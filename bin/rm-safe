@@ -1,0 +1,398 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/rm-safe,v 1.1 2016/10/11 01:50:28 bruce Exp $
+
+# Prefix codes (show the "scope" of variables):
+# gVar - global variable (may even be external to the script)
+# pVar - parameter (script option or function parameter)
+# gpVar - global parameter, i.e. may be defined external to the script
+# cVar - global constant (set once)
+# tVar - temporary variable (local to a function)
+# fFun - function
+
+# Commonally used global variables:
+# gpDebug - toggle (-x)
+# gpVerbose - (-v)
+# Tmp - personal tmp directory.  Usually set to: $HOME/tmp
+# gErr - error code (0 = no error)
+# cVer - current version
+# cName - script's name
+
+# --------------------------------
+function fUsage
+{
+	if [ $# -ne 0 ]; then
+		pod2text $0
+	else
+		pod2usage $0
+	fi
+	gErr=1
+	exit 1
+	cat <<EOF >/dev/null
+=pod
+
+=head1 NAME
+
+rm-safe - If recursive remove, first remove symlinks. Also can just mv files.
+
+=head1 SYNOPSIS
+
+rm-safe [-f] [-r] [-R] [-m] [-l] [-i] [-v] [-x] [-h] FILES
+
+    -f - force remove            -v - verbose
+    -r,-R - recursive remove     -x - debug, do nothing
+    -m - move files              -h - more help
+    -l - log to syslog           FILES - one or more dirs or files
+    -i - prompt before removing
+
+=head1 DESCRIPTION
+
+This script's main purpose is to remove all symlinks, when the -r option is used. Many implementations of rm, will follow symlinks, which could lead to unintended removes of files outside of the expected levels.
+
+Most interactive rm options are not supported, because this is mainly for use in scripts.
+
+The -m option will try to move files to tmp dirs, rather than remove files.
+
+=head2 Other safety features
+
+* If you are cd'ed to the top / dir, rm-safe will exit with an error. Using wild cards while at that level could be very destructive. Double check what you are doing and use the standard 'rm'.
+
+* If you specify an absolute path, and it has less than two directory levels, then rm-safe will exit with an error. Double check what you are doing and use the standard 'rm'.
+
+=head1 OPTIONS
+
+
+=over 4
+
+=item B<-f>
+
+Force remove. And turns off -i option.
+
+=item B<-r, -R>
+
+Recursive removal. First symlinks will be removed.
+
+=item B<-m>
+
+Move files tmp dir.
+ If root user use:  $Tmp, or /var/tmp, or /tmp
+ If not root user use:  $Tmp, or $HOME/tmp, or /var/tmp, or /tmp
+
+The -r option is ignored.
+
+=item B<-l>
+
+Send log messages to syslog.
+
+=item B<-i>
+
+Interactive prompt for removals. This turns off the -f option.
+
+=item B<-h>
+
+This help.
+
+=item B<-v>
+
+Verbose output.  Sent to stderr.
+
+=item B<-x>
+
+Debug mode.  Do nothing. Just show what would be done. Multiple x options will give more debug output.
+
+ -x - show command that would be executed
+ -xx - also show the symlinks that would be removed
+ -xxx - also show all internal variable options set
+
+=item B<FILES>
+
+One or more directories or files.
+
+=back
+
+=head1 RETURN VALUE
+
+ 0 - OK
+ 1 - error
+
+=head1 ERRORS
+
+crit: No files were specifed
+
+crit: Already removed: FILES - Nothing to do, the file(s) are already removed
+
+crit: Unknown option: ARG
+
+crit: Invalid option: ARG
+
+crit: Value required for option: ARG
+
+crit: PWD = / - dangerous, so not allowed.
+
+crit: FILE has less than 2 dir levels - dangerous, so not allowed
+
+Many error messages may describe where the error is located, with the
+following log message format:
+
+ Program[PID] LEVEL: Message [LINE](ErrNo)
+
+=head1 EXAMPLES
+
+=head1 ENVIRONMENT
+
+ $HOME
+ $USER
+ $Tmp - Optional. Define directory for -m option.
+
+=head1 FILES
+
+=head1 SEE ALSO
+
+rm, find, mv, logger
+
+=head1 NOTES
+
+=head1 CAVEATS
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS
+
+There is no check to see if there is enough space to move files to a tmp dir.
+
+=head1 RESTRICTIONS
+
+Most interactive rm options are not supported.
+
+=head1 AUTHOR
+
+BAR
+
+=head1 HISTORY
+
+$Revision: 1.1 $ $Date: 2016/10/11 01:50:28 $ GMT
+
+=cut
+EOF
+	exit 1
+} # fUsage
+
+# --------------------------------
+function fError
+{
+	# Usage:
+	#     fError pMsg [pLine [pErr]]
+	# Print the error message, then exit
+
+	local pMsg="$1"
+	local pLine=$2
+	local pErr=$3
+
+	gpVerbose="-v"
+	fLog crit "$pMsg" $pLine $pErr
+	fUsage
+} # fError
+
+# ------------------
+function fLog
+{
+	# Usage:
+	#     gErr=8801		# optional
+	#     fLog notice "Just testing" $LINENO 8
+	# pLevel - emerg alert crit err warning notice info debug
+
+	local pLevel=$1
+	local pMsg="$2"
+	# optional
+	local pLine=$3
+	# optional
+	local pErr=$4
+
+	local tVerbose=""
+	local tErr=""
+	if [ -n "$pErr" ]; then
+		tErr="$pErr"
+	fi
+	if [ $gErr -ne 0 ]; then
+		tErr="$tErr,$gErr"
+	fi
+	if [ -n "$tErr" ]; then
+		tErr="($tErr)"
+	fi
+
+	local tLine=""
+	if [ -n "$pLine" ]; then
+		tLine="[$pLine]"
+	fi
+
+	if [ $gpLog -eq 0 -o $gpDebug -ne 0 ]; then
+		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+	else
+		if [ -n "$gpVerbose" ]; then
+			tVerbose="-s"
+		fi
+		logger $tVerbose -i -t $cName -p user.$pLevel "$pLevel: $pMsg $tLine$tErr"
+	fi
+
+
+} # fLog
+
+# Main --------------------------------------------------------------
+
+# Set name of this script
+export cName=${0##*/}
+export gErr=0
+
+# -------------------
+# Define the version number for this script
+cVer='$Revision: 1.1 $'
+cVer=${cVer#*' '}
+cVer=${cVer%' '*}
+
+# -------------------
+# Get Options Section
+if [ $# -eq 0 ]; then
+	fUsage
+fi
+export gStatus="notice"
+export gpDebug=${gpDebug:-0}
+export gpFileList=""
+export gpForce=""
+export gpInteractive=""
+export gpLog=0
+export gpMove=0
+export gpRecursive=""
+export gpVerbose=""
+while getopts :filmrRhvx-: tArg; do
+	case $tArg in
+		f)	gpForce="-f"
+			gpInteractive=""
+		;;
+		i)	gpInteractive="-i"
+			gpForce=""
+		;;
+		l)	gpLog=1;;
+		m)	gpMove=1;;
+		r|R)	gpRecursive="-r";;
+		h)	fUsage long;;
+		v)	gpVerbose="-v";;
+		x)	let gpDebug=gpDebug+1
+			gStatus="debug"
+		;;
+		+x)	gpDebug=0
+			gStatus="notice"
+		;;
+		\-)	fError "Invalid option: ${tArg}-$OPTARG" $LINENO;;
+		:)	fError "Value required for option: $OPTARG" $LINENO;;
+		\?)	fError "Unknown option: $tArg $OPTARG" $LINENO;;
+	esac
+done
+let tOptInd=OPTIND-1
+shift $tOptInd
+if [ $# -ne 0 ]; then
+	gpFileList="$*"
+else
+	fError "No files were specified." $LINENO
+fi
+
+# -------------------
+# Validate
+
+if [ "$PWD" = "/" ]; then
+	fError "PWD = /" $LINENO
+fi
+
+tList=""
+for i in $gpFileList; do
+	if [ "$i" != "${i#/}" ]; then
+		# Check absolute paths
+		c=$(echo $i | tr -dc '/')
+		if [ ${#c} -le 2 ]; then
+			fError "$i has less than 2 dir levels" $LINENO
+		fi
+	fi
+	if [ -e $i ]; then
+		tList="$tList $i"
+	else
+		fLog $gStatus "$i does not exist" $LINENO
+	fi
+done
+if [ -z "$tList" ]; then
+	fError "Already removed: $gpFileList" $LINENO
+fi
+gpFileList="$tList"
+
+# -------------------
+# Setup a temporary directory
+if [ $gpMove -ne 0 ]; then
+	export Tmp
+	if [ "$USER" = "root" ]; then
+		tList="/var/tmp /tmp"
+	else
+		tList="$HOME/tmp /var/tmp /tmp"
+	fi
+	for i in $Tmp $tList; do
+		if [ -d $i -a -w $i ]; then
+			Tmp=$i
+			break
+		fi
+	done
+fi
+
+# -------------------
+# Debug
+
+if [ $gpDebug -gt 2 ]; then
+	echo
+	for i in \
+		cName \
+		cVer \
+		gErr \
+		Tmp \
+		gpDebug \
+		gpForce \
+		gpInteractive \
+		gpLog \
+		gpMove \
+		gpRecursive \
+		gpVerbose \
+		gpOpt \
+		gpFileList \
+	; do
+		tMsg=$(eval echo -R "$i=\$$i")
+		fLog debug "$tMsg" $LINENO
+	done
+	echo
+fi
+
+# -------------------
+# Functional Section
+
+# ----------
+# Move files to Tmp
+if [ $gpMove -ne 0 ]; then
+	fLog $gStatus "mv $gpForce $gpInteractive $gpVerbose $gpFileList $Tmp" $LINENO
+	if [ $gpDebug -eq 0 ]; then
+		mv $gpForce $gpInteractive $gpVerbose $gpFileList $Tmp
+	fi
+	exit $?
+fi
+
+# ----------
+# Remove all symlinks
+if [ -n "$gpRecursive" ]; then
+	if [ -n "$gpVerbose" -o $gpDebug -gt 1 ]; then
+		echo "Will remove these symlinks:"
+		find $gpFileList -type l -exec ls -l {} \; | awk '{print "\t",$10,$11,$12}'
+	fi
+	fLog $gStatus "find $gpFileList -type l -exec rm $gpForce $gpInteractive $gpVerbose {} \;" $LINENO
+	if [ $gpDebug -eq 0 ]; then
+		find $gpFileList -type l -exec rm $gpForce $gpInteractive $gpVerbose {} \;
+	fi
+fi
+
+# ----------
+# Remove files (and dirs if -r)
+fLog $gStatus "rm $gpForce $gpInteractive $gpRecursive $gpVerbose $gpFileList" $LINENO
+if [ $gpDebug -eq 0 ]; then
+	rm $gpForce $gpForce $gpInteractive $gpRecursive $gpVerbose $gpFileList
+fi

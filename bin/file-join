@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+# Usage: file-join <FILE
+# FILE is a list of one or more dir/file names (one on each line)
+
+# Example:
+#	find /release/package -name README.html | file-join >readme.tmp
+
+while (<>) {
+	$tFile = $_;
+	chomp $tFile;
+	open(hIn, "<$tFile");
+	print "---------- file-split: $tFile\n";
+	while (<hIn>) {
+		print $_;
+	}
+	close(hIn);
+}

@@ -1,0 +1,127 @@
+#!/bin/bash
+# per-dev/bin/ed
+
+# Usage:
+#	ed -l
+#	ed -d
+
+cMyLogs=/home/bruce/bc/tmp/ver/doc/mylogs
+tBG=0
+tArchive=0
+tDefLog=''
+tEdit='emacs -nw'
+tHost=$HOSTNAME
+if [ -x /etc/inst-env.sh ]; then
+    . /etc/inst-env.sh
+    if [ "$BaseHost" = "ec9" -a "$USER" = "bxr55" ]; then
+	tHost=ec9
+    fi
+fi
+
+tEdit='emacs -nw'
+case $tHost in
+    AN00608453|AN00622379)
+	tDefLog=~/tmp/e.tmp
+#	if [ -f /usr/bin/emacs-w32.exe ]; then
+#	    # emacs-w32 does not load ~/.abbrev_defs
+#	    tEdit="run emacs-w32 -Q"
+#	    tBG=1
+#	fi
+    ;;
+    ec9)
+	tDefLog=~/tmp/e.tmp
+    ;;
+    asimov*)
+	tDefLog=~/tmp/a.tmp
+	tArchive=1
+    ;;
+    plasma)
+	tDefLog=~/tmp/p.tmp
+	tEdit=emacs
+	tBG=1
+	tArchive=1
+    ;;
+    mxtrance)
+	tDefLog=~/tmp/m.tmp
+	tEdit=emacs
+	tBG=1
+	tArchive=1
+    ;;
+    windell5)
+	tDefLog=~/tmp/w.tmp
+    ;;
+    *)
+	tDefLog=~/tmp/t.tmp
+    ;;
+esac
+
+if [ -n "CYGWIN" -a -x /usr/bin/mintty ]; then
+	tEdit="mintty -s 80,40 --fs 10 emacs"
+	tBG=1
+fi
+
+tLogIt=0
+if [ $# -ne 0 ]; then
+	if [ "$1" = "-l" ]; then
+		tLogIt=1
+		shift
+	elif [ "$1" = "-d" ]; then
+		tLogIt=1
+		shift
+	fi
+fi
+tFile=''
+tFirstFile=''
+if [ $# -ne 0 ]; then
+	tFirstFile=$1
+	shift
+fi
+if [ $# -ne 0 ]; then
+	tFile="$*"
+fi
+
+#if [ "$tFirstFile" != "${tFirstFile%.txt}" ]; then
+#	tLogIt=1
+#fi
+     
+if [ $tLogIt -ne 0 ]; then
+	if [ -z $tFirstFile ]; then
+		tFirstFile=$tDefLog
+	fi
+	if [ $tArchive -ne 0 -a -d ~/bc ]; then
+		read -p "Archive $tFirstFile (y/n)? "
+		if [ "$REPLY" = 'y' ]; then
+			if [ ! -d $cMyLogs ]; then
+				read -p 'Run: "bcmnt -m" (y/n)? '
+				if [ "$REPLY" = 'y' ]; then
+					bcmnt -m
+				fi
+			fi
+			if [ -d $cMyLogs ]; then
+				echo "Archiving: $tFirstFile"
+				cd $cMyLogs
+				cvs update
+				cp $tFirstFile $cMyLogs
+				cvs ci -m "Updated"
+				cd - 2>/dev/null
+			else
+				echo "Not archived. Missing $cMyLogs"
+			fi
+		fi
+	fi
+	echo >>$tFirstFile
+	echo '# ---------------------------' >>$tFirstFile
+	if [ "$(date +'%Z')" = "UTC" ]; then
+		date --date='now - 8 hours' +'# %F %R:%S PST %a' >>$tFirstFile
+   		date                        +'# %F %R:%S %Z %a'  >>$tFirstFile
+	else
+	date    +'# %F %R:%S %Z %a' >>$tFirstFile
+	fi
+	echo >>$tFirstFile
+fi
+
+if [ $tBG -ne 0 ]; then
+	$tEdit $tFirstFile $tFile &
+else
+	$tEdit $tFirstFile $tFile
+fi

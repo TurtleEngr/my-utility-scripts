@@ -1,0 +1,15 @@
+#!/bin/bash
+# debian-pkg-fmt any
+
+if [ $# -eq 0 ]; then
+	echo "Usage: debian-pkg-fmt any"
+	exit 1
+fi
+
+for i in *.pkg; do
+	tBase=${i%.pkg}
+	grep '^ii ' <$tBase.pkg | awk '{print $2, $3}' | sort >$tBase.pkg2
+	awk '{print $1}' <$tBase.pkg2 >$tBase.pkg3
+done
+cat *.pkg3 | sort -u >all.list
+map-pkg.pl -a all.list *.pkg3

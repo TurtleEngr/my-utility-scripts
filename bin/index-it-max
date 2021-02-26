@@ -1,0 +1,10 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/index-it-max,v 1.2 2016/10/11 01:25:43 bruce Exp $
+
+# Usage:
+#	tMax=$(index-it-max <FILE.html)
+
+# Find the largest anchor index number. For this to work, tidy with
+# "--indent-attribute yes" needs to be used on the input.
+
+grep 'id=\"id-' | sed 's/\"//g' | sed 's/ *id=id-//g' | sort -n | tail -n 1

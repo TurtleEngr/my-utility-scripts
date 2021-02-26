@@ -1,0 +1,69 @@
+#!/bin/bash
+
+if [ $# -eq 0 -o "x$1" = "x-h" ]; then
+	cat <<EOF
+Usage:
+	vid-new-project ProjectName
+EOF
+	exit 1
+fi
+
+# Todo:
+# create new cvs directory "init", if none found
+# create new vid-template directory, if none found
+# create new project from vid-template directory found in mounted disk
+
+# --------------------
+# Config
+export gpProjName=$1
+export CVSUMASK=0007
+export CVS_RSH=ssh
+export CVSROOT=/mnt/usb-video/repo/video
+echo "CVSROOT=$CVSROOT"
+
+# --------------------
+# Validate
+if [ ! -d /home/video ]; then
+	echo "Error: /home/video not found"
+	exit 1
+fi
+if [ ! -d $CVSROOT/vid-template ]; then
+	echo "Error: $CVSROOT is not mounted."
+	exit 1
+fi
+if [ -d /home/video/$gpProjName/CVS ]; then
+	echo "Warning: /home/video/$gpProjName already exists."
+	if [ -d $CVSROOT/$gpProjName ]; then
+		echo "Use: cvs update"
+	else
+		cat <<EOF
+	But $CVSROOT/$gpProjName not found.
+	Mount the disk with "$gpProjName" project, then use: cvs update.
+EOF
+	fi
+	exit 1
+fi
+if [ -d $CVSROOT/$gpProjName ]; then
+	echo "Error: $CVSROOT/$gpProjName already exists."
+	exit 1
+fi
+
+# --------------------
+# Main
+
+cd $CVSROOT
+cp -r vid-template $gpProjName
+if [ ! -d $gpProjName ]; then
+	echo "Error: Problem creating: $CVSROOT/$gpProjName"
+	exit 1
+fi
+cd /home/video
+cvs co $gpProjName
+cp /mnt/usb-video/disk.id /home/video/$gpProjName
+
+cat <<EOF
+
+cd /home/video/$gpProjName
+Read:   /home/video/$gpProjName/doc/project-outline.html or
+firefox /home/video/$gpProjName/doc/project-outline.html
+EOF

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+pDefault="-night 0 -nomarkers -wait 300 -nice 8 -pos sunrel,50,0 -mag .5 -shift -300,160 -starfreq 0.0008 -bigstars 5 -grid1 6 -grid2 5"
+
+if [ $# -ne 0 ]; then
+	pParm="-nofork -once $*"
+else
+	pParm="-fork"
+	kill $(ps -ef | grep xearth | grep -v xearth.start | awk '{print $1}')
+fi
+
+tMarker=""
+if [ -f $HOME/.xearth.marker ]; then
+	tMarker="-markerfile $HOME/.xearth.marker -markers"
+fi
+
+xearth $pDefault $(cat ~/.xearth.rc) $tMarker $pParm

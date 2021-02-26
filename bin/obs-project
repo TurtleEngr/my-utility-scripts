@@ -1,0 +1,65 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.1 2020/11/19 00:43:07 bruce Exp $
+
+function fUsage
+{
+	cat <<EOF
+Usage
+	obs-project
+
+The "obs-config" directory  must be found the current directory.
+
+This script will set the obs config dir to "obs-config" in the current directory. This overides the default directory at ~/.config/obs-studio/.
+
+For how this is done, see:
+https://maex.me/2019/12/the-power-of-the-xdg-base-directory-specification/
+EOF
+	exit 1
+}
+
+# --------------------
+# Config
+cConfigDir=$PWD/obs-config
+
+# --------------------
+# Validate
+if [ ! -d $cConfigDir ]; then
+	echo
+	echo "Error: missing directory: $cConfigDir"
+	fUsage
+fi
+
+if [ ! -d $cConfigDir/obs-studio ]; then
+	echo
+	echo "Warning: missing directory: $cConfigDir/obs-studio"
+	echo '(this is OK for the first run.)'
+fi
+
+if [ ! -d $cConfigDir/obs-studio/basic/scenes/CVS ]; then
+	cat <<EOF
+
+You should version these dirs and files:
+obs-config/obs-studio/global.ini
+obs-config/obs-studio/basic/profiles/*/*
+obs-config/obs-studio/basic/scenes/*/*.json
+EOF
+fi
+
+# --------------------
+# Set
+export XDG_CONFIG_HOME=$cConfigDir
+
+# It looks like this is ignored
+export XDG_CACHE_HOME=$HOME/.cache
+
+if [ -d $cConfigDir/obs-studio ]; then
+	cat <<EOF >$cConfigDir/obs-studio/.cvsignore
+logs
+plugin_config
+profiler_data
+EOF
+fi
+
+# --------------------
+# Run
+obs >/dev/null 2>&1 &

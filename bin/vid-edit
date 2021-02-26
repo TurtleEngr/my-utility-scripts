@@ -1,0 +1,425 @@
+#!/bin/bash
+
+# --------------------------------
+function fUsage
+{
+	if [ $# -ne 0 ]; then
+		pod2text $0
+	else
+		pod2usage $0
+	fi
+	exit 1
+	# See also: pod2html, and pod2man, pod2pdf, pod2md
+	cat <<EOF >/dev/null
+=pod
+
+=head1 NAME
+
+vid-edit - kdenlive edit
+
+=head1 SYNOPSIS
+
+ vid-edit [-b] [-c] [-v KdenLiveVer] [-h] [FileName[.kdenlive]]
+
+=head1 DESCRIPTION
+
+After committing all files in the current directory, run kdenlive with
+the file passed in. The version of kdenlive will be picked out of the file.
+
+The -v option can be used to define another version of kdenlive to be run on
+the file. It is recommended that you only pick one major version ahead at a
+time.
+
+If the file is versioned, it will be committed before starting.  It is
+recommended that you exit and start kdenlive frequently to checkpoint
+your file.  kdenlive can sometimes end up with corrupted files. Look
+at the version logs to check out previous versions to find a stable
+one.  On exit, be sure to add any new files.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-b>
+
+Batch mode. Do not prompt for inputs.
+
+=item B<-c>
+
+If defined, skip the CVS  checks and commits.
+
+=item B<-v KdenLiveVer>
+
+Pick a different kdenlive version. The current versions are:
+
+ 16.11, 16.12, 17.04, 17.12, 18.12, 19.04, 19.08, 19.12
+
+The AppImage program file will be found in:
+/rel/archive/software/ThirdParty/kdenlive (or /usr/local/bin)
+
+=item B<-h>
+
+This help.
+
+=back
+
+=head1 RETURN VALUE
+
+=head1 ERRORS
+
+Many error messages may describe where the error is located, with the
+following log message format:
+
+ Program: PID NNNN: Message [LINE]
+
+=head2 Errors
+
+Could not find [FileName], or it is not writable.
+
+kdenliveversion not found. Is [FileName] a kdenlive file?
+
+Could not find directory: [AppImageDir]
+
+No version available for [VER]. [VER] is the lastest version. You will need to upgrade.
+
+Not found: [AppImage Binary]]
+
+To fix, add [FileName] to a CVS repository.
+
+[CVS/Root] is not mounted
+
+Missing options.
+
+Value required for option: [OPTARG]
+
+Unknown option: [OPTARG]
+
+Unknown options: [OPTARG]
+
+=head2 Warnings
+
+VER is different from the file version: VER
+
+=head1 EXAMPLES
+
+=head1 ENVIRONMENT
+
+=head1 FILES
+
+/tmp/kdenlive.log - output from command line. It is overwritten every time.
+
+/rel/archive/software/ThirdParty/kdenlive - location of the kdenlive
+AppImage binaries.
+
+=head1 SEE ALSO
+
+logtime
+
+=head1 NOTES
+
+CVS is used for versioning, rather than the git, because it is easier to
+remove large binary files and versions.
+
+If you are working on a project where there is a lot of collaboration
+AND all have a high speed network, the git would be a better
+choice. However the will still be a need to remove old binary files
+from the git repo, or it will become too large to be useable.
+
+=head1 CAVEATS
+
+There is no warning, if you specify a version that is earlier than the
+kdenlive file's version.
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS
+
+=head1 RESTRICTIONS
+
+=head1 AUTHOR
+
+=head1 HISTORY
+
+$Revision: 1.16 $ $Date: 2020/10/11 21:19:48 $ GMT 
+
+=cut
+EOF
+	exit 1
+} # fUsage
+
+# --------------------------------
+function fError
+{
+	# Usage:
+	#     fError pMsg [pLine [pErr]]
+	# Print the error message.  Then call fCleanUp, and exit
+
+	local pMsg="$1"
+	local pLine=$2
+	local pErr=$3
+
+	fLog crit "$pMsg" $pLine $pErr
+	fUsage
+} # fError
+
+# ------------------
+function fLog
+{
+	# Usage:
+	#     gErr=8801		# optional
+	#     fLog notice "Just testing" $LINENO 8
+	# pLevel - emerg alert crit err warning notice info debug
+
+	local pLevel=$1
+	local pMsg="$2"
+	# optional
+	local pLine=$3
+	# optional
+	local pErr=$4
+
+	local tVerbose=""
+	local tErr=""
+	if [ -n "$pErr" ]; then
+		tErr="$pErr"
+	fi
+	if [ $gErr -ne 0 ]; then
+		tErr="$tErr,$gErr"
+	fi
+	if [ -n "$tErr" ]; then
+		tErr="($tErr)"
+	fi
+
+	local tLine=""
+	if [ -n "$pLine" ]; then
+		tLine="[$pLine]"
+	fi
+
+	if [ $gpLog -eq 0 ]; then
+		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+	else
+		if [ -n "$gpVerbose" ]; then
+			tVerbose="-s"
+		fi
+		logger $tVerbose -i -t $cName -p local1.$pLevel "$pLevel: $pMsg $tLine$tErr"
+	fi
+} # fLog
+
+# ------------------
+function fFileCheck
+{
+	# Input: gpFile
+	# Ouput: gFileVer
+	if [ -z "$gpFile" ]; then
+		gFileVer=""
+		return
+	fi
+
+	if [ ! -w $gpFile ]; then
+		if [ ! -w $gpFile.kdenlive ]; then
+			fError "Could not find $gpFile, or it is not writable." $LINENO
+		fi
+		gpFile=$gpFile.kdenlive
+	fi
+
+	gFileVer=$(grep kdenliveversion $gpFile | sed 's/[<>]/ /g' | awk '{print $3}')
+	gFileVer=${gFileVer%.*}
+
+	if [ -z "$gFileVer" ]; then
+		fError "kdenliveversion not found. Is $gpFile a kdenlive file?" $LINENO
+	fi
+} # fFileCheck
+
+# ------------------
+function fKLVer
+{
+	# Input: gpVer, gFileVer, cLatestVer, cKLBin
+	# Output: gKLProg, gpVer, gFileVer
+	if [ ! -d $cKLBin ]; then
+		fError "Could not find directory: $cKLBin" $LINENO
+	fi
+	if [ -z "$gFileVer" ]; then
+		gFileVer=$cLatestVer
+	fi
+	if [ -z "$gpVer" ]; then
+		gpVer=$gFileVer
+	fi
+
+	case $gpVer in
+		16.11)	tUse=kdenlive-16.12-alpha1-x86_64.AppImage;;
+		16.12)	tUse=kdenlive-16.12-alpha1-x86_64.AppImage;;
+		17.04)	tUse=Kdenlive-17.04.1b-x86_64.AppImage;;
+		17.12)	tUse=Kdenlive-17.12.0d-x86_64.AppImage;;
+		18.12)	tUse=kdenlive-18.12.1-x86_64.appimage;;
+		19.04)	tUse=kdenlive-19.04.3-x86_64.appimage;;
+		19.08)	tUse=kdenlive-19.08.3-x86_64.appimage;;
+		19.12)	tUse=kdenlive-19.12.0a-x86_64.appimage;;
+		20.04)	tUse=kdenlive-20.04.0b-x86_64.appimage;;
+		*)	fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
+		;;
+	esac
+	gKLProg=$cKLBin/$tUse
+	if [ ! -x $gKLProg ]; then
+		fError "Not found: $gKLProg" $LINENO
+	fi
+	if [ "$gpVer" != "$gFileVer" ]; then
+		fLog warning "$gpVer is different from the file version: $gFileVer" $LINENO
+	fi
+} # fKLVer
+
+# ------------------
+function fCVSCheck
+{
+	if [ $gpCVS -ne 1 ]; then
+		return
+	fi
+
+	if [ ! -r CVS/Entries ]; then
+		cat <<EOF
+		
+Error: there are no CVS directories in this directory. You need to
+add files to CVS, so that files can be versioned.
+
+Recommend:
+	cd /home/video/PROJECT
+	export CVSROOT=/mnt/usb-video/repo/video
+	export CVS_RSH=ssh
+	export CVSUMASK=0003
+EOF
+		fError "To fix, add $gpFile to a CVS repository." $LINENO
+	fi
+
+	if grep ':ext:' CVS/Root ; then
+		ps -ef | grep ssh-agent
+		if [ $? -eq 0 ]; then
+			. sshagent -s
+		else
+			fLog warning "Things will go smoother if you start a sshagent" $LINENO
+		fi
+	else
+		tRoot=$(cat CVS/Root)
+		if [ ! -d $tRoot ]; then
+			fError "$tRoot is not mounted" $LINENO
+		fi
+	fi
+
+	if [ -z "$gpFile" ]; then
+		return
+	fi
+	if grep -q $gpFile CVS/Entries; then
+		# Commit the file
+		cvs commit -m "Updated with script vid-edit" $pFile
+	else
+		fLog info "The file isn't versioned."
+		if [ $gpBatch -ne 0 ]; then
+			return
+		fi
+		read -p "Version the file? (y/n) "
+		if [ "$REPLY" = "y" ]; then
+			cvs add $pFile
+			cvs commit -m "Added with script vid-edit"
+		fi
+	fi
+} # fCVSCheck
+
+# ------------------
+function fTag
+{
+	if [ $gpCVS -ne 1 -o $gpBatch -eq 1 ]; then
+		return
+	fi
+	
+	echo
+	read -p "Was the video rendered (y/n)? "
+	if [ "$REPLY" != "y" ]; then
+		return
+	fi
+
+	tTag=${gpFile%.*}_$(date +%F)
+	echo
+	read -p "Tag the file with: $tTag (y/n)? "
+	if [ "$REPLY" != "y" ]; then
+		return
+	fi
+
+	cvs ci -m "Rendered: $tTag.mp4" $gpFile
+	logtime rendered $gpFile to $tTag.mp4
+	cvs tag $tTag $gpFile
+} # fTag
+
+# ===================================================
+# Main
+
+# -------------------
+# Name of this script
+# Note: this does not work if the script is executed with './'
+export cName=${0##*/}
+
+# -------------------
+# Setup log variables
+export gpDebug=${gpDebug:-0}
+export gpVerbose=""
+export gpLog=0
+export gErr=0
+
+# -------------------
+# Configuration
+export cLatestVer=20.04
+#export cKLBin=/rel/archive/software/ThirdParty/kdenlive
+export cKLBin=/usr/local/bin
+
+# -------------------
+# Get Options Section
+if [ $# -eq 0 ]; then
+	fError "Missing options." $LINENO
+fi
+export gpFile=""
+export gpCVS=1
+export gpVer=""
+export gpBatch=0
+while getopts :bcv:hLVx tArg; do
+	case $tArg in
+		b)	gpBatch=1;;
+		c)	gpCVS=0;;
+		v)	gpVer=$OPTARG;;
+
+		h)	fUsage long;;
+		L)	gpLog=1;;
+		V)	gpVerbose="-v";;
+		x)	let gpDebug=gpDebug+1;;
+		:)	fError "Value required for option: $OPTARG" $LINENO;;
+		\?)	fError "Unknown option: $OPTARG" $LINENO;;
+	esac
+done
+let tOptInd=OPTIND-1
+shift $tOptInd
+if [ $# -eq 1 ]; then
+	gpFile="$1"
+else
+	fError "Unknown options: $*" $LINENO
+fi
+
+# -------------------
+# Validate Options Section
+
+# gpFile is defined, check file, and get version
+export gFileVer
+fFileCheck
+
+# Get KdenLive version, based on file's version
+export gKLProg
+fKLVer
+
+# if -c option not used, cvs related checks
+fCVSCheck
+
+# -------------------
+# Functional Section
+
+logtime start vid-edit $gpFile
+
+echo $gKLProg $gpFile
+$gKLProg $gpFile >/tmp/kdenlive.log 2>&1
+
+logtime stop vid-edit $gpFile
+
+fTag

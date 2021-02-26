@@ -1,0 +1,121 @@
+#!/bin/bash -x
+# $Id: init-sys-ver,v 1.3 2012/04/20 23:57:11 bruce Exp $
+# Use this script the first time a server is setup.  It will put the
+# most common config and other server files under version control.
+
+# Tuned for RH distribution
+
+cd /
+if [ ! -d CVS ]; then
+	echo "You need to create the top CVS directory."
+	exit 1
+fi
+
+echo >>/etc/CHANGES
+#if [ ! -L /opt ]; then
+#	rmdir /opt
+#fi
+#if [ ! -d /opt ]; then
+#	ln -s /usr/local /opt
+#fi
+
+if [ ! -f /etc/anaconda-ks.cfg ]; then
+	cp -i /root/anaconda-ks.cfg /etc
+fi
+
+cvs add etc
+sleep 1
+cvs add usr var
+sleep 1
+
+cd /etc
+cvs add \
+profile.d \
+rc.d \
+ssh \
+sudoers \
+sysconfig
+sleep 1
+
+cvs add \
+anaconda-ks.cfg \
+*.conf \
+*.config \
+CHANGES \
+exports \
+fstab \
+group \
+hosts \
+issue \
+issue.net \
+motd \
+my.cnf \
+passwd \
+profile \
+shadow
+sleep 1
+
+cd /etc
+cvs add selinux
+cd selinux
+cvs add config
+
+cd /etc/profile.d
+cvs add cvs.sh local.sh less.sh
+
+if [ -d /etc/yum.repos.d ]; then
+	cd /etc
+	cvs add yum.conf
+	cvs add yum.repos.d
+	cd /etc/yum.repos.d
+	cvs add *
+fi
+
+cd /etc/ssh
+cvs add *config
+
+cd /etc/rc.d
+cvs add init.d rc.local
+sleep 1
+cd init.d
+sleep 1
+cvs add ntpd
+
+cd /etc/sysconfig
+cvs add httpd network hwconf ntpd syslog xinitd
+cvs add network-scripts $(find * -prune -type f)
+cd network-scripts
+sleep 1
+cvs add ifcfg-eth[0123]
+
+cd /usr
+cvs add local
+sleep 1
+cd local
+cvs add bin
+cd bin
+sleep 1
+cvs add *
+sleep 1
+
+cd /var
+cvs add log spool
+cd log
+cvs add rpmpkgs
+cvs add yum.log
+
+cd /var/spool
+cvs add cron
+
+cd /
+# cvs commit -m Added
+
+cat <<EOF
+Now get ntp configured and added to start on boot.
+web files go in /var/www/VIRT-SERVER-NAME/html/
+Update /etc/motd (template software/tool/local/trunk/src/etc/motd)
+Update /etc/CHANGES (template software/tool/local/trunk/src/etc/CHANGES)
+
+Before editing any config files, first do a
+'cvs add' and commit the file.
+EOF

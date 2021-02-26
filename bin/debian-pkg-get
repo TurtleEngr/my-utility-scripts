@@ -1,0 +1,10 @@
+#!/bin/bash
+# debian-pkgget host
+
+if [ $# -eq 0 ]; then
+	echo "Usage: debian-pkg-get HostName"
+	exit 1
+fi
+
+tBase=$1
+dpkg -l >/tmp/$tBase.pkg

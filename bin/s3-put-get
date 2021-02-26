@@ -1,0 +1,178 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/s3-put-get,v 1.1 2015/07/25 22:23:00 bruce Exp $
+
+# Usage:
+#     
+# --------------------------------
+function fUsage
+{
+	# Print usage help for this script, using pod2text.
+	pod2text $0
+	exit 1
+	cat <<EOF >/dev/null
+=pod
+
+=head1 NAME
+
+s3-put-get - put or get files to or from a S3 bucket
+
+=head1 SYNOPSIS
+
+	s3-put-get -g|-p [-c CONFIG] [-b BUCKET] -d PATH [-h] FILE*
+
+=head1 DESCRIPTION
+
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-h>
+
+This help.
+
+=back
+
+=head1 RETURN VALUE
+
+[What the program or function returns if successful.]
+
+=head1 ERRORS
+
+Fatal Error:
+
+Warning:
+
+Many error messages may describe where the error is located, with the
+following: (FILE:LINE) [PROGRAM:LINE]
+
+=head1 EXAMPLES
+
+=head1 ENVIRONMENT
+
+$HOME
+
+=head1 FILES
+
+=head1 SEE ALSO
+
+=head1 NOTES
+
+=head1 CAVEATS
+
+[Things to take special care with; sometimes called WARNINGS.]
+
+=head1 DIAGNOSTICS
+
+[All possible messages the program can print out--and what they mean.]
+
+=head1 BUGS
+
+[Things that are broken or just don't work quite right.]
+
+=head1 RESTRICTIONS
+
+[Bugs you don't plan to fix :-)]
+
+=head1 AUTHOR
+
+=head1 HISTORY
+
+=cut
+EOF
+} # fUsage
+
+# =======================================================================
+
+# -------------------
+# Get Options Section
+
+pBucket=tid-rel-stage
+pConfig=""
+pFileList=""
+pPath=""
+pDirection=""
+gDebug=0
+while getopts :hgpb:c:d:x tArg; do
+	case $tArg in
+		h)	fUsage
+			exit 1
+		;;
+		g)	pDirection="get";;
+		p)	pDirection="put";;
+		b)	pBucket=$OPTARG;;
+		c)	pConfig=$OPTARG;;
+		d)	pPath=$OPTARG;;
+
+		x)	gDebug=1;;
+		+x)	gDebug=0;;
+		:)	echo "Error: Value required for option: $OPTARG ($LINENO)";;
+		\?)	echo "Error Unknown option: $OPTARG ($LINENO)";;
+	esac
+done
+let tOptInd=OPTIND-1
+shift $tOptInd
+if [ $# -ne 0 ]; then
+	pFileList="$*"
+fi
+
+# ----------------------
+# Validate
+
+pBucket=s3://$pBucket
+
+if [ -z "$pDirection" ]; then
+    echo "Error: Missing -g or -p option"
+    exit 1
+fi
+
+if [ -z "$pFileList" ]; then
+    echo "Error: Missing FILES"
+    exit 1
+fi
+
+if [ -z "$pPath" ]; then
+    echo "Error: Missing -d option"
+    exit 1
+fi
+
+if [ -n "$pConfig" ]; then
+    if [ ! -r $pConfig ]; then
+        echo "Error: Could not find $pConfig config file"
+        exit 1
+    fi
+else
+    if [ -r $HOME/.s3cfg ]; then
+        pConfig="$HOME/.s3cfg"
+    elif [ -r $HOME/.s3cfg.tidcloud ]; then
+        pConfig="$HOME/.s3cfg.tidcloud"
+    elif [ -r /root/.ec2/s3cfg ]; then
+        pConfig="/root/.ec2/s3cfg"
+    else
+        echo 'Could not find ~/.s3cfg or ~/.s3cfg.tidcloud or /root/.ec2/s3cfg'
+        exit 1
+    fi
+fi
+
+# ----------------------
+if [ "$pDirection" = "put" ]; then
+    for i in $pFileList; do
+        if [ ! -r $i ]; then
+  	    echo "Could not read file: $i"
+	    exit 1
+        fi
+    done
+fi
+
+# ----------------------
+for i in $pFileList; do
+    if [ "$pDirection" = "put" ]; then
+        tCmd="s3cmd -c $pConfig put $i $pBucket/$pPath/$i"
+    elif [ "$pDirection" = "get" ]; then
+        tCmd="s3cmd -c $pConfig get $pBucket/$pPath/$i"
+    fi
+    echo $tCmd
+    if [ $gDebug -eq 0 ]; then
+        $tCmd
+    fi
+done

@@ -1,0 +1,24 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/pdf2jpg,v 1.2 2020/12/24 01:28:48 bruce Exp $
+# Source: https://askubuntu.com/questions/100994/convert-pdf-to-image
+
+if [ $# -eq 0 ]; then
+	cat <<EOF
+Usage:
+	pdf2jpg Input.pdf
+
+Input.pdf file will be converted to one image per page. The images are
+put in the current directory. Named: page-NN.jpg.
+
+EOF
+	exit 1
+fi
+
+gpInFile=$1
+
+cDPI=600
+
+gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cDPI -sOutputFile='page-%02d.jpg' $gpInFile
+
+# Force higher resolution?  Also add -dDEVICEHEIGHT-1080  ?
+#gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cDPI -dFIXEDMEDIA -FitPage  -sOutputFile='page-%02d.jpg' $gpInFile

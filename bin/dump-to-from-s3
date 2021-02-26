@@ -1,0 +1,70 @@
+#!/bin/bash
+# Usage:
+#     dump-to-from-s3 FILE
+
+# ----------------------
+tRepo=s3://tid-rel-stage/archive
+tDir=trunk/db
+
+# ----------------------
+if [ -r $HOME/.s3cfg ]; then
+    tConfig="-c $HOME/.s3cfg"
+elif [ -r $HOME/.s3cfg.tidcloud ]; then
+    tConfig="-c $HOME/.s3cfg.tidcloud"
+elif [ -r /root/.ec2/s3cfg ]; then
+    tConfig="-c /root/.ec2/s3cfg"
+else
+    echo 'Could not find ~/.s3cfg or ~/.s3cfg.tidcloud or /root/.ec2/s3cfg'
+    exit 1
+fi
+
+# ----------------------
+PS3="Functional area? "
+echo
+select pFunctional in QUIT HELP prod qa eng ops; do
+	case $pFunctional in
+		QUIT)	exit 1;;
+		HELP)	cat <<EOF
+prod - prod* db dumps
+qa   - sit* db dumps
+eng  - dit* or dev* db dumps
+ops  - misc dumps
+EOF
+		;;
+		*)	break;;
+	esac
+done
+
+# ----------------------
+echo
+echo "S3 Path: $tRepo/$pFunctional/$tDir"
+PS3="Direction? "
+echo
+select pUpDown in QUIT HELP up down; do
+	case $pFunctional in
+		QUIT)	exit 1;;
+		HELP)	cat <<EOF
+up   - Upload the FILE in current dir to 
+down - Download the FILE in from S3 to the current dir
+EOF
+		;;
+		*)	break;;
+	esac
+done
+
+# ----------------------
+pFile=$1
+if [ $pUpDown = "up" -a ! -r $pFile ]; then
+	echo "Could not read file: $pFile"
+	exit 1
+fi
+
+# ----------------------
+if [ $pUpDown = "up" ]; then
+    tCmd="s3cmd $tConfig put $pFile $tRepo/$pFunctional/$tDir/$pFile"
+else
+    tCmd="s3cmd $tConfig get $tRepo/$pFunctional/$tDir/$pFile"
+fi
+
+echo $tCmd
+$tCmd

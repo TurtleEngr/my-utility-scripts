@@ -1,0 +1,96 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/back-disk-change,v 1.2 2012/04/20 23:57:11 bruce Exp $
+
+# Usage
+#	back-disk-change BackDir Interval DiskId LastId
+#
+# If the backup disk has been changed, then move all of the old first
+# interval files to an "old" dir, so that the next interval level will
+# be done correctly.
+#
+# Example in rsnapshot.conf
+#	cmd_preexec	back-disk-change /media/disk/rsnapshot hourly disk.id rsnapshot-last.id
+#
+# Files, for this example:
+#
+# /media/disk/disk.id 			- id file with date stamp
+# /var/log/rsnapshot-last.id 		- last backup disk id
+# /media/disk/rsnapshot/hourly.0 	- interval file always kept
+# /media/disk/rsnapshot/old_2010-02-24_13_01/rsnapshot-last.id - previous disk
+# /media/disk/rsnapshot/old_2010-02-24_13_01/hourly.* - moved files
+ 
+if [ $# -ne 4 ]; then
+	# Just pretend all is OK, but send a syslog error
+	logger -t rsnapshot -p user.err "back-disk-change: Missing args"
+	exit 0
+fi
+
+pBackDir=$1
+pInterval=$2
+pDiskId=$3
+pLastId=$4
+
+cIdFmt="%F_%H-%M-%S"
+
+tDiskDir=${pBackDir%/*}
+tDiskId=$tDiskDir/$pDiskId
+tLastDir=/var/log
+tLastId=$tLastDir/$pLastId
+
+# -------------
+if [ ! -d $pBackDir ]; then
+	logger -t rsnapshot -p user.err "back-disk-change ($pLastId): $pBackDir not found"
+	exit 0
+fi
+if [ ! -w $pBackDir ]; then
+	logger -t rsnapshot -p user.err "back-disk-change ($pLastId): $pBackDir not writable"
+	exit 0
+fi
+
+# -------------
+if [ ! -d $tDiskDir ]; then
+	logger -t rsnapshot -p user.err "back-disk-change ($pLastId): $tDiskDir not found"
+	exit 0
+fi
+if [ ! -w $tDiskDir ]; then
+	logger -t rsnapshot -p user.err "back-disk-change ($pLastId): $tDiskDir not writable"
+	exit 0
+fi
+if [ ! -e $tDiskId ]; then
+	# No Id, so create one
+	date +$cIdFmt >$tDiskId
+fi
+
+# -------------
+if [ ! -d $tLastDir ]; then
+	logger -t rsnapshot -p user.err "back-disk-change ($pLastId): $tLastDir not found"
+	exit 0
+fi
+if [ ! -w $tLastDir ]; then
+	logger -t rsnapshot -p user.err "back-disk-change ($pLastId): $tLastDir not writable"
+	exit 0
+fi
+if [ ! -e $tLastId ]; then
+	# First time, no need to compare
+	cp -f $tDiskId $tLastId
+	exit 0
+fi
+
+# -------------
+# Has the back up disk been changed?
+diff -q $tDiskId $tLastId >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+	# No
+	exit 0
+fi
+
+# -------------
+# Yes, the backup disk has been changed, so move all but the last
+# Interval file to an "old" dir.
+
+tOldDir=$pBackDir/old_$(date +$cIdFmt)
+mkdir $tOldDir
+mv $pBackDir/$pInterval.* $tOldDir
+mv $tOldDir/$pInterval.0 $pBackDir
+cp -f $tLastId $tOldDir
+cp -f $tDiskId $tLastId

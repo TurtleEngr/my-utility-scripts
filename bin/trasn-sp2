@@ -1,0 +1,15 @@
+#!/bin/bash
+# Translate all file and dir names with spaces to use '_'
+
+for f in *; do
+	ns=$(echo $f | tr ' ' '_')
+	if [ "$f" != "$ns" ]; then
+		echo "mv $PWD/$f $ns"
+		mv "$f" $ns 2>&1
+	fi
+done
+
+for d in $(find $PWD/* -prune -type d); do
+	cd $d
+	trans-sp
+done

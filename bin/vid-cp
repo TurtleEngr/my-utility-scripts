@@ -1,0 +1,96 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/vid-cp,v 1.5 2020/03/18 04:09:56 bruce Exp $
+
+# --------------------
+if [ $# -lt 2 -o "x$1" = "x-h" ]; then
+	cat <<EOF
+Usage:
+	vid-cp FileList DestDir
+See also:
+	vid-list-files
+EOF
+	exit 1
+fi
+
+# --------------------
+# Config
+
+cCurDir=$PWD
+
+gpFileList="$*"
+gpFileList="${gpFileList% *}"
+
+gpDistDir="$*"
+gpDistDir="${gpDistDir##* }"
+
+# --------------------
+# Validate
+tNotFound=0
+for i in $gpFileList; do
+	if [ ! -f $i ]; then
+		echo "Error: not found: $i"
+		tNotFound=1
+	fi
+done
+if [ $tNotFound -ne 0 ]; then
+	exit 1
+fi
+
+cd $gpDistDir
+gpDistDir=$PWD
+cd $cCurDir
+echo
+
+if [ "${gpDistDir#/home/video/*/src}" = "$gpDistDir" ]; then
+	tVidDir=0
+	echo "Warning: DestDir is not a /home/video/Project/src dir"
+	read -p "Enter to continue or ^C to quit: "
+	echo
+else
+	tVidDir=1
+fi
+
+tSize=$(du -scm $gpFileList | grep total | awk '{print $1}')
+let tSize*=2
+
+tAvail=$(df -m $gpDistDir | grep -v Filesystem | awk '{print $4}')
+if [ $tSize -gt $tAvail ]; then
+	echo "Error: Not enough space at: $gpDistDir ($tSize MB required)"
+	exit 1
+fi
+
+if [ $tVidDir -eq 1 -a -d /mnt/usb-video/repo ]; then
+	tMasterAvail=$(df -m /mnt/usb-video/repo/ | grep -v Filesystem | awk '{print $4}')
+	if [ $tSize -gt $tMasterAvail ]; then
+		echo "Error: Not enough space at: /mnt/usb-video ($tSize MB required)"
+		exit 1
+	fi
+fi
+
+# --------------------
+# Copy
+
+for i in $gpFileList; do
+	echo
+	if [ ! -f $i ]; then
+		echo "Missing $i, skipping"
+		continue
+	fi
+	tFile=${i##*/}
+	tDistFile=$gpDistDir/$tFile
+	if [ -f $gpDistDir/$tFile ]; then
+		tCount=$(ls -l $i $gpDistDir/$tFile | awk '{print $5}' | uniq -c | awk '{print $1}')
+		if [ $tCount -eq 2 ]; then
+			echo "Skipping dup: $tFile"
+			continue
+		else
+			echo "Copying to: copy_$tFile"
+			tDist=$gpDistDir/copy_$tFile
+		fi
+	fi
+	echo | tee -a $gpDistDir/README.html
+	echo "cd $cCurDir" | tee -a $gpDistDir/README.html
+	echo "rsync -aP $i $tDistFile" | tee -a $gpDistDir/README.html
+	rsync -aP $i $tDistFile
+	echo "# $(date)" | tee -a $gpDistDir/README.html
+done

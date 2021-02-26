@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ $# -ne 0 ]; then
+   if [ ".$1" = ".-h" ]; then
+      cat <<EOF
+Usage:
+	lsg [-d] [-L N] [dir...]
+-d - dir only
+-L N - limit to N levels
+dir - default $PWD
+
+For more options see: man tree
+Current: -a -Q -F -n --dirsfirst --charset=ascii --noreport
+EOF
+        exit 1
+    fi
+fi
+
+tree -a -Q -F -n --dirsfirst --charset=ascii --noreport $* | sed '
+s/`/|/g;
+s/|-- /|/g;
+s/    |/|   |/g
+'

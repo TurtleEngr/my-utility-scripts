@@ -1,0 +1,23 @@
+#!/bin/bash
+# "source" this file.
+
+kill.old.agent
+
+ssh-agent -s >~/.ssh-agent
+chmod u=rwx,go= ~/.ssh-agent
+. ~/.ssh-agent
+
+for i in $HOME/.ssh/identity.*; do
+	if [ "${i%.pub}" != "$i" ]; then
+		continue
+	fi
+	ssh-add $i
+done
+case $OSTYPE in
+	darwin*|freebsd*)
+		ps -aux | grep ssh-agent | grep $LOGNAME | grep -v grep
+	;;
+	Linux*|linux*|cygwin*|solaris*)
+		ps -ef | grep ssh-agent | grep $LOGNAME | grep -v grep
+	;;
+esac

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Usage:
+#	find * -type d | dir-level [-t] [-l N]
+
+# -------------------
+# Config
+
+cAWK=awk
+which nawk 2>/dev/null 1>&2
+if [ $? -eq 0 ]; then
+	cAWK=nawk
+fi
+
+# -------------------
+# Get options
+pFileList=""
+pLevel=100
+pTab="s/	/   |/g"
+while getopts :tl: tArg; do
+	case $tArg in
+		t)	pTab="";;
+		l)	pLevel=$OPTARG;;
+		:)	echo "Error: 2 Value required for option: $OPTARG";;
+		\?)	echo "Error: 3 Unknown option: $OPTARG";;
+	esac
+done
+let tOptInd=OPTIND-1
+shift $tOptInd
+if [ $# -ne 0 ]; then
+	pFileList="$*"
+fi
+let pLevel=pLevel-1
+
+cat $pFileList | \
+$cAWK -v pLevel=$pLevel '{
+	sub("/$","",$1)
+	level = gsub("[^/]*/", "", $1)
+	if (level > pLevel) {
+		next
+	}
+	for (i=1; i<level; i++) {
+		printf("\t")
+	}
+	print $1
+}' | sed "$pTab"

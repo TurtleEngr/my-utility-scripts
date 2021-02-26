@@ -1,0 +1,27 @@
+# TrustedID Holidays
+# Used by holiday.sh script to not run cron jobs that would send
+# customer alerts.
+
+2011-12-23 Christmas Eve, observed
+2011-12-26 Christmas, observed
+2011-12-30 New Year's Eve
+
+2012-02-20 Presidents Day
+2012-05-28 Memorial Day
+2012-07-04 Independence Day
+2012-09-03 Labor Day
+2012-11-12 Veterans Day
+2012-11-22 Thanksgiving
+2012-11-23 Day after Thanksgiving
+2012-12-24 Christmas Eve
+2012-12-25 Christmas
+
+2013-01-01 New Year Day
+2013-05-27 Memorial Day
+2013-07-04 Independence Day
+2013-09-02 Labor Day
+2013-11-11 Veterans Day
+2013-11-28 Thanksgiving
+2013-11-29 Day after Thanksgiving
+2013-12-24 Christmas Eve
+2013-12-25 Christmas

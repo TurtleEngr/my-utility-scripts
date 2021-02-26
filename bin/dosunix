@@ -1,0 +1,99 @@
+#!/bin/bash
+# Translate ASCII files from Dos to Unix or Unix to Dos format.
+
+# --------------------------------
+function fCleanUp
+{
+	'rm' -f ${tTmpF}[1-9]*.tmp 2>/dev/null
+	exit $1
+}
+
+# --------------------------------
+function fUsage
+{
+	cat <<END | more
+DosUnix.sh
+
+Usage
+	DosUnix.sh {-u|-d} [%%file%%...]
+
+Parameters
+	-h	give this usage help
+	-d	convert files to MS-DOS (PC) format
+	-u	convert files to Unix format
+	file	list file names.  If no files stdin/stdout used.
+
+Description
+	Convert files from DOS format to Unix format or from Unix format to
+	DOS format.  The -d or -u option is required to describe the type of
+	conversion desired.  The files will be overritten with the converted
+	file, so you may want to make copies of files that you can not afford
+	to lose.
+END
+	fCleanUp 1
+}
+
+# --------------------------------
+function fError
+{
+	cat <<END 1>&2
+Error: $1
+Usage: DosUnix.sh.sh [-h] {-u | -d} file...
+ Type: "DosUnix.sh.sh -h" for more help.
+END
+	fCleanUp 1
+}
+
+# Main ---------------------------------------------
+# Init and Pre-validate Section
+Tmp=${Tmp:-"/tmp/$LOGNAME"}
+tTmpF=$Tmp/d2u$$
+tTmp1=${TmpF}1.tmp
+trap fCleanUp 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+
+# Get Options Section
+pMode=""
+pFileList=""
+while [ $# -ne 0 ]; do
+	case $1 in
+		-h)	fUsage;;
+		-d|-u)	pMode=${1#-};;
+		-*)	fError "Unknown option: $1";;
+		*)	pFileList="${pFileList} $1";;
+	esac
+	shift
+done
+
+# Post-validate Section
+if [ -z "$pMode" ]; then
+	fError "A -d or -u was not specified."
+fi
+if [ -z "$pFileList" ]; then
+	if [ "$pMode" = "d" ]; then
+		sed 's/*$//g; s/$//g'
+	else
+		sed 's/*$//g'
+	fi
+	exit 0
+fi
+
+for i in $pFileList; do
+	if [ -d $i ]; then
+		continue
+	fi
+	if [ ! -r $i ]; then
+		fError "Could not read file: $i"
+	fi
+	echo "Converting: $i"
+	if [ "$pMode" = "d" ]; then
+		sed 's/*$//g; s/$//g' $i >$tTmp1
+	else
+		sed 's/*$//g' $i >$tTmp1
+	fi
+	mv $tTmp1 $i
+	if [ -n "$relFileMode" ]; then
+		chmod $relFileMode $i
+	fi
+done
+
+fCleanUp 0

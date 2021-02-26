@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+
+# Kill all ssh-agent jobs owned by $LOGNAME.
+# If on linux or cygwin, then only kill jobs not started today.
+
+$tName = $ENV{'LOGNAME'};
+if ($tName eq "root") {
+	die "Do not run this with root.\n";
+}
+
+$tOS = $ENV{'OSTYPE'};
+
+if ($tOS =~ /^Linux/ || $tOS =~ /^linux/ || $tOS =~ /^cygwin/ || $tOS =~ /^solaris/) {
+	open(F, 'ps -ef|');
+	while (<F>) {
+		s/^\s+//;
+		chop;
+		@l = split /\s+/;
+		if (	$l[0] eq $tName &&
+			$_ =~ /ssh-agent/ &&
+			$l[4] =~ /^[A-Z]/ ) {
+			print $_ . " [killed]\n";
+			system("kill $l[1]");
+		}
+	}
+} elsif ($tOS =~ /^freebsd/) {
+	open(F, 'ps -aux -v stime|');
+	while (<F>) {
+		s/^\s+//;
+		chop;
+		@l = split /\s+/;
+		if (	$l[0] eq $tName &&
+			$_ =~ /ssh-agent/ &&
+			$l[8] =~ /[A-Z][a-z]/ ) {
+			print $_ . " [killed]\n";
+			system("kill $l[1]");
+		}
+	}
+} elsif ($tOS =~ /^darwin/) {
+	# Start time can't be determined, so kill all agents
+	open(F, 'ps -aux|');
+	while (<F>) {
+		s/^\s+//;
+		chop;
+		@l = split /\s+/;
+		if (	$l[0] eq $tName &&
+			$_ =~ /ssh-agent/ ) {
+			print $_ . " [killed]\n";
+			system("kill $l[1]");
+		}
+	}
+} else {
+	die "Unknown OSTYPE: $tOS\n";
+}
+
+close(F);

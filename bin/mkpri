@@ -1,0 +1,85 @@
+#!/bin/bash
+
+PS3="Media type? "
+select pType in Exit HardDisk Removable; do
+	case $pType in
+		Exit)	exit 1;;
+		'')	print 'Invalid number';;
+		*)	break
+	esac
+done
+
+if [ $pType = 'Removable' ]; then
+	PS3="Mount removable disk at directory? "
+	select pMount in Exit $(grep noauto /etc/fstab | awk '{ print $2}'); do
+		case $pMount  in
+			Exit)	exit 1;;
+			'')	print 'Invalid number';;
+			*)	break
+		esac
+	done
+
+	set -x
+	mount $pMount
+	ls $pMount
+	set +x
+	umount $pMount 2>/dev/null
+
+	PS3="Make a new ext2 filesystem? "
+	select pFormat in Exit Yes No; do
+		case $pFormat in
+			Exit)	exit 1;;
+			'')	print 'Invalid number';;
+			*)	break
+		esac
+	done
+
+	if [ $pFormat = 'Yes' ]; then
+		pDev=$(grep $pMount /etc/fstab | awk '{ print $1}')
+	fi
+fi
+
+PS3="File name? "
+tDS=$(date '+%Y-%m-%d')
+tS=$(date '+%S')
+select pPriFile in Exit $tDS-bach$tS.mp3 $tDS-image$tS.gif Custom; do
+	case
+		Exit)	exit 1;;
+		Custom)
+			print -n "Custom file name: "
+			read pPriFile
+			break
+		;;
+		'')	print 'Invalid number';;
+		*)	break
+	esac
+done
+
+if [ $pType = 'HardDisk' ]; then
+	pPath=NONE
+	while [ ! -d $pPath ]; do
+???		print -n "Path to file? "
+		read pPath
+	done
+else
+fi
+
+
+df -k $p
+
+PS3="Size (KB)? " (less than 'df -k path' available space)
+
+# bctool mount dir
+
+# ----------------------
+# Make it
+
+if [ $pType = 'Removable' ]; then
+	if [ $pFormat = 'Yes' ]; then
+		set -x
+		mkfs -t ext2 -c -v $pDev
+		mount $pMount
+		df -k $pMount
+		set +x
+	fi
+fi

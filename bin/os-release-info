@@ -1,0 +1,24 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/os-release-info,v 1.2 2020/10/28 01:22:39 bruce Exp $
+
+echo
+echo 'uname -a'
+uname -a
+
+if [ -f /etc/os-release ]; then
+   echo
+   echo '/etc/os-release'
+   cat /etc/os-release
+fi
+
+if [ -f /etc/issue.net ]; then
+   echo
+   echo '/etc/issue.net'
+   cat /etc/issue.net
+fi
+
+if [ -f /etc/initrd-release ]; then
+   echo
+   echo '/etc/initrd-release'
+   cat /etc/initrd-release
+fi

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	cat <<EOF
+Usage:
+	vid-make-timestamp FILE.mp4
+
+	Output: FILE-timestamp.mp4
+EOF
+	exit 1
+fi
+
+pInput=test-video.mp4
+
+tOutput=${pInput%.mp4}-timestamp.mp4
+tNL=$'\r'
+
+ffmpeg -i $pInput -vf "drawtext=x=8:y=8:\
+box=1:fontcolor=white:\
+boxcolor=black:expansion=strftime:\
+basetime=$(date +%s --date='today 00:00:00')000000:\
+text='$tNL  %H\\:%M\\:%S $tNL'" $tOutput

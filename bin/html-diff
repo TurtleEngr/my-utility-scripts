@@ -1,0 +1,77 @@
+#!/bin/bash
+
+if [ $# -ne 3 ]; then
+	cat <<EOF
+Usage:
+	html-diff OldFile.html NewFile.html DiffFile.html
+
+This script generates ins and del tags for the differences between
+OldFile and NewFile.  This works best for xhtml files that have been
+formatted with tidy.
+EOF
+	exit 1
+fi
+
+# -----------------
+# Get args
+pOldFile=$1
+pNewFile=$2
+pDiffFile=$3
+tTmpFile=~/tmp/diff.tmp
+
+# -----------------
+# Validate
+if [ ! -r $pOldFile ]; then
+	echo "Error: can not read $pOldFile"
+	exit 1
+fi
+if [ ! -r $pNewFile ]; then
+	echo "Error: can not read $pNewFile"
+	exit 1
+fi
+if [ $pOldFile = $pNewFile ]; then
+	echo OldFile can not be the same as NewFile
+	exit 1
+fi
+if [ $pOldFile = $pDiffFile ]; then
+	echo OldFile can not be the same as DiffFile
+	exit 1
+fi
+if [ $pNewFile = $pDiffFile ]; then
+	echo NewFile can not be the same as DiffFile
+	exit 1
+fi
+
+# -----------------
+diff -bBwi --ifdef=NeW $1 $2 >$tTmpFile
+
+awk '
+/^#ifdef NeW/ {
+	Ins = 1
+	print "<ins>"
+	next
+}
+/^#endif / && Ins {
+	Ins = 0
+	print "</ins>"
+	next
+}
+/^#ifndef NeW/ {
+	Del = 1
+	print "<del>"
+	next
+}
+/^#else / && Del {
+	Del = 0
+	print "</del>"
+	Ins = 1
+	print "<ins>"
+	next
+}
+/^#endif / && Del {
+	Del = 0
+	print "</del>"
+	next
+}
+{print $0}
+' <$tTmpFile >$3

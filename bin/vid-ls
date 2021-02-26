@@ -1,0 +1,14 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/vid-ls,v 1.1 2019/09/25 04:16:49 bruce Exp $
+
+# alias lsv='ls /mnt/usb-video/repo/video/${PWD#/home/video/}'
+# alias lsv=vid-ls
+
+if [ ! -d /mnt/usb-video/repo/video ]; then
+	echo "/mnt/usb-video/repo/video is not mounted"
+	exit 1
+fi
+
+tVidDir=/mnt/usb-video/repo/video/${PWD#/home/video/}
+echo $tVidDir
+ls $tVidDir

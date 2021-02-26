@@ -1,0 +1,237 @@
+#!/bin/bash
+# $Id: sshagent,v 1.58 2015/07/19 03:30:07 bruce Exp $
+
+# Note: Because this script is usually sourced, exits and functions
+# are not used.  So that is why the "if" logic is so messy, with
+# "flags", to control the logic.
+
+# Get options
+gErr=0
+pAdd=""
+pDebug=0
+pHelp=0
+pKill=0
+pScript=0
+while getopts :'hksx' tArg; do
+	case $tArg in
+		a)	pAdd=1;;
+		h)	pHelp=1;;
+		k)	pKill=1
+			pScript=1
+		;;
+		s)	pScript=1;;
+		x)	pDebug=1;;
+		?)	gErr=2
+			echo "Error: Unknown option: -$OPTARG [$gErr]"
+		;;
+		*)	gErr=3
+			echo "Error: Unknown option: $tArg [$gErr]"
+		;;
+	esac
+done
+let OPTIND=OPTIND-1
+shift $OPTIND
+pParm=""
+if [ $# -ne 0 ]; then
+	pParm="$*"
+fi
+
+if [ $pHelp -ne 0 -o $gErr -ne 0 ]; then
+	if [ $pHelp -ne 0 ]; then
+		pod2text $0
+		cat <<'EOF' >/dev/null
+=pod
+
+=head1 NAME
+
+sshagent - setup the ssh agent process
+
+=head1 SYNOPSIS
+
+ . sshagent [-h] [-s] [-k] [key ...]
+
+=head1 DESCRIPTION
+
+sshagent is a wrapper for ssh-agent and ssh-add.  It only starts an
+agent process if one isn't already running.  It also saves the PID
+env. var. values for scripts.  Typically sshagent is put in a users
+profile file.  Notice that the script is "sourced" (.) so that the
+env. var. are defined in the current shell.
+
+For the best use of ssh-agent, put your public keys in the
+~/.ssh/authorized_keys file on all the systems that you have login
+access to.
+
+If an agent is found, then the env. var. are set, and the keys are
+listed (after adding any keys specified on the command line).  If an
+agent is not found, all other agents are killed, and a new agent is
+initialized, the keys are added, and the env. var. are set.
+
+If -s is used and an agent isn't running, then unset SSH_AGENT_PID,
+and exit (don't try to start an agent).  This is commonly used in cron
+job scripts.
+
+If cgAgentOwner env. is set, then that will be used instead of
+$LOGNAME, to find the sshagent.env file.  This is useful for scripts
+that are run by other users, who have read access to the user's home
+dir (usually only the "root" user).
+/home/$cgAgentOwner/.ssh/.sshagent.env file.  (The script just
+"sources" the file.)
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-h>
+
+This help.
+
+=item B<-s>
+
+Only set env. var. (don't run a new agent).
+
+=item B<-k>
+
+Kill all agents owned by you.
+
+=item B<key...>
+
+A list of key file names.
+
+=back
+
+=head1 RETURN VALUE
+
+=head1 ERRORS
+
+=head1 EXAMPLES
+
+In a profile script:
+
+ 	. sshagent ~/.ssh/id.home ~/.ssh/id.work
+
+In a script run by the 'root' user:
+
+ 	export $cgAgentOwner=george
+ 	. sshagent -s
+
+You ran sshagent manually to create an agent, but you forgot to
+"source" the script so that the SSH_* env. are set.  Fix this by just
+running sshagent again: . sshagent
+
+Add another key to a running agent:
+
+ 	sshagent ~/.ssh/id_foo_dsa
+
+List agent and added keys:
+
+ 	sshagent
+
+Kill all agents:
+
+ 	sshagent -k
+
+=head1 ENVIRONMENT
+
+ $cgAgentOwner - user name.  Set to $LOGNAME if empty.
+
+ $SSH_AUTH_SOCK - set by sshagent
+ $SSH_AGENT_PID - set by sshagent
+
+=head1 FILES
+
+ /home/$LOGNAME/.ssh/.sshagent.env
+ /home/$cgAgentOwner/.ssh/.sshagent.env
+
+=head1 SEE ALSO
+
+ ssh-agent, ssh-add
+
+=head1 NOTES
+
+Because this script is usually sourced, exits and functions are not
+used.  So that is why the "if" logic in this script is so messy with
+the pExit flag.
+
+=head1 CAVEATS
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS
+
+=head1 RESTRICTIONS
+
+sshagent only works well with bash.
+
+=head1 AUTHOR
+
+=head1 HISTORY
+
+(c) Copyright 2009 by TrustedID
+
+$Revision: 1.58 $ GMT 
+
+=cut
+
+EOF
+	fi
+else
+
+# ------------------------------------------
+
+export cgAgentOwner=${cgAgentOwner:-$USER}
+export cgEnvDir=/home/$cgAgentOwner/.ssh
+export cgEnvFile=$cgEnvDir/.sshagent.env
+
+# Create cgEnvDir if it doesn't exist
+if [ ! -d $cgEnvdir ]; then
+	mkdir -p $cgEnvDir
+fi
+# Keep the permissions low
+chown -R $cgAgentOwner $cgEnvDir
+chmod u=rwx,go= $cgEnvDir
+chmod -R go= $cgEnvDir
+
+# Kill all agents.
+if [ $pKill -ne 0 ]; then
+	# Setup so that all agents will be killed and none started
+	echo "Killing all of your ssh-agents"
+	killall ssh-agent 2>/dev/null
+	rm -f $cgEnvFile 2>/dev/null
+fi
+
+# Check to see if an agent is running
+tSARunning=0
+if [ -f $cgEnvFile ]; then
+	chmod u+rwx,go= $cgEnvFile
+	. $cgEnvFile >/dev/null
+	ps -ef | egrep "($cgAgentOwner|$(id -u $cgAgentOwner))" | grep -v grep | grep $SSH_AGENT_PID >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		tSARunning=1
+		ssh-add -l
+		if [ -n "$pParm" ]; then
+			ssh-add $pParm
+		fi
+		ssh-add -l
+	fi
+fi
+if [ $tSARunning -eq 0 ]; then
+	unset SSH_AUTH_SOCK SSH_AGENT_PID
+	if [ $pScript -eq 0 ]; then
+	    killall ssh-agent 2>/dev/null
+	    rm -f $cgEnvFile 2>/dev/null
+	fi
+fi
+
+if [ $pScript -eq 0 -a $tSARunning -eq 0 ]; then
+	echo Starting a new ssh-agent:
+	ssh-agent >$cgEnvFile
+	chmod u+rwx,go= $cgEnvFile
+	. $cgEnvFile >/dev/null
+	echo ssh-add $pParm
+	ssh-add $pParm
+fi
+
+unset tSARunning pScript pParm cgEnvDir cgEnvFile
+
+fi

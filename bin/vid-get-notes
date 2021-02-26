@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ $# -ne 0 ]; then
+    cat <<EOF
+Usage:
+	get-video-notes <FILE.kdenlive >FILE.html
+EOF
+    exit 1
+fi
+
+# Older kdenlive
+#awk '/<documentnotes>/,/<\/documentnotes/ { print $0 }' | \
+#sed 's/&lt;/</g' | \
+#awk '{ gsub("<[/]*documentnotes>",""); print $0 }'
+
+awk '/<property name="kdenlive:documentnotes">/,/<\/property>/ { print $0 }' |
+sed 's/&lt;/</g' | \
+awk '{ gsub("<[/]*property[^>]*>",""); print $0 }'

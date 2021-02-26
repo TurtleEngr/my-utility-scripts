@@ -1,0 +1,46 @@
+#!/usr/bin/perl
+
+# Usage: file-split FILE
+#    or: file-split <FILE
+
+# Syntax of FILE:
+# File names are tagged with: one or more '-' starting in column 1,
+# one or more spaces, then "file-split:', one or more spaces, then the
+# directory/file name.
+
+# Output the text in FILE, split across the files listed.
+# Also output file-join.list, with the list of file names.
+
+# Example input file:
+# 	---- file-split: foo/bar/readme.html
+#	line1
+#	line2
+# 	---- file-split: foo/readme.html
+#	line1
+#	line2
+
+open(hList, ">file-join.list");
+
+open(hOut, ">/dev/null");
+select hOut;
+while (<>) {
+	if (/^-+ +file-split: +([^ ]*)/) {
+		close(hOut);
+		$tFile = $1;
+		chomp $tFile;
+		print hList "$tFile\n";
+		$tDir = $tFile;
+		$tDir =~ s/\/[^\/]*$//;
+		if (! -d $tDir) {
+			print STDERR "mkdir=$tDir\n";
+			system("mkdir -p $tDir");
+		}
+		print STDERR "file: $tFile\n";
+		open(hOut, ">$tFile");
+		select hOut;
+		next;
+	}
+	print $_;
+}
+close(hOut);
+close(hList);

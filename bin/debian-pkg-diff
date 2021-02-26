@@ -1,0 +1,24 @@
+#!/bin/bash
+# debian-pkg-diff
+
+if [ $# -ne 2 ]; then
+	echo "Usage: debian-pkg-diff Host1 Host2"
+	exit 1
+fi
+
+# debian-pkgdiff host1.pkg3 host2.pkg3
+tPkg1=$1
+tPkg2=$2
+tPkg1Base=${tPkg1%.*}
+tPkg1Base=${tPkg1Base##*/}
+tPkg2Base=${tPkg2%.*}
+tPkg2Base=${tPkg2Base##*/}
+
+# Files that are in tPkg1, and in tPkg2
+cat $tPkg1 $tPkg2 | sort | uniq -d >${tPkg1Base}-${tPkg2Base}.same
+
+# Files that are in tPkg1, and not in tPkg2
+cat $tPkg2 $tPkg2 $tPkg1 | sort | uniq -u >notin-${tPkg2Base}.diff
+
+# Files that are in tPkg1, and not in tPkg2
+cat $tPkg1 $tPkg1 $tPkg2 | sort | uniq -u >notin-$tPkg2.diff

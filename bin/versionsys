@@ -1,0 +1,35 @@
+#!/bin/bash
+# $Id: versionsys,v 1.4 2015/07/19 03:30:07 bruce Exp $
+
+# This script may be different for each server that it is installed
+# on, so don't just over-write it with newer versions.
+
+# Commit all of the versioned config files for this system.
+# This script is run as root, and it patches up any permission
+# or ownership changes, that CVS may make.
+
+if [ "$(whoami)" != "root" ]; then
+	echo "Error: You have to be root to run this."
+	exit 1
+fi
+
+export CVSROOT=$(cat /CVS/Root)
+export CVSUMASK=002
+export CVS_RSH=ssh
+
+umask 022
+cd /
+cvs commit -m Updated
+
+# --------------------
+# Fix permissions and ownership
+# You only need to add fixed for files that actually get changed to
+# incorrect values.  Most of the time CVS does the right thing.  If you
+# see that the execute bit keeps getting cleared, then set the execute
+# bit of the CVS repository file.
+
+# /etc
+chmod a+r /etc/CHANGES
+chmod a+r /etc/ntp.conf
+chmod ug=r,o= /etc/sudoers
+#chmod a+r /etc/yum.conf

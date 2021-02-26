@@ -1,0 +1,49 @@
+#!/bin/bash
+
+if [ $# -ne 4 ]; then
+    cat <<EOF
+Usage:
+	diff-month MonthBeg YearBeg MonthEnd YearEnd
+EOF
+    exit 1
+fi
+
+MonthBeg=$1
+YearBeg=$2
+MonthEnd=$3
+YearEnd=$4
+
+if [ $YearBeg -eq $YearEnd ]; then
+	DiffYear=0
+	let DiffMonth=MonthEnd-MonthBeg
+else
+	let tMonth="( ( ( YearEnd - YearBeg ) * 12 ) - MonthBeg ) + 1 + MonthEnd"
+	let DiffYear="tMonth / 12"
+	let DiffMonth="tMonth - ( DiffYear * 12 )"
+fi
+
+if [ $DiffYear -eq 0 ]; then
+	tYearLabel=""
+	tSep=""
+fi
+if [ $DiffYear -eq 1 ]; then 
+	tYearLabel="1 year"
+	tSep=", "
+fi
+if [ $DiffYear -gt 1 ]; then 
+	tYearLabel="$DiffYear years"
+	tSep=", "
+fi
+
+if [ $DiffMonth -eq 0 ]; then
+	tMonthLabel=""
+	tSep=""
+fi
+if [ $DiffMonth -eq 1 ]; then
+	tMonthLabel="1 month"
+fi
+if [ $DiffMonth -gt 1 ]; then
+	tMonthLabel="$DiffMonth months"
+fi
+
+echo ${tYearLabel}${tSep}${tMonthLabel}

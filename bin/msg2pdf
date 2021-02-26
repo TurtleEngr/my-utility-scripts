@@ -1,0 +1,28 @@
+#!/bin/bash
+# Fix up pdf files mailed from the Minolta
+
+# Input: ~/tmp/message.eml (save the whole message)
+# Output: ~/tmp/message.pdf
+
+if [ ! -f ~/tmp/message.eml ]; then
+	echo "Error: Could not find ~/tmp/message.eml"
+	exit 1
+fi
+
+awk '
+	/Content-Disposition:/ {
+		getline
+		Found = 1
+		next
+	}
+	Found == 0 { next }
+	NF == 0 { next }
+	/--Boundary/ { next }
+	{ print }
+' <~/tmp/message.eml >~/tmp/message.tmp
+
+#dosunix -u ~/tmp/message.tmp
+
+mimencode -u <~/tmp/message.tmp >~/tmp/message.pdf
+
+echo "Output: ~/tmp/message.pdf"

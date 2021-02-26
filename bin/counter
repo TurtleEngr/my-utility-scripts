@@ -1,0 +1,467 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/counter,v 1.6 2020/11/25 10:02:14 bruce Exp $
+
+# Prefix codes (show the "scope" of variables):
+# gVar - global variable (may even be external to the script)
+# pVar - parameter (script option or function parameter)
+# gpVar - global parameter, i.e. may be defined external to the script
+# cVar - global constant (set once)
+# tVar - temporary variable (local to a function)
+# fFun - function
+
+# Commonally used global variables:
+# gpDebug - toggle (-x)
+# gpVerbose - toggle (-v)
+# Tmp - personal tmp directory.  Usually set to: /tmp/$USER
+# cTmpF - tmp file prefix.  Includes $gpTmp and $$ to make it unique
+# gErr - error code (0 = no error)
+# cVer - current version
+# cName - script's name
+# cBin - directory where the script is executing from
+# cCurDir - current directory
+
+# --------------------------------
+function fCleanUp
+{
+	trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+	# Called when script ends (see trap) to remove temporary files,
+	rm $gpTimerFile >/dev/null 2>&1
+	fLog notice "Removing $gpTimerFile" $LINENO 8801
+	exit $gErr
+} # fCleanUp
+
+# --------------------------------
+function fUsage
+{
+	if [ $# -ne 0 ]; then
+		pod2text $0
+	else
+		pod2usage $0
+	fi
+	gErr=1
+	fCleanUp
+	exit 1
+	cat <<EOF >/dev/null
+=pod
+
+=head1 NAME
+
+counter - manage a count up or count down timer for OBS
+
+=head1 SYNOPSIS
+
+	counter [-m Min | -s Sec | -t Time [-T Time]] [-u|-d] [-p] [-i Sec]
+		[-f File] [-S "Start"] [-E "End"] [-h]
+
+=head1 DESCRIPTION
+
+Use -m and -s to set the duration for the timer. Or use -t to set the
+end time (which is assumed to be in the future, if -T is not defined)
+and the duration will be calculated.
+
+Use -u to define a count up timer. Use -d to define a count down timer.
+
+Use -i to define the interval, in seconds.
+
+Only one version of counter can write to File. So there is a check to
+see is a counter is already running for the specified file. If yes,
+then that counter process is killed, and the file will be used by the
+new counter.  This is done so that a counter can be run in the
+background. If put in the background, don't use the -p option.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-m Min>
+
+Number of minutes. Default: 0
+
+=item B<-s Sec>
+
+Number of seconds. Default: 60
+
+=item B<-t Time>
+
+Set the hour, minute time from now. The counter's duration will be set
+to number of min:sec until that time. The hour HH must use 24 hour time,
+or add AM/PM to the time.
+
+-t will override -m and -s settings.
+
+See Example section.
+
+=item B<-T Time>
+
+The start time of the -t calculation can be defined. The default is "now".
+
+See Example section.
+
+=item B<-u>
+
+Start a 0 and count up until greater or equal to Min:Sec.
+
+=item B<-d>
+
+Start a Min:Sec and count down until 0.
+
+Default.
+
+=item B<-p>
+
+Pause at Start and prompt before starting.  Default: no pause.
+
+=item B<-i Sec>
+
+Interval in sec. Default: 1
+
+=item B<-f File>
+
+File location for the counter. Default: /tmp/counter.tmp
+
+=item B<-S "Start">
+
+Start text. Default: if -d: Min:Sec, if -u: 0:0
+
+=item B<-E "End">
+
+End text. Default: if -d: 0:00, if -u: Min:Sec
+
+=item B<-h>
+
+This help.
+
+=back
+
+=head1 RETURN VALUE
+
+=head1 ERRORS
+
+Fatal Error: Bad arguments.
+
+Warnings: Another counter was running, it will be stopped.
+
+=head1 EXAMPLES
+
+To use the counter, point OBS text to read from the counter file
+/tmp/counter.tmp or from the file specified with the -f option.
+
+Countdown timer for 2min 13sec. File /tmp/counter.tmp will be use for
+time remaining.
+
+ 	counter -m 2 -s 13
+
+Countup timer for 2min 13sec, but wait for user to press Enter to
+start it. And first display "Time until Program". At end, display
+"Starting".
+
+ 	counter -u -m 2 -s 13 -p -S "Time until Program" -E "Starting"
+
+Start a counter in background for 15 min. The start 
+a replacement counter time for 2 min, before the first one
+finishes.  When the second counter starts, any running counters using file
+/tmp/counter.tmp will die, before the other counter starts.
+
+ 	counter -m 15 -s 0 &
+	sleep 60
+	counter -m 2 -s 0 &
+
+If you need to have two counters running at the same time, use two
+different counter files.
+
+ 	counter -m 15 -s 0 -f /tmp/counter1.tmp &
+	counter -m 2  -s 0 -f /tmp/counter2.tmp &
+
+Start countdown timer to end at 11am.
+
+ 	counter -t '2020-12-06 11am'
+
+Countdown timer, duration is calculated between the two times
+specified.  To test what dates values are allowed, use the "date
+--date='time'" command.
+
+ 	counter -T '2020-12-06 11am - 7min - 62sec' -t '2020-12-06 11am'
+
+=head1 ENVIRONMENT
+
+=head1 FILES
+
+ /tmp/counter.tmp
+
+=head1 SEE ALSO
+
+date
+
+=head1 NOTES
+
+=head1 CAVEATS
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS
+
+=head1 RESTRICTIONS
+
+=head1 AUTHOR
+
+=head1 HISTORY
+
+$Revision: 1.6 $ GMT 
+
+=cut
+EOF
+	fCleanUp 1
+	exit 1
+} # fUsage
+
+# --------------------------------
+function fError
+{
+	# Usage:
+	#     fError pMsg [pLine [pErr]]
+	# Print the error message.  Then call fCleanUp, and exit
+
+	local pMsg="$1"
+	local pLine=$2
+	local pErr=$3
+
+	fLog crit "$pMsg" $pLine $pErr
+	fUsage
+} # fError
+
+# ------------------
+function fLog
+{
+	# Usage:
+	#     gErr=8801		# optional
+	#     fLog notice "Just testing" $LINENO 8
+	# pLevel - emerg alert crit err warning notice info debug
+
+	local pLevel=$1
+	local pMsg="$2"
+	# optional
+	local pLine=$3
+	# optional
+	local pErr=$4
+
+	local tVerbose=""
+	local tErr=""
+	if [ -n "$pErr" ]; then
+		tErr="$pErr"
+	fi
+	if [ $gErr -ne 0 ]; then
+		tErr="$tErr,$gErr"
+	fi
+	if [ -n "$tErr" ]; then
+		tErr="($tErr)"
+	fi
+
+	local tLine=""
+	if [ -n "$pLine" ]; then
+		tLine="[$pLine]"
+	fi
+
+	if [ $gpLog -eq 0 ]; then
+		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+	else
+		if [ -n "$gpVerbose" ]; then
+			tVerbose="-s"
+		fi
+		logger $tVerbose -i -t $cName -p user.$pLevel "$pLevel: $pMsg $tLine$tErr"
+	fi
+} # fLog
+
+# ==========================================================
+# Main
+export	cBin cCurdir gErr gpDebug cName \
+	gNoExit cVer gpVerbose PWD
+
+# -------------------
+# Set name of this script
+# Note: this does not work if the script is executed with '.'
+cName=${0##*/}
+
+# -------------------
+# Setup log variables
+gpDebug=${gpDebug:-0}
+gpVerbose=1
+gpLog=1
+gErr=0
+
+# -------------------
+# Define the version number for this script
+cVer='$Revision: 1.6 $'
+cVer=${cVer#*' '}
+cVer=${cVer%' '*}
+
+# -------------------
+# Configuration
+export cTag=systag
+
+# -------------------
+# Get Options Section
+if [ $# -eq 0 ]; then
+	fError "Missing options." $LINENO 8801
+fi
+
+export gpTimerFile="/tmp/counter.tmp"
+export gpStart=""
+export gpEnd=""
+export gpMin=0
+export gpSec=60
+export gpTime=""
+export gpTimeStart=""
+export gpInterval=1
+export gpUpDown=d
+export gpPause=0
+while getopts :m:s:t:T:udpi:f:S:E:h tArg; do
+	case $tArg in
+		m)	gpMin=$OPTARG;;
+		s)	gpSec=$OPTARG;;
+		t)	gpTime=$OPTARG;;
+		T)	gpTimeStart=$OPTARG;;
+		i)	gpInterval=$OPTARG;;
+		u)	gpUpDown="u";;
+		d)	gpUpDown="d";;
+		p)	gpPause=1;;
+		f)	gpTimerFile=$OPTARG;;
+		S)	gpStart=$OPTARG;;
+		E)	gpEnd=$OPTARG;;
+		h)	fUsage long;;
+		:)	fError "Value required for option: $OPTARG" $LINENO 8802;;
+		\?)	fError "Unknown option: $OPTARG" $LINENO 8803;;
+	esac
+done
+let tOptInd=OPTIND-1
+shift $tOptInd
+if [ $# -ne 0 ]; then
+	fError "Unexpeted argument: $*" $LINENO 8804
+fi
+
+# -------------------
+# Validate Options Section
+
+if [ $gpInterval -le 0 ]; then
+	fError "Invalid -i: $gpInterval" $LINENO 8805
+fi
+
+if [ -f $gpTimerFile ]; then
+	fLog notice "Another counter using $gpTimerFile is running. Waiting for it to die." $LINENO 8806
+	rm -f $gpTimerFile
+	sleep 3
+	fLog notice "Continuing..." $LINENO 8807
+fi
+
+if [ -n "$gpTimeStart" -a -z "$gpTime" ]; then
+	fError "Invalid: -T option requires -t option." $LINENO 8808
+fi
+
+if [ -n "$gpTime" ]; then
+	if [ -n "$gpTimeStart" ]; then
+		tTimeBegin=$(date --date="$gpTimeStart" +'%s')
+		date --date="$gpTimeStart"
+		if [ -z "$tTimeBegin" ]; then
+			fError "Invalid -T option: $gpTimeStart" $LINENO 8809
+		fi
+	else
+		tTimeBegin=$(date +'%s')
+	fi
+	
+	tTimeEnd=$(date --date="$gpTime" +'%s')
+	date --date="$gpTime"
+	if [ -z "$tTimeEnd" ]; then
+		fError "Invalid -t option: $gpTime" $LINENO 8810
+	fi
+
+	if [ $tTimeBegin -ge $tTimeEnd ]; then
+		fError "Invalid: -t time must be greater than -T time." $LINENO 8811
+	fi
+
+	gpMin=0
+	let gpSec=tTimeEnd-tTimeBegin
+	
+	if [ -z "$gpSec" ]; then
+		fError "Invalid -t or -T option" $LINENO 8812
+	fi
+fi
+
+# -------------------
+# Functional Section
+trap fCleanUp 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+
+fLog notice "Sending counter to: $gpTimerFile" $LINENO 8813
+touch $gpTimerFile
+
+export tCounter
+
+if [ "$gpUpDown" = "d" ]; then
+	let tCounter=gpMin*60+gpSec
+	tEndCount=0
+	if [ -n "$gpStart" ]; then
+		echo -n $gpStart >$gpTimerFile
+		echo "$gpStart"
+		sleep 1
+	else
+		printf "%i:%02i" $gpMin $gpSec >$gpTimerFile
+		printf "%i:%02i\n" $gpMin $gpSec
+	fi
+else
+	tCounter=0
+	let tEndCount=gpMin*60+gpSec
+	if [ -n "$gpStart" ]; then
+		echo -n $gpStart >$gpTimerFile
+		echo "$gpStart"
+	else
+		printf "%i:%02i" 0 0 >$gpTimerFile
+		echo printf "%i:%02i\n" 0 0
+	fi
+fi
+
+if [ $gpPause -ne 0 ]; then
+	read -p "Press return to start"
+fi
+
+export m s
+let m=tCounter/60
+let s=tCounter-60*m
+fLog notice "$(printf "Starting counter for %i:%02i to %s\n" $m $s $gpTimerFile)" $LINENO 8814
+
+while [ $tCounter -ne $tEndCount ]; do
+	if [ ! -f $gpTimerFile ]; then
+		fLog notice "Another counter using $gpTimerFile started. So exiting." $LINENO 8815
+		fCleanUp
+	fi
+	let m=tCounter/60
+	let s=tCounter-60*m
+	printf "%i:%02i" $m $s >$gpTimerFile
+	printf "%i:%02i\n" $m $s
+	if [ "$gpUpDown" = "d" ]; then
+		let tCounter=tCounter-gpInterval
+	else
+		let tCounter=tCounter+gpInterval
+	fi
+	sleep $gpInterval
+done
+sleep 1
+if [ "$gpUpDown" = "d" ]; then
+	printf "0:00" >$gpTimerFile
+	printf "0:00\n"
+else
+	printf "%i:%02i" $gpMin $gpSec >$gpTimerFile
+	printf "%i:%02i\n" $gpMin $gpSec
+fi
+	sleep 1
+
+if [ -n "$gpEnd" ]; then
+	echo -n $gpEnd >$gpTimerFile
+	echo "$gpEnd"
+	sleep 1
+fi
+if [ $gpPause -ne 0 ]; then
+	read -t 600 -p "Press return to end"
+fi
+
+# -------------------
+# Cleanup Section
+sleep 1
+fCleanUp

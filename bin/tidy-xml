@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -eq 0 ]; then
+	cat <<EOF
+Usage:
+	tidy-xml FILE...
+
+Cleanup xml files so they are easier to read (the original file is
+replaced with the re-formatted file).
+EOF
+	exit 1
+fi
+
+for i in $*; do
+	if [ ! -f $i ]; then
+		continue
+	fi
+	echo Processing: $i
+	tidy -xml -q -i --indent-spaces 2 --wrap 75 --indent-attributes y -m $i
+done

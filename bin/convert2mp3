@@ -1,0 +1,6 @@
+#!/bin/bash
+
+pIn=$1
+
+tOut=${pIn%.*}.mp3
+ffmpeg -vn -i $pIn $tOut

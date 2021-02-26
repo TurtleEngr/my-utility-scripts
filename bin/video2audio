@@ -1,0 +1,14 @@
+#!/bin/bash
+# Given an input video, output only the mp3 audio
+
+pIn=$1
+tOut=${pIn%.*}.mp3
+pArtist=$2
+pAlbum=$3
+pTitle=$4
+pOrder=$5
+
+ffmpeg -i $pIn \
+	-vn -ab 128k -metadata album=$pAlbum -metadata artist=$pArtist \
+	-metadata title=${pOrder}_$pTitle -metadata track=$pOrder \
+	$tOut

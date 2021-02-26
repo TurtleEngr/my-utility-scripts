@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	cat <<EOF
+Usage:
+	vid-frame-rate FILES...
+	Returns: Frame rate of a video
+EOF
+	exit 1
+fi
+
+for i in $*; do
+	if [ ! -f $i ]; then
+		echo "Missing: $i"
+		continue
+	fi
+	tFPS=$(ffprobe -i $i -show_streams 2>&1 | \
+		grep fps | \
+		sed "s/.*, \([0-9.]*\) fps,.*/\1/")
+	echo $i = $tFPS
+done

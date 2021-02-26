@@ -1,0 +1,33 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/vid-info,v 1.2 2018/02/25 21:37:30 bruce Exp $
+# Extract meta info from video files. Save it in FILE.info
+# Usage:
+#	# Local dir only
+#	vid-info
+
+#	# Recursive
+#	vid-info ARG
+
+#--------------------
+# Set this to empty, to be recursive
+
+if [ $# -eq 0 ]; then
+	pNotRecursive='-prune'
+else
+	# Any option makes it recursive
+	pNotRecursive=''
+fi
+
+tFound=$(find * $pNotRecursive -type f | \
+    egrep -v '\.info$|\.txt$|\.htm$|\.html|\.au$|\.sh$|AuthDir' | \
+    grep -v ' ' | wc -l)
+echo "Found: $tFound"
+echo
+
+for i in $(find * $pNotRecursive -type f | \
+    egrep -v '\.info$|\.txt$|\.htm$|\.html|\.au$|\.sh$|AuthDir' | \
+    grep -v ' '); do
+	exiftool $i >$i.info
+	echo -n '.'
+done
+echo

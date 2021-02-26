@@ -1,0 +1,225 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/backup.laptop,v 1.15 2020/09/11 02:10:17 bruce Exp $
+
+function fUsage()
+{
+    cat <<EOF
+Usage
+	backup.laptop
+
+Format a WD Passport USB disk:
+- Plug into usb drive
+- Use dmesg to get the device id
+  Look for something like:
+	USB Mass Storage support registered.
+	  Vendor: WD        Model: 2500BEA External  Rev: 1.04
+	  Type:   Direct-Access                      ANSI SCSI revision: 04
+	SCSI device sdc: 488397168 512-byte hdwr sectors (250059 MB)
+	sdc: Write Protect is off
+	sdc: Mode Sense: 21 00 00 00
+	sdc: assuming drive cache: write through
+	SCSI device sdc: 488397168 512-byte hdwr sectors (250059 MB)
+	sdc: Write Protect is off
+	sdc: Mode Sense: 21 00 00 00
+	sdc: assuming drive cache: write through
+	 sdc: sdc1
+  sdc is the device, in this case
+- Or do a 'df' and note device that is mounted.
+
+umount /dev/sdc1
+
+fdisk /dev/sdc
+	d, 1
+	n, p, 1, 1, max
+	a, 1
+	w
+
+mkfs -t ext3 -m 1  /dev/sdc1
+
+# Use tune2fs to adjust the LABEL names of partitions (16 char max).
+Example:
+tune2fs -L backup /dev/sdc1
+
+# /etc/fstab entry
+LABEL=usb-backup /mnt/usb-backup ext3 defaults,nosuid,nodev,sync,data=ordered,noauto 0 0
+
+# create disk id label
+cDisk=/mnt/usb-backup
+mount $cDisk
+cIdFmt="%F_%H-%M-%S"
+cDiskId=$cDisk/disk.id
+date +$cIdFmt >$cDiskId
+chmod a+r $cDiskId
+
+# Format for Windows
+https://superuser.com/questions/116323/how-to-create-a-filesystem-mountable-by-windows-in-linux
+
+dd if=/dev/zero of=/dev/sdc bs=512 count=1
+(echo o; echo n; echo p; echo 1; echo; echo; echo t; echo b; echo w) | fdisk /dev/sdc
+b="W95 FAT32"
+mkfs -t vfat /dev/sdc1
+EOF
+}
+
+# ------------------------
+# Config
+
+# Location of the rsnapshot config file
+cConf=/etc/rsnapshot.laptop.conf
+
+# Path for the removable disk when it is mounted
+cDisk=/mnt/usb-backup
+
+cRoot=$cDisk/laptop
+cNumFile=$cRoot/backup.count
+cDiskIdFile=$cRoot/disk.uuid
+cLastIdFile=/var/log/backup.laptop.uuid
+
+# -------------------------
+# Validate
+
+if [ "$(whoami)" != "root" ]; then
+	echo "Error: You have to run this as root"
+	exit 1
+fi
+
+if [ ! -d $cRoot ]; then
+	mount $cDisk
+	if [ ! -d $cRoot ]; then
+		cat <<EOF
+Error: Can not find the backup disk: $cRoot
+If disk is mounted at $cDisk, then to make this a backup disk, execute:
+	mkdir $cRoot
+EOF
+		exit 1
+	fi
+fi
+
+if [ ! -x /usr/bin/rsnapshot ]; then
+	echo "Error: Can not find: /usr/bin/rsnapshot"
+	exit 1
+fi
+
+if [ ! -r $cConf ]; then
+	echo "Error: Can not find conf file: $cConf"
+	exit 1
+fi
+
+# Get the 'day' interval
+cMaxNum="$(awk '/^interval\tday/ { print $3}' $cConf)"
+if [ -z "$cMaxNum" ]; then
+	echo "Error: Can not find 'interval day' in $cConf"
+	exit 1
+fi
+if [ $cMaxNum -lt 2 -o $cMaxNum -gt 30 ]; then
+	echo "Error: day interval must be between 2 and 30"
+	exit 1
+fi
+
+# First time
+if [ ! -e $cNumFile ]; then
+	touch $cNumFile
+fi
+
+if [ ! -w $cNumFile ]; then
+	echo "Error: Can not write to file: $cNumFile"
+	exit 1
+fi
+
+tDiskId=$(d=$(df /mnt/usb-backup | tail -n 1 | awk '{print $1}'); tune2fs -l $d | grep UUID | awk '{print $3}')
+if [ -r $cDiskIdFile ]; then
+	cDiskId=$(cat $cDiskIdFile)
+	cDiskId=$(echo $cDiskId)
+	if [ "$cDiskId" != "$tDiskId" ]; then
+		echo "Error: DiskId in $cDiskIdFile does not match, $tDiskId"
+		exit 1
+	fi
+else
+	echo "New backup disk creating $cDiskIdFile"
+	echo $tDiskId >$cDiskIdFile
+fi
+
+if [ -r $cLastIdFile ]; then
+	cLastId=$(cat $cLastIdFile)
+	cLastId=$(echo $cLastId)
+else
+	echo "$cDiskId" >$cLastIdFile
+	cLastId=$cDiskId
+fi
+
+# ------------------------
+# Prepare
+
+# Setup the initial counter file
+tNum=$(cat $cNumFile)
+if [ -z "$tNum" ]; then
+	tNum=0
+fi
+if [ $tNum -gt $cMaxNum ]; then
+	tNum=0
+fi
+
+# Check the last used disk id (create, if none)
+if [ "$cDiskId" != "$cLastId" ]; then
+	cat <<EOF
+New disk detected: $cDiskId
+	Current Id:  $(cat $cDiskIdFile)
+	Previous Id: $(cat $cLastIdFile)
+$cRoot contains:
+$(ls $cRoot)
+Do you want to contiune with a new backup? (y/n)
+EOF
+	read
+	if [ "$REPLY" = "y" ]; then
+		echo "Reseting day counter."
+		tNum=0
+		cat <$cDiskIdFile >$cLastIdFile
+		mv $cRoot ${cRoot}.$(date +'%F')
+		mkdir $cRoot
+		echo Moved $cRoot to ${cRoot}.$(date +'%F')
+		echo Optional: Remove ${cRoot}.$(date +'%F') to free up space.
+		echo Then run backup.laptop again
+		exit 1
+	else
+		exit 1
+	fi
+fi
+
+# ------------------------
+# Do the backups
+
+date
+if [ $tNum -lt $cMaxNum ]; then
+	echo "rsnapshot sync ($tNum)"
+	nice rsnapshot -c $cConf sync
+	if [ $? -eq 1 ]; then
+		exit 1
+	fi
+	echo "rsnapshot day ($tNum)"
+	rsnapshot -c $cConf day
+	if [ $? -eq 1 ]; then
+		exit 1
+	fi
+	let tNum=$tNum+1
+else
+	echo rsnapshot group
+	rsnapshot -c $cConf group
+	if [ $? -eq 1 ]; then
+		exit 1
+	fi
+	echo "rsnapshot sync (0)"
+	nice rsnapshot -c $cConf sync
+	if [ $? -eq 1 ]; then
+		exit 1
+	fi
+	echo "rsnapshot day (0)"
+	rsnapshot -c $cConf day
+	if [ $? -eq 1 ]; then
+		exit 1
+	fi
+	tNum=1
+fi
+echo $tNum >$cNumFile
+
+echo Done
+date

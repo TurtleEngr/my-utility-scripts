@@ -1,0 +1,499 @@
+#!/bin/bash
+
+# --------------------------------
+function fUsage
+{
+	if [ $# -ne 0 -a -x /usr/bin/pod2usage ]; then
+		pod2usage $0
+		exit 1
+	elif [ /usr/bin/pod2text ]; then
+		pod2text $0
+		exit 1
+	fi
+	cat <<EOF >/dev/null
+=pod
+
+=head1 getrel
+
+=head1 SYNOPSIS
+
+ Config: ~/.getrel.cfg
+ [export getrel_onlan=1]
+ getrel [-r Name] [-g | -u | -d | -s] [-b] [-f] [-l] [-L] [-h] [-x]
+     -r repo - default: rel          -f force
+     -g - get, download              -l - local (not recursive)
+     -u - upload                     -L - same as getrel_onlan=1
+     -d - get all directories        -h - this help
+     -s - status                     -x debug
+     -b - batch, no prompts
+
+=head1 DESCRIPTION
+
+Get local copies of files from the remote "rel" repository.  Mainly
+this is used for large video, audio, and binary files.
+
+If -L option or env. var. getrel_onlan is set to 1, then the
+remote.${pRel}.host-lan name will be used, instead of the
+remote.${pRel}.host-wan name.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-r Name>
+
+Repository name, in the config file. Default: rel
+
+=item B<-g>
+
+Get files, recursively, from the remote server, from the remote dir
+that is equivalent to the local dir.  Newer local files will not be
+overwritten. If the -f option is used, then the remote files can
+overwrite any local files.  If the -l option is used, then only the
+current local dir is updated (i.e. not recursive).  If you are not
+cd'ed in a "local" rel dir, then output a warning, and do nothing.
+
+=item B<-u>
+
+Upload files, recursively, to the remote server, to the remote dir
+that is equivalent to the local dir.  Only files that are not on the
+remote server will be uploaded.  If -f option, then update all remote
+files, but only if the local file is "newer" If you are not cd'ed in a
+"local" rel dir, then output a warning, and do nothing.
+
+=item B<-d>
+
+Update the local dir area with all the remote dirs.  Required to run
+this once.  Running it again, new dirs will be added.
+
+=item B<-s>
+
+Show the status of the -r rel dirs.
+
+=item B<-f>
+
+Force option. Newer source files will replace older files destination files.
+
+The default method is to ignore existing files, i.e. to only update
+missing files.
+
+=item B<-l>
+
+Local dir only option (not recursive).  For use with the -g and -u
+options
+
+=item B<-L>
+
+This is the same as setting: getrel_onlan=1
+
+=item B<-h>
+
+Print this help
+
+=item B<-x>
+
+Set debug on. Just show what would be done.
+
+=back
+
+=head1 RETURN VALUE
+
+=head1 ERRORS
+
+* Local rel dirs are not writable.
+
+* Not in a local rel dir, when using the -g or -u options.
+
+=head1 EXAMPLES
+
+=head1 ENVIRONMENT
+
+getrel_onlan, GIT_CONFIG, HOME, USER
+
+=head1 FILES
+
+=head2 Config File: $HOME/.getrel.cfg
+
+ # Default
+ [remote]
+        home = /mnt/asimov.data3/rel
+        sym = /rel
+        host-wan = moria.whyayh.com
+        host-lan = asimov.lan
+        user = bruce
+ [local]
+        # -l
+        home = /mnt/plasma.data1/rel
+        sym = /rel
+ # Named
+ [remote per-rel]
+        home = /home/bruce/per-rel
+        sym = /home/bruce/per-rel
+        host-wan = moria.whyayh.com
+        host-lan = asimov.lan
+        user = bruce
+ [local per-rel]
+        home = /home/bruce/per-rel
+        sym = /home/bruce/per-rel
+ [opt]
+        exclude = --exclude=.svn --exclude=.git --exclude=CVS
+        # -d
+        dir = -rvptgoPCl -f+_*/ -f-_*
+        # -g
+        get = -vptgoPCl
+        get-no-force = --ignore-existing
+        # -gf
+        get-force = --update
+        # -u
+        update = -vptgoPCl
+        update-no-force = --ignore-existing
+        # -uf
+        update-force = --update
+
+=head1 SEE ALSO
+
+rsync, git config
+
+=head1 NOTES
+
+=head1 CAVEATS
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS
+
+=head1 RESTRICTIONS
+
+=head1 AUTHOR
+
+Bruce Rafnel
+
+=head1 HISTORY
+
+=cut
+
+EOF
+	exit 1
+} # fUsage
+
+# --------------------------------
+function fDefaultConfig
+{
+    export cRemoteHome=/rel
+    export cRemoteSym=/rel
+    export cRemoteHostWan=moria.whyayh.com
+    export cRemoteHostLan=asimov.lan
+    export cRemoteUser=$USER
+    export cLocalHome=/rel
+    export cLocalSym=/rel
+    export cOptExclude='--exclude=.svn --exclude=.git --exclude=CVS --exclude=*~'
+    export cOpt_d='-rvptgoPCl -f+_*/ -f-_*'
+    export cOpt_g='-vptgoPCl'
+    export cOpt_gnf='--ignore-existing'
+    export cOpt_gf='--update'
+    export cOpt_u='-rvptgoPCl'
+    export cOpt_unf='--ignore-existing'
+    export cOpt_uf='--update'
+} # fDefaultConfig
+
+# --------------------------------
+function fSetVar
+{
+    local tVar=$1
+    local tConf=$2
+    local tVal
+
+    tVal="$(git config --get $tConf 2>/dev/null)"
+    if [ -n "$tVal" ]; then
+        eval $tVar=\"$tVal\"
+    fi
+} # fSetVar
+
+# --------------------------------
+function fGetConfig
+{
+    if [ -r $GIT_CONFIG ]; then
+	fSetVar cRemoteHome remote.${pRel}.home
+	fSetVar cRemoteSym remote.${pRel}.sym
+        fSetVar cRemoteHostWan remote.${pRel}.host-wan
+        fSetVar cRemoteHostLan remote.${pRel}.host-lan
+        fSetVar cRemoteUser remote.${pRel}.user
+        fSetVar cLocalHome local.${pRel}.home
+        fSetVar cLocalSym local.${pRel}.sym
+        fSetVar cOptExclude opt.exclude
+        fSetVar cOpt_d opt.dir
+        fSetVar cOpt_g opt.get
+        fSetVar cOpt_gf opt.get-force
+        fSetVar cOpt_gnf opt.get-no-force
+        fSetVar cOpt_u opt.update
+        fSetVar cOpt_uf opt.update-force
+        fSetVar cOpt_unf opt.update-no-force
+    fi
+} # fGetConfig
+
+# --------------------------------
+function fSaveConfig
+{
+    if [ ! -w $GIT_CONFIG ]; then
+        echo "Error: can not write to: $GIT_CONFIG"
+        exit 1
+    fi
+    if [ ! -e $GIT_CONFIG ]; then
+        echo "# Config file for the getrel script" >$GIT_CONFIG
+    fi
+    git config --replace remote.${pRel}.home "$cRemoteHome"
+    git config --replace remote.${pRel}.sym "$cRemoteSym"
+    git config --replace remote.${pRel}.host-wan "$cRemoteHostWan"
+    git config --replace remote.${pRel}.host-lan "$cRemoteHostLan"
+    git config --replace remote.${pRel}.user "$cRemoteUser"
+    git config --replace local.${pRel}.home "$cLocalHome"
+    git config --replace local.${pRel}.sym "$cLocalSym"
+    git config --replace opt.exclude "$cOptExclude"
+    git config --replace opt.dir "$cOpt_d"
+    git config --replace opt.get "$cOpt_g"
+    git config --replace opt.get-force "$cOpt_gf"
+    git config --replace opt.get-no-force "$cOpt_gnf"
+    git config --replace opt.update "$cOpt_u"
+    git config --replace opt.update-force "$cOpt_uf"
+    git config --replace opt.update-no-force "$cOpt_unf"
+    git config --replace opt.update-local "$cOpt_lu"
+} # fSaveConfig
+
+# --------------------------------
+function fStatus
+{
+    echo "Config file: $GIT_CONFIG values:"
+    git config --list | cat -n
+    echo -en "Number of dirs  in $cLocalHome: "
+    find $cLocalHome -type d | wc -l
+    echo -en "Number of files in $cLocalHome: "
+    find $cLocalHome/* -type f | wc -l
+    echo "Space used by $cLocalHome"
+    du -sh $cLocalHome/*/* | cat -n
+    echo "Partition space"
+    df -h $cLocalHome | cat -n
+} # fStatus
+
+# =====================================
+# Main
+
+# ----------
+export GIT_CONFIG=$HOME/.getrel.cfg
+
+# Set defaults for all values
+fDefaultConfig
+
+# ----------
+# Get options
+if [ $# -eq 0 ]; then
+    fUsage short
+fi
+
+export gDebug=0
+export pBatch=0
+export pDir=0
+export pFileList=""
+export pForce=0
+export pGet=0
+export pLocal=0
+export pRel="rel"
+export pStatus=0
+export pUpdate=0
+while getopts :r:gudsbflLhx tArg; do
+    case $tArg in
+	r)      pRel="$OPTARG"
+	;;
+	g)      pGet=1
+		pUpdate=0
+		pDir=0
+	;;
+	u)      pUpdate=1
+		pGet=0
+		pDir=0
+	;;
+	d)      pDir=1
+		pGet=0
+		pUpdate=0
+	;;
+	s)	pStatus=1;;
+	b)	pBatch=1;;
+	f)	pForce=1;;
+	+f)	pForce=0;;
+	l)	pLocal=1;;
+	+l)	pLocal=0;;
+	L)	getrel_onlan=1;;
+	+L)	getrel_onlan=0;;
+        h)      fUsage
+		exit 1
+	;;
+	x)	gDebug=1;;
+	+x)	gDebug=0;;
+	:)	echo "Error: Value required for option: $OPTARG"
+		exit 1
+	;;
+	\?)	echo "Error: Unknown option: $OPTARG"
+		exit 1
+	;;
+    esac
+done
+let tOptInd=OPTIND-1
+shift $tOptInd
+if [ $# -ne 0 ]; then
+    echo "Error: Unknown option: $*"
+    exit 1
+fi
+
+if [ ! -e $GIT_CONFIG ]; then
+    echo "Creating initial config file: $GIT_CONFIG"
+    fSaveConfig
+    echo "Review the file, then run again."
+    cat $GIT_CONFIG
+    exit 1
+fi
+
+# Override defaults with user settings
+fGetConfig
+
+# ----------
+# Validation
+
+if [ ! -w $cLocalHome ]; then
+    echo "Error: LocalHome: $cLocalHome is not writable."
+    exit 1
+fi
+
+if [ ! -w $cLocalSym ]; then
+    echo "Error: LocalSym $cLocalSym is not writable."
+    exit 1
+fi
+
+# ----------
+# Select the remote host name to use
+if [ ${getrel_onlan:-0} -ne 0 ]; then
+    echo "Note:  getrel_onlan is on"
+    tRemoteHost=$cRemoteHostLan
+else
+    echo "Note: if you are on the same lan as the remote host, for faster transfers use -L or set:"
+    echo "export getrel_onlan=1"
+    tRemoteHost=$cRemoteHostWan
+fi
+
+# ----------
+# Option -s
+if [ $pStatus -ne 0 ]; then
+    fStatus
+    exit 0
+fi
+
+# ----------
+# Option: -d
+if [ $pDir -ne 0 ]; then
+    echo "Refreshing directory structure at $cLocalSym with:"
+    echo "    rsync $cOptExclude $cOpt_d $cRemoteUser@$tRemoteHost:$cRemoteSym/* $cLocalHome"
+    if [ $pBatch -eq 0 ]; then
+        read -p "Continue (y/n)? "
+        if [ "$REPLY" != "y" ]; then
+            exit 1
+        fi
+    fi
+    if [ $gDebug -eq 0 ]; then
+        time 'rsync' $cOptExclude $cOpt_d $cRemoteUser@$tRemoteHost:$cRemoteSym/* $cLocalHome
+    fi
+    exit 0
+fi
+
+# ----------
+# Get the Path at PWD under rel
+tCurDir=$PWD
+tPath="NONE"
+
+tCheckDir="${tCurDir#$cLocalHome}"
+if [ "$tCurDir" != "$tCheckDir" ]; then
+    if [ $gDebug -ne 0 ]; then echo "debug2a in LocalHome"; fi
+    tPath=${tCheckDir#/}
+fi
+
+tCheckDir="${tCurDir#$cLocalSym}"
+if [ "$tCurDir" != "$tCheckDir" ]; then
+    if [ $gDebug -ne 0 ]; then echo "debug2b in LocalSym"; fi
+    tPath=${tCheckDir#/}
+fi
+
+if [ $gDebug -ne 0 ]; then echo "debug3 |${tPath}|"; fi
+
+if [ "$tPath" = "NONE" ]; then
+    echo "Error: You are not in a rel dir, under $cLocalSym"
+    exit 1
+fi
+
+# ----------
+# Option: -g
+if [ $pGet -ne 0 ]; then
+    tOpt=""
+    if [ $pForce -eq 0 ]; then
+        tOpt="$tOpt $cOpt_gnf"
+    else
+        tOpt="$tOpt $cOpt_gf"
+    fi
+    if [ $pLocal -eq 0 ]; then
+        tOpt="$tOpt -r"
+    fi
+
+    echo "Get list of files relative to $cLocalHome/$tPath"
+    ssh $cRemoteUser@$tRemoteHost ls -1hlsr $cRemoteHome/$tPath | awk '/^total/ {total=$2; next}{$1=""; $2=""; $3=""; $4=""; $5=""; print $0} END {print "Total:", total}'
+    echo "rsync $cOptExclude $cOpt_g $tOpt $cRemoteUser@$tRemoteHost:$cRemoteHome/$tPath/* $cLocalHome/$tPath"
+    if [ $pBatch -eq 0 ]; then
+        read -p "Continue (y/n)? "
+        if [ "$REPLY" != "y" ]; then
+            exit 1
+        fi
+    fi
+
+    if [ $gDebug -ne 0 ]; then
+        echo "mkdir -p $cLocalHome/$tPath"
+        echo "Copy files:"
+        echo "time rsync $cOptExclude $cOpt_g $tOpt $cRemoteUser@$tRemoteHost:$cRemoteHome/$tPath/* $cLocalHome/$tPath"
+    else
+        mkdir -p $cLocalHome/$tPath
+        echo "Copy files:"
+        time 'rsync' $cOptExclude $cOpt_g $tOpt $cRemoteUser@$tRemoteHost:$cRemoteHome/$tPath/* $cLocalHome/$tPath
+    fi
+    exit 0
+fi
+
+# ----------
+# Option: -u
+if [ $pUpdate -ne 0 ]; then
+    tOpt=""
+    if [ $pForce -eq 0 ]; then
+        tOpt="$tOpt $cOpt_unf"
+    else
+        tOpt="$tOpt $cOpt_uf"
+    fi
+    if [ $pLocal -eq 0 ]; then
+        tOpt="$tOpt -r"
+    fi
+
+    echo "Upload files relative to $cLocalHome/$tPath"
+    ls -1hlsr $cLocalHome/$tPath | awk '/^total/ {total=$2; next}{$1=""; $2=""; $3=""; $4=""; $5=""; print $0} END {print "Total:", total}'
+    echo "rsync $cOptExclude $cOpt_u $tOpt $cLocalHome/$tPath/* $cRemoteUser@$tRemoteHost:$cRemoteHome/$tPath"
+    if [ $pBatch -eq 0 ]; then
+        read -p "Continue (y/n)? "
+        if [ "$REPLY" != "y" ]; then
+            exit 1
+        fi
+    fi
+
+    if [ $gDebug -ne 0 ]; then
+        echo "Create dir $cRemoteHome/$tPath"
+        echo "ssh $cRemoteUser@$tRemoteHost mkdir -p $cRemoteHome/$tPath"
+        echo "Copy files:"
+        echo "time rsync $cOptExclude $cOpt_u $tOpt $cLocalHome/$tPath/* $cRemoteUser@$tRemoteHost:$cRemoteHome/$tPath"
+    else
+        echo "Create dir $cRemoteHome/$tPath"
+        ssh $cRemoteUser@$tRemoteHost mkdir -p $cRemoteHome/$tPath
+        echo "Copy files:"
+        time 'rsync' $cOptExclude $cOpt_u $tOpt $cLocalHome/$tPath/* $cRemoteUser@$tRemoteHost:$cRemoteHome/$tPath
+    fi
+    exit 0
+fi

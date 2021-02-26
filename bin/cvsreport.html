@@ -1,0 +1,247 @@
+<HTML>
+<HEAD>
+<TITLE>cvsreport.pl</TITLE>
+<LINK REV="made" HREF="mailto:bhcompile@daffy.perf.redhat.com">
+</HEAD>
+
+<BODY>
+
+<A NAME="__index__"></A>
+<!-- INDEX BEGIN -->
+<!--
+
+<UL>
+
+	<LI><A HREF="#name">NAME</A></LI>
+	<LI><A HREF="#synopsis">SYNOPSIS</A></LI>
+	<LI><A HREF="#description">DESCRIPTION</A></LI>
+	<LI><A HREF="#options">OPTIONS</A></LI>
+	<LI><A HREF="#return value">RETURN VALUE</A></LI>
+	<LI><A HREF="#errors">ERRORS</A></LI>
+	<LI><A HREF="#examples">EXAMPLES</A></LI>
+	<LI><A HREF="#environment">ENVIRONMENT</A></LI>
+	<LI><A HREF="#files">FILES</A></LI>
+	<LI><A HREF="#see also">SEE ALSO</A></LI>
+	<LI><A HREF="#notes">NOTES</A></LI>
+	<LI><A HREF="#caveats">CAVEATS</A></LI>
+	<LI><A HREF="#diagnostics">DIAGNOSTICS</A></LI>
+	<LI><A HREF="#bugs">BUGS</A></LI>
+	<LI><A HREF="#restrictions">RESTRICTIONS</A></LI>
+	<LI><A HREF="#author">AUTHOR</A></LI>
+	<LI><A HREF="#history">HISTORY</A></LI>
+</UL>
+-->
+<!-- INDEX END -->
+
+<P>
+<HR>
+<H1><A NAME="name">NAME</A></H1>
+<P>cvsreport.pl - Report changes in CVS</P>
+<P>
+<HR>
+<H1><A NAME="synopsis">SYNOPSIS</A></H1>
+<PRE>
+ cvsreport.pl
+        -co</PRE>
+<PRE>
+        -root RootPath
+        -dir RepositoryPath</PRE>
+<PRE>
+        -from Tag|Date
+        -to Tag|Date</PRE>
+<PRE>
+        -show files,numrev,diff,add,del
+        -sort name|numrev|diff|add|del</PRE>
+<PRE>
+        -html
+        -rawfile RawFileName</PRE>
+<PRE>
+        -help
+        -fmthelp text|html|man
+        -debug Level
+        -verbose</PRE>
+<P>
+<HR>
+<H1><A NAME="description">DESCRIPTION</A></H1>
+<P>For a given list of CVS directory names (relative to the CVSROOT),
+generate a summary report, for the number of lines that have changed
+between the specified CVS version.</P>
+<P>Report the total number of lines across all files, in the directory
+(recursively), that were: deleted or added.</P>
+<P>For each file in each dir., list the number of lines: deleted or
+added. (-show files)</P>
+<P>Select the revision from/to range by: tags or dates. (-to, -from)</P>
+<P>Output an HTML report. (-html)</P>
+<P>Also output a file with the raw report values represented as Perl hash
+variables.  This will be useful for debugging and for writing other
+reporting scripts. (-rawfile)</P>
+<P>
+<HR>
+<H1><A NAME="options">OPTIONS</A></H1>
+<DL>
+<DT><STRONG><A NAME="item_%2Dco"><STRONG>-co</STRONG></A></STRONG><BR>
+<DD>
+If the files are already checked out, and you are cd'ed into the
+directory that you want for the report.  If this option isn't given,
+then ``rlog'' will be used (i.e. there is no need to checkout the
+files).
+<P>Note: this should not be a ``development'' directory, i.e. no files
+should be modified, so that ``cvs update'' will always update all files.</P>
+<P></P>
+<DT><STRONG><A NAME="item_%2Droot_RootPath"><STRONG>-root RootPath</STRONG></A></STRONG><BR>
+<DD>
+Specify the CVSROOT directory.  ``:ext:'' can be used, but the CVS_RSH
+env. var.  will need to be defined before the script is run.
+<P>Default: use the value in CVS/Root, else use the CVSROOT env. var,
+else error.</P>
+<P>This option is Ignored if ``-co'' is used.</P>
+<P></P>
+<DT><STRONG><A NAME="item_%2Ddir_RepositoryPath"><STRONG>-dir RepositoryPath</STRONG></A></STRONG><BR>
+<DD>
+``RepositoryPath'' is a directory name, relative to CVSROOT.  More than
+one -dir can specified.
+<P>This option is Ignored if ``-co'' is used.</P>
+<P></P>
+<DT><STRONG><A NAME="item_%2Dfrom_Tag%7CDate"><STRONG>-from Tag|Date</STRONG></A></STRONG><BR>
+<DD>
+Earliest date or tag.  If ``yesterday'' is used, then a date 24 hours
+before now will be used.  Default: version 1.1 (BASE) for all files.
+<P></P>
+<DT><STRONG><A NAME="item_%2Dto_Tag%7CDate"><STRONG>-to Tag|Date</STRONG></A></STRONG><BR>
+<DD>
+Latest date or tag.  If ``today'' is used, then this implies HEAD.
+Default: HEAD
+<P>If the ``-co'' option is used, then the current directory will be
+updated to this date or tag.</P>
+<P></P>
+<DT><STRONG><A NAME="item_%2Dhtml"><STRONG>-html</STRONG></A></STRONG><BR>
+<DD>
+Specify this option to output the HTML formatted report.
+<P></P>
+<DT><STRONG><A NAME="item_%2Dshow_files%2Cnumrev%2Cdiff%2Cadd%2Cdel"><STRONG>-show files,numrev,diff,add,del</STRONG></A></STRONG><BR>
+<DD>
+This option controls what is shown in the HTML report.  One or more
+of these options can be specified.
+<P>files - show the individual files, rather than just the directories.</P>
+<P>numrev - show the number of revisions.</P>
+<P>diff - show the number of lines added plus the number of lines deleted.</P>
+<P>add - show the number of lines added.</P>
+<P>del - show the number of lines deleted.</P>
+<P>Default: files,numrev,diff,add,del</P>
+<P></P>
+<DT><STRONG><A NAME="item_%2Dsort_name%7Cnumrev%7Cdiff%7Cadd%7Cdel"><STRONG>-sort name|numrev|diff|add|del</STRONG></A></STRONG><BR>
+<DD>
+This option will define the sort column.  Only one can be specified.
+Note: if the column isn't shown (see -show), the results could be
+confusing.
+<P>If two numbers are equal, then the names will be used as a secondary
+sort key.</P>
+<P>Default: name</P>
+<P></P>
+<DT><STRONG><A NAME="item_%2Drawfile_RawFileName"><STRONG>-rawfile RawFileName</STRONG></A></STRONG><BR>
+<DD>
+If specified output the Perl variables, used to generate the report
+totals, to RawFile.  This file's format will be suitable for inclusion
+in other Perl scripts (with eval).
+<P></P>
+<DT><STRONG><A NAME="item_%2Dhelp"><STRONG>-help</STRONG></A></STRONG><BR>
+<DD>
+This help.
+<P></P>
+<DT><STRONG><A NAME="item_%2Ddebug_Level"><STRONG>-debug Level</STRONG></A></STRONG><BR>
+<DD>
+Level is a number between 0 and 100.  If set to 0, debug is off
+(default: 0).
+<P>Larger debug levels output more debug messages.  The debug messages
+include the debug level number, so that you can see how to turn them
+off.</P>
+<P>Setting debug to 1 or larger, will also turn on the verbose option.</P>
+<P></P>
+<DT><STRONG><A NAME="item_%2Dverbose"><STRONG>-verbose</STRONG></A></STRONG><BR>
+<DD>
+If this is set, output verbose status messages.
+<P></P></DL>
+<P>
+<HR>
+<H1><A NAME="return value">RETURN VALUE</A></H1>
+<P>
+<HR>
+<H1><A NAME="errors">ERRORS</A></H1>
+<P>
+<HR>
+<H1><A NAME="examples">EXAMPLES</A></H1>
+<P>
+<HR>
+<H1><A NAME="environment">ENVIRONMENT</A></H1>
+<P>
+<HR>
+<H1><A NAME="files">FILES</A></H1>
+<P>
+<HR>
+<H1><A NAME="see also">SEE ALSO</A></H1>
+<P>cvs rlog</P>
+<P>
+<HR>
+<H1><A NAME="notes">NOTES</A></H1>
+<P>Date format:</P>
+<PRE>
+ YYYY-MM-DD [HH:MM[Z]]</PRE>
+<P>Adding a Z to the time, will define the time as Zulu (UTC), otherwise
+local time will be used.</P>
+<P>
+<HR>
+<H1><A NAME="caveats">CAVEATS</A></H1>
+<P>1. The directory list is limited to the same repository.  I.e. the
+CVSROOT doesn't change.</P>
+<P>Enhancement: Support different CVSROOTs.  However, tag names used in
+the ranges may not make sense across multiple repositories.</P>
+<P>2.Binary files (i.e. with the -kb option) will not be included in the
+report.</P>
+<P>Enhancement: If a binary file has been changed, the number of versions
+in the range could be reported in the detailed report.</P>
+<P>3. Changes are reported for single ranges.  If a change history is
+desired, then a simple wrapper script can be used to step through the
+different ranges (use the output file of raw Perl variables).</P>
+<P>4. Summaries are limited to single directories.  If multiple
+directories need to be merged into a single ``category'', then a wrapper
+script would be the best way of doing this.</P>
+<P>5. Files: added or deleted may be ignored.</P>
+<P>Enhancement: make a summary report of these files and list the file
+names in the detailed report.  However for this to work, the script
+may need to run on the cvs server.</P>
+<P>6. ``Moved'' files can not be handled by cvsreport.  This is a CVS
+limitation.</P>
+<P>7. Files with zero changes (i.e. add/del lines both equal zero), for
+the range, will not be listed.</P>
+<P>Enhancement: Add an option to set a limits on what files will be
+reported.  For example: show all files with more than 1000 lines
+changed.  Or show the files with changes in the top 10'th percential,
+for the specified range.  Or show files with changes greater than the
+average number of changes seen, for the specified range.</P>
+<P>8. If ``rlog'' is not supported with you version of CVS, then the
+``-co'' option must be used.</P>
+<P>
+<HR>
+<H1><A NAME="diagnostics">DIAGNOSTICS</A></H1>
+<P>See the -debug option.  For minimal debug info, use:</P>
+<PRE>
+        -debug 1</PRE>
+<P>
+<HR>
+<H1><A NAME="bugs">BUGS</A></H1>
+<P>* If CVSROOT can't be found or accessed, the script silently does nothing.</P>
+<P>* -rawfile is not implemented.</P>
+<P>
+<HR>
+<H1><A NAME="restrictions">RESTRICTIONS</A></H1>
+<P>
+<HR>
+<H1><A NAME="author">AUTHOR</A></H1>
+<P>Bruce Rafnel</P>
+<P>
+<HR>
+<H1><A NAME="history">HISTORY</A></H1>
+
+</BODY>
+
+</HTML>

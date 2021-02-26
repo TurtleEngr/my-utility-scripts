@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# --------------------------
+function fUsage
+{
+    cat <<EOF
+Usage:
+	s3-lsg [-t] [-l N] [-c Config] [-p] bucket[/dir]
+
+Options:
+	-t - use tabs for the levels, default: use '   |'
+	-l N - only show N levels deep, default: 100
+	-c Config - use Config file, default: $HOME/.s3cfg
+	-p - use the previous s3 bucket file name
+EOF
+	exit
+} # fUsage
+
+# --------------------------
+# Init constants
+
+cAWK=awk
+which nawk 2>/dev/null 1>&2
+if [ $? -eq 0 ]; then
+	cAWK=nawk
+fi
+
+##cTmp=/tmp/s3-lsg-$$
+cTmp=/tmp/s3-lsg
+
+# --------------------------
+# Get options
+
+pDir=""
+pTab="s/	/   |/g"
+pLevel=100
+pConfig=$HOME/.s3cfg
+pPrev=0
+gDebug=0
+while getopts :htl:c:px tArg; do
+	case $tArg in
+		h)	fUsage
+			exit 1
+		;;
+		t)	pTab='';;
+		l)	pLevel=$OPTARG;;
+		c)	pConfig=$OPTARG;;
+		p)	pPrev=1;;
+
+		x)	gDebug=1;;
+		+x)	gDebug=0;;
+		:)	echo "Error: Value required for option: $OPTARG";;
+		\?)	echo "Error: Unknown option: $OPTARG";;
+	esac
+done
+let tOptInd=OPTIND-1
+shift $tOptInd
+
+# --------------------------
+# Validate
+
+##let pLevel=pLevel-1
+
+if [ $# -eq 0 ]; then
+	echo "Error: give a s3 bucket name"
+	exit
+else
+	pDir="$*"
+fi
+
+if [ ! -r $pConfig ]; then
+	echo "Error: Can not find or read config file $pConfig"
+	exit
+fi
+
+if [ $pPrev -ne 0 ]; then
+	if [ ! -r $cTmp.1.tmp ]; then
+		echo "There is no previous results, so getting new"
+		pPrev=0
+	fi
+fi
+
+# --------------------------
+# Main
+
+for d in $pDir; do
+	echo s3://$d
+
+	if [ $pPrev -eq 0 ]; then
+		s3cmd ls -r s3://$d >$cTmp.1.tmp
+		if [ $? -ne 0 ]; then
+			echo "Error: Problem getting bucket listing"
+			rm $cTmp.1.tmp
+			exit
+		fi
+	fi
+
+	for i in $(awk '{print $4}' $cTmp.1.tmp); do
+		j=${i%/*}
+		j=${j#s3://}
+		echo $j
+	done | sort -u >$cTmp.2.tmp
+
+	cat $cTmp.2.tmp | $cAWK -v pLevel=$pLevel '
+		BEGIN { getline }
+		{
+			level = gsub("[^/]*/", "", $1)
+			if (level > pLevel) {
+				next
+			}
+			for (i=2; i<=level; i++) {
+				printf("\t")
+			}
+			print "\t" $1 "/"
+		}
+	' | sed "$pTab"
+done
+
+rm $cTmp.2.tmp
