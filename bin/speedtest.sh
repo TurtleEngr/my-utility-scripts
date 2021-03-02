@@ -1,13 +1,14 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/speedtest.sh,v 1.3 2020/04/15 06:14:15 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/speedtest.sh,v 1.5 2021/03/02 04:49:05 bruce Exp $
 
 # This despends on: SpeedTest
-# See /etc/CHANGE for details
+  # Source: https://github.com/taganaka/SpeedTest
+  # See /etc/CHANGE for details
+  # Local code at: /home/bruce/ver/public/app/SpeedTest
 
 # ----------
 if [ ! -x /usr/local/bin/SpeedTest ]; then
     echo Error: SpeedTest is not installed.
-    echo See /etc/CHANGE for details
     exit 1
 fi
 
@@ -39,7 +40,19 @@ if [ $pRun -eq 1 ]; then
     echo '# --------------------' >>$cOutput
     echo -n '# ' >>$cOutput
     date >>$cOutput
-    SpeedTest --output text >>$cOutput
+    timeout 5m SpeedTest --output text >>$cOutput
+fi
+
+export tDone=1
+if ! grep -q DOWNLOAD_SPEED $cOutput; then
+   tDone=0
+fi
+if ! grep -q UPLOAD_SPEED $cOutput; then
+   tDone=0
+fi
+if [ $tDone -ne 1 ]; then
+   echo SpeedTest timedout after 5 min. So no results available.
+   exit 1
 fi
 
 tDown=$(grep DOWNLOAD_SPEED $cOutput | tail -n 1)
