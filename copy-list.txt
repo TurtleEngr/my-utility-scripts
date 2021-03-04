@@ -148,6 +148,7 @@ vid-new-project
 vid-rename.sh
 vid-repair-upgrade.sh
 vid-rm-ver
+vid-set-aspect
 vid-trim-rev
 xearth.start
 xp.sh

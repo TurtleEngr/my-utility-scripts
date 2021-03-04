@@ -1,0 +1,52 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/vid-set-aspect,v 1.2 2021/03/04 21:06:10 bruce Exp $
+# Source: https://superuser.com/questions/547296/resizing-videos-with-ffmpeg-avconv-to-fit-into-static-sized-player
+
+if [ $# -ne 3 ]; then
+	cat <<EOF
+Usage:
+	vid-set-aspect res input.mp4 output.mp4 
+
+Force a 16:9 aspect ratio, using black bars for sides or top.
+Input: res
+	Where res = l, m, h, or v.
+	Vertical resolutions for res values: l=360, m=720, h=1080, v=1440
+EOF
+	exit 1
+fi
+
+pRes=$1
+pIn=$2
+pOut=$3
+
+case $pRes in
+	l)	tRatio=640:360;;
+	m)	tRatio=1280:720	;;
+	h)	tRatio=1920:1080;;
+	v)	tRatio=2560:1440;;
+	*)	echo "Error: Expected l, m, h, or v"
+		exit 1
+	;;
+esac
+
+if [ ! -r $pIn ]; then
+	echo "Error: could not read file: $pIn"
+	exit 1
+fi
+
+if [ -e $pOut ]; then
+	read -p "Warning: $pOut exists. Overwrite (y/n)? "
+	if [ $REPLY != 'y' ]; then
+		exit 1
+	fi
+	rm $pOut
+fi
+
+# Back bars
+ffmpeg -i $pIn -vf "scale=${tRatio}:force_original_aspect_ratio=decrease,pad=${tRatio}:-1:-1:color=black" $pOut
+echo ffmpeg -i $pIn -vf "scale=${tRatio}:force_original_aspect_ratio=decrease,pad=${tRatio}:-1:-1:color=black" $pOut
+
+# Crop to size
+##ffmpeg -i $pIn -vf "scale=${tRatio}:force_original_aspect_ratio=increase,crop=${tRatio}" $pOut
+
+
