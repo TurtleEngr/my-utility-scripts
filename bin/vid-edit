@@ -140,7 +140,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.16 $ $Date: 2020/10/11 21:19:48 $ GMT 
+$Revision: 1.19 $ $Date: 2021/04/24 15:58:02 $ GMT 
 
 =cut
 EOF
@@ -254,6 +254,7 @@ function fKLVer
 		19.08)	tUse=kdenlive-19.08.3-x86_64.appimage;;
 		19.12)	tUse=kdenlive-19.12.0a-x86_64.appimage;;
 		20.04)	tUse=kdenlive-20.04.0b-x86_64.appimage;;
+		20.12)	tUse=kdenlive-20.12.3a-x86_64.appimage;;
 		*)	fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
 		;;
 	esac
@@ -333,17 +334,17 @@ function fTag
 	if [ "$REPLY" != "y" ]; then
 		return
 	fi
+	tTag="rendered_${gpFile%.*}_$(date +%F)"
+	logtime "$tTag"
 
-	tTag=${gpFile%.*}_$(date +%F)
 	echo
-	read -p "Tag the file with: $tTag (y/n)? "
+	read -p "Tag the files with: $tTag (y/n)? "
 	if [ "$REPLY" != "y" ]; then
 		return
 	fi
 
-	cvs ci -m "Rendered: $tTag.mp4" $gpFile
-	logtime rendered $gpFile to $tTag.mp4
-	cvs tag $tTag $gpFile
+	cd ..; cvs ci -m "$tTag"
+	cd ..; cvs tag -F "$tTag"
 } # fTag
 
 # ===================================================
