@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-cp,v 1.5 2020/03/18 04:09:56 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-cp,v 1.6 2021/05/04 04:06:09 bruce Exp $
 
 # --------------------
 if [ $# -lt 2 -o "x$1" = "x-h" ]; then
@@ -67,6 +67,14 @@ if [ $tVidDir -eq 1 -a -d /mnt/usb-video/repo ]; then
 	fi
 fi
 
+export tReadMe=$gpDistDir/README.txt
+if [ -f $gpDistDir/README.html ]; then
+	tReadMe=$gpDistDir/README.html
+fi
+if [ -f $gpDistDir/README.txt ]; then
+	tReadMe=$gpDistDir/README.txt
+fi
+
 # --------------------
 # Copy
 
@@ -88,9 +96,10 @@ for i in $gpFileList; do
 			tDist=$gpDistDir/copy_$tFile
 		fi
 	fi
-	echo | tee -a $gpDistDir/README.html
-	echo "cd $cCurDir" | tee -a $gpDistDir/README.html
-	echo "rsync -aP $i $tDistFile" | tee -a $gpDistDir/README.html
+
+	echo | tee -a $tReadMe
+	echo "# $(date)" | tee -a $tReadMe
+	echo "cd $cCurDir" | tee -a $tReadMe
+	echo "rsync -aP $i $tDistFile" | tee -a $tReadMe
 	rsync -aP $i $tDistFile
-	echo "# $(date)" | tee -a $gpDistDir/README.html
 done

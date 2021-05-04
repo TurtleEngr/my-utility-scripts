@@ -140,7 +140,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.19 $ $Date: 2021/04/24 15:58:02 $ GMT 
+$Revision: 1.20 $ $Date: 2021/05/04 04:06:09 $ GMT 
 
 =cut
 EOF
@@ -308,7 +308,7 @@ EOF
 	fi
 	if grep -q $gpFile CVS/Entries; then
 		# Commit the file
-		cvs commit -m "Updated with script vid-edit" $pFile
+		cvs commit -m "Updated with script vid-edit" $gpFile
 	else
 		fLog info "The file isn't versioned."
 		if [ $gpBatch -ne 0 ]; then
@@ -316,7 +316,7 @@ EOF
 		fi
 		read -p "Version the file? (y/n) "
 		if [ "$REPLY" = "y" ]; then
-			cvs add $pFile
+			cvs add $gpFile
 			cvs commit -m "Added with script vid-edit"
 		fi
 	fi
@@ -343,8 +343,10 @@ function fTag
 		return
 	fi
 
-	cd ..; cvs ci -m "$tTag"
-	cd ..; cvs tag -F "$tTag"
+	cd ..
+	cvs ci -m "$tTag"
+	cvs tag -F "$tTag"
+	cd -
 } # fTag
 
 # ===================================================

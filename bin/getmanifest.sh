@@ -198,8 +198,12 @@ function fLinuxCommon {
 	fCmd Partition 'cat /proc/partitions' /proc/partitions
 	fCmd Mount 'cat /proc/mounts' /proc/mounts
 	fCmd DiskSize 'df -m'
+#????
+	fCmd OSName1 'cat /etc/issue.net' /etc/issue.net
+	fCmd OSName2 'cat /etc/issue' /etc/issue
+	fCmd OSName3 'cat /etc/os-release' /etc/os-release
+	fCmd OSName4 'cat /etc/mx-version' /etc/mx-version
 
-	fCmd OSName 'cat /etc/issue.net' /etc/issue.net
 	fCmd Network '/sbin/ifconfig | egrep "eth|inet addr" | grep -v 127.0.0.1'
 	fCmd KernelVer 'uname -r'
 	fCmd KernelMod 'cat /proc/modules' /proc/modules
