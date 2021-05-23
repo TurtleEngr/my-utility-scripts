@@ -19,7 +19,7 @@ vid-edit - kdenlive edit
 
 =head1 SYNOPSIS
 
- vid-edit [-b] [-c] [-v KdenLiveVer] [-h] [FileName[.kdenlive]]
+ vid-edit [-b] [-c] [-l] [-v KdenLiveVer] [-h] [FileName[.kdenlive]]
 
 =head1 DESCRIPTION
 
@@ -48,14 +48,20 @@ Batch mode. Do not prompt for inputs.
 
 If defined, skip the CVS  checks and commits.
 
+=item B<-l>
+
+Use the latest version. (See variable: $cLatestVer
+
 =item B<-v KdenLiveVer>
 
-Pick a different kdenlive version. The current versions are:
+Pick a different kdenlive version. 
 
- 16.11, 16.12, 17.04, 17.12, 18.12, 19.04, 19.08, 19.12
+The archived versions are: 16.11, 16.12, 17.04, 17.12, 19.04, 19.08
 
-The AppImage program file will be found in:
-/rel/archive/software/ThirdParty/kdenlive (or /usr/local/bin)
+The current versions are: 18.12,  19.12, 20.04, 20.12
+
+The AppImage program files will be found at:
+/rel/archive/software/ThirdParty/kdenlive/ (or /usr/local/bin/)
 
 =item B<-h>
 
@@ -140,7 +146,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.20 $ $Date: 2021/05/04 04:06:09 $ GMT 
+$Revision: 1.21 $ $Date: 2021/05/23 00:09:17 $ GMT 
 
 =cut
 EOF
@@ -366,7 +372,7 @@ export gErr=0
 
 # -------------------
 # Configuration
-export cLatestVer=20.04
+export cLatestVer=20.12
 #export cKLBin=/rel/archive/software/ThirdParty/kdenlive
 export cKLBin=/usr/local/bin
 
@@ -379,10 +385,11 @@ export gpFile=""
 export gpCVS=1
 export gpVer=""
 export gpBatch=0
-while getopts :bcv:hLVx tArg; do
+while getopts :bclv:hLVx tArg; do
 	case $tArg in
 		b)	gpBatch=1;;
 		c)	gpCVS=0;;
+		l)	gpVer=cLatestVer;;
 		v)	gpVer=$OPTARG;;
 
 		h)	fUsage long;;
