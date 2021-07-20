@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/backup.laptop,v 1.15 2020/09/11 02:10:17 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/backup.laptop,v 1.16 2021/07/13 21:11:40 bruce Exp $
 
 function fUsage()
 {
@@ -35,6 +35,12 @@ fdisk /dev/sdc
 	w
 
 mkfs -t ext3 -m 1  /dev/sdc1
+
+# Get UUID
+udevadm info /dev/sdb1 | grep FS_UUID=
+
+# Get lable on ext* drive
+e2label /dev/sdb1
 
 # Use tune2fs to adjust the LABEL names of partitions (16 char max).
 Example:

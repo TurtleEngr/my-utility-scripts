@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pdf2jpg,v 1.2 2020/12/24 01:28:48 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/pdf2jpg,v 1.3 2021/07/15 02:27:40 bruce Exp $
 # Source: https://askubuntu.com/questions/100994/convert-pdf-to-image
 
 if [ $# -eq 0 ]; then
@@ -15,9 +15,9 @@ EOF
 fi
 
 gpInFile=$1
+export cDPI=${cDPI:-600}
 
-cDPI=600
-
+echo gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cDPI -sOutputFile='page-%02d.jpg' $gpInFile
 gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cDPI -sOutputFile='page-%02d.jpg' $gpInFile
 
 # Force higher resolution?  Also add -dDEVICEHEIGHT-1080  ?

@@ -1,16 +1,25 @@
 #!/bin/bash
 
+# -C:  -I 'CVS|*~|tmp|*.tmp' $* | tr -d '"'
+# -T: | tr -d '|' | awk '{gsub("   ","\t"); print $0}'
+
 if [ $# -ne 0 ]; then
    if [ ".$1" = ".-h" ]; then
       cat <<EOF
 Usage:
-	lsg [-d] [-L N] [dir...]
+	lsg [-d] [-L N] [-C] [-T] [dir...]
 -d - dir only
 -L N - limit to N levels
+-C - clean, no CVS, no *~, no tmp, and no *.tmp files. And no quotes (not imp)
+-T - use tabs to indent (not imp))
 dir - default $PWD
 
+Note: the output of tree is cleaned up to only use '|'.
+Note: if using -C option, do not use the tree's -I opton.
+
 For more options see: man tree
-Current: -a -Q -F -n --dirsfirst --charset=ascii --noreport
+Current options used: -a -Q -F -n --dirsfirst --charset=ascii --noreport
+If -C, this option is added: -I 'CVS|*~|tmp|*.tmp'
 EOF
         exit 1
     fi

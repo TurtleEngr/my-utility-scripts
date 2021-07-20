@@ -52,3 +52,24 @@ cat $tFile |  grep -n "'" | while read; do
 done
 echo -n "Number of ': "
 tr -cd "'" <$tFile  | wc -c
+
+# ----------
+# spellcheck codes
+# https://gist.github.com/nicerobot/53cee11ee0abbdc997661e65b348f375
+
+# To disable codes before single code lines, use comments like this:
+# shellcheck disable=SC1090,SC2003
+
+# SC1090: Can't follow non-constant source. Use a directive to specify location. (becaus you used ". $var/foo")
+# SC2003: expr is antiquated. Consider rewriting this using $((..)), ${} or [[ ]].
+# SC2006: Use $(...) notation instead of legacy backticked `...`.
+# SC2086: Double quote to prevent globbing and word splitting.
+# SC2155: Declare and assign separately to avoid masking return values.
+# SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
+# SC2219: Instead of 'let expr', prefer (( expr )) .
+# SC2230: which is non-standard. Use builtin 'command -v' instead.
+echo
+echo '================================'
+echo 'shellcheck -e SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230'
+echo
+shellcheck -e SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230 $tFile
