@@ -2,7 +2,8 @@ apg-gen.sh
 archive-video.sh
 audio.control
 back-disk-change
-backup.laptop
+backup2cloud
+bar.env
 bcmnt
 cert-expire-date
 com-bash-lib.inc
@@ -37,7 +38,6 @@ ed
 encrypt.sh
 file-join
 file-split
-flv-mp3
 gen-links.sh
 getmanifest.sh
 getmyip
@@ -71,6 +71,7 @@ mkpass.sh
 mkpri
 mkthumbnail.sh
 mkthumb.sh
+mkurl.pl
 msg2pdf
 mv2cd
 obs-project
@@ -103,6 +104,8 @@ s3put
 s3-put-get
 setpath.sh
 show-vlc-record.sh
+shunit2
+shunit2.1
 sonar.cmd
 speedtest.sh
 sshagent
@@ -134,6 +137,7 @@ vid-archive
 vid-clear-cache
 vid-cp
 vid-cp2rel
+vid-duration
 vid-edit
 video2audio
 vid-frame-rate
@@ -151,5 +155,6 @@ vid-rm-ver
 vid-set-aspect
 vid-split
 vid-trim-rev
+vncx
 xearth.start
 xp.sh

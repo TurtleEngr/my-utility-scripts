@@ -5,6 +5,12 @@
 tFile=$1
 
 echo
+echo '================================'
+echo bash -n $tFile
+bash -n $tFile
+
+echo
+echo '================================'
 echo 'Matching []'
 cat $tFile |  grep -n '\[' | grep -v '\]'
 cat $tFile |  grep -n '\]' | grep -v '\['
@@ -68,6 +74,7 @@ tr -cd "'" <$tFile  | wc -c
 # SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
 # SC2219: Instead of 'let expr', prefer (( expr )) .
 # SC2230: which is non-standard. Use builtin 'command -v' instead.
+
 echo
 echo '================================'
 echo 'shellcheck -e SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230'

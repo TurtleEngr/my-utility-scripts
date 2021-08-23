@@ -58,7 +58,7 @@ Pick a different kdenlive version.
 
 The archived versions are: 16.11, 16.12, 17.04, 17.12, 19.04, 19.08
 
-The current versions are: 18.12,  19.12, 20.04, 20.12
+The current versions are: 18.12,  19.12, 20.04, 20.12, 21
 
 The AppImage program files will be found at:
 /rel/archive/software/ThirdParty/kdenlive/ (or /usr/local/bin/)
@@ -146,7 +146,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.21 $ $Date: 2021/05/23 00:09:17 $ GMT 
+$Revision: 1.22 $ $Date: 2021/08/18 23:12:21 $ GMT 
 
 =cut
 EOF
@@ -261,6 +261,7 @@ function fKLVer
 		19.12)	tUse=kdenlive-19.12.0a-x86_64.appimage;;
 		20.04)	tUse=kdenlive-20.04.0b-x86_64.appimage;;
 		20.12)	tUse=kdenlive-20.12.3a-x86_64.appimage;;
+		21.04)	tUse=kdenlive-21.04.3b-x86_64.appimage;;
 		*)	fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
 		;;
 	esac

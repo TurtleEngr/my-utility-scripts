@@ -58,7 +58,7 @@ function fLog
 	# Args
 	#    -m pMsg
 	#    -p pLevel - emerg alert crit err warning notice info debug
-	#    -l pLine - usually: -l LINENO
+	#    -l pLine - usually: -l $LINENO
 	#    -e pErr - will also set gErr
 	#    -s - stderr output (also set with gpVerbose)
 	# Config:
@@ -121,7 +121,7 @@ function fConfSet
 {
 	# Set the value to pName in the git pConfig file
 	# Usage:
-	#    fConfSet -c pCategory [-s pSection] -n pName -f pConf "pValue"
+	#    fConfSet [-c pCategory] [-s pSection] -n pName -f pConf "pValue"
 	# Args:
 	#    -c pCategory - Override gConfCategory (no dots in name)
 	#    -s pSection - Override gConfSection (can be blank) (no dots in name)
@@ -290,7 +290,7 @@ function fConfGet
 function fConfPromptStr
 {
 
-	# Select one string value from pName list from the listed of
+	# Select one string value from pName list from the list of
 	# git config files.
 	#
 	# Usage:
@@ -405,7 +405,7 @@ function fConfPromptStr
 # --------------------------------
 function fConfPromptStrList
 {
-	# Select one string value from pName list from the listed of
+	# Select one string value from pName list from the list of
 	# git config files. Or if LIST is selected, the build up a new
 	# string list from single values.
 	#	
@@ -459,7 +459,7 @@ function fConfPromptStrList
 # --------------------------------
 function fConfPromptList
 {
-	# Select one value from pName list from the listed of git
+	# Select one value from pName list from the list of git
         # config files, and add it to the list of previously selected
         # names.
 	#
@@ -579,7 +579,7 @@ function fConfPromptList
 # --------------------------------
 function fConfPromptYN
 {
-	# Select one value from pName list from the listed of git config files.
+	# Select one value from pName list from the list of git config files.
 	#
 	# Usage:
 	#    fConfPrompt -p "pPrompt" [-e] [-o "pOther"] [-h] \

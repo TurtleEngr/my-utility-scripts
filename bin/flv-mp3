@@ -1,2 +1,0 @@
-ffmpeg -i FILE.flv -vn -acodec copy FILE.mp3
-ffmpeg -i FILE.flv -acodec libmp3lame -ab 128k FILE.mp3

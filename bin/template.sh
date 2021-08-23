@@ -1,5 +1,5 @@
 #!/bin/bash
-# Last used error code number: 6
+# $Header: /repo/local.cvs/per/bruce/bin/template.sh,v 1.36 2021/08/23 04:57:03 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -9,291 +9,673 @@
 # tVar - temporary variable (local to a function)
 # fFun - function
 
-# Commonally used global variables:
-# gpDebug - toggle (-x)
-# gpVerbose - toggle (-v)
-# gpLog - log level
-# gpTmp - personal tmp directory.  Usually set to: /tmp/$LOGNAME
-# cTmpF - tmp file prefix.  Includes $gpTmp and $$ to make it unique
+# Commonly used global variables:
+# gpDebug - -x
+# gpVerbose - -v
+# Tmp - personal tmp directory.  Usually set to: /tmp/$USER
+# cTmpF - tmp file prefix.  Includes $$ to make it unique
 # gErr - error code (0 = no error)
 # cVer - current version
 # cName - script's name
 # cBin - directory where the script is executing from
 # cCurDir - current directory
 
+# ========================================
+# Tests
+
+fUDebug()
+{
+	if [ ${gpUnitDebug:-0} -ne 0 ]; then
+		echo "$*"
+	fi
+}
+
+testInitialConfig()
+{
+	assertEquals "tic-1" "$PWD" "$cCurDir"
+
+	# ADJUST
+	assertEquals "tic-2" "template.sh" "$cName"
+	#assertEquals "tic-2" "SCRIPTNAME" "$cName"
+
+	# ADJUST
+	assertEquals "tic-3" "/home/$USER/public_html/template" "$cBin"
+	#assertEquals "tic-3" "/usr/bin" "$cBin"
+	#assertEquals "tic-3" "/usr/local/bin" "$cBin"
+
+	assertEquals "tic-4" "0" "$gpDebug"
+	assertEquals "tic-5" "0" "$gpVerbose"
+	assertEquals "tic-6" "0" "$gpLog"
+	assertEquals "tic-7" "user" "$gpFacility"
+	assertEquals "tic-8" "0" "$gErr"
+	assertNull "tic-9" "$(echo $cVer | tr -d '.[:digit:]')"
+	assertEquals "tic-10" "/tmp/$USER/$cName" "$Tmp"
+	assertEquals "tic-11" "$Tmp/file-$cPID" "$cTmpF"
+	assertEquals "tic-12" "${cTmpF}-1.tmp" "$cTmp1"
+
+	# ADJUST
+	assertEquals "tic-13" "/tmp/$USER/$cName" "$Tmp"
+}
+
+testLog()
+{
+	local tMsg
+	local tLevel
+	local tLine
+	local tErr
+	local tExtra
+	local tResult
+
+	# ADJUST
+	export tSyslog=/var/log/user.log
+
+	#fLog level msg [line] [err]
+	# pLevel - emerg alert crit err warning notice info debug
+
+	# Check format
+	gpLog=0
+	gpVerbose=0
+	local tMsg="Testing 123"
+	local tLevel="err"
+	local tLine="458"
+	local tErr="42"
+	local tExtra="extra text"
+	tResult=$(fLog $tLevel "$tMsg" $tLine $tErr $tExtra 2>&1)
+gpUnitDebug=1
+	fUDebug "$tResult"
+gpUnitDebug=0
+	assertContains "tl-1.1" "$tResult" "$cName"
+	assertContains "tl-1.2" "$tResult" '['$cPID']'
+	assertContains "tl-1.3" "$tResult" "$tLevel:"
+	assertContains "tl-1.4" "$tResult" "$tMsg"
+	assertContains "tl-1.5" "$tResult" '['$tLine']'
+	assertContains "tl-1.6" "$tResult" '('$tErr')'
+	assertContains "tl-1.7" "$tResult" " - $tExtra"
+
+	# Check levels
+	gpLog=0
+	gpVerbose=0
+	local tMsg="Testing 123"
+	for tLevel in emerg alert crit err warning; do
+		tResult=$(fLog $tLevel "$tMsg" 2>&1)
+		fUDebug $tResult
+		assertContains "tl-2.$tLevel" "$tResult" "$tLevel:"
+	done
+	for tLevel in notice info debug; do
+		tResult=$(fLog $tLevel "$tMsg" 2>&1)
+		assertNull "tl-3.$tLevel" "$tResult"
+	done
+
+	gpLog=0
+	gpVerbose=1
+	for tLevel in notice info; do
+		tResult=$(fLog $tLevel "$tMsg" 2>&1)
+		assertContains "tl-4.$tLevel" "$tResult" "$tLevel:"
+	done
+
+	# Check debug
+	gpLog=0
+	gpVerbose=0
+	gpDebug=2
+	tMsg="Debug msg"
+
+	tResult=$(fLog debug "$tMsg" 2>&1)
+	fUDebug $tResult
+	assertContains "tl-5.1" "$tResult" "$tMsg"
+
+	tResult=$(fLog debug-1 "$tMsg" 2>&1)
+	fUDebug $tResult
+	assertContains "tl-5.2" "$tResult" "$tMsg"
+
+	tResult=$(fLog debug-2 "$tMsg" 2>&1)
+	fUDebug $tResult
+	assertContains "tl-5.3" "$tResult" "$tMsg"
+
+	tResult=$(fLog debug-3 "$tMsg" 2>&1)
+	fUDebug $tResult
+	assertNull "tl-5.4" "$tResult"
+
+	# Check syslog
+	gpLog=1
+	gpVerbose=0
+	local tMsg="Testing 123"
+	for tLevel in emerg alert crit err warning; do
+		tResult=$(fLog $tLevel "$tMsg" 2>&1)
+		fUDebug $tResult
+		assertContains "tl-6.1" "$tResult" "$tLevel:"
+		tResult=$(tail -n1 $tSyslog)
+		fUDebug $tResult
+		assertContains "tl-6.2" "$tResult" "$tLevel:"
+		assertContains "tl-6.3" "$tResult" "$tMsg"
+	done
+}
+
+testErrorLog()
+{
+	local tMsg
+	local tLevel
+	local tLine
+	local tErr
+	local tResult
+
+	gpLog=0
+	gpVerbose=0
+	local tMsg="Testing 123"
+	local tLine="458"
+	local tErr="42"
+	tResult=$(fError "$tMsg" $tLine $tErr 2>&1)
+	fUDebug $tResult
+
+	assertContains "tel-1.1" "$tResult" "$cName"
+	assertContains "tel-1.2" "$tResult" '['$cPID']'
+	assertContains "tel-1.3" "$tResult" "crit:"
+	assertContains "tel-1.4" "$tResult" "$tMsg"
+	assertContains "tel-1.5" "$tResult" '['$tLine']'
+	assertContains "tel-1.6" "$tResult" '('$tErr')'
+	assertContains "tel-1.7" "$tResult" "Usage:"
+}
+
+testCleanUp()
+{
+	gpDebug=0
+	local tResult
+	
+	assertEquals "tcu-1" "/tmp/$USER/$cName" "$Tmp"
+	assertTrue "tcu-2" "[ -d $Tmp ]"
+	
+	assertEquals "tcu-3" "$Tmp/file-$cPID" "$cTmpF"
+	
+	assertEquals "tcu-4" "${cTmpF}-1.tmp" "$cTmp1"
+	touch $cTmp1
+	assertTrue "tcu-5" "[ -f $cTmp1 ]"
+
+	tResult=$(fCleanUp 2>&1)
+	assertFalse "tcu-6" "[ -f $cTmp1 ]"
+}
+
+# ========================================
+# Functions
+
 # --------------------------------
-function fCleanUp
+fCleanUp()
 {
 	trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
 	# Called when script ends (see trap) to remove temporary files,
 	# if not in debug mode.
-	if [ $gDebug -eq 0 ]; then
-		'rm' -f ${cTmpF}[1-9]*.tmp 2>/dev/null
+	if [ $gpDebug -eq 0 ]; then
+		'rm' -f ${cTmpF}*.tmp 2>/dev/null
 	fi
-#	print "$gName is done" | $gBin/log -sv
-#	print "Out" | $gBin/log -odvs
-	exit $1
-}
+	fLog notice "Done" $LINENO 9900
+	exit $gErr
+} # fCleanUp
 
 # --------------------------------
-function fUsage
+fUsage()
 {
-	# Print usage help for this script.  Strip tags with tag2a if
-	# it can be found.  tag2a.sh will not strip tags if the
-	# gPrintTag env. var. is set to 1.
-	if [ -x $gBin/tag2a ]; then
-		tStrip=$gBin/tag2a
+	if [ $# -ne 0 ]; then
+		pod2text $0
 	else
-		if [ $gDos -eq 0 ]; then
-			whence tag2a >/dev/null 2>&1
-		else
-			which tag2a >/dev/null 2>&1
-		fi
-		if [ $? -eq 0 ]; then
-			tStrip=tag2a
-		else
-			tStrip=cat
-		fi
+		pod2usage $0
 	fi
-	$tStrip <<END | more -e
-<rsect>$gName
-	<idx main|$gName:usage|
+	gErr=1
+	fCleanUp
+	exit 1
+	cat <<EOF >/dev/null
+=pod
 
-<rsub>Usage
-#	<syntax>
-	$gName [-h] {-n%%HostName%%
-		     -c} [-t %%Tag%%] &<%%InFile%% >%%OutFile%%
-#	<\syntax>
+=head1 NAME
 
-<rsub>Parameters
-#	<lablist>
-	\-h\	Give this usage help
+SCRIPTNAME - DESCRIPTION
 
-	\-n%%Name%%\	Explicit host name.
-	\-c\	Use the current host name: $(hostname)
-	\-t%%Tag%%\	Tag word that preceeds the host name. Default:
-			$cTag
-#	<\lablist>
+=head1 SYNOPSIS
 
-<rsub>Description
-	Stdin is read and lines that begin with the %%Tag%% word are
-	outputed to stdout only if the next word matches the
-	%%HostName%%.  All other lines are outputed.
+	SCRIPTNAME [-o Value] [-h] [-l] [-v] [-x] [-t Test]
 
-	The purpose of this filter is to create different versions
-	of a file from a common file.
+=head1 DESCRIPTION
 
-<rsub>Language Syntax
-	Lines that have the following pattern:
-	<ex>
-	%%Tag%% %%HostName%%[,%%HostName%%]* %%Line%%
-	</ex>
+Describe the script.
 
-	will be outputed as:
-	<ex>
-	%%Line%%
-	</ex>
-	if -n%%HostName%% (or the current hostname, if the -c option
-	was used) matches any of the hostnames after the Tag.
+=head1 OPTIONS
 
-<rsub>Version
-	$gVer
-END
+=over 4
+
+=item B<-h>
+
+This help.
+
+=item B<-l>
+
+Send log messages to syslog.
+
+=item B<-v>
+
+Verbose output.  Sent to stderr.
+
+=item B<-x>
+
+Debug mode.  But do not log to syslog. Multiple x options turns
+on more debug output. See Global gpDebug.
+
+=item B<-t Test>
+
+Run the unit test functions in this script.
+
+If Test is "all", then all of the functions that begin with "test"
+will be run. Otherwise "Test" should match the test function names
+separated with commas (with all names in a quote).
+
+For more details about shunit2 (or shunit2.1), see
+shunit2/shunit2-manual.html Source: https://github.com/kward/shunit2
+
+See shunit2, shunit2.1, Global: gpUnitDebug
+
+=back
+
+=head2 Globals
+
+Globals that may affect how way the script runs. Just about all of
+these globals can be set and exported before the script is run (just
+in case you cannot easily set them with CLI flags).
+
+=item B<Tmp>
+
+This is the top directory where tmp file will be put.
+
+Default: /tmp/$USER/SCRIPTNAME/
+
+if gpDebug is 0, temp files will usually include the PID.
+
+=item B<gpLog>
+
+If set to 0, log messages will only be sent to stderr.
+
+If set to 1, log messages will be sent to stderr and syslog.
+
+See -l, fLog and fErr for details
+
+Default: 0
+
+=item B<gpFacility>
+
+Log messages sent to syslog will be sent to the "facility" specified
+by by gpFacility.
+
+"user" log messages will be sent to /var/log/user.log, or
+/var/log/syslog, or /var/log/messages.log
+
+See: fLog
+
+Default: user
+
+=item B<gpVerbose>
+
+If set to 0, only log message at "warning" level and above will be output.
+
+If set to 1, all non-debug messages will be output.
+
+See -v, fLog
+
+Default: 0
+
+=item B<gpDebug>
+
+If set to 0, all "debug" and "debug-N" level messages will be skipped.
+
+If not 0, all "debug" level messages will be output.
+
+Or if "debug-N" level is used, then if gpDebug is <= N, then the
+log message will be output, otherwise it is skipped.
+
+See -x
+
+=item B<gpUnitDebug>
+
+If set to non-zero, then the fUDebug function calls will output
+the messages when in test functions.
+
+See -t, fUDebug
+
+=back
+
+=head1 RETURN VALUE
+
+[What the program or function returns if successful.]
+
+=head1 ERRORS
+
+Fatal Error:
+
+Warning:
+
+Many error messages may describe where the error is located, with the
+following log message format:
+
+ Program: PID NNNN: Message [LINE](ErrNo)
+
+=head1 EXAMPLES
+
+=head1 ENVIRONMENT
+
+ $HOME
+ $USER
+ $Tmp
+
+=head1 FILES
+
+=head1 SEE ALSO
+
+=head1 NOTES
+
+=head1 CAVEATS
+
+[Things to take special care with; sometimes called WARNINGS.]
+
+=head1 DIAGNOSTICS
+
+[All possible messages the program can print out--and what they mean.]
+
+=head1 BUGS
+
+[Things that are broken or just don't work quite right.]
+
+=head1 RESTRICTIONS
+
+[Bugs you don't plan to fix :-)]
+
+=head1 AUTHOR
+
+NAME
+
+=head1 HISTORY
+
+(c) Copyright 2009 by COMPANY
+
+$Revision: 1.36 $ GMT 
+
+=cut
+EOF
 	fCleanUp 1
 	exit 1
-}
+} # fUsage
 
 # --------------------------------
-function fError
+fError()
 {
-	# Print the error message (fError options).  Then call
-	# fCleanUp to exit.
-	gErr=$1
-	shift
-	set -f
-#	print "Error: $*" | $gBin/log -e
-	set +f
-	if [ $gNoExit -ne 0 ]; then
-		gNoExit=0
-		return
-	fi
-	cat <<END 1>&2
-Usage: 	$gName [-h] {-nHostName | -c} [-tTag] <InFile >OutFile
- Type: "$gName -h" for more help.
-END
-	fCleanUp 1
-	exit 1
-}
+	# Usage:
+	#     fError pMsg [pLine [pErr]]
+	# Print the error message.  Then call fCleanUp, and exit
+
+	local pMsg="$1"
+	local pLine=$2
+	local pErr=$3
+
+	fLog crit "$pMsg" $pLine $pErr
+	fUsage
+} # fError
 
 # ------------------
-function fLog
+fLog()
 {
-	# Input:
-	#	$1 level (# emerg alert crit err warning notice info debug)
-	#	$2 message
-	tErr=""
-	if [ $gErr -ne 0 ]; then
-		tErr="[$gErr]"
-	fi
-	echo "$1: $2 $tErr" 1>&2
-	if [ $pDebug -ne 0 ]; then
+	# Usage:
+	#     fLog Level "Msg" [LineNo] [Err] [extra...]
+	#     pLevel - emerg alert crit err warning notice info debug
+	#
+	# Examples:
+	#     fLog notice "Just testing" $LINENO 8 "added to msg"
+	#     fLog debug-3 "Only if $gpDebug>=3" $LINENO
+	#
+	# Globals
+	#     gpLog=0 - output to stderr only
+	#     gpLog=1 - output to syslog and stderr
+	#     gpFacility - only used with syslog.
+	#     		 user, local[0-7], auth, authpriv, cron, daemon,
+        #		 ftp, kern, lpr, mail, news, sslog, uucp
+	#     gpVerbose=0 - ignore all levels below warning
+	#     gpVerbose=1 - output notice and info
+	#     gpDebug=0 - debug msgs are not output
+	#     gpDebug=N - debug msgs are output, or if debug-N > N, then skip
+
+	local pLevel="alert"
+	local pMsg="Missing message"
+	local pLine=""
+	local pErr=""
+	local tLevel
+	local tLine=""
+	local tErr=""
+	local tDebugLevel
+
+	# Get args
+	case $# in
+		1)
+			pLevel=$1
+		;;
+		2)
+			pLevel=$1
+			pMsg=$2
+		;;
+		3)
+			pLevel=$1
+			pMsg=$2
+			pLine=$3
+		;;
+		4)
+			pLevel=$1
+			pMsg=$2
+			pLine=$3
+			pErr=$4
+		;;
+		*)
+			pLevel=$1
+			pMsg=$2
+			pLine=$3
+			pErr=$4
+			shift 4
+			pMsg="$pMsg - $*"
+		;;
+	esac
+	tLevel=$pLevel
+
+	# Set any missing globals
+	gpLog=${gpLog:-0}
+	gpFacility=${gpFacility:-user}
+	gpVerbose=${gpVerbose:-0}
+	gpDebug=${gpDebug:-0}
+
+	# Check debug
+	if [ $gpDebug -eq 0 ] && [ "${pLevel%-*}" = "debug" ]; then
 		return
 	fi
-	logger -i -t mirror.release1 -p local1.$1 "$2 $tErr"
+	if [ $gpDebug -ne 0 ] && [ "${pLevel%-[0-9]*}" != "$pLevel" ]; then
+		tDebugLevel=${pLevel#*-}
+		fUDebug echo tDebugLevel=x${tDebugLevel}x
+		if [ $tDebugLevel -gt $gpDebug ]; then
+			return
+		fi
+		tLevel=debug
+	fi
+
+	# Check verbose
+	if [ $gpVerbose -eq 0 ] &&
+	     ( [ "$pLevel" = "notice" ] || [ "$pLevel" = "info" ] ); then
+		return
+	fi
+
+	# LineNo formatting
+	tLine=""
+	if [ -n "$pLine" ]; then
+		tLine="[$pLine]"
+	fi
+
+	# Err formatting
+	tErr=""
+	if [ -n "$pErr" ]; then
+		tErr="($pErr)"
+	fi
+
+	# Output
+	if [ $gpLog -eq 0 ]; then
+		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+	else
+		logger -s -i -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
+	fi
 } # fLog
 
-# Main --------------------------------------------------------------
-export	gBin gCurdir gErr gErrLog gDebug gLog gLogFile gName \
-	gNoExit gVer gVerbose PWD
-
-# -------------------
-# Set current directory location in PWD and gCurDir, because with cron
-# jobs PWD is not set.
-if [ -z $PWD ]; then
-	PWD=$(pwd)
-fi
-gCurDir=$PWD
+# ========================================
+# Main
 
 # -------------------
 # Set name of this script
-# Note: this does not work if the script is executed with '.'
-gName=${0##*/}
+export cName=${0##*/}
+
+# -------------------
+# Set current directory location in PWD and cCurDir, because with cron
+# jobs PWD is not set.
+if [ -z "$PWD" ]; then
+	export PWD=$(pwd)
+fi
+export cCurDir=$PWD
 
 # -------------------
 # Define the location of the script
-if [ $0 = ${0%/*} ]; then
-	gBin=$(whence $gName)
-	gBin=${gBin%/*}
-else
-	gBin=${0%/*}
+export cBin=${0%/*}
+if [ "$cBin" = "." ]; then
+        cBin=$PWD
 fi
-cd $gBin
-gBin=$PWD
-cd $gCurDir
+cd $cBin
+cBin=$PWD
+cd $cCurDir
 
 # -------------------
 # Setup log variables
-gDebug=${gDebug:-0}
-gErr=0
-gErrLog=""
-gLog=1
-gLogFile=""
-gNoExit=0
-gVerbose=${gVerbose:-0}
+export gpDebug=${gpDebug:-0}
+export gpVerbose=${gpVerbose:-0}
+export gpLog=${gpLog:-0}
+export gpFacility=${gpFacility:=user}
+export gpTest="";
+export gErr=0
 
 # -------------------
 # Define the version number for this script
-gVer='$Revision: 1.35 $'
-gVer=${gVer#*' '}
-gVer=${gVer%' '*}
+export cVer='$Revision: 1.36 $'
+cVer=${cVer#*' '}
+cVer=${cVer%' '*}
 
 # -------------------
-# Setup a temporary directory for each user.
-Tmp=${Tmp:-"/tmp/$LOGNAME"}
+# Setup a temporary directory for each user/script.
+export Tmp=${Tmp:-"/tmp/$USER/$cName"}
 if [ ! -d $Tmp ]; then
 	mkdir -p $Tmp 2>/dev/null
 	if [ ! -d $Tmp ]; then
-		fError "1" "Could not find directory $Tmp (\$Tmp)."
+		fError "Could not find directory $Tmp (\$Tmp)." $LINENO
 	fi
 fi
-
-gErrLog=$Tmp/$gName.err
-rm $gErrLog 2>/dev/null
 
 # -------------------
 # Define temporary file names used by this script.  The variables for
 # the file names can be any name, but the file name pattern should be:
-# "${cTmpF}[0-9]*.tmp"
-if [ $gDebug -eq 0 ]; then
-	cTmpF=$Tmp/syst$$
-else
-	cTmpF=$Tmp/syst
+# "${cTmpF}-*.tmp"
+export cPID=$$
+export cTmpF=$Tmp/file-$cPID
+if [ $gpDebug -ne 0 ]; then
+	cTmpF=$Tmp/file
 	rm -f ${cTmpF}*.tmp 2>/dev/null
 fi
-cTmp1=${cTmpF}1.tmp
+export cTmp1=${cTmpF}-1.tmp
+export cTmp2=${cTmpF}-2.tmp
 trap fCleanUp 1 2 3 4 5 6 7 8 10 11 12 13 14 15
-export cTmpF cTmp1 cTmp2
 
 # -------------------
 # Configuration
-export cTag=systag
 
 # -------------------
 # Get Options Section
-pFileList=""
-pTag=$cTag
-pHostName=""
-while getopts :hcn:t:x tArg; do
+if [ $# -eq 0 ]; then
+	fError "Missing options." $LINENO
+fi
+export gpFileList=""
+export gpHostName=""
+while getopts :cn:hlt:vx tArg; do
 	case $tArg in
-		h)	fUsage
-			exit 1
-		;;
-		c)	pHostName=$(hostname);;
-		n)	pHostName=$OPTARG;;
-		t)	pTag=$OPTARG;;
+		c)	gpHostName=$(hostname);;
+		n)	gpHostName=$OPTARG;;
 
-		x)	gDebug=1;;
-		+x)	gDebug=0;;
-		:)	fError "2" "Value required for option: $OPTARG";;
-		\?)	fError "3" "Unknown option: $OPTARG";;
+		h)	fUsage long;;
+		l)	gpLog=1;;
+		v)	gpVerbose=1;;
+		x)	let gpDebug=gpDebug+1;;
+		t)	gpTest=$OPTARG;;
+		:)	fError "Value required for option: $OPTARG" $LINENO;;
+		\?)	fError "Unknown option: $OPTARG" $LINENO;;
 	esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	pFileList="$*"
+	gpFileList="$*"
 fi
 
 # -------------------
-#print "In" | $gBin/log -idv
-#print "Version: $gVer" | $gBin/log -sv
+if [ -n "$gpTest" ]; then
+	export SHUNIT_COLOR=light
+	export gpUnitDebug=${gpUnitDebug:-0}
+	if [ "$gpTest" = "all" ]; then
+		. /usr/local/bin/shunit2.1
+		exit $?
+	fi
+	. /usr/local/bin/shunit2.1 -- $gpTest
+	exit $?
+fi
 
+# -------------------
 # Print dump of variables
-if [ $gDebug -ne 0 ]; then
+if [ $gpDebug -gt 1 ]; then
 	for i in \
 		PWD \
-		gBin \
-		gCurDir \
-		gName \
-		gVer \
-		gLog \
-		gLogFile \
-		gErrLog \
-		gDebug \
-		gVerbose \
+		cBin \
+		cCurDir \
+		cName \
+		cVer \
+		gpDebug \
+		gpVerbose \
 		gErr \
-		pTag \
-		pHostName \
+		gpHostName \
 		Tmp \
 	; do
-		eval print -R "$i=\$$i" | $gBin/log -d
+		tMsg=$(eval echo -R "$i=\$$i")
+		fLog debug "$tMsg" $LINENO
 	done
 fi
 
 # -------------------
 # Validate Options Section
 
-if [ -z $pHostName ]; then
-	fError "5" "The -n or -c option is required."
+if [ -z $gpHostName ]; then
+	fError "The -n or -c option is required." $LINENO
 fi
 
 # -------------------
 # Functional Section
 
-cat <<END-END >$cTmp1
-	\$1 == "$pTag" {
-		if (\$2 ~ /$pHostName/) {
+cat <<EOF >$cTmp1
+	\$1 == "$gpTag" {
+		if (\$2 ~ /$gpHostName/) {
 			\$1 = ""
 			\$2 = ""
 			sub(/^  /,"",\$0)
-			print \$0
+			echo \$0
 		 }
 		 next
 	}
-	{ print \$0}
-END-END
-awk -f $cTmp1
+	{ echo \$0}
+EOF
+timeout 5 awk -f $cTmp1
+
+for i in $(seq 2 40); do
+	if [ -e "File$i" ]; then
+		echo "Found File$i"
+	fi
+done
 
 # -------------------
 # Cleanup Section
-fCleanUp 0
+fCleanUp

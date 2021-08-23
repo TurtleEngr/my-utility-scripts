@@ -1,22 +1,8 @@
 #!/bin/bash
 # Select a cvs root to connect to.
 
-tRCFileList="$HOME/.cvsroot.rc /usr/local/etc/cvsroot.rc /etc/cvsroot.rc cvsroot.rc"
-tCVSDirList="/cvs /cvs/* /repo/*.cvs /data/cvs/* /data/*.cvs /home/cvs/* /home/*.cvs"
-
-if [ -x /bin/nawk ]; then
-	export awk=nawk
-else
-	export awk=awk
-fi
-
-gErr=0
-if [ ! -f $HOME/.cvsroot.rc -a ! -f /usr/local/etc/cvsroot.rc ]; then
-    echo Error: Could not fined $HOME/.cvsroot or /usr/local/etc/cvsroot.rc
-    gErr=1
-fi
-if [ $gErr -ne 0 -o ".$1" = '.-h' ]; then
-	more <<ENDHERE
+function fUsage() {
+	more <<EOF
 Usage:
 	. cvsroot.sh
 
@@ -53,16 +39,31 @@ Example cvsroot.rc:
 	/cvs
 	:ext:\$CVSUser@redwood.sfo.sychron.net:/data/cvs/redwood.cvs
 	:ext:\$CVSUser@redwood.sfo.sychron.net:/data/cvs/tool.cvs
-	:pserver:anoncvs@anoncvs.cygnus.com:/cvs
-	:pserver:anoncvs@anoncvs.cygnus.com:/cvs/gcc
-	:pserver:anonymous@cvs-mirror.mozilla.org:/cvsroot
 
 Defects
 	The script only works well with bash or ksh.
-ENDHERE
-else
+EOF
+	exit 1
+}
 
+# ==============================
+export gErr=0
+if [ ! -f $HOME/.cvsroot.rc -a ! -f /usr/local/etc/cvsroot.rc ]; then
+	echo Error: Could not fined $HOME/.cvsroot or /usr/local/etc/cvsroot.rc
+	gErr=1
+fi
+if [ $gErr -ne 0 -o ".$1" = '.-h' ]; then
+	fUsage
+fi
+
+tRCFileList="$HOME/.cvsroot.rc /usr/local/etc/cvsroot.rc /etc/cvsroot.rc cvsroot.rc"
+tCVSDirList="/cvs /cvs/* /repo/*.cvs /data/cvs/* /data/*.cvs /home/cvs/* /home/*.cvs"
 export CVSUser=${CVSUser:-$LOGNAME}
+if [ -x /bin/nawk ]; then
+	export awk=nawk
+else
+	export awk=awk
+fi
 
 tFile1=/tmp/cvsroot.1.$$
 tFile2=/tmp/cvsroot.2.$$
@@ -76,7 +77,7 @@ cat $tRCFileList 2>/dev/null | $awk '
 	}
 ' 2>/dev/null >$tFile1
 
-for i in $tCVSDirList $(cat $tFile1); do
+for i in $tCVSDirList $(cat $tFile1 2>/dev/null); do
 	if [ "${i#:}" != "$i" ]; then
 		echo ${i%/} >>$tFile2
 		continue
@@ -89,7 +90,7 @@ done
 cat $tFile2 >$tFile1
 
 for i in CVS/Root ../CVS/Root */CVS/Root /CVS; do
-	for j in $(cat $i); do
+	for j in $(cat $i 2>/dev/null); do
 		echo ${j%/} >>$tFile1
 	done
 done
@@ -134,4 +135,3 @@ if [ $tSelect != "EXIT" ]; then
 fi
 
 'rm' -f $tFile1 $tFile2 2>/dev/null
-fi

@@ -1,33 +1,68 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-info,v 1.2 2018/02/25 21:37:30 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-info,v 1.3 2021/08/18 23:12:21 bruce Exp $
+
 # Extract meta info from video files. Save it in FILE.info
+# See "man exiftool" for where the list of valid file extentions came from
+
 # Usage:
 #	# Local dir only
-#	vid-info
-
+#	vid-info -l
+#
 #	# Recursive
-#	vid-info ARG
+#	vid-info -r
+
+#--------------------
+cExt='.3fr$|.3g2$|.3gp$|.a$|.aa$|.aax$|.acr$|.afm$|.ai$|.aiff$|.ape$|.arw$|.asf$|.avi$|.azw$|.bmp$|.bpg$|.btf$|.chm$|.cos$|.cr2$|.crw$|.cs1$|.dcm$|.dcp$|.dcr$|.dfont$|.divx$|.djvu$|.dll$|.dng$|.doc$|.docx$|.dpx$|.dr4$|.dss$|.dv$|.dvb$|.dylib$|.eip$|.eps$|.epub$|.erf$|.exe$|.exif$|.exr$|.exv$|.f4a$|.fff$|.fla$|.flac$|.flif$|.flv$|.fpf$|.fpx$|.gif$|.gpr$|.gz$|.hdp$|.hdr$|.heic$|.heif$|.icc$|.ics$|.idml$|.iiq$|.ind$|.inx$|.iso$|.itc$|.j2c$|.jng$|.jp2$|.jpeg$|.jpg$|.json$|.k25$|.kdc$|.key$|.la$|.lfp$|.lnk$|.m2ts$|.m4a/v$|.max$|.mef$|.mie$|.miff$|.mka$|.mks$|.mkv$|.mng$|.mobi$|.modd$|.moi$|.mos$|.mov$|.mp3$|.mp4$|.mpc$|.mpg$|.mpo$|.mqv$|.mrw$|.mxf$|.nef$|.nrw$|.numbers$|.o$|.odp$|.ods$|.odt$|.ofr$|.ogg$|.ogv$|.opus$|.orf$|.otf$|.pac$|.pages$|.pbm$|.pcd$|.pdb$|.pdf$|.pef$|.pfa$|.pfb$|.pfm$|.pgf$|.pgm$|.pict$|.plist$|.pmp$|.png$|.ppm$|.ppt$|.pptx$|.ps$|.psb$|.psd$|.psp$|.qtif$|.r3d$|.ra$|.raf$|.ram$|.rar$|.raw$|.riff$|.rm$|.rsrc$|.rtf$|.rw2$|.rwl$|.rwz$|.seq$|.so$|.sr2$|.srf$|.srw$|.svg$|.swf$|.thm$|.tiff$|.torrent$|.ttc$|.ttf$|.vcf$|.vrd$|.vsd$|.wav$|.wdp$|.webm$|.webp$|.wma$|.wmv$|.wv$|.x3f$|.xcf$|.xls$|.xlsx$|.xmp$|.zip'
 
 #--------------------
 # Set this to empty, to be recursive
-
-if [ $# -eq 0 ]; then
+if [ ".$1" = '.-r' ]; then
+	pNotRecursive=''
+elif [ ".$1" = '.-l' ]; then
 	pNotRecursive='-prune'
 else
-	# Any option makes it recursive
-	pNotRecursive=''
+	cat <<EOF
+Usage:
+	vid-info -l  # local
+	vid-info -r  # recursive
+EOF
+	exit 1
 fi
 
-tFound=$(find * $pNotRecursive -type f | \
-    egrep -v '\.info$|\.txt$|\.htm$|\.html|\.au$|\.sh$|AuthDir' | \
-    grep -v ' ' | wc -l)
+#--------------------
+# Note: this assumes there are no spaces or special char. in the names
+tFound=0
+tFile=""
+for i in $(find * $pNotRecursive -type f); do
+	tExt=".${i##*.}"
+	if [ "$tExt" = "$i" ]; then
+		continue
+	fi
+	if [ "$tExt" = ".info" ]; then
+		continue
+	fi
+	if echo $i | egrep -qi "$cExt"; then
+		let ++tFound
+		tFile="$tFile $i"
+	fi
+done
+
+#echo
+#echo $tFile
+echo
+tFound=$tFound
 echo "Found: $tFound"
 echo
 
-for i in $(find * $pNotRecursive -type f | \
-    egrep -v '\.info$|\.txt$|\.htm$|\.html|\.au$|\.sh$|AuthDir' | \
-    grep -v ' '); do
+if [ $tFound -eq 0 ]; then
+	exit 1
+fi
+
+#--------------------
+for i in $tFile; do
 	exiftool $i >$i.info
 	echo -n '.'
 done
 echo
+
+find * -name '*.info'
