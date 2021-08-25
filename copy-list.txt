@@ -116,7 +116,6 @@ svn-propset-keywords.sh
 svn-propset.sh
 talk.dict
 talk.pl
-template2.sh
 template.pl
 template.sh
 test-perl.pl
