@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.42 $ $Date: 2021/08/25 09:31:27 $ GMT
+# $Revision: 1.43 $ $Date: 2021/08/25 09:59:48 $ GMT
 
 # ========================================
 # Tests
@@ -210,7 +210,7 @@ testInitialConfig()
 	# ADJUST
 	assertEquals "tic-19" "/tmp/$USER/$cName" "$Tmp"
 
-	for tProg in logger pod2text pod2usage pod2html pod2man tidy awk tr; do
+	for tProg in logger pod2text pod2usage pod2html pod2man pod2markdown tidy awk tr; do
 		which $tProg &>/dev/null
 		assertTrue "tic-20 missing: $tProg" "[ $? -eq 0 ]"
 	done
@@ -512,8 +512,10 @@ fUsage()
 		long)	pod2text $tScript;;
 		man)	pod2man $tScript;;
 		html)	pod2html $tScript --title="SCRIPTNAME" | $tTidy;;
+		md)	pod2markdown <$tScript;;
 		internal)	fInternalDoc $tScript | pod2text;;
 		internal-html)	fInternalDoc $tScript | pod2html --title="SCRIPTNAME Internal Documentation" | $tTidy;;
+		internal-md)	fInternalDoc $tScript | pod2markdown;;
 		*)	pod2usage $tScript;;
 	esac
 	gErr=1
@@ -571,6 +573,10 @@ Output long usage help as a man page.
 
 Output long usage help as html.
 
+=item B<md>
+
+Output long usage help as markdown.
+
 =item B<internal>
 
 Output internal documentation as text.
@@ -578,6 +584,10 @@ Output internal documentation as text.
 =item B<internal-html>
 
 Output internal documentation as html.
+
+=item B<internal-md>
+
+Output internal documentation as markdown.
 
 =back
 
@@ -768,7 +778,7 @@ NAME
 
 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.42 $ $Date: 2021/08/25 09:31:27 $ GMT 
+$Revision: 1.43 $ $Date: 2021/08/25 09:59:48 $ GMT 
 
 =cut
 EOF
@@ -1115,7 +1125,7 @@ fSetComGlobals()
 	# -------------------
 	# Define the version number for this script
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.42 $'
+	cVer='$Revision: 1.43 $'
 	cVer=${cVer#*' '}
 	cVer=${cVer%' '*}
 
@@ -1252,7 +1262,7 @@ export SHUNIT_COLOR
 export gpFileList=""
 
 fSetComGlobals
-fCheckDeps "logger pod2text pod2usage" "pod2html pod2man tidy shunit2.1 awk tr"
+fCheckDeps "logger pod2text pod2usage" "pod2html pod2man pod2markdown tidy shunit2.1 awk tr"
 fSetGlobals
 
 # -------------------
