@@ -1,0 +1,198 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>rm-safe</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a>
+    <ul>
+      <li><a href="#Other-safety-features">Other safety features</a></li>
+    </ul>
+  </li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
+  <li><a href="#ERRORS">ERRORS</a></li>
+  <li><a href="#EXAMPLES">EXAMPLES</a></li>
+  <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
+  <li><a href="#FILES1">FILES</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#NOTES">NOTES</a></li>
+  <li><a href="#CAVEATS">CAVEATS</a></li>
+  <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#HISTORY">HISTORY</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>rm-safe - If recursive remove, first remove symlinks. Also can just mv files.</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<p>rm-safe [-f] [-r] [-R] [-m] [-l] [-i] [-v] [-x] [-h] FILES</p>
+
+<pre><code>    -f - force remove            -v - verbose
+    -r,-R - recursive remove     -x - debug, do nothing
+    -m - move files              -h - more help
+    -l - log to syslog           FILES - one or more dirs or files
+    -i - prompt before removing</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>This script&#39;s main purpose is to remove all symlinks, when the -r option is used. Many implementations of rm, will follow symlinks, which could lead to unintended removes of files outside of the expected levels.</p>
+
+<p>Most interactive rm options are not supported, because this is mainly for use in scripts.</p>
+
+<p>The -m option will try to move files to tmp dirs, rather than remove files.</p>
+
+<h2 id="Other-safety-features">Other safety features</h2>
+
+<p>* If you are cd&#39;ed to the top / dir, rm-safe will exit with an error. Using wild cards while at that level could be very destructive. Double check what you are doing and use the standard &#39;rm&#39;.</p>
+
+<p>* If you specify an absolute path, and it has less than two directory levels, then rm-safe will exit with an error. Double check what you are doing and use the standard &#39;rm&#39;.</p>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
+<dl>
+
+<dt id="f"><b>-f</b></dt>
+<dd>
+
+<p>Force remove. And turns off -i option.</p>
+
+</dd>
+<dt id="r--R"><b>-r, -R</b></dt>
+<dd>
+
+<p>Recursive removal. First symlinks will be removed.</p>
+
+</dd>
+<dt id="m"><b>-m</b></dt>
+<dd>
+
+<p>Move files tmp dir. If root user use: $Tmp, or /var/tmp, or /tmp If not root user use: $Tmp, or $HOME/tmp, or /var/tmp, or /tmp</p>
+
+<p>The -r option is ignored.</p>
+
+</dd>
+<dt id="l"><b>-l</b></dt>
+<dd>
+
+<p>Send log messages to syslog.</p>
+
+</dd>
+<dt id="i"><b>-i</b></dt>
+<dd>
+
+<p>Interactive prompt for removals. This turns off the -f option.</p>
+
+</dd>
+<dt id="h"><b>-h</b></dt>
+<dd>
+
+<p>This help.</p>
+
+</dd>
+<dt id="v"><b>-v</b></dt>
+<dd>
+
+<p>Verbose output. Sent to stderr.</p>
+
+</dd>
+<dt id="x"><b>-x</b></dt>
+<dd>
+
+<p>Debug mode. Do nothing. Just show what would be done. Multiple x options will give more debug output.</p>
+
+<pre><code> -x - show command that would be executed
+ -xx - also show the symlinks that would be removed
+ -xxx - also show all internal variable options set</code></pre>
+
+</dd>
+<dt id="FILES"><b>FILES</b></dt>
+<dd>
+
+<p>One or more directories or files.</p>
+
+</dd>
+</dl>
+
+<h1 id="RETURN-VALUE">RETURN VALUE</h1>
+
+<pre><code> 0 - OK
+ 1 - error</code></pre>
+
+<h1 id="ERRORS">ERRORS</h1>
+
+<p>crit: No files were specifed</p>
+
+<p>crit: Already removed: FILES - Nothing to do, the file(s) are already removed</p>
+
+<p>crit: Unknown option: ARG</p>
+
+<p>crit: Invalid option: ARG</p>
+
+<p>crit: Value required for option: ARG</p>
+
+<p>crit: PWD = / - dangerous, so not allowed.</p>
+
+<p>crit: FILE has less than 2 dir levels - dangerous, so not allowed</p>
+
+<p>Many error messages may describe where the error is located, with the following log message format:</p>
+
+<pre><code> Program[PID] LEVEL: Message [LINE](ErrNo)</code></pre>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<h1 id="ENVIRONMENT">ENVIRONMENT</h1>
+
+<pre><code> $HOME
+ $USER
+ $Tmp - Optional. Define directory for -m option.</code></pre>
+
+<h1 id="FILES1">FILES</h1>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p>rm, find, mv, logger</p>
+
+<h1 id="NOTES">NOTES</h1>
+
+<h1 id="CAVEATS">CAVEATS</h1>
+
+<h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>There is no check to see if there is enough space to move files to a tmp dir.</p>
+
+<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
+
+<p>Most interactive rm options are not supported.</p>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<p>BAR</p>
+
+<h1 id="HISTORY">HISTORY</h1>
+
+<p>$Revision: 1.1 $ $Date: 2016/10/11 01:50:28 $ GMT</p>
+
+
+</body>
+
+</html>
+
+

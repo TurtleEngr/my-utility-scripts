@@ -1,7 +1,9 @@
+SHELL = /bin/bash
 
 update copy :
-	for i in $$(cat copy-list.txt); do \
-		cp ../$$i bin; \
+	-for i in $$(cat copy-list.txt); do \
+		cp -a ../$$i bin; \
+		cp -a ../doc/$$i.* doc 2>/dev/null; \
 	done
 
 checkin commit save :

@@ -1,0 +1,247 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>vid-split</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
+  <li><a href="#ERRORS">ERRORS</a></li>
+  <li><a href="#EXAMPLES">EXAMPLES</a>
+    <ul>
+      <li><a href="#d-example">-d example</a></li>
+      <li><a href="#m-example">-m example</a></li>
+      <li><a href="#s-example">-s example</a></li>
+    </ul>
+  </li>
+  <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
+  <li><a href="#FILES">FILES</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#NOTES">NOTES</a></li>
+  <li><a href="#CAVEATS">CAVEATS</a></li>
+  <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#HISTORY">HISTORY</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>vid-split - Split a video file into multiple files. (Can also join files.)</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>    vid-split [-d | -j | -m Min | -s Size] [-h] [-x] File.mp4</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>Split File.mp4 into multiple files that are no more than -m minutes in length. Only files that end with &#39;mp4&#39; (or MP4) are supported for the -m option.</p>
+
+<p>Or split File.mp4 into multiple files that are no more than -s megabytes in size. Any file video file format can be used with this option.</p>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
+<dl>
+
+<dt id="d"><b>-d</b></dt>
+<dd>
+
+<p>Just list the duration and size of File.mp4.</p>
+
+</dd>
+<dt id="m-Min"><b>-m Min</b></dt>
+<dd>
+
+<p>Define the maximum number of minutes for each split file. Range limit: 10 to 60. If &lt; file duration, then nothing is done. This option will generate separate mp4 files that are standalone.</p>
+
+<p>Output file pattern for -m 20</p>
+
+<pre><code>    Base-000.mp4
+    Base-020.mp4
+    Base-040.mp4
+    ...</code></pre>
+
+</dd>
+<dt id="s-Size"><b>-s Size</b></dt>
+<dd>
+
+<p>Define the maximum size in MegaBytes for each split file. Range limit: 10 to 2000. The files will not be valid video (or audio) files; they will need to be concatinated together in the order they were split.</p>
+
+<p>Output file pattern for -s 200</p>
+
+<pre><code>    Base.mp4-000
+    Base.mp4-001
+    Base.mp4-002
+    ...</code></pre>
+
+</dd>
+<dt id="j"><b>-j</b></dt>
+<dd>
+
+<p>The File.mp4 will be created from the files that correspond to the -m or -s options.</p>
+
+<p>If the File.mp4 exists it will be renamed to File.mp4.sav. If File.mp4.sav exists, the script will do nothing and exit.</p>
+
+</dd>
+<dt id="h"><b>-h</b></dt>
+<dd>
+
+<p>This help.</p>
+
+</dd>
+<dt id="x"><b>-x</b></dt>
+<dd>
+
+<p>Debug mode. Do nothing. Just list the ffmpeg commands that will be run.</p>
+
+</dd>
+</dl>
+
+<h1 id="RETURN-VALUE">RETURN VALUE</h1>
+
+<p>[What the program or function returns if successful.]</p>
+
+<h1 id="ERRORS">ERRORS</h1>
+
+<p>Missing options.</p>
+
+<p>Value required for option: [OPT]</p>
+
+<p>Unknown option: [OPT]</p>
+
+<p>Missing file name</p>
+
+<p>Only one file name is allowed.</p>
+
+<p>Could not find: ffmpeg&quot;</p>
+
+<p>Could not find: split&quot;</p>
+
+<p>Must include one of -d, -j, -m, or -s option.</p>
+
+<p>[FILE] file is not found or is not readable</p>
+
+<p>[FILE] exists. Remove or rename it.</p>
+
+<p>Number must be between [Min] and [Max]</p>
+
+<p>Invalid extension for file: [FILE]</p>
+
+<p>Could not found any matching files to join.</p>
+
+<p>Cannot figure out which files to join. There are -s and -m patterns. Remove one set.</p>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<h2 id="d-example">-d example</h2>
+
+<p>Size of file.</p>
+
+<pre><code>    vid-split -d cam1-short.mp4
+    vid-split -d cam2-short.mp4</code></pre>
+
+<p>Output:</p>
+
+<pre><code>    cam1-short.mp4 Duration: 00:54:48.42 Size: 2714Mb
+    cam2-short.mp4 Duration: 00:22:18.04 Size: 904Mb</code></pre>
+
+<h2 id="m-example">-m example</h2>
+
+<p>Split file into 15 minute files:</p>
+
+<pre><code>    vid-split -m 15 cam1-short.mp4
+    vid-split -m 15 cam2-short.mp4</code></pre>
+
+<p>Output:</p>
+
+<pre><code>    cam1-short-000.mp4 Duraton: 00:15:00.00
+    cam1-short-015.mp4 Duraton: 00:15:00.00
+    cam1-short-030.mp4 Duraton: 00:15:00.00
+    cam1-short-040.mp4 Duraton: 00:09:48.42
+
+    cam2-short-000.mp4 Duraton: 00:15:00.00
+    cam2-short-015.mp4 Duraton: 00:07:18.04</code></pre>
+
+<h2 id="s-example">-s example</h2>
+
+<p>Split files into 500Mb files.</p>
+
+<pre><code>    vid-split -s 500 cam1-short.mp4
+    vid-split -s 500 cam2-short.mp4</code></pre>
+
+<p>Output:</p>
+
+<pre><code>    cam1-short.mp4-000 Size: 500Mb
+    cam1-short.mp4-001 Size: 500Mb
+    cam1-short.mp4-002 Size: 500Mb
+    cam1-short.mp4-003 Size: 500Mb
+    cam1-short.mp4-004 Size: 500Mb
+    cam1-short.mp4-005 Size: 214Mb
+
+    cam2-short.mp4-000 Size: 500Mb
+    cam2-short.mp4-002 Size: 404Mb</code></pre>
+
+<h1 id="ENVIRONMENT">ENVIRONMENT</h1>
+
+<h1 id="FILES">FILES</h1>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p>ffmpeg, split</p>
+
+<h1 id="NOTES">NOTES</h1>
+
+<p>If a video file is over 2GB in size, cvs will not be able to version it across the network. So this script will use ffmeg to split the video file into separate files. If the resulting files are still over 2GB, then use a smaller -m value (or use the -s option).</p>
+
+<p>Sources for ffmpeg split and join mp4 files: https://superuser.com/questions/140899/ffmpeg-splitting-mp4-with-same-quality https://trac.ffmpeg.org/wiki/Concatenate</p>
+
+<p>Another solution is to use &quot;split&quot;</p>
+
+<pre><code>    split -a 3 -d -b 1500M File.mp4 File.mp4-</code></pre>
+
+<p>or</p>
+
+<pre><code>    vid-split -s 1500 File.mp4</code></pre>
+
+<p>But before you can use the split files they will need to joined with:</p>
+
+<pre><code>    cat File.mp4-* &gt;File.mp4</code></pre>
+
+<p>or</p>
+
+<pre><code>    vid-split -j File.mp4</code></pre>
+
+<h1 id="CAVEATS">CAVEATS</h1>
+
+<h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
+
+<p>Use -x to see the ffmpeg or split commands that would be executed, with no -x option.</p>
+
+<h1 id="BUGS">BUGS</h1>
+
+<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<h1 id="HISTORY">HISTORY</h1>
+
+<p>$Revision: 1.6 $</p>
+
+
+</body>
+
+</html>
+
+

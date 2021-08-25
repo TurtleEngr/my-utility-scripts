@@ -1,0 +1,100 @@
+NAME
+    sshagent - setup the ssh agent process
+
+SYNOPSIS
+     . sshagent [-h] [-s] [-k] [key ...]
+
+DESCRIPTION
+    sshagent is a wrapper for ssh-agent and ssh-add. It only starts an agent
+    process if one isn't already running. It also saves the PID env. var.
+    values for scripts. Typically sshagent is put in a users profile file.
+    Notice that the script is "sourced" (.) so that the env. var. are
+    defined in the current shell.
+
+    For the best use of ssh-agent, put your public keys in the
+    ~/.ssh/authorized_keys file on all the systems that you have login
+    access to.
+
+    If an agent is found, then the env. var. are set, and the keys are
+    listed (after adding any keys specified on the command line). If an
+    agent is not found, all other agents are killed, and a new agent is
+    initialized, the keys are added, and the env. var. are set.
+
+    If -s is used and an agent isn't running, then unset SSH_AGENT_PID, and
+    exit (don't try to start an agent). This is commonly used in cron job
+    scripts.
+
+    If cgAgentOwner env. is set, then that will be used instead of $LOGNAME,
+    to find the sshagent.env file. This is useful for scripts that are run
+    by other users, who have read access to the user's home dir (usually
+    only the "root" user). /home/$cgAgentOwner/.ssh/.sshagent.env file. (The
+    script just "sources" the file.)
+
+OPTIONS
+    -h  This help.
+
+    -s  Only set env. var. (don't run a new agent).
+
+    -k  Kill all agents owned by you.
+
+    key...
+        A list of key file names.
+
+RETURN VALUE
+ERRORS
+EXAMPLES
+    In a profile script:
+
+            . sshagent ~/.ssh/id.home ~/.ssh/id.work
+
+    In a script run by the 'root' user:
+
+            export $cgAgentOwner=george
+            . sshagent -s
+
+    You ran sshagent manually to create an agent, but you forgot to "source"
+    the script so that the SSH_* env. are set. Fix this by just running
+    sshagent again: . sshagent
+
+    Add another key to a running agent:
+
+            sshagent ~/.ssh/id_foo_dsa
+
+    List agent and added keys:
+
+            sshagent
+
+    Kill all agents:
+
+            sshagent -k
+
+ENVIRONMENT
+     $cgAgentOwner - user name.  Set to $LOGNAME if empty.
+
+     $SSH_AUTH_SOCK - set by sshagent
+     $SSH_AGENT_PID - set by sshagent
+
+FILES
+     /home/$LOGNAME/.ssh/.sshagent.env
+     /home/$cgAgentOwner/.ssh/.sshagent.env
+
+SEE ALSO
+     ssh-agent, ssh-add
+
+NOTES
+    Because this script is usually sourced, exits and functions are not
+    used. So that is why the "if" logic in this script is so messy with the
+    pExit flag.
+
+CAVEATS
+DIAGNOSTICS
+BUGS
+RESTRICTIONS
+    sshagent only works well with bash.
+
+AUTHOR
+HISTORY
+    (c) Copyright 2009 by TrustedID
+
+    $Revision: 1.58 $ GMT
+

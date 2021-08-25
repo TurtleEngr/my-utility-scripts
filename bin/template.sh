@@ -5,6 +5,7 @@
 # ========================================
 # Tests
 
+# --------------------------------
 fUDebug()
 {
 	if [ ${gpUnitDebug:-0} -ne 0 ]; then
@@ -116,6 +117,7 @@ because the tests are also embedded in the script.
 EOF
 } # fUDebug
 
+# --------------------------------
 oneTimeSetUp()
 {
 	# Save global values
@@ -147,6 +149,7 @@ tests as needed.
 EOF
 } # oneTimeSetUp
 
+# --------------------------------
 setUp()
 {
 	# Restore global values
@@ -177,6 +180,7 @@ global variable settings,
 EOF
 } # setUp
 
+# --------------------------------
 testInitialConfig()
 {
 	local tProg
@@ -204,7 +208,7 @@ testInitialConfig()
 	assertEquals "tic-14" "0" "$gErr"
 	assertNull "tic-15" "$(echo $cVer | tr -d '.[:digit:]')"
 	assertEquals "tic-16" "/tmp/$USER/$cName" "$Tmp"
-	assertEquals "tic-17" "$Tmp/file-$cPID" "$cTmpF"
+	#assertEquals "tic-17" "$Tmp/file-$cPID" "$cTmpF"
 	assertEquals "tic-18" "${cTmpF}-1.tmp" "$cTmp1"
 
 	# ADJUST
@@ -227,6 +231,7 @@ Verify all of the global variables are correctly defined.
 EOF
 } # testInitialConfig
 
+# --------------------------------
 testLog()
 {
 	local tMsg
@@ -237,11 +242,6 @@ testLog()
 	local tResult
 	local tLog
 	local tTestMsg
-
-	# ADJUST?
-	export tSyslog=/var/log/user.log
-	#export tSyslog=/var/log/messages.log
-	#export tSyslog=/var/log/syslog
 
 	# Check format, for a number of settings
 	gpLog=0
@@ -258,6 +258,7 @@ testLog()
 	    for gpDebug in 0 1 2; do
 	      for tLevel in alert crit err warning notice info debug debug-1 debug-3; do
 	        for tLog in "fLog" "fLog2"; do
+		  echo -n '.' 1>&2
 	          tTestMsg="l-$gpLog.v-$gpVerbose.d-$gpDebug.$tLevel.$tLog"
 	          if [ "$tLog" = "fLog" ]; then
 		    fUDebug " "
@@ -302,7 +303,38 @@ testLog()
 	    done
 	  done
 	done
+	echo 1>&2
 	gpUnitDebug=0
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testLog
+
+Test fLog and fLog2.
+
+=internal-cut
+EOF
+} # testLog
+
+
+# --------------------------------
+testSysLog()
+{
+	local tMsg
+	local tLevel
+	local tLine
+	local tErr
+	local tExtra
+	local tResult
+	local tLog
+	local tTestMsg
+
+	# ADJUST?
+	export tSyslog=/var/log/user.log
+	#export tSyslog=/var/log/messages.log
+	#export tSyslog=/var/log/syslog
 
 	# Check syslog
 	gpUnitDebug=0
@@ -312,6 +344,7 @@ testLog()
 	#for tLevel in emerg alert crit err warning; do
 	for tLevel in alert crit err warning; do
 	    for tLog in "fLog" "fLog2"; do
+		echo -n '.' 1>&2
 	    	tTestMsg="$tLevel.$tLog"
 		fUDebug " "
 	        if [ "$tLog" = "fLog" ]; then
@@ -330,20 +363,22 @@ testLog()
 		assertContains "tl13-$tTestMsg" "$tResult" "$tMsg"
 	    done
 	done
+	echo 1>&2
 	gpUnitDebug=0
 	return
 	
     	cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 testLog
+=internal-head3 testSysLog
 
-Test fLog and fLog2.
+Test fLog and fLog2, and verify messages are in a syslog file.
 
 =internal-cut
 EOF
-} # testLog
+} # testSysLog
 
+# --------------------------------
 testErrorLog()
 {
 	local tMsg
@@ -361,6 +396,7 @@ testErrorLog()
 	local tLine="458"
 	for gpLog in 0 1; do
 	    for tLog in "fError" "fError2"; do
+		echo -n '.' 1>&2
 	    	tTestMsg="l-$gpLog.$tLog"
 		fUDebug " "
 	        if [ "$tLog" = "fError" ]; then
@@ -381,6 +417,7 @@ testErrorLog()
 		assertContains "tel-$tTestMsg.usage" "$tResult" "Usage:"
 	    done
 	done
+	echo 1>&2
 	gpUnitDebug=0
 	return
 	
@@ -395,6 +432,7 @@ Test fError and fError2.
 EOF
 } # testErrorLog
 
+# --------------------------------
 testCleanUp()
 {
 	gpDebug=0
@@ -424,12 +462,48 @@ Test fCleanUp. Verify the tmp files are removed.
 EOF
 } # testCleanUp
 
+# --------------------------------
 testUsage()
 {
 	local tResult
-gpUnitDebug=1
-	fUDebug "NA"
-gpUnitDebug=0
+	
+	gpUnitDebug=0
+
+	tResult=$(fUsage short 2>&1)
+	assertContains "tu-short" "$tResult" "Usage:"
+	
+	tResult=$(fUsage foo 2>&1)
+	assertContains "tu-foo" "$tResult" "Usage:"
+	
+	tResult=$(fUsage long 2>&1)
+	assertContains "tu-long.1" "$tResult" "DESCRIPTION"
+	assertContains "tu-long.2" "$tResult" "HISTORY"
+
+	tResult=$(fUsage man 2>&1)
+	assertContains "tu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
+	assertContains "tu-man.2" "$tResult" '.IX Header "HISTORY"'
+
+	tResult=$(fUsage html 2>&1)
+	assertContains "tu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+	assertContains "tu-tml.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+
+	tResult=$(fUsage md 2>&1)
+	assertContains "tu-md.1" "$tResult" '# DESCRIPTION'
+	assertContains "tu-md.2" "$tResult" '# HISTORY'
+
+	tResult=$(fUsage internal 2>&1)
+	assertContains "tu-internal.1" "$tResult" 'Template Use
+	assertContains "tu-internal.2" "$tResult" 'fSetComGlobals
+
+	tResult=$(fUsage internal-html 2>&1)
+	assertContains "tu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
+	assertContains "tu-int-html.2" "$tResult" '<h3 id="fSetGlobals">fSetGlobals</h3>'
+
+	tResult=$(fUsage internal-md 2>&1)
+	assertContains "tu-int-md.1" "$tResult" '## Template Use'
+	assertContains "tu-int-md.2" "$tResult" '### fSetComGlobals'
+	
+	gpUnitDebug=0
 	return
 	
     	cat <<EOF >/dev/null
@@ -442,6 +516,58 @@ Test fUsage. Verify the different output styles work.
 =internal-cut
 EOF
 } # testUsage
+
+# --------------------------------
+testComFunctions()
+{
+	local tResult
+
+	tResult=$(fCheckDeps 2>&1)
+	assertTrue "tcf-fCheckDeps" "[ $? -eq 0 ]"
+
+	tResult=$(fSetComGlobals 2>&1)
+	assertTrue "tcf-fSetComGlobals" "[ $? -eq 0 ]"
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testComFunctions
+
+Just verify these functions exist.
+
+=internal-cut
+EOF
+} # testComFunctions
+
+# --------------------------------
+testScriptFunctions()
+{
+	local tResult
+
+	tResult=$(fSetGlobals 2>&1)
+	assertTrue "tsf-fSetGlobals" "[ $? -eq 0 ]"
+
+	gpHostName="foobar"
+	tResult=$(fValidateHostName 2>&1)
+	assertTrue "tsf-fValidateHostName.1" "[ $? -eq 0 ]"
+
+	gpHostName=""
+	tResult=$(fValidateHostName 2>&1)
+	assertContains "tsf-fValidateHostName.2" "$tResult" "required."
+
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testScriptFunctions
+
+This is just a starting point for creating script functionality tests.
+
+=internal-cut
+EOF
+}
 
 # ========================================
 # Functions
@@ -805,6 +931,10 @@ fFmtLog()
 	local tLevel
 	local tLine
 	local tErr
+	# Use this to turn PID on/off in logs
+	local tPID_Flag=0
+	local tPID=""
+	local tPID_Opt=""
 
 	# Set any missing globals
 	gpLog=${gpLog:-0}
@@ -847,11 +977,16 @@ fFmtLog()
 		tErr="($pErr)"
 	fi
 
+	if [ $tPID_Flag -eq 1 ]; then
+		tPID="[$cPID]"
+		tPID_Opt="-i"
+	fi
+
 	# Output
 	if [ $gpLog -eq 0 ]; then
-		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+		echo "${cName}$tPID $pLevel: $pMsg $tLine$tErr" 1>&2
 	else
-		logger -s -i -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
+		logger -s $tPID_Opt -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
 	fi
 	return
 

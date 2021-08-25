@@ -1,0 +1,159 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>hierarchy.sh</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
+  <li><a href="#ERRORS">ERRORS</a></li>
+  <li><a href="#EXAMPLES">EXAMPLES</a></li>
+  <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
+  <li><a href="#FILES">FILES</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#NOTES">NOTES</a></li>
+  <li><a href="#CAVEATS">CAVEATS</a></li>
+  <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#HISTORY">HISTORY</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>hiearchy.sh - Convert full path names to hiearchy levels</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>        hiearchy.sh [-t] [-l N] [-d] &lt;IN-FILE &gt;OUT-FILE</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>Convert full path names to hiearchy levels.</p>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
+<dl>
+
+<dt id="t"><b>-t</b></dt>
+<dd>
+
+<p>Output with one tab for each &#39;/&#39; in the input line.</p>
+
+<p>Default: no tabs, output &quot; |&quot; for each &#39;/&#39; in the input line.</p>
+
+</dd>
+<dt id="l-N"><b>-l N</b></dt>
+<dd>
+
+<p>Number of levels to output. If the number of &#39;/&#39; in the input line is greater than N, then the line is ignored.</p>
+
+</dd>
+<dt id="d"><b>-d</b></dt>
+<dd>
+
+<p>Only output directory lines, i.e. lines that end with &#39;/&#39;.</p>
+
+</dd>
+</dl>
+
+<h1 id="RETURN-VALUE">RETURN VALUE</h1>
+
+<pre><code> 0 - OK
+ !0 - not OK</code></pre>
+
+<h1 id="ERRORS">ERRORS</h1>
+
+<p>Fatal Error:</p>
+
+<p>Unknown options.</p>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<p>Input file &quot;foo.txt&quot; has these lines:</p>
+
+<pre><code>    /tid-rel-stage/archive/ops/
+    /tid-rel-stage/archive/ops/trunk/
+    /tid-rel-stage/archive/ops/trunk/backup/
+    /tid-rel-stage/archive/ops/trunk/backup/2010-05-13/
+    /tid-rel-stage/archive/ops/trunk/backup/2010-05-13/safe.backup.xml
+    /tid-rel-stage/archive/ops/trunk/backup/2011-10-19
+    /tid-rel-stage/archive/ops/trunk/backup/2011-10-19/lead-uat1.trustedid.com.zip
+    /tid-rel-stage/archive/ops/trunk/backup/2011-10-19/tid-sit3.trustedid.com.zip
+    /tid-rel-stage/archive/ops/trunk/backup/2011-10-19/tid-uat1.trustedid.com.zip
+    /tid-rel-stage/archive/ops/trunk/backup/2012-03-29/
+    /tid-rel-stage/archive/ops/trunk/backup/2012-03-29/unsubscribe-db.schema.sql.gz</code></pre>
+
+<p>hierarchy.sh &lt;foo.txt</p>
+
+<p>Outputs:</p>
+
+<pre><code>    /tid-rel-stage/archive/ops/
+        |trunk/
+        |   |backup/
+        |   |   |2010-05-13/
+        |   |   |   |safe.backup.xml
+        |   |   |2011-10-19/
+        |   |   |   |lead-uat1.trustedid.com.zip
+        |   |   |   |tid-sit3.trustedid.com.zip
+        |   |   |   |tid-uat1.trustedid.com.zip
+        |   |   |2012-03-29/
+        |   |   |   |unsubscribe-db.schema.sql.gz</code></pre>
+
+<p>hierarchy.sh &lt;foo.txt -d</p>
+
+<p>Outputs:</p>
+
+<pre><code>    /tid-rel-stage/archive/ops/
+        |trunk/
+        |   |backup/
+        |   |   |2010-05-13/
+        |   |   |2011-10-19/
+        |   |   |2012-03-29/</code></pre>
+
+<p>hierarchy.sh &lt;foo.txt -l 2</p>
+
+<p>Outputs:</p>
+
+<pre><code>    /tid-rel-stage/archive/ops/
+        |trunk/
+        |   |backup/</code></pre>
+
+<h1 id="ENVIRONMENT">ENVIRONMENT</h1>
+
+<h1 id="FILES">FILES</h1>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<h1 id="NOTES">NOTES</h1>
+
+<h1 id="CAVEATS">CAVEATS</h1>
+
+<h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
+
+<h1 id="BUGS">BUGS</h1>
+
+<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<h1 id="HISTORY">HISTORY</h1>
+
+
+</body>
+
+</html>
+
+

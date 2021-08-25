@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>holiday.sh</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
+  <li><a href="#ERRORS">ERRORS</a></li>
+  <li><a href="#EXAMPLES">EXAMPLES</a></li>
+  <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
+  <li><a href="#FILES">FILES</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#NOTES">NOTES</a></li>
+  <li><a href="#CAVEATS">CAVEATS</a></li>
+  <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#HISTORY">HISTORY</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>holiday.sh - Return 0 if holiday, else non-zero</p>
+
+<p>Mainly for use in cron, to skip holidays. For example:</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>        holiday.sh [-h] [-d YYYY-MM-DD] [-t HH] [-w TAG]</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>This script will read a file (default: /usr/local/etc/holidays.txt) to see if &quot;today&quot; (or the -d date) is a holiday.</p>
+
+<p>The -d option can be passed to see if that date is a holiday.</p>
+
+<p>There can be zero or more -w TAG flags.</p>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
+<dl>
+
+<dt id="h"><b>-h</b></dt>
+<dd>
+
+<p>Print this help, then exit with a 1 return code.</p>
+
+</dd>
+<dt id="d-YYYY-MM-DD"><b>-d YYYY-MM-DD</b></dt>
+<dd>
+
+<p>Pass in the date to test for holiday. Default: today</p>
+
+</dd>
+<dt id="w-TAG"><b>-w TAG</b></dt>
+<dd>
+
+<p>One or more TAGs words can be specified (using multiple -w options). This will activate any lines that contain the TAG words between [] characters.</p>
+
+</dd>
+</dl>
+
+<h1 id="RETURN-VALUE">RETURN VALUE</h1>
+
+<p>Return 0 if the date is a holiday, else non-zero</p>
+
+<h1 id="ERRORS">ERRORS</h1>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<p><b>Example cron job:</b></p>
+
+<pre><code> cHolidayFile=&quot;/projects/mgmt4/data/tid-closed.txt /projects/mgmt4/data/tid-holidays.txt&quot;
+
+ # send-mail will be run 5 min. after every hour, but not on holidays
+ # M H d m w  user
+ 5 * * * *  root  /usr/local/bin/holiday.sh || /usr/local/bin/send-email
+
+ # &quot;send-mail -a&quot; on a tuesday if monday was a holiday.
+ # But only on the first hour of the day.
+ # M H d m w    user
+ 5 0 * * tue  root  /usr/local/bin/holiday.sh -d $(date --date=yesterday +\%F) &amp;&amp; /usr/local/bin/send-email -a</code></pre>
+
+<p><b>Example holiday files</b></p>
+
+<p># /projects/mgmt4/data/tid-closed.txt # Days when CS is not open. The cron jobs will assume Sat and Sun are # not work days, so this file is for the holiday exceptions. ...........TBD</p>
+
+<p># /projects/mgmt4/data/tid-maintenance.txt ............TBD</p>
+
+<h1 id="ENVIRONMENT">ENVIRONMENT</h1>
+
+<p>cHolidayFile - This env. var. can contain a list of file name paths of multiple holiday files. Default: /usr/local/etc/holidays.txt</p>
+
+<h1 id="FILES">FILES</h1>
+
+<p>Format of holiday file (YYYY must be at the very beginning of lines):</p>
+
+<pre><code>        # comment (the full line will be ignored)
+        YYYY-MM-DD Any text following
+        YYYY-MM-DD [TAG] Any text following
+        YYYY-MM-DD [TAG] [TAG] Any text following
+        YYYY-MM-DD {SH-EH} Any text following
+        YYYY-MM-DD {SH-EH} [TAG] Any text following</code></pre>
+
+<p>[TAG] is optional. The record will only be included if a -w TAG matches, one or more of the [TAG] words. If there is no [TAG], then the record will be used.</p>
+
+<p>{SH-EH} is optional. If the current time (or the -t TIME) is between hours SH and EH (inclusive), and the date record&#39;s date matches the -d option, then then this will be a match, so a 0 would be returned. The SH and EH hours are in 24 hour format, with leading zero.</p>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<h1 id="NOTES">NOTES</h1>
+
+<h1 id="CAVEATS">CAVEATS</h1>
+
+<p>[Things to take special care with; sometimes called WARNINGS.]</p>
+
+<h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
+
+<p>[All possible messages the program can print out--and what they mean.]</p>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>[Things that are broken or just don&#39;t work quite right.]</p>
+
+<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
+
+<p>[Bugs you don&#39;t plan to fix :-)]</p>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<p>Bruce Rafnel</p>
+
+<h1 id="HISTORY">HISTORY</h1>
+
+<p>$Revision: 1.3 $</p>
+
+
+</body>
+
+</html>
+
+

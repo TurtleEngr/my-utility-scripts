@@ -1,0 +1,158 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>vid-rm-ver</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
+  <li><a href="#ERRORS">ERRORS</a>
+    <ul>
+      <li><a href="#Fatal-Errors">Fatal Errors:</a></li>
+      <li><a href="#Warnings">Warnings:</a></li>
+    </ul>
+  </li>
+  <li><a href="#EXAMPLES">EXAMPLES</a></li>
+  <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
+  <li><a href="#FILES">FILES</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#NOTES">NOTES</a></li>
+  <li><a href="#CAVEATS">CAVEATS</a></li>
+  <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#HISTORY">HISTORY</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>vid-rm-ver - remove all version except HEAD version for files</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>        vid-rm-ver [-b] [-n] [-h] [-l] [-v] [-x[x..]] Files...</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>This command will remove all CVS revisions except the HEAD version. This is mostly useful for binary files because that will save space. The -b option can be used to limit this operation only for files with the -kb setting.</p>
+
+<p>The command is optimized to do nothing if there is only one revision.</p>
+
+<p>This operation can only be undone by restoring the File,v file on the repository server.</p>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
+<dl>
+
+<dt id="b"><b>-b</b></dt>
+<dd>
+
+<p>Only remove revisions from binary files.</p>
+
+</dd>
+<dt id="n"><b>-n</b></dt>
+<dd>
+
+<p>No execute. Just list the files that will have their revisions trimmed.</p>
+
+</dd>
+<dt id="h"><b>-h</b></dt>
+<dd>
+
+<p>This help.</p>
+
+</dd>
+<dt id="l"><b>-l</b></dt>
+<dd>
+
+<p>Send log messages to syslog.</p>
+
+</dd>
+<dt id="v"><b>-v</b></dt>
+<dd>
+
+<p>Verbose output. Sent to stderr.</p>
+
+</dd>
+<dt id="x"><b>-x</b></dt>
+<dd>
+
+<p>Debug mode. Do nothing? Don&#39;t log to syslog. Multiple x options turns on more debug output.</p>
+
+</dd>
+</dl>
+
+<h1 id="RETURN-VALUE">RETURN VALUE</h1>
+
+<h1 id="ERRORS">ERRORS</h1>
+
+<p>Many error messages may describe where the error is located, with the following log message format:</p>
+
+<pre><code> Program: PID NNNN: Message [LINE](ErrNo)</code></pre>
+
+<h2 id="Fatal-Errors">Fatal Errors:</h2>
+
+<p>Missing file names on command line.</p>
+
+<p>File not found.</p>
+
+<p>Not in a CVS directory.</p>
+
+<h2 id="Warnings">Warnings:</h2>
+
+<p>Skipping directory.</p>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<h1 id="ENVIRONMENT">ENVIRONMENT</h1>
+
+<pre><code> $CVS_RSH</code></pre>
+
+<h1 id="FILES">FILES</h1>
+
+<pre><code> CVS/</code></pre>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<pre><code> cvs admin -o ::HEAD
+ trans-sp</code></pre>
+
+<h1 id="NOTES">NOTES</h1>
+
+<h1 id="CAVEATS">CAVEATS</h1>
+
+<h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>There could be problems if revisions have symbolic names.</p>
+
+<p>The file names must not contain spaces or weird special characters. They should only use the characters: [a-zA-Z][0-9][.-_]</p>
+
+<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<h1 id="HISTORY">HISTORY</h1>
+
+<pre><code> $Revision: 1.4 $;
+ $Date: 2020/09/18 20:59:32 $ GMT </code></pre>
+
+
+</body>
+
+</html>
+
+

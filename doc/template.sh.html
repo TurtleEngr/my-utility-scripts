@@ -1,0 +1,328 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>template.sh</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a>
+    <ul>
+      <li><a href="#Globals">Globals</a></li>
+    </ul>
+  </li>
+  <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
+  <li><a href="#ERRORS">ERRORS</a></li>
+  <li><a href="#EXAMPLES">EXAMPLES</a></li>
+  <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
+  <li><a href="#FILES">FILES</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#NOTES">NOTES</a></li>
+  <li><a href="#CAVEATS">CAVEATS</a></li>
+  <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
+  <li><a href="#BUGS">BUGS</a></li>
+  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
+  <li><a href="#AUTHOR">AUTHOR</a></li>
+  <li><a href="#HISTORY">HISTORY</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>SCRIPTNAME - DESCRIPTION</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>        SCRIPTNAME [-o &quot;Name=Value&quot;] [-h] [-H Style] [-l] [-v] [-x] [-T Test]</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>Describe the script.</p>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
+<dl>
+
+<dt id="o-Name-Value"><b>-o Name=Value</b></dt>
+<dd>
+
+<p>[This is a placeholder for user options.]</p>
+
+</dd>
+<dt id="h"><b>-h</b></dt>
+<dd>
+
+<p>Output this &quot;long&quot; usage help. See &quot;-H long&quot;</p>
+
+</dd>
+<dt id="H-Style"><b>-H Style</b></dt>
+<dd>
+
+<p>Style is used to select the type of help and how it is formatted.</p>
+
+<p>Styles:</p>
+
+<dl>
+
+<dt id="short"><b>short</b></dt>
+<dd>
+
+<p>Output short usage help as text.</p>
+
+</dd>
+<dt id="long"><b>long</b></dt>
+<dd>
+
+<p>Output long usage help as text.</p>
+
+</dd>
+<dt id="man"><b>man</b></dt>
+<dd>
+
+<p>Output long usage help as a man page.</p>
+
+</dd>
+<dt id="html"><b>html</b></dt>
+<dd>
+
+<p>Output long usage help as html.</p>
+
+</dd>
+<dt id="md"><b>md</b></dt>
+<dd>
+
+<p>Output long usage help as markdown.</p>
+
+</dd>
+<dt id="internal"><b>internal</b></dt>
+<dd>
+
+<p>Output internal documentation as text.</p>
+
+</dd>
+<dt id="internal-html"><b>internal-html</b></dt>
+<dd>
+
+<p>Output internal documentation as html.</p>
+
+</dd>
+<dt id="internal-md"><b>internal-md</b></dt>
+<dd>
+
+<p>Output internal documentation as markdown.</p>
+
+</dd>
+</dl>
+
+</dd>
+<dt id="l"><b>-l</b></dt>
+<dd>
+
+<p>Send log messages to syslog. Default is to just send output to stderr.</p>
+
+</dd>
+<dt id="v"><b>-v</b></dt>
+<dd>
+
+<p>Verbose output. Default is is only output (or log) messages with level &quot;warning&quot; and higher.</p>
+
+<p>-v - output &quot;notice&quot; and higher.</p>
+
+<p>-vv - output &quot;info&quot; and higher.</p>
+
+</dd>
+<dt id="x"><b>-x</b></dt>
+<dd>
+
+<p>Set the gpDebug level. Add 1 for each -x. Or you can set gpDebug before running the script.</p>
+
+<p>See: fLog and fLog2</p>
+
+</dd>
+<dt id="T-Test"><b>-T Test</b></dt>
+<dd>
+
+<p>Run the unit test functions in this script.</p>
+
+<p>If Test is &quot;all&quot;, then all of the functions that begin with &quot;test&quot; will be run. Otherwise &quot;Test&quot; should match the test function names separated with commas (with all names in a quote).</p>
+
+<p>For more details about shunit2 (or shunit2.1), see shunit2/shunit2-manual.html <a href="https://github.com/kward/shunit2">Source</a></p>
+
+<p>See shunit2, shunit2.1, Global: gpUnitDebug</p>
+
+<p>Also for more help, use the &quot;-H internal&quot; option.</p>
+
+</dd>
+</dl>
+
+<h2 id="Globals">Globals</h2>
+
+<p>Globals that may affect how way the script runs. Just about all of these globals can be set and exported before the script is run (just in case you cannot easily set them with CLI flags).</p>
+
+<dl>
+
+<dt id="Tmp"><b>Tmp</b></dt>
+<dd>
+
+<p>This is the top directory where tmp file will be put.</p>
+
+<p>Default: /tmp/$USER/SCRIPTNAME/</p>
+
+<p>if gpDebug is 0, temp files will usually include the PID.</p>
+
+</dd>
+<dt id="gpLog"><b>gpLog</b></dt>
+<dd>
+
+<p>If set to 0, log messages will only be sent to stderr.</p>
+
+<p>If set to 1, log messages will be sent to stderr and syslog.</p>
+
+<p>See -l, fLog and fErr for details</p>
+
+<p>Default: 0</p>
+
+</dd>
+<dt id="gpFacility"><b>gpFacility</b></dt>
+<dd>
+
+<p>Log messages sent to syslog will be sent to the &quot;facility&quot; specified by by gpFacility.</p>
+
+<p>&quot;user&quot; log messages will be sent to /var/log/user.log, or /var/log/syslog, or /var/log/messages.log</p>
+
+<p>See: fLog</p>
+
+<p>Default: user</p>
+
+<p>Allowed facility names:</p>
+
+<pre><code> local0 through local7 - for local use (these are some suggested uses)
+    local0 - system or application configuration
+    local1 - application processes
+    local2 - web site errors
+    local3 - web site access
+    local4 - backend processes
+    local5 - publishing
+    local6 - available
+    local7 - available
+ user - misc scripts, generic user-level messages
+ auth - security/authorization messages
+ authpriv - security/authorization messages (private)
+ cron - clock daemon (cron and at)
+ daemon - system daemons without separate facility value
+ ftp - ftp daemon
+ kern - kernel  messages  (these  can&#39;t be generated from user processes)
+ lpr - line printer subsystem
+ mail - mail subsystem
+ news - USENET news subsystem
+ syslog - messages generated internally by syslogd(8)
+ uucp - UUCP subsystem
+       </code></pre>
+
+</dd>
+<dt id="gpVerbose"><b>gpVerbose</b></dt>
+<dd>
+
+<p>If set to 0, only log message at &quot;warning&quot; level and above will be output.</p>
+
+<p>If set to 1, all non-debug messages will be output.</p>
+
+<p>See -v, fLog</p>
+
+<p>Default: 0</p>
+
+</dd>
+<dt id="gpDebug"><b>gpDebug</b></dt>
+<dd>
+
+<p>If set to 0, all &quot;debug&quot; and &quot;debug-N&quot; level messages will be skipped.</p>
+
+<p>If not 0, all &quot;debug&quot; level messages will be output.</p>
+
+<p>Or if &quot;debug-N&quot; level is used, then if gpDebug is &lt;= N, then the log message will be output, otherwise it is skipped.</p>
+
+<p>See -x</p>
+
+</dd>
+<dt id="gpUnitDebug"><b>gpUnitDebug</b></dt>
+<dd>
+
+<p>If set to non-zero, then the fUDebug function calls will output the messages when in test functions.</p>
+
+<p>See -T, fUDebug</p>
+
+</dd>
+</dl>
+
+<h1 id="RETURN-VALUE">RETURN VALUE</h1>
+
+<p>[What the program or function returns if successful.]</p>
+
+<h1 id="ERRORS">ERRORS</h1>
+
+<p>Fatal Error:</p>
+
+<p>Warning:</p>
+
+<p>Many error messages may describe where the error is located, with the following log message format:</p>
+
+<pre><code> Program: PID NNNN: Message [LINE](ErrNo)</code></pre>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<h1 id="ENVIRONMENT">ENVIRONMENT</h1>
+
+<p>See Globals section for details.</p>
+
+<p>HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug, gpUnitDebug</p>
+
+<h1 id="FILES">FILES</h1>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p>shunit2</p>
+
+<h1 id="NOTES">NOTES</h1>
+
+<h1 id="CAVEATS">CAVEATS</h1>
+
+<p>[Things to take special care with; sometimes called WARNINGS.]</p>
+
+<h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
+
+<p>[All possible messages the program can print out--and what they mean.]</p>
+
+<p>To verify the script is internally OK, run: SCRIPTNAME -T all</p>
+
+<h1 id="BUGS">BUGS</h1>
+
+<p>[Things that are broken or just don&#39;t work quite right.]</p>
+
+<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
+
+<p>[Bugs you don&#39;t plan to fix :-)]</p>
+
+<h1 id="AUTHOR">AUTHOR</h1>
+
+<p>NAME</p>
+
+<h1 id="HISTORY">HISTORY</h1>
+
+<p>(c) Copyright 2021 by COMPANY</p>
+
+<p>$Revision: 1.43 $ $Date: 2021/08/25 09:59:48 $ GMT</p>
+
+
+</body>
+
+</html>
+
+
