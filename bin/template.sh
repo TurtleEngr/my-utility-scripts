@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.43 $ $Date: 2021/08/25 09:59:48 $ GMT
+# $Revision: 1.44 $ $Date: 2021/08/26 00:08:49 $ GMT
 
 # ========================================
 # Tests
@@ -61,7 +61,7 @@ important work continued or work reverted?
 
 =internal-head3 Variable Naming Convention
 
-Prefix codes are used to show the "scope" of variables):
+Prefix codes are used to show the B<"scope"> of variables:
 
  gVar - global variable (may even be external to the script)
  pVar - a function parameter I<local>
@@ -904,7 +904,7 @@ NAME
 
 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.43 $ $Date: 2021/08/25 09:59:48 $ GMT 
+$Revision: 1.44 $ $Date: 2021/08/26 00:08:49 $ GMT 
 
 =cut
 EOF
@@ -1260,7 +1260,7 @@ fSetComGlobals()
 	# -------------------
 	# Define the version number for this script
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.43 $'
+	cVer='$Revision: 1.44 $'
 	cVer=${cVer#*' '}
 	cVer=${cVer%' '*}
 

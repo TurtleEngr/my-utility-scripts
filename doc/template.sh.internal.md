@@ -42,7 +42,7 @@ important work continued or work reverted?
 
 ### Variable Naming Convention
 
-Prefix codes are used to show the "scope" of variables):
+Prefix codes are used to show the **"scope"** of variables:
 
     gVar - global variable (may even be external to the script)
     pVar - a function parameter I<local>
