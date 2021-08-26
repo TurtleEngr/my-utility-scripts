@@ -1,0 +1,60 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/backup2cloud,v 1.5 2020/02/29 01:36:38 bruce Exp $
+
+# See /root/.s3cfg
+
+# ----------
+# Validate
+
+if [ $(whoami) != "root" ]; then
+    echo "Error: run as root"
+    exit 1
+fi
+
+/usr/lib/nagios/plugins/check_procs -a s3cmd  -m PROCS -w 0 -c 0
+if [ $? -ne 0 ]; then
+    echo "Warning: backup2cloud is already running"
+    exit 1
+fi
+
+# ----------
+# s3cmd options
+pParms="$*"
+
+cCache=/var/cache/backup2cloud/md5-cache.txt
+mkdir -p ${cCache%/*} 2>&1
+
+cOptions="--config=/root/.s3cfg -r -p --no-progress --multipart-chunk-size-mb=1000 --cache-file=$cCache $pParms"
+
+# ----------
+echo START
+date
+tStart=$(date +'%s')
+
+for i in 1 2; do
+	cd /mnt/backup$i
+	if [ -d rsnapshot$i ]; then
+		echo '----------------------------------------'
+		echo "/usr/local/bin/s3cmd $cOptions sync rsnapshot$i/hourly.0/$HOSTNAME s3://$HOSTNAME-backup/rsnapshot$i/hourly.0/"
+		/usr/local/bin/s3cmd $cOptions sync rsnapshot$i/hourly.0/$HOSTNAME s3://$HOSTNAME-backup/rsnapshot$i/hourly.0/
+
+		find /mnt/backup$i/rsnapshot$i/hourly.0 -type l -exec ls -l {} \; >/tmp/symlinks$i.txt
+		echo "/usr/local/bin/s3cmd -v --no-delete-removed sync /tmp/symlinks$i.txt s3://$HOSTNAME-backup/rsnapshot$i/"
+		/usr/local/bin/s3cmd -v --no-delete-removed sync /tmp/symlinks$i.txt s3://$HOSTNAME-backup/rsnapshot$i/
+tEnd=$(date +'%s')
+		let tElapsed=(tEnd-tStart)/60
+		echo Duration $i: $tElapsed min
+	fi
+done
+
+echo '----------------------------------------'
+tEnd=$(date +'%s')
+let tElapsed=(tEnd-tStart)/60
+echo Duration: $tElapsed min
+echo DONE
+date
+
+mv /var/log/backup2cloud.last /var/log/backup2cloud.prev
+echo backup2cloud last ran: >>/var/log/backup2cloud.last
+date >>/var/log/backup2cloud.last
+echo Duration: $tElapsed min >>/var/log/backup2cloud.last

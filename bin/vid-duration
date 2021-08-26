@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	cat <<EOF
+Usage
+	vid-duration *.mp4 *.mp3
+EOF
+	exit 1
+fi
+
+for i in $*; do
+	if [ ! -f $i ]; then
+		continue
+	fi
+	echo -n $i
+	ffmpeg -i $i 2>&1 | grep Duration
+done | \
+sed 's/00://; s/\.[0-9]*,//' | \
+awk '{print $1 "\t" $2,$3}' >duration.txt
