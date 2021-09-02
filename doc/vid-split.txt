@@ -171,5 +171,5 @@ BUGS
 RESTRICTIONS
 AUTHOR
 HISTORY
-    $Revision: 1.6 $
+    $Revision: 1.1 $
 

@@ -1,0 +1,608 @@
+#!/bin/bash
+# $Source: /repo/local.cvs/per/bruce/bin/bash-com.test,v $
+# $Revision: 1.1 $ $Date: 2021/09/02 08:16:19 $ GMT
+
+# -------------------
+# Set current directory location in PWD and cCurDir, because with cron
+# jobs PWD is not set.
+if [ -z "$PWD" ]; then
+	PWD=$(pwd)
+fi
+cCurDir=$PWD
+
+# -------------------
+# Define the location of the script
+cBin=${0%/*}
+if [ "$cBin" = "." ]; then
+        cBin=$PWD
+fi
+cd $cBin
+cBin=$PWD
+cd $cCurDir
+
+# --------------------------------
+fComBashTestUsage()
+{
+	# This is mainly used to test fComUsage, for the script usage styles
+	return
+    	cat <<\EOF >/dev/null
+=internal-pod
+
+=internal-head1 bash-com.test
+
+=internal-head2 bash-com.test Usage
+
+=internal-cut
+
+=pod
+
+=head1 NAME
+
+bash-com.test - test the bash-com.inc functions
+
+=head1 SYNOPSIS
+
+	bash-com.test [testName,testName,...]
+
+=head1 DESCRIPTION
+
+shunit2.1 is used to run the unit tests. If no test function names are
+listed, then all of the test functions will be run.
+
+=head1 RETURN VALUE
+
+0 - if OK
+
+=head1 ERRORS
+
+Look for the assert errors.
+
+=head1 EXAMPLES
+
+=head1 ENVIRONMENT
+
+=head1 FILES
+
+=head1 SEE ALSO
+
+shunit2.1
+
+=head1 NOTES
+
+=head1 CAVEATS
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS
+
+=head1 RESTRICTIONS
+
+=head1 AUTHOR
+
+=head1 HISTORY
+
+$Revision: 1.1 $ $Date: 2021/09/02 08:16:19 $ GMT 
+
+=cut
+EOF
+}
+
+# --------------------------------
+fCleanUp()
+{
+	fComCleanUp
+}
+
+# --------------------------------
+fComUDebug()
+{
+	if [ ${gpUnitDebug:-0} -ne 0 ]; then
+		echo "fComUDebug: $*"
+	fi
+	return
+	cat <<EOF
+
+=internal-head2 Com Unit Test Functions
+
+EOF
+} # fComUDebug
+
+# --------------------------------
+oneTimeSetUp()
+{
+	. $cBin/bash-com.inc
+	fComSetGlobals
+
+	# Save global values
+	export tDefault_Tmp=$Tmp
+	export tDefault_cBin=$cBin
+	export tDefault_cCurDir=$cCurDir
+	export tDefault_cName=$cName
+	export tDefault_cPID=$cPID
+	export tDefault_cTmp1=$cTmp1
+	export tDefault_cTmpF=$cTmpF
+	export tDefault_cVer=$cVer
+	export tDefault_gErr=0
+	export tDefault_gpDebug=0
+	export tDefault_gpFacility=user
+	export tDefault_gpLog=0
+	export tDefault_gpVerbose=0
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head2 Test bash-com.inc
+
+=internal-head3 oneTimeSetuUp
+
+Currently this records all of the script's expected initial global
+variable settings, defined in fComSetGlobals. If different, adjust the
+tests as needed.
+
+Calls:
+
+ $cBin/bash-com.inc
+ fComSetGlobals
+
+=internal-cut
+EOF
+} # oneTimeSetUp
+
+# --------------------------------
+setUp()
+{
+	# Restore global values, before each test
+	Tmp=$tDefault_Tmp
+	cBin=$tDefault_cBin
+	cCurDir=$tDefault_cCurDir
+	cName=$tDefault_cName
+	cPID=$tDefault_cPID
+	cTmp1=$tDefault_cTmp1
+	cTmpF=$tDefault_cTmpF
+	cVer=$tDefault_cVer
+	gErr=$tDefault_gErr
+	gpDebug=$tDefault_gpDebug
+	gpFacility=$tDefault_gpFacility
+	gpLog=$tDefault_gpLog
+	gpVerbose=$tDefault_gpVerbose
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 setUp
+
+Before each test runs, this restores all of the script's initial
+global variable settings,
+
+=internal-cut
+EOF
+} # setUp
+
+# --------------------------------
+testComInitialConfig()
+{
+	local tProg
+	local tResult
+
+	assertEquals "tcic-1" "$PWD" "$cCurDir"
+	assertTrue "tcic-2" "[ -d $cCurDir ]"
+
+	assertNotNull "tcic-3" "$cBin"
+	assertTrue "tcic-4" "[ -d $cBin ]"
+	assertTrue "tcic-5" "[ -f $cBin/$cName ]"
+	assertTrue "tcic-6" "[ -x $cBin/$cName ]"
+	assertTrue "tcic-7" "[ -x $cBin/bash-com.inc ]"
+	assertTrue "tcic-8" "[ -x $cBin/bash-com.test ]"
+	
+	assertEquals "tcic-10" "0" "$gpDebug"
+	assertEquals "tcic-11" "0" "$gpVerbose"
+	assertEquals "tcic-12" "0" "$gpLog"
+	assertEquals "tcic-13" "user" "$gpFacility"
+	assertEquals "tcic-14" "0" "$gErr"
+	assertNull "tcic-15" "$(echo $cVer | tr -d '.[:digit:]')"
+	assertEquals "tcic-16" "/tmp/$USER/$cName" "$Tmp"
+	#assertEquals "tcic-17" "$Tmp/file-$cPID" "$cTmpF"
+	assertEquals "tcic-18" "${cTmpF}-1.tmp" "$cTmp1"
+
+	# ADJUST
+	assertEquals "tcic-19" "/tmp/$USER/$cName" "$Tmp"
+
+	for tProg in logger pod2text pod2usage pod2html pod2man pod2markdown tidy awk tr; do
+		which $tProg &>/dev/null
+		assertTrue "tcic-20 missing: $tProg" "[ $? -eq 0 ]"
+	done
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testInitialConfig
+
+Verify all of the global variables are correctly defined. Look for
+"ADJUST" comment for tests that might need to be changed for your
+script.
+
+=internal-cut
+EOF
+} # testInitialConfig
+
+# --------------------------------
+testComLog()
+{
+	local tMsg
+	local tLevel
+	local tLine
+	local tErr
+	local tResult
+	local tLog
+	local tTestMsg
+
+	# Check format, for a number of settings
+	gpLog=0
+	gpVerbose=0
+	gpDebug=0
+	tMsg="Testing 123"
+	tLine="458"
+	tErr="42"
+
+	gpUnitDebug=0
+	for gpLog in 0 1; do
+	  for gpVerbose in 0 1 2; do
+	    for gpDebug in 0 1 2; do
+	      for tLevel in alert crit err warning notice info debug debug-1 debug-3; do
+	        for tLog in "fLog" "fLog2"; do
+		  echo -n '.' 1>&2
+	          tTestMsg="l-$gpLog.v-$gpVerbose.d-$gpDebug.$tLevel.$tLog"
+	          if [ "$tLog" = "fLog" ]; then
+		    fComUDebug " "
+		    fComUDebug "Call: fLog $tLevel \"$tMsg\" $tLine $tErr"
+		    tResult=$(fLog $tLevel "$tMsg" $tLine $tErr 2>&1)
+	          fi
+	          if [ "$tLog" = "fLog2" ]; then
+		    fComUDebug " "
+		    fComUDebug "Call: fLog2 -p $tLevel -m \"$tMsg\" -l $tLine -e $tErr"
+		    tResult=$(fLog2 -p $tLevel -m "$tMsg" -l $tLine -e $tErr 2>&1)
+	      	  fi
+		  fComUDebug "tResult=$tResult"
+
+		  if [ $gpVerbose -eq 0 ] && echo $tLevel | grep -Eq 'notice|info'; then
+	              assertNull "tcl1-$tTestMsg not notice,info" "$tResult"
+		      continue
+		  fi
+		  if [ $gpVerbose -eq 1 ] && echo $tLevel | grep -Eq 'info'; then
+	              assertNull "tcl1-$tTestMsg not info" "$tResult"
+		      continue
+		  fi		  
+		  if [ $gpDebug -eq 0 ] && [ "${tLevel%%-*}" = "debug" ]; then
+	              assertNull "tcl2-$tTestMsg not debug" "$tResult"
+		      continue
+		  fi
+		  if [ $gpDebug -lt 2 ] && [ "$tLevel" = "debug-2" ]; then
+	              assertNull "tcl3-$tTestMsg not debug-2" "$tResult"
+		      continue
+		  fi
+		  if [ $gpDebug -lt 3 ] && [ "$tLevel" = "debug-3" ]; then
+	              assertNull "tcl4-$tTestMsg not debug-3" "$tResult"
+		      continue
+		  fi
+	      	  assertContains "tcl5-$tTestMsg.name" "$tResult" "$cName"
+	      	  assertContains "tcl6-$tTestMsg.level" "$tResult" "$tLevel:"
+	      	  assertContains "tcl7-$tTestMsg.msg" "$tResult" "$tMsg"
+	      	  assertContains "tcl8-$tTestMsg.line" "$tResult" '['$tLine']'
+	      	  assertContains "tcl9-$tTestMsg.$tLevel.err" "$tResult" '('$tErr')'
+	        done
+	      done
+	    done
+	  done
+	done
+	echo 1>&2
+	gpUnitDebug=0
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testLog
+
+Test fLog and fLog2.
+
+=internal-cut
+EOF
+} # testLog
+
+
+# --------------------------------
+testComSysLog()
+{
+	local tErr
+	local tLevel
+	local tLine
+	local tLog
+	local tMsg
+	local tResult
+	local tTestMsg
+
+	# ADJUST? This is dependent on your syslog configuration.
+	export tSyslog=/var/log/user.log
+	#export tSyslog=/var/log/messages.log
+	#export tSyslog=/var/log/syslog
+
+	# Check syslog
+	gpUnitDebug=0
+	gpLog=1
+	gpVerbose=0
+	tMsg="Testing 123"
+	#for tLevel in emerg alert crit err warning; do
+	for tLevel in alert crit err warning; do
+	    for tLog in "fLog" "fLog2"; do
+		echo -n '.' 1>&2
+	    	tTestMsg="$tLevel.$tLog"
+		fComUDebug " "
+	        if [ "$tLog" = "fLog" ]; then
+		    fComUDebug "Call: $tLog $tLevel $tMsg"
+		    tResult=$($tLog $tLevel "$tMsg" 2>&1)
+		fi
+	        if [ "$tLog" = "fLog2" ]; then
+		    fComUDebug "Call: $tLog -p $tLevel -m \"$tMsg\""
+		    tResult=$($tLog -p $tLevel -m "$tMsg" 2>&1)
+		fi
+		fComUDebug "tResult=$tResult"
+		assertContains "tcl11-$tTestMsg" "$tResult" "$tLevel:"
+		tResult=$(tail -n1 $tSyslog)
+		fComUDebug "syslog tResult=$tResult"
+		assertContains "tcl12-$tTestMsg" "$tResult" "$tLevel:"
+		assertContains "tcl13-$tTestMsg" "$tResult" "$tMsg"
+	    done
+	done
+	echo 1>&2
+	gpUnitDebug=0
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testSysLog
+
+Test fLog and fLog2, and verify messages are in a syslog file.
+
+=internal-cut
+EOF
+} # testSysLog
+
+# --------------------------------
+testComErrorLog()
+{
+	local tMsg
+	local tLevel
+	local tLine
+	local tErr
+	local tResult
+	local tLog
+	local tTestMsg
+
+	gpUnitDebug=0
+	gpLog=0
+	gpVerbose=0
+	local tMsg="Testing 123"
+	local tLine="458"
+	for gpLog in 0 1; do
+	    for tLog in "fError" "fError2"; do
+		echo -n '.' 1>&2
+	    	tTestMsg="l-$gpLog.$tLog"
+		fComUDebug " "
+	        if [ "$tLog" = "fError" ]; then
+		    fComUDebug "Call: $tLog \"$tMsg\" $tLine"
+		    tResult=$($tLog "$tMsg" $tLine 2>&1)
+		fi
+	        if [ "$tLog" = "fError2" ]; then
+		    fComUDebug "Call: $tLog -m \"$tMsg\" -l $tLine"
+		    tResult=$($tLog -m "$tMsg" -l $tLine 2>&1)
+		fi
+		fComUDebug "tResult=$tResult"
+		assertContains "tcel-$tTestMsg.name" "$tResult" "$cName"
+		assertContains "tcel-$tTestMsg.crit" "$tResult" "crit:"
+		assertContains "tcel-$tTestMsg.msg" "$tResult" "$tMsg"
+		assertContains "tcel-$tTestMsg.line" "$tResult" '['$tLine']'
+		# shellcheck disable=SC2026
+		assertContains "tcel-$tTestMsg.err" "$tResult" '('1')'
+		assertContains "tcel-$tTestMsg.usage" "$tResult" "Usage:"
+	    done
+	done
+	echo 1>&2
+	gpUnitDebug=0
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testErrorLog
+
+Test fError and fError2.
+
+=internal-cut
+EOF
+} # testErrorLog
+
+# --------------------------------
+testComCleanUp()
+{
+	gpDebug=0
+	local tResult
+
+	assertEquals "tccu-1" "/tmp/$USER/$cName" "$Tmp"
+	assertTrue "tccu-2" "[ -d $Tmp ]"
+
+	assertEquals "tccu-3" "$Tmp/file-$cPID" "$cTmpF"
+
+	assertEquals "tccu-4" "${cTmpF}-1.tmp" "$cTmp1"
+	touch $cTmp1
+	assertTrue "tccu-5" "[ -f $cTmp1 ]"
+
+	tResult=$(fComCleanUp 2>&1)
+	assertFalse "tccu-6" "[ -f $cTmp1 ]"
+	return
+
+	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testComCleanUp
+
+Test fComCleanUp. Verify the tmp files are removed.
+
+=internal-cut
+EOF
+} # testComCleanUp
+
+# --------------------------------
+testComUsage()
+{
+	local tResult
+	
+	gpUnitDebug=0
+
+	#-----
+	tResult=$(fComUsage -s short -f $cBin/$cName 2>&1)
+	fComUDebug "tResult=$tResult"
+	assertContains "tcu-short" "$tResult" "Usage:"
+	
+	#-----
+	tResult=$(fComUsage -s foo -f $cBin/$cName 2>&1)
+	fComUDebug "tResult=$tResult"
+	assertContains "tcu-s-foo.1" "$tResult" "DESCRIPTION"
+	assertContains "tcu-s-foo.2" "$tResult" "HISTORY"
+
+	#-----
+	tResult=$(fComUsage -f $cBin/$cName -s 2>&1)
+	fComUDebug "tResult=$tResult"
+	assertContains "tcu-s-null.1" "$tResult" "crit: Internal: fComUsage: Value required"
+
+	#-----
+	tResult=$(fComUsage -s long -f $cBin/$cName 2>&1)
+	assertContains "tcu-long.1" "$tResult" "DESCRIPTION"
+	assertContains "tcu-long.2" "$tResult" "HISTORY"
+
+	#-----
+	tResult=$(fComUsage -s man -f $cBin/$cName 2>&1)
+	assertContains "tcu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
+	assertContains "tcu-man.2" "$tResult" '.IX Header "HISTORY"'
+
+	#-----
+	tResult=$(fComUsage -s html -f $cBin/$cName -t "$cName Usage" 2>&1)
+	assertContains "tcu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+	assertContains "tcu-html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+	assertContains "tcu-html.3" "$tResult" "<title>$cName Usage</title>"
+
+	#-----
+	tResult=$(fComUsage -s md -f $cBin/$cName 2>&1)
+	assertContains "tcu-md.1" "$tResult" '# DESCRIPTION'
+	assertContains "tcu-md.2" "$tResult" '# HISTORY'
+
+	#-----
+	tResult=$(fComUsage -i -s long -f $cBin/$cName -f $cBin/bash-com.inc 2>&1)
+	fComUDebug "tResult=$tResult"
+	assertContains "tcu-internal.1" "$tResult" 'Template Use'
+	assertContains "tcu-internal.2" "$tResult" 'fComSetGlobals'
+
+	#-----
+	tResult=$(fComUsage -i -s html -t "Internal Doc" -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test 2>&1)
+	fComUDebug "tResult=$tResult"
+	assertContains "tcu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
+	assertContains "tcu-int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
+	assertContains "tcu-int-html.3" "$tResult" '<title>Internal Doc</title>'
+	assertContains "tcu-int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
+
+	#-----
+	tResult=$(fComUsage -i -s md -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test 2>&1)
+	assertContains "tcu-int-md.1" "$tResult" '## Template Use'
+	assertContains "tcu-int-md.2" "$tResult" '### fComSetGlobals'
+	assertContains "tcu-int-md.3" "$tResult" '### testComUsage'
+	
+	#-----
+	tResult=$(fComUsage -a -s long -f $cBin/$cName -f $cBin/bash-com.inc 2>&1)	
+	#-----
+	gpUnitDebug=0
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testComUsage
+
+Test fComUsage. Verify the different output styles work.
+
+=internal-cut
+EOF
+} # testComUsage
+
+# --------------------------------
+testComFunctions()
+{
+	local tResult
+
+	tResult=$(fComCheckDeps 2>&1)
+	assertTrue "tcf-fComCheckDep tResult=$tResult" "[ $? -eq 0 ]"
+
+	tResult=$(fComSetGlobals 2>&1)
+	assertTrue "tcf-fComSetGlobals tResult=$tResult" "[ $? -eq 0 ]"
+	return
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testComFunctions
+
+Just verify these functions exist and run.
+
+Calls:
+
+ fComCheckDeps
+ fComSetGlobals
+
+=internal-cut
+EOF
+} # testComFunctions
+
+# -------------------
+# This should be the last defined function
+fComRunTests()
+{
+	# ADJUST?
+	# export SHUNIT_COLOR=none
+	export SHUNIT_COLOR=light
+	export gpUnitDebug=${gpUnitDebug:-0}
+	if [ "${gpTest:-all}" = "all" ]; then
+		# shellcheck disable=SC1091
+		. $cBin/shunit2.1
+		exit $?
+	fi
+	# shellcheck disable=SC1091
+	. /usr/local/bin/shunit2.1 -- $gpTest
+	exit $?
+	
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComRunTests
+
+Run unit tests for the common functions.
+
+=internal-cut
+EOF
+} # fComRunTests
+
+# ====================
+
+export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
+export gErr gpDebug gpFacility gpLog gpVerbose
+
+# Test globals
+export gpTest
+export gpUnitDebug
+export SHUNIT_COLOR
+
+# -----
+# Optional input: a comma separated list of test function names
+export gpTest="$*"
+fComRunTests $gpTest

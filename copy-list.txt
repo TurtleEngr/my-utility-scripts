@@ -4,6 +4,9 @@ audio.control
 back-disk-change
 backup2cloud
 bar.env
+bash-com.inc
+bash-com.test
+bash-lint
 bcmnt
 cert-expire-date
 com-bash-lib.inc
@@ -57,7 +60,6 @@ init-sys-ver
 kden2csv.sh
 kden2csv.xsl
 kill.old.agent
-lint-bash
 list
 logtime
 lsg
