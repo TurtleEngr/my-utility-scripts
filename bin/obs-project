@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.1 2020/11/19 00:43:07 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.2 2021/09/15 18:32:25 bruce Exp $
 
 function fUsage
 {
@@ -41,7 +41,7 @@ if [ ! -d $cConfigDir/obs-studio/basic/scenes/CVS ]; then
 You should version these dirs and files:
 obs-config/obs-studio/global.ini
 obs-config/obs-studio/basic/profiles/*/*
-obs-config/obs-studio/basic/scenes/*/*.json
+obs-config/obs-studio/basic/scenes/*/*
 EOF
 fi
 
@@ -52,7 +52,7 @@ export XDG_CONFIG_HOME=$cConfigDir
 # It looks like this is ignored
 export XDG_CACHE_HOME=$HOME/.cache
 
-if [ -d $cConfigDir/obs-studio ]; then
+if [ -d $cConfigDir/obs-studio ] && [ ! -f $cConfigDir/obs-studio/.cvsignore ]; then
 	cat <<EOF >$cConfigDir/obs-studio/.cvsignore
 logs
 plugin_config

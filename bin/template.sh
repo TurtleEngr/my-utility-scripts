@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.45 $ $Date: 2021/09/02 08:15:46 $ GMT
+# $Revision: 1.47 $ $Date: 2021/09/06 18:34:34 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -291,7 +291,7 @@ NAME
 
 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.45 $ $Date: 2021/09/02 08:15:46 $ GMT 
+$Revision: 1.47 $ $Date: 2021/09/06 18:34:34 $ GMT 
 
 =cut
 EOF
@@ -433,7 +433,7 @@ This is just a starting point for creating script functionality tests.
 
 =internal-cut
 EOF
-}
+} # testScriptFunctions
 
 # ========================================
 # Script Functions
@@ -442,7 +442,7 @@ EOF
 fCleanUp()
 {
 	fComCleanUp
-	return
+	exit
 
     	cat <<EOF >/dev/null
 =internal-pod
@@ -455,7 +455,7 @@ Calls fComCleanUp.
 
 =internal-cut
 EOF
-}
+} # fCleanUp
 
 # -------------------
 fSetGlobals()
@@ -507,8 +507,6 @@ EOF
 # This should be the last defined function
 fRunTests()
 {
-	SHUNIT_COLOR=${SHUNIT_COLOR:-light}
-	# or SHUNIT_COLOR=none
 	gpUnitDebug=${gpUnitDebug:-0}
 	if [ "$gpTest" = "all" ]; then
 		# shellcheck disable=SC1091
@@ -547,10 +545,7 @@ export gErr gpDebug gpFacility gpLog gpVerbose
 # Test globals
 export gpTest gpUnitDebug SHUNIT_COLOR
 
-# Script globals
-export gpFileList=""
-export gpHostName=""
-
+cVer='$Revision: 1.47 $'
 fSetGlobals
 
 # -------------------

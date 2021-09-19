@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.1 $ $Date: 2021/09/02 08:16:19 $ GMT
+# $Revision: 1.3 $ $Date: 2021/09/05 00:58:05 $ GMT
 
 # --------------------------------
 fBashComInternalDoc()
@@ -88,7 +88,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.1 $'
+	cVer='$Revision: 1.3 $'
 
 =internal-head3 Documentation Format
 
@@ -160,7 +160,7 @@ fComSetGlobals()
 	# -------------------
 	# If your script defines a version with the Revision keyword, clean it
 	# shellcheck disable=SC2016
-	#cVer='$Revision: 1.1 $'
+	#cVer='$Revision: 1.3 $'
 	
 	if [ "$cVer" !=  "${cVer#*' '}" ]; then
 		cVer=${cVer#*' '}
@@ -492,7 +492,7 @@ fFmtLog()
 
 	# Check verbose
 	if [ $gpVerbose -eq 0 ] &&
-	     ( [ "$pLevel" = "notice" ] || [ "$pLevel" = "info" ] ); then
+	     [ "$pLevel" = "notice" -o "$pLevel" = "info" ]; then
 		return
 	fi
 	if [ $gpVerbose -eq 1 ] && [ "$pLevel" = "info" ]; then
@@ -725,3 +725,39 @@ If no -i, then "fUsage short", will be called.
 =internal-cut
 EOF
 } # fError2
+
+# --------------------------------
+fTimeoutFunction()
+{
+	# Number of seconds
+	declare -i pTimeout
+	# Cmd including args
+	local pCmd
+
+	pTimeout=$1
+	pCmd="$2"
+
+	declare -x tChild
+	( 
+		eval "$pCmd" &>/dev/null &
+		tChild=$!
+		trap -- "" SIGTERM
+		(
+			sleep $pTimeout
+			kill $tChild 2> /dev/null
+		) &
+		wait $tChild
+	)
+	return
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fTimeoutFunction pSec "pCmd [args...]"
+
+Algorithm idea came from:
+
+https://stackoverflow.com/questions/9954794/execute-a-shell-function-with-timeout
+
+=internal-cut
+EOF
+} # fTimeoutFunction

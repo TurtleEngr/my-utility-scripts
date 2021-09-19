@@ -63,6 +63,7 @@ kill.old.agent
 list
 logtime
 lsg
+lstree
 make-link.sh
 map-pkg.pl
 mkagent
