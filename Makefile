@@ -6,10 +6,10 @@ update copy :
 		cp -a ../doc/$$i.* doc 2>/dev/null; \
 	done
 
-checkin commit save :
+ci checkin commit save :
 	git ci -am Updated
 
-upload :
+push upload :
 	git pull origin develop
 	git push origin develop
 

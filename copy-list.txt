@@ -9,6 +9,7 @@ bash-com.test
 bash-lint
 bcmnt
 cert-expire-date
+check-status
 com-bash-lib.inc
 convert2mp3
 convert-txt2html.sh
@@ -97,11 +98,13 @@ proj2html.sh
 proj2html.xsl
 ps2pdf.sh
 quick-dump.sh
+rc.local
 re-encrypt.sh
 reset-usb.sh
 rmnl
 rm-safe
 rmtag.sh
+rsnapshot-monitor
 s3get
 s3-lsg
 s3put
