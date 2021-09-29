@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/check-status,v 1.3 2021/09/29 06:25:50 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/check-status,v 1.4 2021/09/29 07:10:44 bruce Exp $
 
 # ========================================
 # Unit Tests
@@ -23,30 +23,39 @@ testParseArgs()
 	local tIP
 	local tPort
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 8.8.8.8 53)
 	assertEquals "line=$LINENO" "1 8.8.8.8 53 file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 foo8.8bar.8.8 bar53)
 	assertEquals "line=$LINENO" "1 8.8.8.8 53 file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 foo 53)
 	assertEquals "line=$LINENO" "1 ip 53 file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 "foo" "53")
 	assertEquals "line=$LINENO" "1 ip 53 file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 8.8.8.8 foo)
 	assertEquals "line=$LINENO" "1 8.8.8.8 port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 foo bar)
 	assertEquals "line=$LINENO" "1 ip port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 8.8.8.8)
 	assertEquals "line=$LINENO" "1 8.8.8.8 port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1)
 	assertEquals "line=$LINENO" "1 ip port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 foo)
 	assertEquals "line=$LINENO" "1 ip port file" "$tCmd $tIP $tPort $tFile"
 }
@@ -60,39 +69,48 @@ testParseQuery()
 	local tFile
 	local tQS
 
+	# -----
 	tQS='cmd=1&ip=8.8.8.8&port=53'
 	read -t 1 -r tCmd tIP tPort tFile  < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "1 8.8.8.8 53 file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	tQS='cmd=1&port=53&ip=8.8.8.8'
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "1 8.8.8.8 53 file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	tQS='cmd=1&port=foo&ip=8.8.8.8'
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "1 8.8.8.8 port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	tQS='cmd=1&port=foo&ip=bar'
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "1 ip port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	tQS='cmd=1&port=foo5bar3&ip=bar8.8.$8.8'
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "1 8.8.8.8 53 file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	tQS='cmd=1&ip=$(cat /etc/shadow)&pp=$(cat /etc/passwd)'
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "1 ip port file" "$tCmd $tIP $tPort $tFile"
 
 
+	# -----
 	tQS='foo=$(cat /etc/shadow)'
 	read -t 1 -r tCmd tIP tPort tFile  < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "cmd ip port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	tQS=''
 	read -t 1 -r tCmd tIP tPort tFile  < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "cmd ip port file" "$tCmd $tIP $tPort $tFile"
 
+	# -----
 	tQS='cmd=2&file=1'
 	read -t 1 -r tCmd tIP tPort tFile  < <(fParseQuery "$tQS")
 	assertEquals "line=$LINENO" "2 ip port 1" "$tCmd $tIP $tPort $tFile"
@@ -110,21 +128,26 @@ testGetStatus()
 	assertEquals "line=$LINENO" "Fail" "$(fGetStatus cmd ip port file)"
 	assertEquals "line=$LINENO" "Fail" "$(fGetStatus 9 ip port 1)"
 	
+	# -----
 	rm $cFile1 &>/dev/null
 	assertEquals "line=$LINENO" "Fail" "$(fGetStatus 2 ip port 1)"
 
+	# -----
 	tMsg='OK'
 	echo "$tMsg" >$cFile1
 	assertEquals "line=$LINENO" "$tMsg" "$(fGetStatus 2 ip port 1)"
 
+	# -----
 	tMsg='Error: Some mail is bouncing'
 	echo "$tMsg" >$cFile1
 	assertNotEquals "line=$LINENO" "OK" "$(fGetStatus 2 ip port 1)"
 
+	# -----
 	tMsg='Error: Some mail is bouncing'
 	echo "$tMsg" >$cFile1
 	assertEquals "line=$LINENO" "$tMsg" "$(fGetStatus 2 ip port 1)"
 
+	# -----
 	tMsg='Subject: asimov backup OK'
 	echo "$tMsg" >$cFile2
 	assertEquals "line=$LINENO" "$tMsg" "$(fGetStatus 2 ip port 2)"
@@ -135,17 +158,17 @@ testOutput()
 {
 	local tResult
 
-	# ----------
+	# -----
 	tResult=$(fOutput 1 192.168.1.5 443 file OK)
 	assertContains "line=$LINENO" "$tResult" 'Check-Status: 1 192.168.1.5 443 file'
 	assertContains "line=$LINENO" "$tResult" "OK" 
 
-	# ----------
+	# -----
 	tResult=$(fOutput 1 192.168.1.5 444 file Fail)
 	assertContains "line=$LINENO" "$tResult" 'Check-Status: 1 192.168.1.5 444 file'
 	assertContains "line=$LINENO" "$tResult" "Fail"
 
-	# ----------
+	# -----
 	tResult=$(fOutput 2 ip port 1 OK)
 	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 2 ip port 1'
 	assertContains "line=$LINENO" "$tResult" "OK" 
@@ -161,7 +184,7 @@ testIntegrate1()
 	local tTestResult=""
 	local tQS=""
 
-	# ----------
+	# -----
 	tQS='cmd=1&ip=192.168.1.5&port=22'
 	read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
 	tResult=$(fGetStatus $tCmd $tIP $tPort $tFile)
@@ -169,7 +192,7 @@ testIntegrate1()
 	assertContains "line=$LINENO $tTestResult" 'Check-Status: 1 192.168.1.5 22 file'
 	assertContains "line=$LINENO" "$tTestResult" "OK"
 
-	# ----------
+	# -----
 	tMsg='OK'
 	echo "$tMsg" >$cFile1
 	tQS='cmd=2&file=1'
@@ -179,7 +202,7 @@ testIntegrate1()
 	assertContains "line=$LINENO $tTestResult" 'Check-Status: 2 ip port 1'
 	assertContains "line=$LINENO" "$tTestResult" "OK"
 	
-	# ----------
+	# -----
 	tMsg='Error: Some mail is bouncing'
 	echo "$tMsg" >$cFile1
 	tQS='cmd=2&file=1'
@@ -189,7 +212,7 @@ testIntegrate1()
 	assertContains "line=$LINENO $tTestResult" 'Check-Status: 2 ip port 1'
 	assertContains "line=$LINENO $tTestResult" "$tTestResult" "$tMsg"
 	
-	# ----------
+	# -----
 	tMsg='Subject: asimov backup OK'
 	echo "$tMsg" >$cFile2
 	tQS='cmd=2&file=2'
@@ -199,7 +222,7 @@ testIntegrate1()
 	assertContains "line=$LINENO $tTestResult" 'Check-Status: 2 ip port 2'
 	assertContains "line=$LINENO $tTestResult" "$tTestResult" "OK"
 
-	# ----------
+	# -----
 	tMsg='Subject: asimov backup Error'
 	echo "$tMsg" >$cFile2
 	tQS='cmd=2&file=2'
@@ -215,59 +238,59 @@ testIntegrate2()
 {
 	local tMsg
 	local tResult
-#	export QUERY_STRING
+	export QUERY_STRING=""
 
-	# ----------
-	tResult=$(./check-status 1 192.168.1.5 22 foo)
-	assertContains "line=$LINENO $tResult" 'Check-Status: 1 192.168.1.5 22 file'
-	assertContains "line=$LINENO" "$tResult" "OK"
+	# -----
+	tResult=$(./check-status 1 192.168.1.5 80 foo)
+	assertContains "line=$LINENO $tResult" 'Check-Status: 1 192.168.1.5 80 file'
+	assertContains "line=$LINENO $tResult" "$tResult" "OK"
 
-	# ----------
+	# -----
 	tResult=$(./check-status 1 192.168.1.5 444 foo)
 	assertContains "line=$LINENO $tResult" 'Check-Status: 1 192.168.1.5 444 file'
 	assertContains "line=$LINENO" "$tResult" "Fail"
 
-	# ----------
+	# -----
 	tMsg='OK'
 	echo "$tMsg" >$cFile1
 	tResult=$(./check-status 2 foo bar 1)
 	assertContains "line=$LINENO $tResult" 'Check-Status: 2 ip port 1'
 	assertContains "line=$LINENO" "$tResult" "OK"
 
-	# ----------
+	# -----
 	tMsg='Error: Some mail is bouncing'
 	echo "$tMsg" >$cFile1
 	tResult=$(./check-status 2 foo bar 1)
 	assertContains "line=$LINENO $tResult" 'Check-Status: 2 ip port 1'
 	assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
+	# -----
 	tMsg='Subject: asimov backup OK'
 	echo "$tMsg" >$cFile2
 	tResult=$(./check-status 2 foo bar 2)
 	assertContains "line=$LINENO $tResult" 'Check-Status: 2 ip port 2'
 	assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
+	# -----
 	tMsg='Subject: asimov backup Error'
 	echo "$tMsg" >$cFile2
 	tResult=$(./check-status 2 foo bar 2)
 	assertContains "line=$LINENO $tResult" 'Check-Status: 2 ip port 2'
 	assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
-	QUERY_STRING='cmd=1&ip=192.168.1.5&port=22'
+	# -----
+	QUERY_STRING='cmd=1&ip=192.168.1.5&port=80'
 	tResult=$(./check-status)
-	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 1 192.168.1.5 22 file'
-	assertContains "line=$LINENO" "$tResult" "OK"
+	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 1 192.168.1.5 80 file'
+	assertContains "line=$LINENO $tResult" "$tResult" "OK"
 
-	# ----------
+	# -----
 	QUERY_STRING='cmd=1&ip=192.168.1.5&port=444'
 	tResult=$(./check-status)
 	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 1 192.168.1.5 444 file'
 	assertContains "line=$LINENO" "$tResult" "Fail"
 
-	# ----------
+	# -----
 	QUERY_STRING='cmd=2&file=1'
 	tMsg='OK'
 	echo "$tMsg" >$cFile1
@@ -275,7 +298,7 @@ testIntegrate2()
 	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 2 ip port 1'
 	assertContains "line=$LINENO" "$tResult" "OK"
 
-	# ----------
+	# -----
 	QUERY_STRING='cmd=2&file=1'
 	tMsg='Error: Some mail is bouncing'
 	echo "$tMsg" >$cFile1
@@ -283,7 +306,7 @@ testIntegrate2()
 	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 2 ip port 1'
 	assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
+	# -----
 	QUERY_STRING='cmd=2&file=2'
 	tMsg='Subject: asimov backup OK'
 	echo "$tMsg" >$cFile2
@@ -291,7 +314,7 @@ testIntegrate2()
 	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 2 ip port 2'
 	assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
+	# -----
 	QUERY_STRING='cmd=2&file=2'
 	tMsg='Subject: asimov backup Error'
 	echo "$tMsg" >$cFile2
@@ -299,7 +322,7 @@ testIntegrate2()
 	assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 2 ip port 2'
 	assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
+	# -----
 	QUERY_STRING=''
 	tMsg='Subject: asimov backup Error'
 	echo "$tMsg" >$cFile2
@@ -307,7 +330,7 @@ testIntegrate2()
 	assertContains "line=$LINENO $tResult" "$tResult" 'Error: problem parsing args, missing QUERY_STRING'
 	assertNotContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
+	# -----
 	QUERY_STRING='cmd=2&file=2'
 	tMsg='Subject: asimov backup Error'
 	echo "$tMsg" >$cFile2
@@ -315,7 +338,7 @@ testIntegrate2()
 	assertContains "line=$LINENO $tResult" "$tResult" '2 ip port 2'
 	assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
-	# ----------
+	# -----
 	QUERY_STRING='cmd=2&file=2'
 	tMsg='Subject: asimov backup Error'
 	echo "$tMsg" >$cFile2
@@ -342,6 +365,13 @@ cgi-bin Usage
 	export QUERY_STRING='cmd=[12]&ip=[N.N.N.N]&port=[NNN]&file=[N]'
 	check-status
 
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1&ip=N.N.N.N&port=N
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=2&file=N
+
+	Example cgi-bin
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.7&port=22
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.96&port=2049
+
 CLI Usage for ip/port check:
 	check-status 1 ip port
 
@@ -351,14 +381,6 @@ CLI Usage for file check:
 	N=1, return: head -n 1 /var/tmp/check-mail.tmp
 	N=2, return: grep "Subject: " /var/tmp/rsnapshot-monitor.tmp | head -n 1
 
-cgi-bin Usage
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1&ip=N.N.N.N&port=N
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=2&file=N
-
-	Example cgi-bin
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.7&port=22
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.96&port=2049
-	
 Output 1 "ip":
 	If IP PORT connected, output "OK"
 	if not connected or timed out: "Fail"
@@ -368,6 +390,38 @@ Output 2 "file":
        if FILE, output "head -n 1 FILE"
 EOF
 	exit 1
+}
+
+# --------------------
+fValidInput()
+{
+	local pCmd=$1
+	local pIP=$2
+	local pPort=$3
+	local pFile=$4
+	local tCount=0
+	local tErr=0
+	local tResult=""
+	
+	tCount=$(echo "pCmd pIP pPort pFile" | wc -w)
+	tCount=$tCount
+	if [ "$tCount" != "4" ]; then
+		tErr=2
+		gResult="Error: problem parsing args, internal error ($tErr)"
+	fi
+	if [ "$pCmd" = "1" ] && ( [ "$pIP" = "ip" ] || [ "$pPort" = "port" ] ); then
+		tErr=3
+		gResult="Error: problem parsing args ($tErr)"
+	fi
+	if [ "$pCmd" = "2" ] && [ "$pFile" = "file" ]; then
+		tErr=4
+		gResult="Error: problem parsing args ($tErr)"
+	fi
+
+	if [ $tErr -ne 0 ]; then
+		fOutput $pCmd "$pIP" "$pPort" "$pFile" "$gResult"
+		exit $tErr
+	fi
 }
 
 # --------------------
@@ -447,7 +501,7 @@ fGetStatus()
 	local tResult="Fail"
 
 	case $pCmd in
-		1)	timeout 3s nc -zvw10 $pIP $pPort &>/dev/null
+		1)	timeout 5s nc -zvw10 $pIP $pPort &>/dev/null
 			if [ $? -eq 0 ]; then
 				tResult="OK"
 			fi
@@ -496,53 +550,40 @@ EOF
 # ========================================
 # Main
 export QUERY_STRING
-pCmd=""
-pIP=""
-pPort=""
-pFile=""
-gResult=""
-gErr=0
-cFile1=/var/tmp/check-mail.tmp
-cFile2=/var/tmp/rsnapshot-monitor.tmp
+export pCmd=""
+export pIP=""
+export pPort=""
+export pFile=""
+export cFile1=/var/tmp/check-mail.tmp
+export cFile2=/var/tmp/rsnapshot-monitor.tmp
+export tResult=""
 
 if [ ".$1" = ".-h" ]; then
 	fUsage
 fi
+
 if [ ".$1" = ".-t" ]; then
 	shift
-#	.  /usr/local/bin/shunit2.1
-	.  ./shunit2.1
+	.  /usr/local/bin/shunit2.1
 	exit $?
+fi
+
+if [ $# -eq 0 ] && [ -z "$QUERY_STRING" ]; then
+	gErr=1
+	tResult="Error: problem parsing args, missing QUERY_STRING ($gErr)"
+	fOutput "cmd" "ip" "port" "file" "$tResult"
+	exit $gErr
 fi
 
 if [ $# -ne 0 ]; then
 	# CLI
 	read -t 1 -r pCmd pIP pPort pFile < <(fParseArgs $*)
-elif [ -z "$QUERY_STRING" ]; then
-	gErr=1
-	gResult="Error: problem parsing args, missing QUERY_STRING ($gErr)"
 else
 	# Web
 	read -t 1 -r pCmd pIP pPort pFile < <(fParseQuery "$QUERY_STRING")
-	tCount=$(echo "pCmd pIP pPort pFile" | wc -w)
-	tCount=$tCount
-	if [ "$tCount" != "4" ]; then
-		gErr=2
-		gResult="Error: problem parsing args, internal error ($gErr)"
-	fi
-	if [ "$pCmd" = "1" ] && ( [ "$pIP" = "ip" ] || [ "$pPort" = "port" ] ); then
-		gErr=3
-		gResult="Error: problem parsing args ($gErr) $QUERY_STRING"
-	fi
-	if [ "$pCmd" = "2" ] && [ "$pFile" = "file" ]; then
-		gErr=4
-		gResult="Error: problem parsing args ($gErr)"
-	fi
 fi
 
-if [ $gErr -eq 0 ]; then
-	gResult=$(fGetStatus $pCmd $pIP $pPort $pFile)
-fi
-
-fOutput $pCmd "$pIP" "$pPort" "$pFile" "$gResult"
+fValidInput $pCmd $pIP $pPort $pFile
+tResult=$(fGetStatus $pCmd $pIP $pPort $pFile)
+fOutput $pCmd "$pIP" "$pPort" "$pFile" "$tResult"
 exit 0
