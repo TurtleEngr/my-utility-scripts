@@ -128,8 +128,8 @@
 .rm #[ #] #H #V #F C
 .\" ========================================================================
 .\"
-.IX Title "TEMPLATE.SH 1"
-.TH TEMPLATE.SH 1 "2021-08-26" "perl v5.26.1" "User Contributed Perl Documentation"
+.IX Title "STDIN 1"
+.TH STDIN 1 "2021-09-29" "perl v5.26.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -157,34 +157,17 @@ Output this \*(L"long\*(R" usage help. See \*(L"\-H long\*(R"
 Style is used to select the type of help and how it is formatted.
 .Sp
 Styles:
-.RS 4
-.IP "\fBshort\fR" 8
-.IX Item "short"
-Output short usage help as text.
-.IP "\fBlong\fR" 8
-.IX Item "long"
-Output long usage help as text.
-.IP "\fBman\fR" 8
-.IX Item "man"
-Output long usage help as a man page.
-.IP "\fBhtml\fR" 8
-.IX Item "html"
-Output long usage help as html.
-.IP "\fBmd\fR" 8
-.IX Item "md"
-Output long usage help as markdown.
-.IP "\fBinternal\fR" 8
-.IX Item "internal"
-Output internal documentation as text.
-.IP "\fBinternal-html\fR" 8
-.IX Item "internal-html"
-Output internal documentation as html.
-.IP "\fBinternal-md\fR" 8
-.IX Item "internal-md"
-Output internal documentation as markdown.
-.RE
-.RS 4
-.RE
+.Sp
+.Vb 8
+\&        short|usage \- Output short usage help as text.
+\&        long|text   \- Output long usage help as text.
+\&        man         \- Output long usage help as a man page.
+\&        html        \- Output long usage help as html.
+\&        md          \- Output long usage help as markdown.
+\&        int         \- Also output internal documentation as text.
+\&        int\-html    \- Also output internal documentation as html.
+\&        int\-md      \- Also output internal documentation as markdown.
+.Ve
 .IP "\fB\-l\fR" 4
 .IX Item "-l"
 Send log messages to syslog. Default is to just send output to stderr.
@@ -201,27 +184,30 @@ level \*(L"warning\*(R" and higher.
 Set the gpDebug level. Add 1 for each \-x.
 Or you can set gpDebug before running the script.
 .Sp
-See: fLog and fLog2
+See: fLog and fLog2 (Internal documentation)
 .IP "\fB\-T Test\fR" 4
 .IX Item "-T Test"
 Run the unit test functions in this script.
 .Sp
 If Test is \*(L"all\*(R", then all of the functions that begin with \*(L"test\*(R"
 will be run. Otherwise \*(L"Test\*(R" should match the test function names
-separated with commas (with all names in a quote).
+separated with commas.
 .Sp
 For more details about shunit2 (or shunit2.1), see
 shunit2/shunit2\-manual.html
 Source <https://github.com/kward/shunit2>
 .Sp
-See shunit2, shunit2.1, Global: gpUnitDebug
+See shunit2, shunit2.1, and global: gpUnitDebug
 .Sp
-Also for more help, use the \*(L"\-H internal\*(R" option.
+Also for more help, use the \*(L"\-H int\*(R" option.
 .SS "Globals"
 .IX Subsection "Globals"
-Globals that may affect how way the script runs. Just about all of
-these globals can be set and exported before the script is run (just
-in case you cannot easily set them with \s-1CLI\s0 flags).
+These are globals that may affect how the script runs. Just about all
+of these globals that begin with \*(L"gp\*(R" can be set and exported before
+the script is run. That way you can set your own defaults, by putting
+them in your ~/.bashrc or ~/.bash_profile files.
+.PP
+The the \*(L"common\*(R" \s-1CLI\s0 flags will override the initial variable settings.
 .IP "\fBTmp\fR" 4
 .IX Item "Tmp"
 This is the top directory where tmp file will be put.
@@ -253,15 +239,7 @@ Default: user
 Allowed facility names:
 .Sp
 .Vb 10
-\& local0 through local7 \- for local use (these are some suggested uses)
-\&    local0 \- system or application configuration
-\&    local1 \- application processes
-\&    local2 \- web site errors
-\&    local3 \- web site access
-\&    local4 \- backend processes
-\&    local5 \- publishing
-\&    local6 \- available
-\&    local7 \- available
+\& local0 through local7 \- local system facilities
 \& user \- misc scripts, generic user\-level messages
 \& auth \- security/authorization messages
 \& authpriv \- security/authorization messages (private)
@@ -274,6 +252,19 @@ Allowed facility names:
 \& news \- USENET news subsystem
 \& syslog \- messages generated internally by syslogd(8)
 \& uucp \- UUCP subsystem
+.Ve
+.Sp
+These are some suggested uses for the localN facilities:
+.Sp
+.Vb 8
+\& local0 \- system or application configuration
+\& local1 \- application processes
+\& local2 \- web site errors
+\& local3 \- web site access
+\& local4 \- backend processes
+\& local5 \- publishing
+\& local6 \- available
+\& local7 \- available
 .Ve
 .IP "\fBgpVerbose\fR" 4
 .IX Item "gpVerbose"
@@ -350,4 +341,4 @@ To verify the script is internally \s-1OK,\s0 run: \s-1SCRIPTNAME\s0 \-T all
 .IX Header "HISTORY"
 (c) Copyright 2021 by \s-1COMPANY\s0
 .PP
-\&\f(CW$Revision: 1.1 $ \f(CW$Date: 2021/08/26 01:04:17 $ \s-1GMT\s0
+\&\f(CW$Revision: 1.2 $ \f(CW$Date: 2021/09/29 09:51:20 $ \s-1GMT\s0
