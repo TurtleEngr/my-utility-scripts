@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.4 2021/09/28 20:24:28 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.6 2021/09/29 09:22:06 bruce Exp $
 # Put this in /usr/local/sbin/rsnapshot-monitor
 # Run this with cron.d/monitor
 # See also rc.local, check-mail
@@ -7,7 +7,7 @@
 # -----------------------
 function fMail
 {
-	local tTmp=/var/tmp/rsnapshot-monitor.tmp
+	local tTmp=/var/local/rsnapshot-monitor.tmp
 	local tPri
 	local tStatus
 
@@ -54,6 +54,7 @@ EOF
 		cat $tTmp
 		echo "Debug mode: No email sent."
 	fi
+	chmod a+r $tTmp
 } # fMail
 
 # -----------------------
