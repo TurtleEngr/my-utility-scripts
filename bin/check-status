@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/check-status,v 1.4 2021/09/29 07:10:44 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/check-status,v 1.5 2021/09/29 07:29:01 bruce Exp $
 
 # ========================================
 # Unit Tests
@@ -554,8 +554,11 @@ export pCmd=""
 export pIP=""
 export pPort=""
 export pFile=""
+
 export cFile1=/var/tmp/check-mail.tmp
 export cFile2=/var/tmp/rsnapshot-monitor.tmp
+export cHost=asimov
+
 export tResult=""
 
 if [ ".$1" = ".-h" ]; then
@@ -564,6 +567,10 @@ fi
 
 if [ ".$1" = ".-t" ]; then
 	shift
+	if [ "$HOSTNAME" = "$cHost" ]; then
+		fError "Error: Do not run unit tests on $cHost"
+		exit 1
+	fi
 	.  /usr/local/bin/shunit2.1
 	exit $?
 fi
