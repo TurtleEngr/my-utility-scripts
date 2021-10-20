@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.48 $ $Date: 2021/10/11 16:48:08 $ GMT
+# $Revision: 1.49 $ $Date: 2021/10/20 01:07:50 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -305,7 +305,7 @@ NAME
 
 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.48 $ $Date: 2021/10/11 16:48:08 $ GMT 
+$Revision: 1.49 $ $Date: 2021/10/20 01:07:50 $ GMT 
 
 =cut
 EOF
@@ -557,7 +557,7 @@ export gErr gpDebug gpFacility gpLog gpVerbose
 export gpTest gpUnitDebug SHUNIT_COLOR
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.48 $'
+cVer='$Revision: 1.49 $'
 fSetGlobals
 
 # -------------------

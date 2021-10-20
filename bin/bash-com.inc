@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.3 $ $Date: 2021/09/05 00:58:05 $ GMT
+# $Revision: 1.4 $ $Date: 2021/10/20 01:07:50 $ GMT
 
 # --------------------------------
 fBashComInternalDoc()
@@ -88,7 +88,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.3 $'
+	cVer='$Revision: 1.4 $'
 
 =internal-head3 Documentation Format
 
@@ -162,7 +162,7 @@ fComSetGlobals()
 	# -------------------
 	# If your script defines a version with the Revision keyword, clean it
 	# shellcheck disable=SC2016
-	#cVer='$Revision: 1.3 $'
+	#cVer='$Revision: 1.4 $'
 	
 	if [ "$cVer" !=  "${cVer#*' '}" ]; then
 		cVer=${cVer#*' '}

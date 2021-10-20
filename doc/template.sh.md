@@ -4,7 +4,7 @@ SCRIPTNAME - DESCRIPTION
 
 # SYNOPSIS
 
-        SCRIPTNAME [-o "Name=Value"] [-h] [-H Style] [-l] [-v] [-x] [-T Test]
+        SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 # DESCRIPTION
 
@@ -20,9 +20,9 @@ Describe the script.
 
     Output this "long" usage help. See "-H long"
 
-- **-H Style**
+- **-H pStyle**
 
-    Style is used to select the type of help and how it is formatted.
+    pStyle is used to select the type of help and how it is formatted.
 
     Styles:
 
@@ -55,13 +55,13 @@ Describe the script.
 
     See: fLog and fLog2 (Internal documentation)
 
-- **-T Test**
+- **-T pTest**
 
     Run the unit test functions in this script.
 
-    If Test is "all", then all of the functions that begin with "test"
-    will be run. Otherwise "Test" should match the test function names
-    separated with commas.
+    "-T all" will run all of the functions that begin with "test".
+    Otherwise "pTest" should match the test function names separated with
+    commas. "-T com" will run all the tests for bash-com.inc
 
     For more details about shunit2 (or shunit2.1), see
     shunit2/shunit2-manual.html
@@ -222,4 +222,4 @@ NAME
 
 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.2 $ $Date: 2021/09/29 09:51:20 $ GMT 
+$Revision: 1.3 $ $Date: 2021/10/20 01:07:51 $ GMT 
