@@ -154,6 +154,14 @@ function fOSRel {
 		fCmd Update "cat $i | egrep -v '^#|^$'" $i
 		done
 	fi
+
+	if [ -e /etc/mx-version ]; then
+		fCmd OSRel 'cat /etc/mx-version' /etc/mx-version
+	fi
+
+	if which lsb_release >/dev/null 2>&1; then
+		fCmd OSRel 'lsb_release -a'
+	fi
 } # fOSRel
 
 # --------------------
@@ -195,14 +203,17 @@ function fLinuxCommon {
 	fCmd CPUSpeed 'grep "cpu MHz" /proc/cpuinfo | head' /proc/cpuinfo
 	fCmd RAM 'grep "MemTotal" /proc/meminfo' /proc/meminfo
 
+	if which inxi &>/dev/null; then
+		fCmd SysInfo 'inxi -c 0 -F'
+	fi
+
 	fCmd Partition 'cat /proc/partitions' /proc/partitions
 	fCmd Mount 'cat /proc/mounts' /proc/mounts
 	fCmd DiskSize 'df -m'
-#????
-	fCmd OSName1 'cat /etc/issue.net' /etc/issue.net
-	fCmd OSName2 'cat /etc/issue' /etc/issue
-	fCmd OSName3 'cat /etc/os-release' /etc/os-release
-	fCmd OSName4 'cat /etc/mx-version' /etc/mx-version
+
+	fCmd OSName 'cat /etc/issue.net' /etc/issue.net
+	fCmd OSName 'cat /etc/issue' /etc/issue
+	fCmd OSName 'cat /etc/os-release' /etc/os-release
 
 	fCmd Network '/sbin/ifconfig | egrep "eth|inet addr" | grep -v 127.0.0.1'
 	fCmd KernelVer 'uname -r'

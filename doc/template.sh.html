@@ -41,7 +41,7 @@
 
 <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
-<pre><code>        SCRIPTNAME [-o &quot;Name=Value&quot;] [-h] [-H Style] [-l] [-v] [-x] [-T Test]</code></pre>
+<pre><code>        SCRIPTNAME [-o &quot;Name=Value&quot;] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]</code></pre>
 
 <h1 id="DESCRIPTION">DESCRIPTION</h1>
 
@@ -63,10 +63,10 @@
 <p>Output this &quot;long&quot; usage help. See &quot;-H long&quot;</p>
 
 </dd>
-<dt id="H-Style"><b>-H Style</b></dt>
+<dt id="H-pStyle"><b>-H pStyle</b></dt>
 <dd>
 
-<p>Style is used to select the type of help and how it is formatted.</p>
+<p>pStyle is used to select the type of help and how it is formatted.</p>
 
 <p>Styles:</p>
 
@@ -104,12 +104,12 @@
 <p>See: fLog and fLog2 (Internal documentation)</p>
 
 </dd>
-<dt id="T-Test"><b>-T Test</b></dt>
+<dt id="T-pTest"><b>-T pTest</b></dt>
 <dd>
 
 <p>Run the unit test functions in this script.</p>
 
-<p>If Test is &quot;all&quot;, then all of the functions that begin with &quot;test&quot; will be run. Otherwise &quot;Test&quot; should match the test function names separated with commas.</p>
+<p>&quot;-T all&quot; will run all of the functions that begin with &quot;test&quot;. Otherwise &quot;pTest&quot; should match the test function names separated with commas. &quot;-T com&quot; will run all the tests for bash-com.inc</p>
 
 <p>For more details about shunit2 (or shunit2.1), see shunit2/shunit2-manual.html <a href="https://github.com/kward/shunit2">Source</a></p>
 
@@ -279,7 +279,7 @@
 
 <p>(c) Copyright 2021 by COMPANY</p>
 
-<p>$Revision: 1.2 $ $Date: 2021/09/29 09:51:20 $ GMT</p>
+<p>$Revision: 1.3 $ $Date: 2021/10/20 01:07:51 $ GMT</p>
 
 
 </body>

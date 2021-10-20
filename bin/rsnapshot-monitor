@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.6 2021/09/29 09:22:06 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.8 2021/10/13 02:14:17 bruce Exp $
 # Put this in /usr/local/sbin/rsnapshot-monitor
 # Run this with cron.d/monitor
 # See also rc.local, check-mail
@@ -189,6 +189,7 @@ function fCheckCert
 	local tMsg=""
 	local i
 
+	# Fix: moo.whyayh.com
 	for i in \
 		moria.whyayh.com \
 		moriamoo.whyayh.com \
