@@ -1,1 +1,21 @@
-pavucontrol
+#!/bin/bash
+# Try this with audio problems
+
+echo Running: pavucontrol
+pavucontrol &
+
+cat <<EOF
+Look at Recording and Input devices
+(Also with speaker setting, look at Applications tab)
+
+Try also: https://help.ubuntu.com/community/SoundTroubleshootingProcedure
+
+sudo killall pulseaudio
+pulseaudio -k
+rm -rf ~/.config/pulse
+
+pulseaudio --start
+or
+reboot
+EOF
+

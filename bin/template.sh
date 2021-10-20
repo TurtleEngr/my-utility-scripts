@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.47 $ $Date: 2021/09/06 18:34:34 $ GMT
+# $Revision: 1.48 $ $Date: 2021/10/11 16:48:08 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -15,18 +15,32 @@ fi
 cCurDir=$PWD
 
 # -------------------
-# Define the location of the script
-cBin=${0%/*}
-if [ "$cBin" = "." ]; then
-        cBin=$PWD
-fi
-cd $cBin
-cBin=$PWD
-cd $cCurDir
+# Define cBin, location of common scripts (pick one)
+tBin=home
+case $tBin in
+	current)
+		cBin=$PWD
+	;;
+	home)	cBin=~/bin;;
+	local)	cBin=/usr/local/bin;;
+	system)	cBin=/usr/bin;;
+	this)
+		cBin=${0%/*}
+		if [ "$cBin" = "." ]; then
+		        cBin=$PWD
+		fi
+		cd $cBin
+		cBin=$PWD
+		cd $cCurDir
+	;;
+esac
 
 . $cBin/bash-com.inc
 
 # ========================================
+# Script Functions
+
+# --------------------------------
 fUsage()
 {
 	# Quick help, run this:
@@ -36,22 +50,22 @@ fUsage()
 
 	case $pStyle in
 		short|usage|man|long|text|md)
-			fComUsage -f $cBin/$cName -s $pStyle
+			fComUsage -f $cCurDir/$cName -s $pStyle
 		;;
 		html)
-			fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
+			fComUsage -f $cCurDir/$cName -s $pStyle -t "$cName Usage"
 		;;
 		int)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+			fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
 		;;
 		int-html)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+			fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
 		;;
 		int-md)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+			fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
 		;;
 		*)
-			fComUsage -f $cBin/$cName -s short
+			fComUsage -f $cCurDir/$cName -s short
 		;;
 	esac
 	exit 1
@@ -65,7 +79,7 @@ SCRIPTNAME - DESCRIPTION
 
 =head1 SYNOPSIS
 
-	SCRIPTNAME [-o "Name=Value"] [-h] [-H Style] [-l] [-v] [-x] [-T Test]
+	SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 =head1 DESCRIPTION
 
@@ -83,9 +97,9 @@ Describe the script.
 
 Output this "long" usage help. See "-H long"
 
-=item B<-H Style>
+=item B<-H pStyle>
 
-Style is used to select the type of help and how it is formatted.
+pStyle is used to select the type of help and how it is formatted.
 
 Styles:
 
@@ -118,13 +132,13 @@ Or you can set gpDebug before running the script.
 
 See: fLog and fLog2 (Internal documentation)
 
-=item B<-T Test>
+=item B<-T pTest>
 
 Run the unit test functions in this script.
 
-If Test is "all", then all of the functions that begin with "test"
-will be run. Otherwise "Test" should match the test function names
-separated with commas.
+"-T all" will run all of the functions that begin with "test".
+Otherwise "pTest" should match the test function names separated with
+commas. "-T com" will run all the tests for bash-com.inc
 
 For more details about shunit2 (or shunit2.1), see
 shunit2/shunit2-manual.html
@@ -291,7 +305,7 @@ NAME
 
 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.47 $ $Date: 2021/09/06 18:34:34 $ GMT 
+$Revision: 1.48 $ $Date: 2021/10/11 16:48:08 $ GMT 
 
 =cut
 EOF
@@ -309,6 +323,71 @@ This function selects the type of help output. See -h and -H options.
 =internal-cut
 EOF
 } # fUsage
+
+# --------------------------------
+fCleanUp()
+{
+	fComCleanUp
+	exit
+
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head2 Script Functions
+
+=internal-head3 fCleanUp
+
+Calls fComCleanUp.
+
+=internal-cut
+EOF
+} # fCleanUp
+
+# -------------------
+fSetGlobals()
+{
+	fComSetGlobals
+	
+	# Put your globals here
+	gpTag=${gpTag:-build}
+
+	# Define the Required and the Optional progs, space separated
+	fComCheckDeps "cat" "cat"
+	return
+
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fSetGlobals
+
+Calls fComSetGlobals to set globals used by bash-com.inc.
+
+Set initial values for all of the other globals use by this
+script. The ones that begin with "gp" can usually be overridden by
+setting them before the script is run.
+
+=internal-cut
+EOF
+} # fSetGlobals
+
+# -------------------
+fValidateHostName()
+{
+	if [ -z $gpHostName ]; then
+		fError "The -n or -c option is required." $LINENO
+	fi
+	return
+
+    	cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fValidateHostName
+
+Exit if missing.
+
+=internal-cut
+EOF
+} # fValidateHostName
 
 # ========================================
 # Tests
@@ -435,74 +514,6 @@ This is just a starting point for creating script functionality tests.
 EOF
 } # testScriptFunctions
 
-# ========================================
-# Script Functions
-
-# --------------------------------
-fCleanUp()
-{
-	fComCleanUp
-	exit
-
-    	cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head2 Script Functions
-
-=internal-head3 fCleanUp
-
-Calls fComCleanUp.
-
-=internal-cut
-EOF
-} # fCleanUp
-
-# -------------------
-fSetGlobals()
-{
-	fComSetGlobals
-	
-	# Put your globals here
-	gpTag=${gpTag:-build}
-
-	# Define the Required and the Optional progs, space separated
-	fComCheckDeps "cat" "cat"
-	return
-
-    	cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fSetGlobals
-
-Calls fComSetGlobals to set globals used by bash-com.inc.
-
-Set initial values for all of the other globals use by this
-script. The ones that begin with "gp" can usually be overridden by
-setting them before the script is run.
-
-=internal-cut
-EOF
-} # fSetGlobals
-
-# -------------------
-fValidateHostName()
-{
-	if [ -z $gpHostName ]; then
-		fError "The -n or -c option is required." $LINENO
-	fi
-	return
-
-    	cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fValidateHostName
-
-Exit if missing.
-
-=internal-cut
-EOF
-} # fValidateHostName
-
 # -------------------
 # This should be the last defined function
 fRunTests()
@@ -545,14 +556,14 @@ export gErr gpDebug gpFacility gpLog gpVerbose
 # Test globals
 export gpTest gpUnitDebug SHUNIT_COLOR
 
-cVer='$Revision: 1.47 $'
+# shellcheck disable=SC2016
+cVer='$Revision: 1.48 $'
 fSetGlobals
 
 # -------------------
 # Get Args Section
 if [ $# -eq 0 ]; then
 	fError2 -m "Missing options." -l $LINENO
-	fUsage short
 fi
 while getopts :cn:t:hH:lT:vx tArg; do
 	case $tArg in

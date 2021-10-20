@@ -18,24 +18,14 @@ OPTIONS
 
         Styles:
 
-        short   Output short usage help as text.
-
-        long    Output long usage help as text.
-
-        man     Output long usage help as a man page.
-
-        html    Output long usage help as html.
-
-        md      Output long usage help as markdown.
-
-        internal
-                Output internal documentation as text.
-
-        internal-html
-                Output internal documentation as html.
-
-        internal-md
-                Output internal documentation as markdown.
+                short|usage - Output short usage help as text.
+                long|text   - Output long usage help as text.
+                man         - Output long usage help as a man page.
+                html        - Output long usage help as html.
+                md          - Output long usage help as markdown.
+                int         - Also output internal documentation as text.
+                int-html    - Also output internal documentation as html.
+                int-md      - Also output internal documentation as markdown.
 
     -l  Send log messages to syslog. Default is to just send output to
         stderr.
@@ -50,27 +40,30 @@ OPTIONS
     -x  Set the gpDebug level. Add 1 for each -x. Or you can set gpDebug
         before running the script.
 
-        See: fLog and fLog2
+        See: fLog and fLog2 (Internal documentation)
 
     -T Test
         Run the unit test functions in this script.
 
         If Test is "all", then all of the functions that begin with "test"
         will be run. Otherwise "Test" should match the test function names
-        separated with commas (with all names in a quote).
+        separated with commas.
 
         For more details about shunit2 (or shunit2.1), see
         shunit2/shunit2-manual.html Source
         <https://github.com/kward/shunit2>
 
-        See shunit2, shunit2.1, Global: gpUnitDebug
+        See shunit2, shunit2.1, and global: gpUnitDebug
 
-        Also for more help, use the "-H internal" option.
+        Also for more help, use the "-H int" option.
 
   Globals
-    Globals that may affect how way the script runs. Just about all of these
-    globals can be set and exported before the script is run (just in case
-    you cannot easily set them with CLI flags).
+    These are globals that may affect how the script runs. Just about all of
+    these globals that begin with "gp" can be set and exported before the
+    script is run. That way you can set your own defaults, by putting them
+    in your ~/.bashrc or ~/.bash_profile files.
+
+    The the "common" CLI flags will override the initial variable settings.
 
     Tmp This is the top directory where tmp file will be put.
 
@@ -100,15 +93,7 @@ OPTIONS
 
         Allowed facility names:
 
-         local0 through local7 - for local use (these are some suggested uses)
-            local0 - system or application configuration
-            local1 - application processes
-            local2 - web site errors
-            local3 - web site access
-            local4 - backend processes
-            local5 - publishing
-            local6 - available
-            local7 - available
+         local0 through local7 - local system facilities
          user - misc scripts, generic user-level messages
          auth - security/authorization messages
          authpriv - security/authorization messages (private)
@@ -121,6 +106,17 @@ OPTIONS
          news - USENET news subsystem
          syslog - messages generated internally by syslogd(8)
          uucp - UUCP subsystem
+
+        These are some suggested uses for the localN facilities:
+
+         local0 - system or application configuration
+         local1 - application processes
+         local2 - web site errors
+         local3 - web site access
+         local4 - backend processes
+         local5 - publishing
+         local6 - available
+         local7 - available
 
     gpVerbose
         If set to 0, only log message at "warning" level and above will be
@@ -193,5 +189,5 @@ AUTHOR
 HISTORY
     (c) Copyright 2021 by COMPANY
 
-    $Revision: 1.1 $ $Date: 2021/08/26 01:04:17 $ GMT
+    $Revision: 1.2 $ $Date: 2021/09/29 09:51:20 $ GMT
 

@@ -134,17 +134,19 @@ fComSetGlobals()
 	if [ -z "$PWD" ]; then
 		PWD=$(pwd)
 	fi
-	cCurDir=$PWD
+	cCurDir=${cCurDir:-$PWD}
 
 	# -------------------
-	# Define the location of the script
-	cBin=${0%/*}
-	if [ "$cBin" = "." ]; then
-	        cBin=$PWD
+	# Define the location of the com script if not already set
+	if [ -z "$cBin" ]; then
+		cBin=${0%/*}
+		if [ "$cBin" = "." ]; then
+		        cBin=$PWD
+		fi
+		cd $cBin
+		cBin=$PWD
+		cd $cCurDir
 	fi
-	cd $cBin
-	cBin=$PWD
-	cd $cCurDir
 
 	# -------------------
 	# Setup log variables

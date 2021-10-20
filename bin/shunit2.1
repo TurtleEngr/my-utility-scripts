@@ -670,7 +670,7 @@ failNotEquals() {
   shunit_expected_=$1
   shunit_actual_=$2
 
-  shunit_message_=${shunit_message_%% }
+  shunit_message_="${shunit_message_%% }"
   _shunit_assertFail "${shunit_message_:+${shunit_message_} }expected:<${shunit_expected_}> but was:<${shunit_actual_}>"
 
   unset shunit_message_ shunit_expected_ shunit_actual_
@@ -703,7 +703,7 @@ failFound() {
     shift
   fi
 
-  shunit_message_=${shunit_message_%% }
+  shunit_message_="${shunit_message_%% }"
   _shunit_assertFail "${shunit_message_:+${shunit_message_} }found"
 
   unset shunit_message_
@@ -737,7 +737,7 @@ failNotFound() {
   fi
   shunit_content_=$1
 
-  shunit_message_=${shunit_message_%% }
+  shunit_message_="${shunit_message_%% }"
   _shunit_assertFail "${shunit_message_:+${shunit_message_} }not found:<${shunit_content_}>"
 
   unset shunit_message_ shunit_content_
@@ -771,7 +771,7 @@ failSame() {
     shift
   fi
 
-  shunit_message_=${shunit_message_%% }
+  shunit_message_="${shunit_message_%% }"
   _shunit_assertFail "${shunit_message_:+${shunit_message_} }expected not same"
 
   unset shunit_message_

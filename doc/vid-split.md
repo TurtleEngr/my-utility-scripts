@@ -198,4 +198,4 @@ with no -x option.
 
 # HISTORY
 
-$Revision: 1.1 $
+$Revision: 1.2 $
