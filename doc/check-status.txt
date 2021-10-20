@@ -1,0 +1,34 @@
+This Help
+	check-status -h
+
+Unit Test
+	check-status -t
+	check-status -t -- testName [testName...]
+
+cgi-bin Usage
+	export QUERY_STRING='cmd=[12]&ip=[N.N.N.N]&port=[NNN]&file=[N]'
+	check-status
+
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1&ip=N.N.N.N&port=N
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=2&file=N
+
+	Example cgi-bin
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.7&port=22
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.96&port=2049
+
+CLI Usage for ip/port check:
+	check-status 1 ip port
+
+CLI Usage for file check:
+	check-status 2 N
+
+	N=1, return: head -n 1 /var/tmp/check-mail.tmp
+	N=2, return: grep "Subject: " /var/tmp/rsnapshot-monitor.tmp | head -n 1
+
+Output 1 "ip":
+	If IP PORT connected, output "OK"
+	if not connected or timed out: "Fail"
+	
+Output 2 "file":
+       if invalid FILE, output "Invalid file"
+       if FILE, output "head -n 1 FILE"

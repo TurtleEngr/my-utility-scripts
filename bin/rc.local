@@ -1,0 +1,151 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/rc.local,v 1.2 2021/09/28 19:59:20 bruce Exp $
+#
+# /etc/rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+
+# -----------------------
+function fMail
+{
+	local tTmp=/var/tmp/rc.local.mail.tmp
+	local tStatus="Notice"
+
+	if [ $gpErr -ne 0 ]; then
+		tStatus="Problem"
+	fi
+	
+	cat <<EOF >$tTmp
+To: $cTo
+Subject: $tStatus: $cSubject
+
+$(cat $cTmp)
+
+--------------------
+Sent by \$Source: /repo/local.cvs/per/bruce/bin/rc.local,v $
+.
+EOF
+	if [ $gpDebug -eq 0 ]; then
+		/usr/sbin/sendmail -t <$tTmp
+		logger -t rc.local -p user.notice "email Subject: $tStatus: $cSubject"
+	else
+		logger -t rc.local -p user.notice "No email sent. See file: $tTmp"
+		cat $tTmp
+	fi
+} # fMail
+
+# -----------------------
+function fMountDisks
+{
+	# Mount backup disks, if not mounted
+	for i in 1 2; do
+		if [ ! -e /mnt/backup$i/rsnapshot$i ]; then
+			mount /mnt/backup$i
+			sleep 1
+		fi
+	done
+} # fMountDisks
+
+# -----------------------
+function fServiceChecks
+{
+	local i
+	local tInitList=" \
+apache2 \
+apcupsd \
+cron \
+cups \
+dovecot \
+nfs-kernel-server \
+ntp \
+postfix \
+rsyslog \
+ssh \
+subsonic \
+ufw \
+"
+	echo  >>$cTmp
+	echo "Expected running services" >>$cTmp
+
+	for i in $tInitList; do
+		if [ ! -x /etc/init.d/$i ]; then
+			echo -e "Error:\t /etc/init.d/$i is not found or not executable" >>$cTmp
+			logger -t rc.local -p user.err "Error:\t /etc/init.d/$i is not found or not executable"
+			gpErr=1
+			continue
+		fi
+		/etc/init.d/$i status >/dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			echo -e "\t $i is running" >>$cTmp
+			continue
+		fi
+		echo -e "Warning:\t $i is not running" >>$cTmp
+		# Try starting
+		/etc/init.d/$i start >/dev/null 2>&1
+		sleep 1
+		# Check again
+		/etc/init.d/$i status >/dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			echo -e "\t $i is now running" >>$cTmp
+			continue
+		fi
+		echo -e "Error:\t $i is not running" >>$cTmp
+		logger -t rc.local -p user.err "Error:\t $i is not running"
+		gpErr=1
+	done
+} # fServiceChecks
+
+# -----------------------
+function fMountChecks
+{
+	local i
+	local tDiskList=" \
+/mnt/asimov.home \
+/mnt/asimov.data1 \
+/mnt/asimov.data3 \
+/mnt/asimov.data2 \
+/mnt/backup1 \
+/mnt/backup2 \
+"
+	echo >>$cTmp
+	echo "Expected mounted disks" >>$cTmp
+	for i in $tDiskList; do
+		if grep -q $i /etc/mtab; then
+			echo -e "\t $i is mounted" >>$cTmp
+		else
+			echo -e "Error:\t $i is not mounted" >>$cTmp
+			logger -t rc.local -p user.err "Error:\t $i is not mounted"
+			gpErr=1
+		fi
+	done
+} # fMountChecks
+
+# ====================================
+export gpDebug=0
+export gpErr=0
+export cTo="barafnel+$HOSTNAME@gmail.com"
+export cSubject="$HOSTNAME was probably rebooted"
+export cTmp=/var/tmp/rc.local.tmp
+
+logger -t rc.local -p user.notice "BEGIN"
+
+sleep 2
+
+if [ $# -ne 0 ]; then
+	gpDebug=1
+fi
+echo >$cTmp
+
+fMountDisks
+fServiceChecks
+fMountChecks
+fMail
+
+logger -t rc.local -p user.notice "END"
+exit 0

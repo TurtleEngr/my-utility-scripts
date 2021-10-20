@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ $# -ne 0 ]; then
+   if [ ".$1" = ".-h" ]; then
+      cat <<EOF
+Usage:
+	lstree [-d] [-L N] [other "tree" options] [dir...]
+-d - dir only
+-L N - limit to N levels
+dir - default $PWD
+
+For more options see: man tree
+Note: do not use tree's -I opton.
+EOF
+        exit 1
+    fi
+fi
+
+# -C:  -I 'CVS|*~|tmp|*.tmp' $* | tr -d '"'
+# -T: | tr -d '|' | awk '{gsub("   ","\t"); print $0}'
+
+tree -a -Q -F -n --dirsfirst --charset=ascii --noreport -I 'CVS|*~|tmp|*.tmp' $* | sed '
+s/`/|/g;
+s/|-- /|/g;
+s/    |/|   |/g
+' | tr -d '"' | tr -d '|' | awk '{gsub("   ","\t"); print $0}'

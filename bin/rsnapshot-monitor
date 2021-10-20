@@ -1,0 +1,258 @@
+#!/bin/bash
+# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.6 2021/09/29 09:22:06 bruce Exp $
+# Put this in /usr/local/sbin/rsnapshot-monitor
+# Run this with cron.d/monitor
+# See also rc.local, check-mail
+
+# -----------------------
+function fMail
+{
+	local tTmp=/var/local/rsnapshot-monitor.tmp
+	local tPri
+	local tStatus
+
+	if [ $gErr -eq 0 ]; then
+		tStatus=OK
+		tPri="-p user.notice"
+	else
+		tStatus=failed
+		tPri="-p user.err"
+	fi
+	cat <<EOF >$tTmp
+To: barafnel+backup@gmail.com
+Subject: $HOSTNAME backup $tStatus
+
+ $gErr errors were found.
+
+$(echo -e $gErrMsg)
+
+ --------------------
+$(echo -e $gOKMsg)
+
+ --------------------
+/var/log/backup2cloud.last:
+$(cat /var/log/backup2cloud.last)
+Should be 26'th of each month.
+
+ --------------------
+$(cat /tmp/speedtest.tmp)
+
+ --------------------
+uptime: $(uptime)
+who: $(who)
+
+/etc/rc.local output: $(cat $gLocalTmp)
+
+ --------------------
+Sent by \$Source: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v $
+.
+EOF
+	if [ $gpDebug -eq 0 ]; then
+		/usr/sbin/sendmail -t <$tTmp
+		logger -s -t rsnapshot-monitor $tPri "email Subject: $HOSTNAME backup $tStatus. Details at: $tTmp"
+	else
+		cat $tTmp
+		echo "Debug mode: No email sent."
+	fi
+	chmod a+r $tTmp
+} # fMail
+
+# -----------------------
+function fCheckMount
+{
+	local i
+	local d
+	for i in 1 2; do
+		d=/mnt/backup${i}/rsnapshot${i}
+		if [ -d $d ]; then
+			gOKMsg="$gOKMsg\n\n OK - $d mounted"
+		else
+			gErrMsg="$gErrMsg\n\n Error - $d not mounted"
+			logger -t rsnapshot-monitor -p user.err "Error - $d not mounted"
+			let gErr=gErr+1
+		fi
+	done
+} # fCheckMount
+
+# -----------------------
+function fCheckSpace
+{
+	local i
+	local s
+	local tSpace
+
+	for i in 1 2; do
+		tSpace=$(df -h /mnt/backup${i} | awk '{print "\\t" $2 "\\t" $3 "\\t" $4 "\\n"}')
+		s=$(df -h /mnt/backup${i} | tail -n 1 | awk '{print $5}')
+		s=${s%\%}
+		if [ $s -lt 96 ]; then
+			gOKMsg="$gOKMsg\n\n OK - Space: /mnt/backup${i} = ${s}%\n $tSpace"
+		else
+			gErrMsg="$gErrMsg\n\n Error - Space: /mnt/backup${i} = ${s}%\n $tSpace"
+			logger -t rsnapshot-monitor -p user.err "Error - Space: /mnt/backup${i} = ${s}%\n $tSpace"
+			let gErr=gErr+1
+		fi
+	done
+} # fCheckSpace
+
+# -----------------------
+function fCheckLog
+{
+	local i
+	local f
+	for i in 1 2; do
+		f=/var/log/rsnapshot${i}.log
+		if ! grep -q ERROR: $f; then
+			gOKMsg="$gOKMsg\n\n OK - no errors in $f"
+		else
+			gErrMsg="$gErrMsg\n\n Error - errors found in $f"
+			logger -t rsnapshot-monitor -p user.err "Error - errors found in $f"
+			let gErr=gErr+1
+		fi
+	done
+} # fCheckLog
+
+# -----------------------
+function fCheckDate
+{
+	local i
+	local tCurTime
+	local tDirTime
+	local tDiff
+	local tMax
+	local d
+	local tErr=$gErr
+
+	for i in 1 2; do
+		tCurTime=$(date +%s)
+		d=/mnt/backup${i}/rsnapshot${i}/hourly.0
+		if [ -d $d ]; then
+			tDirTime=$(date -r $d +%s)
+			let tDiff=tCurTime-tDirTime
+			# 24hrs = 60*60*24
+			let tMax=86400
+			if [ $tDiff -gt $tMax ]; then
+				gErrMsg="$gErrMsg\n\n Error - more than 1 day old: $d $tDiff $tMax"
+				logger -t rsnapshot-monitor -p user.err "Error - more than 1 day old: $d $tDiff $tMax"
+				let gErr=gErr+1
+			fi
+		else
+			gErrMsg="$gErrMsg\n\n Error - Missing $d"
+			logger -t rsnapshot-monitor -p user.err "Error - Missing $d"
+			let gErr=gErr+1
+		fi
+
+		d=/mnt/backup${i}/rsnapshot${i}/.sync
+		if [ -d $d ]; then
+			gErrMsg="$gErrMsg\n\n Error - still exists: $d"
+			logger -t rsnapshot-monitor -p user.err "Error - still exists: $d"
+			let gErr=gErr+1
+		fi
+
+		d=/mnt/backup${i}/rsnapshot${i}/daily.0
+		if [ -d $d ]; then
+			tDirTime=$(date -r $d +%s)
+			let tDiff=tCurTime-tDirTime
+			# 2days = 60*60*24*2
+			let tMax=172800
+			if [ $tDiff -gt $tMax ]; then
+				gErrMsg="$gErrMsg\n\n Error - more than 2 days old: $d"
+				let gErr=gErr+1
+			fi
+		fi
+		d=/mnt/backup${i}/rsnapshot${i}/weekly.0
+		if [ -d $d ]; then
+			tDirTime=$(date -r $d +%s)
+			let tDiff=tCurTime-tDirTime
+			# 15days= 60*60*24*15
+			let tMax=1296000
+			if [ $tDiff -gt $tMax ]; then
+				gErrMsg="$gErrMsg\n\n Error - more than 15 days old: $d"
+				logger -t rsnapshot-monitor -p user.err "Error - more than 15 days old: $d"
+				let gErr=gErr+1
+			fi
+		fi
+	done
+
+	if [ $tErr -eq $gErr ]; then
+		gOKMsg="$gOKMsg\n\n OK - backup dates look OK"
+	else
+		gErrMsg="$gErrMsg\n\n Last hourly backups:\n $(ls -ld /mnt/backup*/rsnapshot*/hourly.*)"
+		gErrMsg="$gErrMsg\n\n Last daily backups:\n $(ls -ld /mnt/backup*/rsnapshot*/daily.0)"
+		gErrMsg="$gErrMsg\n\n Last weely backups:\n $(ls -ld /mnt/backup*/rsnapshot*/weekly.0)"
+	fi
+} # fCheckDate
+
+# -----------------------
+function fCheckCert
+{
+	local tMsg=""
+	local i
+
+	for i in \
+		moria.whyayh.com \
+		moriamoo.whyayh.com \
+		www.whyayh.com \
+		brian618.whyayh.com \
+		www.gayguypublishing.com \
+	    ; do
+		tMsg=$(cert-expire-date $i)
+		if [ $? -eq 0 ]; then
+			gOKMsg="$gOKMsg\n\n OK - $tMsg"
+		else
+			gErrMsg="$gErrMsg\n\n $tMsg"
+			logger -t rsnapshot-monitor -p user.err "$tMsg"
+			let gErr=gErr+1
+		fi
+	done
+} # fCheckCert
+
+# -----------------------
+function fSpeedTest
+{
+	speedtest.sh >/tmp/speedtest.tmp 2>&1
+	if [ $? -eq 0 ]; then
+		gOKMsg="$gOKMsg\n\n OK - Download/Upload speeds are OK"
+	else
+		gErrMsg="$gErrMsg\n\n Problem - Download/Upload speeds are slow"
+#		let gErr=gErr+1
+	fi
+} # fSpeedTest
+
+# =================================================
+# Main
+
+export gpDebug=0
+export gErrMsg=""
+export gOKMsg=""
+export gErr=0
+export gLocalTmp=/var/tmp/rc.local.tmp
+export USER=$LOGNAME
+
+logger -t rsnapshot-monitor -p user.notice "BEGIN"
+
+if [ "$USER" != "root" ]; then
+	logger -s -t rsnapshot-monitor -p user.err "Error: must be run as root."
+	exit 1
+fi
+
+if [ $# -ne 0 ]; then
+	gpDebug=1
+fi
+
+fCheckMount
+if [ $gErr -eq 0 ]; then
+	fCheckSpace
+	fCheckLog
+	fCheckDate
+	fCheckCert
+	fSpeedTest
+fi
+if [ -x /etc/rc.local ]; then
+	/etc/rc.local nomail >/dev/null 2>&1
+else
+	echo "Did not run /etc/rc.local" >$gLocalTmp
+	logger -t rsnapshot-monitor -p user.err "Did not run /etc/rc.local"
+fi
+fMail
+logger -t rsnapshot-monitor -p user.notice "END"
