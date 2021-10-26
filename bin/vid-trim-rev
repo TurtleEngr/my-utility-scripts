@@ -1,8 +1,8 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-trim-rev,v 1.2 2020/09/18 20:54:21 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-trim-rev,v 1.3 2021/10/26 19:26:13 bruce Exp $
 
 if [ $# -ne 2 -o "x$1" = "x-h" ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	vid-rm-trim File Rel
 
@@ -17,7 +17,7 @@ Rel syntax:
 
 Note: this assumes you are on the same system that hosts the master files.
 EOF
-	exit 1
+    exit 1
 fi
 
 # --------------------
@@ -29,56 +29,56 @@ export gpRel=$2
 # Validate
 
 if [ ! -f $gpFile ]; then
-	echo "Error: could not find $gpFile"
-	exit 1
+    echo "Error: could not find $gpFile"
+    exit 1
 fi
 if [ ! -f CVS/Root ]; then
-	echo "Error: You are not in a CVS workspace."
-	exit 1
+    echo "Error: You are not in a CVS workspace."
+    exit 1
 fi
 
 export CVSROOT=$(cat CVS/Root)
 export cPath=$(cat CVS/Repository)
 
 if [ ! -f $CVSROOT/$cPath/${gpFile},v ]; then
-	cat <<EOF
+    cat <<EOF
 Error: could not find $CVSROOT/$cPath/${gpFile},v
 	Is $CVSROOT mounted?
 EOF
-	exit 1
+    exit 1
 fi
 
 echo
 tValid=$(echo $gpRel | tr -d '[0-9.:]')
 if [ -n "$tValid" ]; then
-	echo "Error: Rel can only contain: [0-9.:]"
-	exit 1
+    echo "Error: Rel can only contain: [0-9.:]"
+    exit 1
 fi
 tFound=0
 if [ ${gpRel#::} != $gpRel ]; then
-	echo "Notice: this will delete revisions before ${gpRel#::}"
-	tFound=1
+    echo "Notice: this will delete revisions before ${gpRel#::}"
+    tFound=1
 fi
 if [ ${gpRel%::} != $gpRel ]; then
-	echo "Notice: this will delete revisions after ${gpRel#::} including HEAD"
-	tFound=1
+    echo "Notice: this will delete revisions after ${gpRel#::} including HEAD"
+    tFound=1
 fi
 if [ $tFound -eq 0 -a ${gpRel#:} != $gpRel ]; then
-	echo "Notice: this will delete revisions before, and including ${gpRel#::}"
-	tFound=1
+    echo "Notice: this will delete revisions before, and including ${gpRel#::}"
+    tFound=1
 fi
 if [ $tFound -eq 0 -a ${gpRel%:} != $gpRel ]; then
-	echo "Notice: this will delete revisions after, and including ${gpRel#::} including HEAD"
-	tFound=1
+    echo "Notice: this will delete revisions after, and including ${gpRel#::} including HEAD"
+    tFound=1
 fi
 if [ $tFound -eq 0 -a ${gpRel#*::} != $gpRel ]; then
-	echo "Notice: this will delete revisions between,"
-	echo "but not including, the specified revisions."
-	tFound=1
+    echo "Notice: this will delete revisions between,"
+    echo "but not including, the specified revisions."
+    tFound=1
 fi
 if [ $tFound -eq 0 ]; then
-	echo "Notice: this only deletes revision $gpRel"
-	tFound=1
+    echo "Notice: this only deletes revision $gpRel"
+    tFound=1
 fi
 
 cat <<EOF

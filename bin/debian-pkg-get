@@ -2,8 +2,8 @@
 # debian-pkgget host
 
 if [ $# -eq 0 ]; then
-	echo "Usage: debian-pkg-get HostName"
-	exit 1
+    echo "Usage: debian-pkg-get HostName"
+    exit 1
 fi
 
 tBase=$1

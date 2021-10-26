@@ -1,10 +1,9 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/countdown,v $
-# $Revision: 1.7 $ $Date: 2021/09/08 01:39:35 $ GMT
+# $Revision: 1.8 $ $Date: 2021/10/26 19:26:09 $ GMT
 
 # Algorithm idea came from:
 # https://superuser.com/questions/611538/is-there-a-way-to-display-a-countdown-or-stopwatch-timer-in-a-terminal
-
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -14,7 +13,7 @@
 # Set current directory location in PWD and cCurDir, because with cron
 # jobs PWD is not set.
 if [ -z "$PWD" ]; then
-	PWD=$(pwd)
+    PWD=$(pwd)
 fi
 cCurDir=$PWD
 
@@ -22,7 +21,7 @@ cCurDir=$PWD
 # Define the location of the script
 cBin=${0%/*}
 if [ "$cBin" = "." ]; then
-        cBin=$PWD
+    cBin=$PWD
 fi
 cd $cBin
 cBin=$PWD
@@ -33,34 +32,34 @@ cd $cCurDir
 # ========================================
 fUsage()
 {
-	# Quick help, run this:
-	# counter -h | less
+    # Quick help, run this:
+    # counter -h | less
 
-	local pStyle="$1"
+    local pStyle="$1"
 
-	case $pStyle in
-		short|usage|man|long|text|md)
-			fComUsage -f $cBin/$cName -s $pStyle
-		;;
-		html)
-			fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
-		;;
-		int)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
-		;;
-		int-html)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
-		;;
-		int-md)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
-		;;
-		*)
-			fComUsage -f $cBin/$cName -s short
-		;;
-	esac
-	exit 1
+    case $pStyle in
+        short | usage | man | long | text | md)
+            fComUsage -f $cBin/$cName -s $pStyle
+            ;;
+        html)
+            fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
+            ;;
+        int)
+            fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+            ;;
+        int-html)
+            fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+            ;;
+        int-md)
+            fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+            ;;
+        *)
+            fComUsage -f $cBin/$cName -s short
+            ;;
+    esac
+    exit 1
 
-	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -280,11 +279,11 @@ date
 
 =head1 HISTORY
 
-$Revision: 1.7 $ GMT 
+$Revision: 1.8 $ GMT 
 
 =cut
 EOF
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head1 count Internal Documentation
@@ -304,13 +303,13 @@ EOF
 
 setUp()
 {
-	gpUnitDebug=0
-	gpDebug=0
-	rm $cTmp1 &>/dev/null
-	rm -f $gpCounterFile &>/dev/null &>/dev/null
-	return 0
+    gpUnitDebug=0
+    gpDebug=0
+    rm $cTmp1 &>/dev/null
+    rm -f $gpCounterFile &>/dev/null &>/dev/null
+    return 0
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 setUp
@@ -323,10 +322,10 @@ EOF
 
 tearDown()
 {
-	rm -rf $gpLockDir &>/dev/null
-	return 0
+    rm -rf $gpLockDir &>/dev/null
+    return 0
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 setUp
@@ -340,13 +339,13 @@ EOF
 # --------------------------------
 fUDebug()
 {
-	# See also fUDebug
-	if [ ${gpUnitDebug:-0} -ne 0 ]; then
-		echo "fUDebug: $*"
-	fi
-	return
+    # See also fUDebug
+    if [ ${gpUnitDebug:-0} -ne 0 ]; then
+        echo "fUDebug: $*"
+    fi
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head2 Unit Test Functions
@@ -364,279 +363,279 @@ EOF
 # --------------------------------
 testUsage_Short()
 {
-	local tResult="$(fUsage short 2>&1)"
-	fUDebug "tResult=$tResult"
-	assertContains "$LINENO Expect to see Usage:" "$tResult" "Usage:"
-	assertContains "$LINENO Expect to see cName: change SCRIPTNAME" "$tResult" "$cName"
+    local tResult="$(fUsage short 2>&1)"
+    fUDebug "tResult=$tResult"
+    assertContains "$LINENO Expect to see Usage:" "$tResult" "Usage:"
+    assertContains "$LINENO Expect to see cName: change SCRIPTNAME" "$tResult" "$cName"
 }
 
 testUsage_BadStyleArg()
 {
-	local tResult="$(fUsage foo 2>&1)"
-	fUDebug "tResult=$tResult"
-	assertContains "$LINENO Expect to see Usage:" "$tResult" "Usage:"
+    local tResult="$(fUsage foo 2>&1)"
+    fUDebug "tResult=$tResult"
+    assertContains "$LINENO Expect to see Usage:" "$tResult" "Usage:"
 }
 
 testUsage_Text()
 {
-	local tResult="$(fUsage text 2>&1)"
-	assertContains "$LINENO" "$tResult" "DESCRIPTION"
-	assertContains "$LINENO" "$tResult" "HISTORY"
+    local tResult="$(fUsage text 2>&1)"
+    assertContains "$LINENO" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO" "$tResult" "HISTORY"
 }
 
 testUsage_Man()
 {
-	local tResult="$(fUsage man 2>&1)"
-	assertContains "$LINENO" "$tResult" '.IX Header "DESCRIPTION"'
-	assertContains "$LINENO" "$tResult" '.IX Header "HISTORY"'
+    local tResult="$(fUsage man 2>&1)"
+    assertContains "$LINENO" "$tResult" '.IX Header "DESCRIPTION"'
+    assertContains "$LINENO" "$tResult" '.IX Header "HISTORY"'
 }
 
 testUsage_Html()
 {
-	local tResult="$(fUsage html 2>&1)"
-	assertContains "$LINENO" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
-	assertContains "$LINENO" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
-	assertContains "$LINENO" "$tResult" "<title>$cName Usage</title>"
+    local tResult="$(fUsage html 2>&1)"
+    assertContains "$LINENO" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+    assertContains "$LINENO" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+    assertContains "$LINENO" "$tResult" "<title>$cName Usage</title>"
 }
 
 testUsage_Markdown()
 {
-	local tResult="$(fUsage md 2>&1)"
-	assertContains "$LINENO" "$tResult" '# DESCRIPTION'
-	assertContains "$LINENO" "$tResult" '# HISTORY'
+    local tResult="$(fUsage md 2>&1)"
+    assertContains "$LINENO" "$tResult" '# DESCRIPTION'
+    assertContains "$LINENO" "$tResult" '# HISTORY'
 }
 
 testUsage_Int()
 {
-	local tResult="$(fUsage int 2>&1)"
-	fUDebug "tResult=$tResult"
-	assertContains "$LINENO" "$tResult" 'Template Use'
-	assertContains "$LINENO" "$tResult" 'fComSetGlobals'
+    local tResult="$(fUsage int 2>&1)"
+    fUDebug "tResult=$tResult"
+    assertContains "$LINENO" "$tResult" 'Template Use'
+    assertContains "$LINENO" "$tResult" 'fComSetGlobals'
 }
 
 testUsage_IntHtml()
 {
-	local tResult="$(fUsage int-html 2>&1)"
-	fUDebug "tResult=$tResult"
-	assertContains "$LINENO" "$tResult" '<a href="#Template-Use">Template Use</a>'
-	assertContains "$LINENO" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
-	assertContains "$LINENO" "$tResult" 'Internal Doc</title>'
-	assertContains "$LINENO" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
+    local tResult="$(fUsage int-html 2>&1)"
+    fUDebug "tResult=$tResult"
+    assertContains "$LINENO" "$tResult" '<a href="#Template-Use">Template Use</a>'
+    assertContains "$LINENO" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
+    assertContains "$LINENO" "$tResult" 'Internal Doc</title>'
+    assertContains "$LINENO" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
 }
 
 testUsage_IntMarkdown()
 {
-	local tResult="$(fUsage int-md 2>&1)"
-	assertContains "$LINENO" "$tResult" '## Template Use'
-	assertContains "$LINENO" "$tResult" '### fComSetGlobals'
-	assertContains "$LINENO" "$tResult" '### testComUsage'
+    local tResult="$(fUsage int-md 2>&1)"
+    assertContains "$LINENO" "$tResult" '## Template Use'
+    assertContains "$LINENO" "$tResult" '### fComSetGlobals'
+    assertContains "$LINENO" "$tResult" '### testComUsage'
 }
 
 # --------------------------------
 testSetGlobals()
 {
-	assertEquals "$LINENO" "/tmp/counter.tmp" "$gpCounterFile"
-	assertEquals "$LINENO" "0" "$gpMin"
-	assertEquals "$LINENO" "0" "$gpSec"
-	assertNull "$LINENO" "$gpEnd"
-	assertNull "$LINENO" "$gpStart"
-	assertEquals "$LINENO" "1" "$gpInterval"
-	assertEquals "$LINENO" "M" "$gpFmt"
-	assertEquals "$LINENO" "$Tmp/counter-lock" "$gpLockDir"
+    assertEquals "$LINENO" "/tmp/counter.tmp" "$gpCounterFile"
+    assertEquals "$LINENO" "0" "$gpMin"
+    assertEquals "$LINENO" "0" "$gpSec"
+    assertNull "$LINENO" "$gpEnd"
+    assertNull "$LINENO" "$gpStart"
+    assertEquals "$LINENO" "1" "$gpInterval"
+    assertEquals "$LINENO" "M" "$gpFmt"
+    assertEquals "$LINENO" "$Tmp/counter-lock" "$gpLockDir"
 
-	gpMin="foo"
-	gpSec="bar"
-	gpInterval="foo"
-	assertEquals "$LINENO" "0 0 0" "$gpMin $gpSec $gpInterval"
-	gpInterval=1
-	return
+    gpMin="foo"
+    gpSec="bar"
+    gpInterval="foo"
+    assertEquals "$LINENO" "0 0 0" "$gpMin $gpSec $gpInterval"
+    gpInterval=1
+    return
 }
 
 # --------------------------------
 testValidRange_InRange()
 {
-	tResult=$(fValidRange 0 10 2 "out of range" 2>&1)
-	fUDebug "tResult=$tResult"
-	assertNull "$LINENO" "$tResult"
+    tResult=$(fValidRange 0 10 2 "out of range" 2>&1)
+    fUDebug "tResult=$tResult"
+    assertNull "$LINENO" "$tResult"
 }
 
 testValidRange_OutOfRange()
 {
-	local tResult=$(fValidRange 0 10 11 "out of range" 2>&1)
-	fUDebug "tResult=$tResult"
-	assertContains "$LINENO" "$tResult" "out of range"
-	assertContains "$LINENO" "$tResult" "Usage:"
+    local tResult=$(fValidRange 0 10 11 "out of range" 2>&1)
+    fUDebug "tResult=$tResult"
+    assertContains "$LINENO" "$tResult" "out of range"
+    assertContains "$LINENO" "$tResult" "Usage:"
 }
 
 testValidRange_NegNumOutOfRange()
 {
-	local tResult=$(fValidRange 0 10 -2 "out of range" 2>&1)
-	fUDebug "tResult=$tResult"
-	assertContains "$LINENO" "$tResult" "out of range"
+    local tResult=$(fValidRange 0 10 -2 "out of range" 2>&1)
+    fUDebug "tResult=$tResult"
+    assertContains "$LINENO" "$tResult" "out of range"
 }
 
 testValidRange_StringArgIs0()
 {
-	# Strings assigned to an "integer" variable will be "0"
-	local tResult=$(fValidRange 1 10 "foo" "out of range" 2>&1)
-	fUDebug "tResult=$tResult"
-	assertContains "$LINENO" "$tResult" "out of range"
+    # Strings assigned to an "integer" variable will be "0"
+    local tResult=$(fValidRange 1 10 "foo" "out of range" 2>&1)
+    fUDebug "tResult=$tResult"
+    assertContains "$LINENO" "$tResult" "out of range"
 }
 
 # --------------------------------
 testValidArgs_EndTimeOnly()
 {
-	local tResult=$(fValidArgs "E-11am" "m-0" "s-0" 2>&1)
-	assertNull "$LINENO tResult=$tResult" "$tResult"
+    local tResult=$(fValidArgs "E-11am" "m-0" "s-0" 2>&1)
+    assertNull "$LINENO tResult=$tResult" "$tResult"
 }
 
 testValidArgs_MinSecNoEndTime()
 {
-	local tResult=$(fValidArgs "E-" "m-10" "s-0" 2>&1)
-	assertNull "$LINENO" "$tResult"
+    local tResult=$(fValidArgs "E-" "m-10" "s-0" 2>&1)
+    assertNull "$LINENO" "$tResult"
 }
 
 testValidArgs_SecNoEndTime()
 {
-	local tResult=$(fValidArgs "E-" "m-0" "s-10" 2>&1)
-	assertNull "$LINENO" "$tResult"
+    local tResult=$(fValidArgs "E-" "m-0" "s-10" 2>&1)
+    assertNull "$LINENO" "$tResult"
 }
 
 testValidArgs_AllAreNotSet()
 {
-	local tResult=$(fValidArgs "E-" "m-0" "s-0" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "You need to specify"
-	assertContains "$LINENO" "$tResult" "Usage:"
+    local tResult=$(fValidArgs "E-" "m-0" "s-0" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "You need to specify"
+    assertContains "$LINENO" "$tResult" "Usage:"
 }
 
 testValidArgs_MinIsTooLarge()
 {
-	local tResult=$(fValidArgs "E-" "m-6000" "s-0" 2>&1)
-	assertContains "$LINENO" "$tResult" "-m"
-	assertContains "$LINENO" "$tResult" "Usage:"
+    local tResult=$(fValidArgs "E-" "m-6000" "s-0" 2>&1)
+    assertContains "$LINENO" "$tResult" "-m"
+    assertContains "$LINENO" "$tResult" "Usage:"
 }
 
 testValidArgs_SecIsTooLarge()
 {
-	local tResult=$(fValidArgs "E-" "m-0" "s-300000" 2>&1)
-	assertContains "$LINENO" "$tResult" "-s"
-	assertContains "$LINENO" "$tResult" "Usage:"
+    local tResult=$(fValidArgs "E-" "m-0" "s-300000" 2>&1)
+    assertContains "$LINENO" "$tResult" "-s"
+    assertContains "$LINENO" "$tResult" "Usage:"
 }
 
 # --------------------------------
 testValidStartEnd_BothEmpty()
 {
-	local tResult=$(fValidStartEnd "" "" 2>&1)
-	assertNull "$LINENO $tResult" "$tResult"
+    local tResult=$(fValidStartEnd "" "" 2>&1)
+    assertNull "$LINENO $tResult" "$tResult"
 }
 
 testValidStartEnd_StartLessThanEnd()
 {
-	local tResult=$(fValidStartEnd "today 11am" "today 2pm" 2>&1)
-	assertNull "$LINENO $tResult" "$tResult"
+    local tResult=$(fValidStartEnd "today 11am" "today 2pm" 2>&1)
+    assertNull "$LINENO $tResult" "$tResult"
 }
 
 testValidStartEnd_DateStartLessThanDateEnd()
 {
-	local tResult=$(fValidStartEnd "2021-09-01 10am" "2021-09-02 11am" 2>&1)
-	assertNull "$LINENO $tResult" "$tResult"
+    local tResult=$(fValidStartEnd "2021-09-01 10am" "2021-09-02 11am" 2>&1)
+    assertNull "$LINENO $tResult" "$tResult"
 }
 
 testValidStartEnd_CurTimeLessThanFutureTime()
 {
-	local tResult=$(fValidStartEnd "now" "now + 10 min" 2>&1)
-	assertNull "$LINENO $tResult" "$tResult"
+    local tResult=$(fValidStartEnd "now" "now + 10 min" 2>&1)
+    assertNull "$LINENO $tResult" "$tResult"
 }
 
 testValidStartEnd_MissingEndTime()
 {
-	local tResult=$(fValidStartEnd "10am" "" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "-S option requires -E option"
+    local tResult=$(fValidStartEnd "10am" "" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "-S option requires -E option"
 }
 
 testValidStartEnd_StartTimeGreatertThanEndTime()
 {
-	local tResult=$(fValidStartEnd "now + 10 min" "now" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "must be before -E time"
+    local tResult=$(fValidStartEnd "now + 10 min" "now" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "must be before -E time"
 }
 
 testValidStartEnd_EndTimeMustBeGreaterThanCurrentTime()
 {
-	local tResult=$(fValidStartEnd "" "2020-08-01 10am" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "must be before -E time"
+    local tResult=$(fValidStartEnd "" "2020-08-01 10am" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "must be before -E time"
 }
 
 testValidStartEnd_InvalidTimeArg()
 {
-	local tResult=$(fValidStartEnd "foo" "now" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "Invalid: -S time"
+    local tResult=$(fValidStartEnd "foo" "now" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "Invalid: -S time"
 }
 
 testValidStartEnd_InvalidEndTime()
 {
-	local tResult=$(fValidStartEnd "now" "foo" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "Invalid: -E time"
+    local tResult=$(fValidStartEnd "now" "foo" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "Invalid: -E time"
 }
 
 # --------------------------------
 testValidDir_FoundDefaultCountersFileDir()
 {
-	local tResult=$(fValidDir "$gpCounterFile" 2>&1)
-	assertNull "$LINENO $tResult" "$tResult"
+    local tResult=$(fValidDir "$gpCounterFile" 2>&1)
+    assertNull "$LINENO $tResult" "$tResult"
 }
 
 testValidDir_FoundDirFileCouldBeIn()
 {
-	local tResult=$(fValidDir "$HOME/counter.tmp" 2>&1)
-	assertNull "$LINENO $tResult" "$tResult"
+    local tResult=$(fValidDir "$HOME/counter.tmp" 2>&1)
+    assertNull "$LINENO $tResult" "$tResult"
 }
 
 testValidDir_DirNotFound()
 {
-	local tResult=$(fValidDir "$Tmp/foo/bar" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "directory not found"
+    local tResult=$(fValidDir "$Tmp/foo/bar" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "directory not found"
 }
 
 testValidDir_DirIsNotWritable()
 {
-	local tResult=$(fValidDir "/usr/local/bin/foo" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "directory is not writable"
+    local tResult=$(fValidDir "/usr/local/bin/foo" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "directory is not writable"
 }
 
 # --------------------------------
 testLockCounterFile()
 {
-	local tResult
-	local tPID
+    local tResult
+    local tPID
 
-	assertTrue "$LINENO LockDir should not exist" "[ ! -d $gpLockDir ]"
-	assertTrue "$LINENO CounterFile should not exist" "[ ! -f $gpCounterFile ]"
+    assertTrue "$LINENO LockDir should not exist" "[ ! -d $gpLockDir ]"
+    assertTrue "$LINENO CounterFile should not exist" "[ ! -f $gpCounterFile ]"
 
-	tResult=$(fLockCounterFile $gpLockDir $gpCounterFile 2>&1)
-	assertTrue "$LINENO LockDir created" "[ -d $gpLockDir ]"
-	assertTrue "$LINENO PID file is in LockDir" "[ -f $gpLockDir/PID ]"
-	assertTrue "$LINENO Default CounterFile exists" "[ -f $gpCounterFile ]"
-	tPID=$(cat $gpLockDir/PID)
-	assertEquals "$LINENO in PID file matches the script's PID" "$$" "$tPID"
+    tResult=$(fLockCounterFile $gpLockDir $gpCounterFile 2>&1)
+    assertTrue "$LINENO LockDir created" "[ -d $gpLockDir ]"
+    assertTrue "$LINENO PID file is in LockDir" "[ -f $gpLockDir/PID ]"
+    assertTrue "$LINENO Default CounterFile exists" "[ -f $gpCounterFile ]"
+    tPID=$(cat $gpLockDir/PID)
+    assertEquals "$LINENO in PID file matches the script's PID" "$$" "$tPID"
 
-	# Set so that notice and info log messages will be outut
-	gpVerbose=2
+    # Set so that notice and info log messages will be outut
+    gpVerbose=2
 
-	local tResult=$(fLockCounterFile $gpLockDir $gpCounterFile 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "Already locked"
+    local tResult=$(fLockCounterFile $gpLockDir $gpCounterFile 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "Already locked"
 
-	# Make a PID that matches nothing, and certainly not $cName
-	echo 12345678 >$gpLockDir/PID 
-	local tResult=$(fLockCounterFile $gpLockDir $gpCounterFile 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "Internal error"
+    # Make a PID that matches nothing, and certainly not $cName
+    echo 12345678 >$gpLockDir/PID
+    local tResult=$(fLockCounterFile $gpLockDir $gpCounterFile 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "Internal error"
 
-	gpVerbose=0
+    gpVerbose=0
 
-	echo -e "\tTBD: test killing another running $cName"
-	echo -e "\tTBD: test not able to remove lock-dir after 5 tries"
-	return
+    echo -e "\tTBD: test killing another running $cName"
+    echo -e "\tTBD: test not able to remove lock-dir after 5 tries"
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 testLockCounterFile
@@ -654,222 +653,222 @@ EOF
 # --------------------------------
 testGetCount_SecUntilEndTimeFromNowSmall()
 {
-	local tEndTime=$(date --date="now + 60 sec" +%s)
-	local tCount=$(fGetCount $tEndTime)
-	assertEquals "$LINENO" "60" "$tCount"
+    local tEndTime=$(date --date="now + 60 sec" +%s)
+    local tCount=$(fGetCount $tEndTime)
+    assertEquals "$LINENO" "60" "$tCount"
 }
 
 testGetCount_SecUntilEndTimeFromNowLarge()
 {
-	local tEndTime=$(date --date="now + 6000 sec" +%s)
-	local tCount=$(fGetCount $tEndTime)
-	assertEquals "$LINENO" "6000" "$tCount"
+    local tEndTime=$(date --date="now + 6000 sec" +%s)
+    local tCount=$(fGetCount $tEndTime)
+    assertEquals "$LINENO" "6000" "$tCount"
 }
 
 testGetCount_NoTimeDifference()
 {
-	local tEndTime=$(date --date="now" +%s)
-	local tCount=$(fGetCount $tEndTime)
-	assertEquals "$LINENO" "0" "$tCount"
+    local tEndTime=$(date --date="now" +%s)
+    local tCount=$(fGetCount $tEndTime)
+    assertEquals "$LINENO" "0" "$tCount"
 }
 
 testGetCount_NegativeTimeDifference()
 {
-	local tEndTime=$(date --date="now - 10 sec" +%s)
-	local tCount=$(fGetCount $tEndTime)
-	assertEquals "$LINENO" "0" "$tCount"
+    local tEndTime=$(date --date="now - 10 sec" +%s)
+    local tCount=$(fGetCount $tEndTime)
+    assertEquals "$LINENO" "0" "$tCount"
 }
 
 # --------------------------------
 testOutput_MOver2Min()
 {
-	local tResult=$(fOutput 122 "M" "/tmp/test.tmp" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "2:02"
-	# Note: the "\r" causes matching and reporting problem with asserEquals
-	# so get result from the file.
-	tResult=$(cat /tmp/test.tmp)
-	assertEquals "$LINENO $tResult" " 2:02" "$tResult"
+    local tResult=$(fOutput 122 "M" "/tmp/test.tmp" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "2:02"
+    # Note: the "\r" causes matching and reporting problem with asserEquals
+    # so get result from the file.
+    tResult=$(cat /tmp/test.tmp)
+    assertEquals "$LINENO $tResult" " 2:02" "$tResult"
 }
 
 testOutput_HUnderOneHour()
 {
-	fOutput 122 "H" "/tmp/test.tmp" &>/dev/null
-	local tResult=$(cat /tmp/test.tmp)
-	assertEquals "$LINENO $tResult" " 2:02" "$tResult"
+    fOutput 122 "H" "/tmp/test.tmp" &>/dev/null
+    local tResult=$(cat /tmp/test.tmp)
+    assertEquals "$LINENO $tResult" " 2:02" "$tResult"
 }
 
 testOutput_HOverOneHour()
 {
-	fOutput 3722 "H" "/tmp/test.tmp" &>/dev/null
-	local tResult=$(cat /tmp/test.tmp)
-	assertEquals "$LINENO $tResult" " 1:02:02" "$tResult"
+    fOutput 3722 "H" "/tmp/test.tmp" &>/dev/null
+    local tResult=$(cat /tmp/test.tmp)
+    assertEquals "$LINENO $tResult" " 1:02:02" "$tResult"
 }
 
 testOutput_SUnderOneMin()
 {
-	fOutput 8 "S" "/tmp/test.tmp" &>/dev/null
-	local tResult=$(cat /tmp/test.tmp)
-	assertEquals "$LINENO $tResult" " 0:08" "$tResult"
+    fOutput 8 "S" "/tmp/test.tmp" &>/dev/null
+    local tResult=$(cat /tmp/test.tmp)
+    assertEquals "$LINENO $tResult" " 0:08" "$tResult"
 }
-	
+
 testOutput_SOverOneMin()
 {
-	fOutput 3722 "S" "/tmp/test.tmp" &>/dev/null
-	local tResult=$(cat /tmp/test.tmp)
-	assertEquals "$LINENO $tResult" " 0:3722" "$tResult"
+    fOutput 3722 "S" "/tmp/test.tmp" &>/dev/null
+    local tResult=$(cat /tmp/test.tmp)
+    assertEquals "$LINENO $tResult" " 0:3722" "$tResult"
 }
 
 testOutput_MMinusCountWarning()
 {
-	local tResult=$(fOutput -2 "M" "/tmp/test.tmp" 2>&1)
-	assertContains "$LINENO $tResult" "$tResult" "warning"
-	assertContains "$LINENO $tResult" "$tResult" "Possible internal error"
-	tResult=$(cat /tmp/test.tmp)
-	assertEquals "$LINENO $tResult" " 0:00" "$tResult"
+    local tResult=$(fOutput -2 "M" "/tmp/test.tmp" 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warning"
+    assertContains "$LINENO $tResult" "$tResult" "Possible internal error"
+    tResult=$(cat /tmp/test.tmp)
+    assertEquals "$LINENO $tResult" " 0:00" "$tResult"
 }
 
 testOutput_MMultipleOutputs()
 {
-	# Set so that outputs will be "appended" to output file.
-	gpDebug=1
-	rm -f $cTmp1
-	fOutput 121 "M" "/tmp/test.tmp" &>/dev/null
-	fOutput 120 "M" "/tmp/test.tmp" &>/dev/null
-	local tResult=$(cat $cTmp1)
-	assertContains "$LINENO $tResult" "$tResult" " 2:01 2:00"
-	gpDebug=0
+    # Set so that outputs will be "appended" to output file.
+    gpDebug=1
+    rm -f $cTmp1
+    fOutput 121 "M" "/tmp/test.tmp" &>/dev/null
+    fOutput 120 "M" "/tmp/test.tmp" &>/dev/null
+    local tResult=$(cat $cTmp1)
+    assertContains "$LINENO $tResult" "$tResult" " 2:01 2:00"
+    gpDebug=0
 }
 
 # --------------------------------
 testSetEndTime_SetOnlyMandS()
 {
-	local tExpect
-	
-	local tEndTime=$(fSetEndTime "S-" "E-" "m-2" "s-42")
-	local tNow=$(date +%s)
-	let tExpect=2*60+42+$tNow
-	assertEquals "$LINENO" "$tExpect" "$tEndTime"
+    local tExpect
+
+    local tEndTime=$(fSetEndTime "S-" "E-" "m-2" "s-42")
+    local tNow=$(date +%s)
+    let tExpect=2*60+42+$tNow
+    assertEquals "$LINENO" "$tExpect" "$tEndTime"
 }
 
 testSetEndTime_SetETime()
 {
-	local tSetE=$(date --date='now + 401 sec' +%T)
-	local tExpect=$(date --date='now + 401 sec' +%s)
-	local tEndTime=$(fSetEndTime "S-" "E-$tSetE" "m-2" "s-42")
-	assertEquals "$LINENO" "$tExpect" "$tEndTime"
+    local tSetE=$(date --date='now + 401 sec' +%T)
+    local tExpect=$(date --date='now + 401 sec' +%s)
+    local tEndTime=$(fSetEndTime "S-" "E-$tSetE" "m-2" "s-42")
+    assertEquals "$LINENO" "$tExpect" "$tEndTime"
 }
 
 testSetEndTime_SetStartTimeAndSetEndTime()
 {
-	local tExpect
-	local tSetS=$(date --date='2020-01-21 10am' +%s)
-	local tSetE=$(date --date='2020-01-21 2:22pm' +%s)
-	local tNow=$(date +%s)
-	let tExpect=tNow+tSetE-tSetS
-	local tEndTime=$(fSetEndTime "S-2020-01-21 10am" "E-2020-01-21 2:22pm" "m-2" "s-42")
-	assertEquals "$LINENO" "$tExpect" "$tEndTime"
+    local tExpect
+    local tSetS=$(date --date='2020-01-21 10am' +%s)
+    local tSetE=$(date --date='2020-01-21 2:22pm' +%s)
+    local tNow=$(date +%s)
+    let tExpect=tNow+tSetE-tSetS
+    local tEndTime=$(fSetEndTime "S-2020-01-21 10am" "E-2020-01-21 2:22pm" "m-2" "s-42")
+    assertEquals "$LINENO" "$tExpect" "$tEndTime"
 }
 
 # --------------------------------
 testRunCounter_5SecTo0()
 {
-	declare -i tTimeEnd
-	local tFile=/tmp/countdown.tmp
-	local tFmt
-	declare -i tInt
-	local tResult
+    declare -i tTimeEnd
+    local tFile=/tmp/countdown.tmp
+    local tFmt
+    declare -i tInt
+    local tResult
 
-	# Set so that output will be appended to $tTmp1
-	gpDebug=1
+    # Set so that output will be appended to $tTmp1
+    gpDebug=1
 
-	tFmt=M
-	tInt=1
-	tTimeEnd=$(date --date='now + 5 sec' +%s)
-	echo -e "\tRun: 5 sec"
-	fRunCounter $tTimeEnd $tFile $tFmt $tInt
-	echo
-	tResult=$(cat $cTmp1)
-	assertContains "$LINENO $tResult" "$tResult" ' 0:05 0:04 0:03 0:02 0:01 0:00'
+    tFmt=M
+    tInt=1
+    tTimeEnd=$(date --date='now + 5 sec' +%s)
+    echo -e "\tRun: 5 sec"
+    fRunCounter $tTimeEnd $tFile $tFmt $tInt
+    echo
+    tResult=$(cat $cTmp1)
+    assertContains "$LINENO $tResult" "$tResult" ' 0:05 0:04 0:03 0:02 0:01 0:00'
 }
 
 testRunCounter_SOut121SecFor5Sec()
 {
-	declare -i tTimeEnd
-	local tFile=/tmp/countdown.tmp
-	local tFmt
-	declare -i tInt
-	local tResult
+    declare -i tTimeEnd
+    local tFile=/tmp/countdown.tmp
+    local tFmt
+    declare -i tInt
+    local tResult
 
-	# Set so that output will be appended to $tTmp1
-	gpDebug=1
-	
-	tFmt=S
-	tInt=1
-	tTimeEnd=$(date --date='now + 121 sec' +%s)
-	echo -e "\tTimeout: 5 sec"
-	fTimeoutFunction 5 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
-	tResult=$(cat $cTmp1)
-	assertContains "$LINENO $tResult" "$tResult" ' 0:121 0:120 0:119 0:118 0:117'
+    # Set so that output will be appended to $tTmp1
+    gpDebug=1
+
+    tFmt=S
+    tInt=1
+    tTimeEnd=$(date --date='now + 121 sec' +%s)
+    echo -e "\tTimeout: 5 sec"
+    fTimeoutFunction 5 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
+    tResult=$(cat $cTmp1)
+    assertContains "$LINENO $tResult" "$tResult" ' 0:121 0:120 0:119 0:118 0:117'
 }
 
 testRunCounter_MOut323SecFor5Sec()
 {
-	declare -i tTimeEnd
-	local tFile=/tmp/countdown.tmp
-	local tFmt
-	declare -i tInt
-	local tResult
+    declare -i tTimeEnd
+    local tFile=/tmp/countdown.tmp
+    local tFmt
+    declare -i tInt
+    local tResult
 
-	# Set so that output will be appended to $tTmp1
-	gpDebug=1
-	
-	tFmt=M
-	tInt=1
-	tTimeEnd=$(date --date='now + 323 sec' +%s)
-	echo -e "\tTimeout: 5 sec"
-	fTimeoutFunction 5 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
-	tResult=$(cat $cTmp1)
-	assertContains "$LINENO $tResult" "$tResult" ' 5:23 5:22 5:21 5:20 5:19'
+    # Set so that output will be appended to $tTmp1
+    gpDebug=1
+
+    tFmt=M
+    tInt=1
+    tTimeEnd=$(date --date='now + 323 sec' +%s)
+    echo -e "\tTimeout: 5 sec"
+    fTimeoutFunction 5 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
+    tResult=$(cat $cTmp1)
+    assertContains "$LINENO $tResult" "$tResult" ' 5:23 5:22 5:21 5:20 5:19'
 }
 
 testRunCounter_HOut3777SecFor5Sec()
 {
-	declare -i tTimeEnd
-	local tFile=/tmp/countdown.tmp
-	local tFmt
-	declare -i tInt
-	local tResult
+    declare -i tTimeEnd
+    local tFile=/tmp/countdown.tmp
+    local tFmt
+    declare -i tInt
+    local tResult
 
-	# Set so that output will be appended to $tTmp1
-	gpDebug=1
-	
-	tFmt=H
-	tInt=1
-	tTimeEnd=$(date --date='now + 3777 sec' +%s)
-	echo -e "\tTimeout: 5 sec"
-	fTimeoutFunction 5 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
-	tResult=$(cat $cTmp1)
-	assertContains "$LINENO $tResult" "$tResult" ' 1:02:57 1:02:56 1:02:55 1:02:54 1:02:53'
+    # Set so that output will be appended to $tTmp1
+    gpDebug=1
+
+    tFmt=H
+    tInt=1
+    tTimeEnd=$(date --date='now + 3777 sec' +%s)
+    echo -e "\tTimeout: 5 sec"
+    fTimeoutFunction 5 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
+    tResult=$(cat $cTmp1)
+    assertContains "$LINENO $tResult" "$tResult" ' 1:02:57 1:02:56 1:02:55 1:02:54 1:02:53'
 }
 
 testRunCounter_HOut3777SecInt3For10Sec()
 {
-	declare -i tTimeEnd
-	local tFile=/tmp/countdown.tmp
-	local tFmt
-	declare -i tInt
-	local tResult
+    declare -i tTimeEnd
+    local tFile=/tmp/countdown.tmp
+    local tFmt
+    declare -i tInt
+    local tResult
 
-	# Set so that output will be appended to $tTmp1
-	gpDebug=1
-	
-	tFmt=H
-	tInt=3
-	tTimeEnd=$(date --date='now + 3777 sec' +%s)
-	echo -e "\tTimeout: 10 sec"
-	fTimeoutFunction 10 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
-	tResult=$(cat $cTmp1)
-	assertContains "$LINENO $tResult" "$tResult" ' 1:02:57 1:02:54 1:02:51'
+    # Set so that output will be appended to $tTmp1
+    gpDebug=1
+
+    tFmt=H
+    tInt=3
+    tTimeEnd=$(date --date='now + 3777 sec' +%s)
+    echo -e "\tTimeout: 10 sec"
+    fTimeoutFunction 10 "fRunCounter $tTimeEnd $tFile $tFmt $tInt"
+    tResult=$(cat $cTmp1)
+    assertContains "$LINENO $tResult" "$tResult" ' 1:02:57 1:02:54 1:02:51'
 }
 
 # ========================================
@@ -878,11 +877,11 @@ testRunCounter_HOut3777SecInt3For10Sec()
 # --------------------------------
 fCleanUp()
 {
-	rm -rf $gpCounterFile $gpLockDir &>/dev/null
-	fComCleanUp
-	exit
+    rm -rf $gpCounterFile $gpLockDir &>/dev/null
+    fComCleanUp
+    exit
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head2 Script Functions
@@ -898,24 +897,24 @@ EOF
 # -------------------
 fSetGlobals()
 {
-	fComSetGlobals
-	
-	# Put your globals here
-	declare -gx gpCounterFile=${gpCounterFile:-/tmp/counter.tmp}
-	declare -gxi gpMin=${gpMin:-0}
-	declare -gxi gpSec=${gpSec:-0}
-	declare -gx gpEnd=${gpEnd:-""}
-	declare -gx gpStart=${gpStart:-""}
-	declare -gxi gpInterval=${gpInterval:-1}
-	declare -gxu gpFmt="M"
-	declare -gx gpDate=${gpDate:-date}
-	declare -gx gpLockDir=${gpLockDir:-$Tmp/counter-lock}
+    fComSetGlobals
 
-	# Define the Required and the Optional progs, space separated
-	fComCheckDeps "date" "cat"
-	return
+    # Put your globals here
+    declare -gx gpCounterFile=${gpCounterFile:-/tmp/counter.tmp}
+    declare -gxi gpMin=${gpMin:-0}
+    declare -gxi gpSec=${gpSec:-0}
+    declare -gx gpEnd=${gpEnd:-""}
+    declare -gx gpStart=${gpStart:-""}
+    declare -gxi gpInterval=${gpInterval:-1}
+    declare -gxu gpFmt="M"
+    declare -gx gpDate=${gpDate:-date}
+    declare -gx gpLockDir=${gpLockDir:-$Tmp/counter-lock}
 
-    	cat <<EOF >/dev/null
+    # Define the Required and the Optional progs, space separated
+    fComCheckDeps "date" "cat"
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fSetGlobals
@@ -933,17 +932,17 @@ EOF
 # -------------------
 fValidRange()
 {
-	declare -i pMin=$1
-	declare -i pMax=$2
-	declare -i pNum=$3
-	local pMsg=$4
+    declare -i pMin=$1
+    declare -i pMax=$2
+    declare -i pNum=$3
+    local pMsg=$4
 
-	if [ $pNum -lt $pMin ] || [ $pNum -gt $pMax ]; then
-		fError "$pMsg: $pNum" $LINENO
-	fi
-	return
+    if [ $pNum -lt $pMin ] || [ $pNum -gt $pMax ]; then
+        fError "$pMsg: $pNum" $LINENO
+    fi
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fSetGlobals pMin pMax pNum
@@ -955,20 +954,20 @@ EOF
 # -------------------
 fValidArgs()
 {
-	local pEnd=${1#E-}
-	declare -i pMin=${2#m-}
-	declare -i pSec=${3#s-}
+    local pEnd=${1#E-}
+    declare -i pMin=${2#m-}
+    declare -i pSec=${3#s-}
 
-	if [ -z "$pEnd" ] && [ $pMin -eq 0 ] && [ $pSec -eq 0 ]; then
-		fError "You need to specify -E, -m, or -s" $LINENO
-	fi
-	# About a month of minutes
-	fValidRange 0 5000 $pMin "-m"
-	# About a month of seconds
-	fValidRange 0 260000 $pSec "-s"
-	return
+    if [ -z "$pEnd" ] && [ $pMin -eq 0 ] && [ $pSec -eq 0 ]; then
+        fError "You need to specify -E, -m, or -s" $LINENO
+    fi
+    # About a month of minutes
+    fValidRange 0 5000 $pMin "-m"
+    # About a month of seconds
+    fValidRange 0 260000 $pSec "-s"
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fValidArgs E-pEnd m-pMin s-pSec
@@ -980,38 +979,38 @@ EOF
 # -------------------
 fValidStartEnd()
 {
-	local pStart=${1#s-}
-	local pEnd=${2#e-}
+    local pStart=${1#s-}
+    local pEnd=${2#e-}
 
-	declare -i tStartSec
-	declare -i tEndSec
+    declare -i tStartSec
+    declare -i tEndSec
 
-	if [ -z "$pStart" ] && [ -z "$pEnd" ]; then
-		return
-	fi
-	if [ -n "$pStart" ] && [ -z "$pEnd" ]; then
-		fError "Invalid: -S option requires -E option." $LINENO
-	fi
-	if [ -z "$pStart" ]; then
-		pStart=now
-	fi
+    if [ -z "$pStart" ] && [ -z "$pEnd" ]; then
+        return
+    fi
+    if [ -n "$pStart" ] && [ -z "$pEnd" ]; then
+        fError "Invalid: -S option requires -E option." $LINENO
+    fi
+    if [ -z "$pStart" ]; then
+        pStart=now
+    fi
 
-	tStartSec=$($gpDate --date="$pStart" +%s 2>/dev/null)
-	if [ $tStartSec -eq 0 ]; then
-		fError "Invalid: -S time." $LINENO
-	fi
+    tStartSec=$($gpDate --date="$pStart" +%s 2>/dev/null)
+    if [ $tStartSec -eq 0 ]; then
+        fError "Invalid: -S time." $LINENO
+    fi
 
-	tEndSec=$($gpDate --date="$pEnd" +%s 2>/dev/null)
-	if [ $tEndSec -eq 0 ]; then
-		fError "Invalid: -E time." $LINENO
-	fi
+    tEndSec=$($gpDate --date="$pEnd" +%s 2>/dev/null)
+    if [ $tEndSec -eq 0 ]; then
+        fError "Invalid: -E time." $LINENO
+    fi
 
-	if [ $tStartSec -ge $tEndSec  ]; then
-		fError "Invalid: -S time: $pStart, must be before -E time: $pEnd." $LINENO
-	fi
-	return
+    if [ $tStartSec -ge $tEndSec ]; then
+        fError "Invalid: -S time: $pStart, must be before -E time: $pEnd." $LINENO
+    fi
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fValidStartEnd s-pStart e-pEnd
@@ -1023,19 +1022,19 @@ EOF
 # -------------------
 fValidDir()
 {
-	local pFile=$1
-	
-	local tDir=${pFile%/*}
+    local pFile=$1
 
-	if [ ! -d "$tDir" ]; then
-		fError "Invalid: directory not found for -f $pFile." $LINENO
-	fi
-	if [ ! -w $tDir ]; then
-		fError "Invalid: -f $pFile directory is not writable for you." $LINENO
-	fi
-	return
+    local tDir=${pFile%/*}
 
-    	cat <<EOF >/dev/null
+    if [ ! -d "$tDir" ]; then
+        fError "Invalid: directory not found for -f $pFile." $LINENO
+    fi
+    if [ ! -w $tDir ]; then
+        fError "Invalid: -f $pFile directory is not writable for you." $LINENO
+    fi
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fValidDir pFile
@@ -1047,45 +1046,45 @@ EOF
 # -------------------
 fLockCounterFile()
 {
-	local pLockDir=$1
-	local pFile=$2
+    local pLockDir=$1
+    local pFile=$2
 
-	declare -i tPID
-	declare -i tCount=0
-	local tProc
+    declare -i tPID
+    declare -i tCount=0
+    local tProc
 
-	until mkdir $pLockDir &>/dev/null; do
-		fLog warning "Another counter using $pFile is running. Killing it." $LINENO
-		if [ ! -f $pLockDir/PID ]; then
-			# Huh?
-			rm -rf $pLockDir
-		else
-			tPID=$(cat $pLockDir/PID)
-			if [ "$$" = "$tPID" ]; then
-				fLog notice "Already locked" $LINENO
-				# Do not kill self
-				break
-			fi
-			if ! ps -h $tPID | grep -q $cName; then
-				fError "Internal error in fLockCounterFile" $LINENO
-			fi
-			if ps $tPID &>/dev/null; then
-				fLog notice "killing $tPID" $LINENO
-				kill $tPID
-			fi
-			rm -rf $pLockDir
-		fi
-		let tCount+=1
-		if [ $tCount -ge 5 ]; then
-			fError "Could not lock $pLockDir" $LINENO
-		fi
-		sleep 0.5
-	done
-	echo $$ >$pLockDir/PID
-	echo >$pFile
-	return
+    until mkdir $pLockDir &>/dev/null; do
+        fLog warning "Another counter using $pFile is running. Killing it." $LINENO
+        if [ ! -f $pLockDir/PID ]; then
+            # Huh?
+            rm -rf $pLockDir
+        else
+            tPID=$(cat $pLockDir/PID)
+            if [ "$$" = "$tPID" ]; then
+                fLog notice "Already locked" $LINENO
+                # Do not kill self
+                break
+            fi
+            if ! ps -h $tPID | grep -q $cName; then
+                fError "Internal error in fLockCounterFile" $LINENO
+            fi
+            if ps $tPID &>/dev/null; then
+                fLog notice "killing $tPID" $LINENO
+                kill $tPID
+            fi
+            rm -rf $pLockDir
+        fi
+        let tCount+=1
+        if [ $tCount -ge 5 ]; then
+            fError "Could not lock $pLockDir" $LINENO
+        fi
+        sleep 0.5
+    done
+    echo $$ >$pLockDir/PID
+    echo >$pFile
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fLockCounterFile pLockDir pFile
@@ -1097,21 +1096,21 @@ EOF
 # -------------------
 fGetCount()
 {
-	declare -i pEndTime=$1
+    declare -i pEndTime=$1
 
-	declare -i tCurTime
-	declare -i tCountSec
-	
-	tCurTime=$($gpDate +'%s')
-	let tCountSec=pEndTime-tCurTime
+    declare -i tCurTime
+    declare -i tCountSec
 
-	if [ $tCountSec -lt 0 ]; then
-		tCountSec=0
-	fi
-	echo $tCountSec
-	return
+    tCurTime=$($gpDate +'%s')
+    let tCountSec=pEndTime-tCurTime
 
-    	cat <<EOF >/dev/null
+    if [ $tCountSec -lt 0 ]; then
+        tCountSec=0
+    fi
+    echo $tCountSec
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fGetCount pEndTime
@@ -1126,53 +1125,53 @@ EOF
 # -------------------
 fOutput()
 {
-	declare -i pSec=$1
-	local pFmt=$2
-	local pFile=$3
+    declare -i pSec=$1
+    local pFmt=$2
+    local pFile=$3
 
-	declare -i tHour
-	declare -i tMin
-	declare -i tSec
+    declare -i tHour
+    declare -i tMin
+    declare -i tSec
 
-	local tOutput=">$pFile"
+    local tOutput=">$pFile"
 
-	# Formatting negative seconds makes no sense for countdown
-	if [ $pSec -lt 0 ]; then
-		fLog warning "Possible internal error. Negative count: $pSec" $LINENO
-		pSec=0
-	fi
+    # Formatting negative seconds makes no sense for countdown
+    if [ $pSec -lt 0 ]; then
+        fLog warning "Possible internal error. Negative count: $pSec" $LINENO
+        pSec=0
+    fi
 
-	if [ $gpDebug -ne 0 ]; then
-		tOutput="| tee -a $cTmp1 >$pFile"
-	fi
+    if [ $gpDebug -ne 0 ]; then
+        tOutput="| tee -a $cTmp1 >$pFile"
+    fi
 
-	case $pFmt in
-		S)
-			eval printf "\ 0:%02i" $pSec $tOutput
-			printf "0:%02i\r" $pSec
-		;;
-		M)
-			let tMin=pSec/60
-			let tSec=pSec-60*tMin
-			eval printf "\ %i:%02i" $tMin $tSec $tOutput
-			printf "%i:%02i\r" $tMin $tSec
-		;;
-		H)
-			let tHour=pSec/3600
-			let tMin=(pSec-tHour*3600)/60
-			let tSec=pSec-tHour*3600-tMin*60
-			if [ $tHour -eq 0 ]; then
-				eval printf "\ %i:%02i" $tMin $tSec $tOutput
-				printf "%i:%02i\r" $tMin $tSec
-			else
-				eval printf "\ %i:%02i:%02i" $tHour $tMin $tSec $tOutput
-				printf "%i:%02i:%02i\r" $tHour $tMin $tSec
-			fi
-		;;
-	esac
-	return
+    case $pFmt in
+        S)
+            eval printf "\ 0:%02i" $pSec $tOutput
+            printf "0:%02i\r" $pSec
+            ;;
+        M)
+            let tMin=pSec/60
+            let tSec=pSec-60*tMin
+            eval printf "\ %i:%02i" $tMin $tSec $tOutput
+            printf "%i:%02i\r" $tMin $tSec
+            ;;
+        H)
+            let tHour=pSec/3600
+            let tMin=(pSec - tHour * 3600)/60
+            let tSec=pSec-tHour*3600-tMin*60
+            if [ $tHour -eq 0 ]; then
+                eval printf "\ %i:%02i" $tMin $tSec $tOutput
+                printf "%i:%02i\r" $tMin $tSec
+            else
+                eval printf "\ %i:%02i:%02i" $tHour $tMin $tSec $tOutput
+                printf "%i:%02i:%02i\r" $tHour $tMin $tSec
+            fi
+            ;;
+    esac
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fOutput pSec pFmt pFile
@@ -1184,32 +1183,32 @@ EOF
 # -------------------
 fSetEndTime()
 {
-	local pStart=${1#S-}
-	local pEnd=${2#E-}
-	declare -i pMin=${3#m-}
-	declare -i pSec=${4#s-}
+    local pStart=${1#S-}
+    local pEnd=${2#E-}
+    declare -i pMin=${3#m-}
+    declare -i pSec=${4#s-}
 
-	declare -i tTimeStart
-	declare -i tTimeEnd
-	declare -i tRefTimeEnd
+    declare -i tTimeStart
+    declare -i tTimeEnd
+    declare -i tRefTimeEnd
 
-	if [ -n "$pStart" ] && [ -n "$pEnd" ]; then
-		tTimeStart=$($gpDate --date="$pStart" +%s)
-		tTimeEnd=$($gpDate --date="$pEnd" +%s)
-	elif [ -n "$pEnd" ]; then
-		tTimeStart=$($gpDate +%s)
-		tTimeEnd=$($gpDate --date="$pEnd" +%s)
-	else
-		let pSec+=pMin*60
-		tTimeStart=$($gpDate +%s)
-		tTimeEnd=$($gpDate --date="now + $pSec sec" +%s)
-	fi
-	let pSec=tTimeEnd-tTimeStart
-	tRefTimeEnd=$(($($gpDate +%s) + $pSec));
-	echo $tRefTimeEnd
-	return
+    if [ -n "$pStart" ] && [ -n "$pEnd" ]; then
+        tTimeStart=$($gpDate --date="$pStart" +%s)
+        tTimeEnd=$($gpDate --date="$pEnd" +%s)
+    elif [ -n "$pEnd" ]; then
+        tTimeStart=$($gpDate +%s)
+        tTimeEnd=$($gpDate --date="$pEnd" +%s)
+    else
+        let pSec+=pMin*60
+        tTimeStart=$($gpDate +%s)
+        tTimeEnd=$($gpDate --date="now + $pSec sec" +%s)
+    fi
+    let pSec=tTimeEnd-tTimeStart
+    tRefTimeEnd=$(($($gpDate +%s) + $pSec))
+    echo $tRefTimeEnd
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fSetEndTime S-pStart E-pEnd m-pMin s-pSec
@@ -1220,27 +1219,27 @@ EOF
 
 fRunCounter()
 {
-	declare -i pEndTime=$1
-	local pFile=$2
-	local pFmt=$3
-	declare -i pInt=$4
+    declare -i pEndTime=$1
+    local pFile=$2
+    local pFmt=$3
+    declare -i pInt=$4
 
-	declare -i tCountSec
-	declare -i tMod
+    declare -i tCountSec
+    declare -i tMod
 
-	tCountSec=$(fGetCount $pEndTime)
-	while [ $tCountSec -gt 0 ]; do
-		let tMod=tCountSec%pInt
-		if [ $tMod -eq 0 ]; then
-			fOutput $tCountSec $pFmt $pFile
-		fi
-		sleep 1
-		tCountSec=$(fGetCount $pEndTime)
-	done
-	fOutput 0 $pFmt $pFile
-	return
+    tCountSec=$(fGetCount $pEndTime)
+    while [ $tCountSec -gt 0 ]; do
+        let tMod=tCountSec%pInt
+        if [ $tMod -eq 0 ]; then
+            fOutput $tCountSec $pFmt $pFile
+        fi
+        sleep 1
+        tCountSec=$(fGetCount $pEndTime)
+    done
+    fOutput 0 $pFmt $pFile
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fRunCounter pEndTime pFile pFmt pInt
@@ -1253,21 +1252,21 @@ EOF
 # This should be the last defined function
 fRunTests()
 {
-	gpUnitDebug=${gpUnitDebug:-0}
-	if [ "$gpTest" = "all" ]; then
-		# shellcheck disable=SC1091
-		. /usr/local/bin/shunit2.1
-		exit $?
-	fi
-	if [ "$gpTest" = "com" ]; then
-		$cBin/bash-com.test
-		exit $?
-	fi
-	# shellcheck disable=SC1091
-	. /usr/local/bin/shunit2.1 -- $gpTest
-	exit $?
-	
-    	cat <<EOF >/dev/null
+    gpUnitDebug=${gpUnitDebug:-0}
+    if [ "$gpTest" = "all" ]; then
+        # shellcheck disable=SC1091
+        . /usr/local/bin/shunit2.1
+        exit $?
+    fi
+    if [ "$gpTest" = "com" ]; then
+        $cBin/bash-com.test
+        exit $?
+    fi
+    # shellcheck disable=SC1091
+    . /usr/local/bin/shunit2.1 -- $gpTest
+    exit $?
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fRunTests
@@ -1297,48 +1296,48 @@ export gpTest gpUnitDebug SHUNIT_COLOR
 
 # Script Globals
 export gpCounterFile gpDate gpEnd gpFmt gpInterval gpMin gpSec gpStart
-cVer='$Revision: 1.7 $'
+cVer='$Revision: 1.8 $'
 fSetGlobals
 
 # -------------------
 # Get Options Section
 
 if [ $# -eq 0 ]; then
-	fError "Missing options." $LINENO
+    fError "Missing options." $LINENO
 fi
 
 while getopts :m:s:S:E:i:F:f:hH:lT:vx tArg; do
-	case $tArg in
-		# Script arguments
-		m)	gpMin=$OPTARG;;
-		s)	gpSec=$OPTARG;;
-		
-		E)	gpEnd=$OPTARG;;
-		S)	gpStart=$OPTARG;;
-		
-		i)	gpInterval=$OPTARG;;
-		F)	gpFmt=$OPTARG;;
-		f)	gpCounterFile=$OPTARG;;
-		# Common arguments
-		h)	fUsage long;;
-		H)	fUsage "$OPTARG";;
-		l)	gpLog=1;;
-		v)	let gpVerbose=gpVerbose+1;;
-		x)	let gpDebug=gpDebug+1;;
-		T)	gpTest="$OPTARG";;
-		# Problem arguments
-		:)	fError "Value required for option: $OPTARG" $LINENO;;
-		\?)	fError "Unknown option: $OPTARG" $LINENO;;
-	esac
+    case $tArg in
+        # Script arguments
+        m) gpMin=$OPTARG ;;
+        s) gpSec=$OPTARG ;;
+
+        E) gpEnd=$OPTARG ;;
+        S) gpStart=$OPTARG ;;
+
+        i) gpInterval=$OPTARG ;;
+        F) gpFmt=$OPTARG ;;
+        f) gpCounterFile=$OPTARG ;;
+        # Common arguments
+        h) fUsage long ;;
+        H) fUsage "$OPTARG" ;;
+        l) gpLog=1 ;;
+        v) let gpVerbose=gpVerbose+1 ;;
+        x) let gpDebug=gpDebug+1 ;;
+        T) gpTest="$OPTARG" ;;
+        # Problem arguments
+        :) fError "Value required for option: $OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+    esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 if [ $# -ne 0 ]; then
-	fError "Unexpeted argument: $*" $LINENO
+    fError "Unexpeted argument: $*" $LINENO
 fi
 
 # -------------------
 if [ -n "$gpTest" ]; then
-    	fRunTests
+    fRunTests
 fi
 
 # -------------------

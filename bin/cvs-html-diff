@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -ne 3 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	cvs-html-diff -rN.N File.html DiffFile.html
 
@@ -10,7 +10,7 @@ N.N version of File and the current file.  This works best for xhtml
 files that have been formatted with tidy.
 
 EOF
-	exit 1
+    exit 1
 fi
 
 # -----------------
@@ -23,12 +23,12 @@ tTmpFile=~/tmp/diff.tmp
 # -----------------
 # Validate
 if [ ! -r $pFile ]; then
-	echo "Error: can not read $pFile"
-	exit 1
+    echo "Error: can not read $pFile"
+    exit 1
 fi
 if [ $pFile = $pDiffFile ]; then
-	echo "NewFile can not be the same as DiffFile"
-	exit 1
+    echo "NewFile can not be the same as DiffFile"
+    exit 1
 fi
 
 # -----------------

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/bcmnt,v 1.45 2020/02/07 19:35:35 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/bcmnt,v 1.46 2021/10/26 19:26:08 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -16,16 +16,16 @@
 # cVer - current version
 # cName - script's name
 
-function fUsage
+function fUsage()
 {
-	if [ $# -ne 0 ]; then
-		pod2text $0
-	else
-		pod2usage $0
-	fi
-	exit 1
-	
-	cat <<EOF
+    if [ $# -ne 0 ]; then
+        pod2text $0
+    else
+        pod2usage $0
+    fi
+    exit 1
+
+    cat <<EOF
 =pod
 
 =head1 bcmnt
@@ -148,155 +148,155 @@ encfs, encfsctl
 
 =head1 HISTORY
 
- $Revision: 1.45 $
- $Date: 2020/02/07 19:35:35 $ GMT 
+ $Revision: 1.46 $
+ $Date: 2021/10/26 19:26:08 $ GMT 
 
 =cut
 EOF
-	exit 1
+    exit 1
 } # fUsage
 
 # --------------------------------
-function fError
+function fError()
 {
-	# Usage:
-	#     fError pMsg [pLine [pErr]]
-	# Print the error message.  Then call fCleanUp, and exit
+    # Usage:
+    #     fError pMsg [pLine [pErr]]
+    # Print the error message.  Then call fCleanUp, and exit
 
-	local pMsg="$1"
-	local pLine=$2
-	local pErr=$3
+    local pMsg="$1"
+    local pLine=$2
+    local pErr=$3
 
-	fLog crit "$pMsg" $pLine $pErr
-	fUsage
+    fLog crit "$pMsg" $pLine $pErr
+    fUsage
 } # fError
 
 # ------------------
-function fLog
+function fLog()
 {
-	# Usage:
-	#     gErr=8801		# optional
-	#     fLog notice "Just testing" $LINENO 8
-	# pLevel - emerg alert crit err warning notice info debug
+    # Usage:
+    #     gErr=8801		# optional
+    #     fLog notice "Just testing" $LINENO 8
+    # pLevel - emerg alert crit err warning notice info debug
 
-	local pLevel=$1
-	local pMsg="$2"
-	# optional
-	local pLine=$3
-	# optional
-	local pErr=$4
+    local pLevel=$1
+    local pMsg="$2"
+    # optional
+    local pLine=$3
+    # optional
+    local pErr=$4
 
-	local tVerbose=""
-	local tErr=""
-	if [ -n "$pErr" ]; then
-		tErr="$pErr"
-	fi
-	if [ $gErr -ne 0 ]; then
-		tErr="$tErr,$gErr"
-	fi
-	if [ -n "$tErr" ]; then
-		tErr="($tErr)"
-	fi
+    local tVerbose=""
+    local tErr=""
+    if [ -n "$pErr" ]; then
+        tErr="$pErr"
+    fi
+    if [ $gErr -ne 0 ]; then
+        tErr="$tErr,$gErr"
+    fi
+    if [ -n "$tErr" ]; then
+        tErr="($tErr)"
+    fi
 
-	local tLine=""
-	if [ -n "$pLine" ]; then
-		tLine="[$pLine]"
-	fi
+    local tLine=""
+    if [ -n "$pLine" ]; then
+        tLine="[$pLine]"
+    fi
 
-	echo "${cName} $pLevel: $pMsg $tLine$tErr" 1>&2
+    echo "${cName} $pLevel: $pMsg $tLine$tErr" 1>&2
 } # fLog
 
 # ------------------
-function fCreateDir
+function fCreateDir()
 {
-	local pDir=$1
+    local pDir=$1
 
-	if [ -d $cTop/.$pDir.ecfs ]; then
-		fError "$cTop/.$pDir.ecfs already exists" $LINENO
-	fi
-	
-	if [ ! -d $cTop/$pDir ]; then
-		mkdir -p $cTop/$pDir
-	fi
-	if [ ! -d $cTop/$pDir ]; then
-		fError "Could not create: $cTop/$pDir" $LINENO
-	fi
+    if [ -d $cTop/.$pDir.ecfs ]; then
+        fError "$cTop/.$pDir.ecfs already exists" $LINENO
+    fi
 
-	fLog info "Create $pDir" $LINENO
-	encfs --standard $cTop/.$pDir.ecfs $cTop/$pDir
-	date >$cTop/$pDir/mounted
+    if [ ! -d $cTop/$pDir ]; then
+        mkdir -p $cTop/$pDir
+    fi
+    if [ ! -d $cTop/$pDir ]; then
+        fError "Could not create: $cTop/$pDir" $LINENO
+    fi
 
-	exit 0
+    fLog info "Create $pDir" $LINENO
+    encfs --standard $cTop/.$pDir.ecfs $cTop/$pDir
+    date >$cTop/$pDir/mounted
+
+    exit 0
 } # fCreateDir
 
 # ------------------
-function fMount
+function fMount()
 {
-	local pDir=$1
+    local pDir=$1
 
-	if [ -f $cTop/$pDir/mounted ]; then
-		fLog info "$pDir is already mounted" $LINENO
-		return 0
-	fi
-	if [ ! -d $cTop/.$pDir.ecfs ]; then
-		fError "Not found: $cTop/.$pDir.ecfs" $LINENO
-	fi
-	if [ ! -d $cTop/$pDir ]; then
-		mkdir -p $cTop/$pDir
-	fi
-	if [ ! -d $cTop/$pDir ]; then
-		fError "Could not create: $cTop/$pDir" $LINENO
-	fi
+    if [ -f $cTop/$pDir/mounted ]; then
+        fLog info "$pDir is already mounted" $LINENO
+        return 0
+    fi
+    if [ ! -d $cTop/.$pDir.ecfs ]; then
+        fError "Not found: $cTop/.$pDir.ecfs" $LINENO
+    fi
+    if [ ! -d $cTop/$pDir ]; then
+        mkdir -p $cTop/$pDir
+    fi
+    if [ ! -d $cTop/$pDir ]; then
+        fError "Could not create: $cTop/$pDir" $LINENO
+    fi
 
-	fLog info "Mount $pDir" $LINENO
-	if [ $gpSamePass -eq 1 ]; then
-		echo $cPass | encfs --stdinpass $gpTimeout $cTop/.$pDir.ecfs $cTop/$pDir
-	else
-		encfs --extpass="$cExtPass Password: " $gpTimeout $cTop/.$pDir.ecfs $cTop/$pDir
-	fi
-	if [ ! -f $cTop/$pDir/mounted ]; then
-		fError "Could not mount: $cTop/$pDir" $LINENO
-	fi
+    fLog info "Mount $pDir" $LINENO
+    if [ $gpSamePass -eq 1 ]; then
+        echo $cPass | encfs --stdinpass $gpTimeout $cTop/.$pDir.ecfs $cTop/$pDir
+    else
+        encfs --extpass="$cExtPass Password: " $gpTimeout $cTop/.$pDir.ecfs $cTop/$pDir
+    fi
+    if [ ! -f $cTop/$pDir/mounted ]; then
+        fError "Could not mount: $cTop/$pDir" $LINENO
+    fi
 } # fMount
 
 # ------------------
-function fUnmount
+function fUnmount()
 {
-	local pDir=$1
+    local pDir=$1
 
-	if [ ! -f $cTop/$pDir/mounted ]; then
-		fLog info "$pDir is already unmounted" $LINENO
-		return 0
-	fi
-	fLog info "Unmount $pDir" $LINENO
-	fusermount -u $cTop/$pDir
+    if [ ! -f $cTop/$pDir/mounted ]; then
+        fLog info "$pDir is already unmounted" $LINENO
+        return 0
+    fi
+    fLog info "Unmount $pDir" $LINENO
+    fusermount -u $cTop/$pDir
 } # fUnmount
 
 # ------------------
-function fList
+function fList()
 {
-	cd $cTop
-	fLog info "List dirs:" $LINENO
-	for tDir in $('ls' -d .*.ecfs 2>/dev/null); do
-		tDir=${tDir#.}
-		tDir=${tDir%.ecfs}
-		echo -n $cTop/$tDir
-		if [ -f $tDir/mounted ]; then
-			echo -e "\t mounted"
-		else
-			echo -e "\t not mounted"
-		fi
-	done
+    cd $cTop
+    fLog info "List dirs:" $LINENO
+    for tDir in $('ls' -d .*.ecfs 2>/dev/null); do
+        tDir=${tDir#.}
+        tDir=${tDir%.ecfs}
+        echo -n $cTop/$tDir
+        if [ -f $tDir/mounted ]; then
+            echo -e "\t mounted"
+        else
+            echo -e "\t not mounted"
+        fi
+    done
 
-	if [ -n "$gpVerbose" ]; then
-		for tDir in $cTop/.*.ecfs; do
-			echo '____________________'
-			fLog info "List $tDir:" $LINENO
-			encfsctl $tDir
-		done
-	fi
+    if [ -n "$gpVerbose" ]; then
+        for tDir in $cTop/.*.ecfs; do
+            echo '____________________'
+            fLog info "List $tDir:" $LINENO
+            encfsctl $tDir
+        done
+    fi
 
-	exit 0
+    exit 0
 } # fList
 
 # ==================================================
@@ -315,7 +315,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-export cVer='$Revision: 1.45 $'
+export cVer='$Revision: 1.46 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
@@ -326,7 +326,7 @@ export cTop=$HOME/bc
 # -------------------
 # Get Options Section
 if [ $# -eq 0 ]; then
-	fError "Missing options." $LINENO
+    fError "Missing options." $LINENO
 fi
 
 export gpMountAll=0
@@ -340,115 +340,115 @@ export gpTimeout=""
 export gpList=0
 export gpFileList=""
 while getopts :muM:U:C:agt:lhvx tArg; do
-	case $tArg in
-		m)	gpMountAll=1;;
-		u)	gpUnmountAll=1;;
-		M)	gpMount="$gpMount $OPTARG";;
-		U)	gpUnmount="$gpUnmount $OPTARG";;
-		C)	gpCreate=$OPTARG;;
-		a)	gpSamePass=1;;
-		g)	gpGUIPass=1;;
-		t)	gpTimeout="--idle=$OPTARG";;
-		l)	gpList=1;;
+    case $tArg in
+        m) gpMountAll=1 ;;
+        u) gpUnmountAll=1 ;;
+        M) gpMount="$gpMount $OPTARG" ;;
+        U) gpUnmount="$gpUnmount $OPTARG" ;;
+        C) gpCreate=$OPTARG ;;
+        a) gpSamePass=1 ;;
+        g) gpGUIPass=1 ;;
+        t) gpTimeout="--idle=$OPTARG" ;;
+        l) gpList=1 ;;
 
-		h)	fUsage long;;
-		v)	gpVerbose="-v";;
-		x)	let gpDebug=gpDebug+1;;
-		:)	fError "Value required for option: $OPTARG" $LINENO;;
-		\?)	fError "Unknown option: $OPTARG" $LINENO;;
-	esac
+        h) fUsage long ;;
+        v) gpVerbose="-v" ;;
+        x) let gpDebug=gpDebug+1 ;;
+        :) fError "Value required for option: $OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	gpFileList="$*"
+    gpFileList="$*"
 fi
 
 # -------------------
 # Validate Options Section
 
 if [ $(whoami) = "root" ]; then
-	fError "Do not run as root user" $LINENO
+    fError "Do not run as root user" $LINENO
 fi
 
 which encfs >/dev/null
 if [ $? -ne 0 ]; then
-	fError "encfs is not installed!" $LINENO
+    fError "encfs is not installed!" $LINENO
 fi
 
 if [ $gpMountAll -eq 1 -a $gpUnmountAll -eq 1 ]; then
-	fError "You cannot mount and unmount all at the same time." $LINENO
+    fError "You cannot mount and unmount all at the same time." $LINENO
 fi
 
 if [ $gpMountAll -eq 1 -o $gpUnmountAll -eq 1 ]; then
-	if [ -n "$gpMount" -o -n "$gpUnmount" ]; then
-		fError "-M or -U options cannot be used with -m or -u options." $LINENO
-	fi
+    if [ -n "$gpMount" -o -n "$gpUnmount" ]; then
+        fError "-M or -U options cannot be used with -m or -u options." $LINENO
+    fi
 fi
 
 export cExtPass=""
 if [ -x /lib/cryptsetup/askpass ]; then
-	cExtPass=/lib/cryptsetup/askpass
+    cExtPass=/lib/cryptsetup/askpass
 fi
 if [ $gpGUIPass -eq 1 -a -x /usr/bin/ssh-askpass ]; then
-	cExtPass=/usr/bin/ssh-askpass
+    cExtPass=/usr/bin/ssh-askpass
 fi
 if [ -z "$cExtPass" ]; then
-	fError "Could not find a password prompt program." $LINENO
+    fError "Could not find a password prompt program." $LINENO
 fi
 
 # -------------------
 # Functional Section
 
 if [ $gpList -eq 1 ]; then
-	fList
-	exit 0
+    fList
+    exit 0
 fi
 
 if [ -n "$gpCreate" ]; then
-	fCreateDir $gpCreate
-	exit 0
+    fCreateDir $gpCreate
+    exit 0
 fi
 
 export cPass=""
 if [ -n "$gpMount" -o $gpMountAll -eq 1 ]; then
-	if [ $gpSamePass -eq 1 ]; then
-		cPass="$($cExtPass 'Common Password: ')"
-	fi
+    if [ $gpSamePass -eq 1 ]; then
+        cPass="$($cExtPass 'Common Password: ')"
+    fi
 fi
 
 if [ -n "$gpMount" ]; then
-	for tDir in $gpMount; do
-		fMount $tDir
-	done
+    for tDir in $gpMount; do
+        fMount $tDir
+    done
 fi
 
 if [ -n "$gpUnmount" ]; then
-	for tDir in $gpUnmount; do
-		fUnmount $tDir
-	done
+    for tDir in $gpUnmount; do
+        fUnmount $tDir
+    done
 fi
 
 if [ $gpMountAll -eq 1 ]; then
-	cd $cTop
-	for tDir in $('ls' -d .*.ecfs 2>/dev/null); do
-		tDir=${tDir#.}
-		tDir=${tDir%.ecfs}
-		if [ -f $tDir/mounted ]; then
-			fLog info "$tDir is already mounted" $LINENO
-		else
-			fMount $tDir
-		fi
-	done
-	exit 0
+    cd $cTop
+    for tDir in $('ls' -d .*.ecfs 2>/dev/null); do
+        tDir=${tDir#.}
+        tDir=${tDir%.ecfs}
+        if [ -f $tDir/mounted ]; then
+            fLog info "$tDir is already mounted" $LINENO
+        else
+            fMount $tDir
+        fi
+    done
+    exit 0
 fi
 
 if [ $gpUnmountAll -eq 1 ]; then
-	cd $cTop
-	for tDir in $('ls' */mounted 2>/dev/null); do
-		fUnmount ${tDir%/mounted}
-	done
-	exit 0
+    cd $cTop
+    for tDir in $('ls' */mounted 2>/dev/null); do
+        fUnmount ${tDir%/mounted}
+    done
+    exit 0
 fi
 
 exit 0

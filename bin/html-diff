@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -ne 3 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	html-diff OldFile.html NewFile.html DiffFile.html
 
@@ -9,7 +9,7 @@ This script generates ins and del tags for the differences between
 OldFile and NewFile.  This works best for xhtml files that have been
 formatted with tidy.
 EOF
-	exit 1
+    exit 1
 fi
 
 # -----------------
@@ -22,24 +22,24 @@ tTmpFile=~/tmp/diff.tmp
 # -----------------
 # Validate
 if [ ! -r $pOldFile ]; then
-	echo "Error: can not read $pOldFile"
-	exit 1
+    echo "Error: can not read $pOldFile"
+    exit 1
 fi
 if [ ! -r $pNewFile ]; then
-	echo "Error: can not read $pNewFile"
-	exit 1
+    echo "Error: can not read $pNewFile"
+    exit 1
 fi
 if [ $pOldFile = $pNewFile ]; then
-	echo OldFile can not be the same as NewFile
-	exit 1
+    echo OldFile can not be the same as NewFile
+    exit 1
 fi
 if [ $pOldFile = $pDiffFile ]; then
-	echo OldFile can not be the same as DiffFile
-	exit 1
+    echo OldFile can not be the same as DiffFile
+    exit 1
 fi
 if [ $pNewFile = $pDiffFile ]; then
-	echo NewFile can not be the same as DiffFile
-	exit 1
+    echo NewFile can not be the same as DiffFile
+    exit 1
 fi
 
 # -----------------

@@ -1,13 +1,13 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	vid-make-timestamp FILE.mp4
 
 	Output: FILE-timestamp.mp4
 EOF
-	exit 1
+    exit 1
 fi
 
 pInput=test-video.mp4

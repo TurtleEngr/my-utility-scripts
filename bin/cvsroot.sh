@@ -1,8 +1,9 @@
 #!/bin/bash
 # Select a cvs root to connect to.
 
-function fUsage() {
-	more <<EOF
+function fUsage()
+{
+    more <<EOF
 Usage:
 	. cvsroot.sh
 
@@ -43,26 +44,26 @@ Example cvsroot.rc:
 Defects
 	The script only works well with bash or ksh.
 EOF
-	exit 1
+    exit 1
 }
 
 # ==============================
 export gErr=0
 if [ ! -f $HOME/.cvsroot.rc -a ! -f /usr/local/etc/cvsroot.rc ]; then
-	echo Error: Could not fined $HOME/.cvsroot or /usr/local/etc/cvsroot.rc
-	gErr=1
+    echo Error: Could not fined $HOME/.cvsroot or /usr/local/etc/cvsroot.rc
+    gErr=1
 fi
 if [ $gErr -ne 0 -o ".$1" = '.-h' ]; then
-	fUsage
+    fUsage
 fi
 
 tRCFileList="$HOME/.cvsroot.rc /usr/local/etc/cvsroot.rc /etc/cvsroot.rc cvsroot.rc"
 tCVSDirList="/cvs /cvs/* /repo/*.cvs /data/cvs/* /data/*.cvs /home/cvs/* /home/*.cvs"
 export CVSUser=${CVSUser:-$LOGNAME}
 if [ -x /bin/nawk ]; then
-	export awk=nawk
+    export awk=nawk
 else
-	export awk=awk
+    export awk=awk
 fi
 
 tFile1=/tmp/cvsroot.1.$$
@@ -78,27 +79,27 @@ cat $tRCFileList 2>/dev/null | $awk '
 ' 2>/dev/null >$tFile1
 
 for i in $tCVSDirList $(cat $tFile1 2>/dev/null); do
-	if [ "${i#:}" != "$i" ]; then
-		echo ${i%/} >>$tFile2
-		continue
-	fi
-	if [ ! -d $i/CVSROOT ]; then
-		continue
-	fi
-	echo ${i%/} >>$tFile2
+    if [ "${i#:}" != "$i" ]; then
+        echo ${i%/} >>$tFile2
+        continue
+    fi
+    if [ ! -d $i/CVSROOT ]; then
+        continue
+    fi
+    echo ${i%/} >>$tFile2
 done
 cat $tFile2 >$tFile1
 
 for i in CVS/Root ../CVS/Root */CVS/Root /CVS; do
-	for j in $(cat $i 2>/dev/null); do
-		echo ${j%/} >>$tFile1
-	done
+    for j in $(cat $i 2>/dev/null); do
+        echo ${j%/} >>$tFile1
+    done
 done
 echo $CVSROOT >>$tFile1
 
 'rm' -f $tFile2
 for i in $(sort -fu $tFile1); do
-	echo ${i%/} >>$tFile2
+    echo ${i%/} >>$tFile2
 done
 
 cat <<ENDHERE
@@ -113,25 +114,25 @@ ENDHERE
 
 PS3="Select a CVSROOT (by number) "
 select tSelect in EXIT $(sort -fu $tFile2); do
-	case $tSelect in
-		EXIT)	break;;
-	esac
-	break
+    case $tSelect in
+        EXIT) break ;;
+    esac
+    break
 done
 echo ""
 
 if [ $tSelect != "EXIT" ]; then
-	unset CVSROOT CVS_RSH RSYNC_RSH RSYNC_OPT
-	export CVSROOT=$tSelect
-	echo CVSROOT=$CVSROOT
-	export CVS_RSH=${CVS_RSH:-ssh}
-	echo CVS_RSH=$CVS_RSH
-	export CVSUMASK=${CVSUMASK:-0007}
-	echo CVSUMASK=$CVSUMASK
-	export RSYNC_RSH=${RSYNC_RSH:-ssh}
-	echo RSYNC_RSH=$RSYNC_RSH
-	export RSYNC_OPT=${RSYNC_OPT:-"-aCHz"}
-	echo RSYNC_OPT=$RSYNC_OPT
+    unset CVSROOT CVS_RSH RSYNC_RSH RSYNC_OPT
+    export CVSROOT=$tSelect
+    echo CVSROOT=$CVSROOT
+    export CVS_RSH=${CVS_RSH:-ssh}
+    echo CVS_RSH=$CVS_RSH
+    export CVSUMASK=${CVSUMASK:-0007}
+    echo CVSUMASK=$CVSUMASK
+    export RSYNC_RSH=${RSYNC_RSH:-ssh}
+    echo RSYNC_RSH=$RSYNC_RSH
+    export RSYNC_OPT=${RSYNC_OPT:-"-aCHz"}
+    echo RSYNC_OPT=$RSYNC_OPT
 fi
 
 'rm' -f $tFile1 $tFile2 2>/dev/null

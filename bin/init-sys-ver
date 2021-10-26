@@ -1,5 +1,5 @@
 #!/bin/bash -x
-# $Id: init-sys-ver,v 1.3 2012/04/20 23:57:11 bruce Exp $
+# $Id: init-sys-ver,v 1.4 2021/10/26 19:26:10 bruce Exp $
 # Use this script the first time a server is setup.  It will put the
 # most common config and other server files under version control.
 
@@ -7,8 +7,8 @@
 
 cd /
 if [ ! -d CVS ]; then
-	echo "You need to create the top CVS directory."
-	exit 1
+    echo "You need to create the top CVS directory."
+    exit 1
 fi
 
 echo >>/etc/CHANGES
@@ -20,7 +20,7 @@ echo >>/etc/CHANGES
 #fi
 
 if [ ! -f /etc/anaconda-ks.cfg ]; then
-	cp -i /root/anaconda-ks.cfg /etc
+    cp -i /root/anaconda-ks.cfg /etc
 fi
 
 cvs add etc
@@ -30,29 +30,29 @@ sleep 1
 
 cd /etc
 cvs add \
-profile.d \
-rc.d \
-ssh \
-sudoers \
-sysconfig
+    profile.d \
+    rc.d \
+    ssh \
+    sudoers \
+    sysconfig
 sleep 1
 
 cvs add \
-anaconda-ks.cfg \
-*.conf \
-*.config \
-CHANGES \
-exports \
-fstab \
-group \
-hosts \
-issue \
-issue.net \
-motd \
-my.cnf \
-passwd \
-profile \
-shadow
+    anaconda-ks.cfg \
+    *.conf \
+    *.config \
+    CHANGES \
+    exports \
+    fstab \
+    group \
+    hosts \
+    issue \
+    issue.net \
+    motd \
+    my.cnf \
+    passwd \
+    profile \
+    shadow
 sleep 1
 
 cd /etc
@@ -64,11 +64,11 @@ cd /etc/profile.d
 cvs add cvs.sh local.sh less.sh
 
 if [ -d /etc/yum.repos.d ]; then
-	cd /etc
-	cvs add yum.conf
-	cvs add yum.repos.d
-	cd /etc/yum.repos.d
-	cvs add *
+    cd /etc
+    cvs add yum.conf
+    cvs add yum.repos.d
+    cd /etc/yum.repos.d
+    cvs add *
 fi
 
 cd /etc/ssh

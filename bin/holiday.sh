@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	# Print usage help for this script, using pod2text.
-	pod2text $0
-	exit 1
-	cat <<EOF >/dev/null
+    # Print usage help for this script, using pod2text.
+    pod2text $0
+    exit 1
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -131,7 +131,7 @@ Bruce Rafnel
 
 =head1 HISTORY
 
-$Revision: 1.3 $
+$Revision: 1.4 $
 
 =cut
 EOF
@@ -139,27 +139,26 @@ EOF
 
 # -----------------------------------------------------
 if [ $# -ne 0 ]; then
-	if [ "$1" = "-h"]; then
-		fUsage
-	fi
+    if [ "$1" = "-h"]; then
+        fUsage
+    fi
 fi
-
 
 # Define cHolidayFile env. to override this
 cHolidayFile=${cHolidayFile:-/usr/local/etc/holidays.txt}
 
-if [ $# -eq 0 ]; then 
-	tToday=$(date '+%F')
+if [ $# -eq 0 ]; then
+    tToday=$(date '+%F')
 else
-	# Test: /usr/local/bin/holiday.sh 2011-11-24
-	tToday=$(date --date="$1" '+%F')
+    # Test: /usr/local/bin/holiday.sh 2011-11-24
+    tToday=$(date --date="$1" '+%F')
 fi
 
 for i in $cHolidayFile; do
-	if [ ! -f $i ]; then
-		echo "$0 $i file not found."
-		exit 1
-	fi
+    if [ ! -f $i ]; then
+        echo "$0 $i file not found."
+        exit 1
+    fi
 done
 
 grep -qs -m 1 "^$tToday" $cHolidayFile

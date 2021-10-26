@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-cp2rel,v 1.1 2019/09/24 07:49:40 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-cp2rel,v 1.2 2021/10/26 19:26:12 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -19,16 +19,16 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	if [ $# -ne 0 ]; then
-		pod2text $0
-	else
-		pod2usage $0
-	fi
-	gErr=1
-	exit 1
-	cat <<EOF >/dev/null
+    if [ $# -ne 0 ]; then
+        pod2text $0
+    else
+        pod2usage $0
+    fi
+    gErr=1
+    exit 1
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -164,79 +164,79 @@ You are cd'd in /home/video/skit/src/final and it has files:
 
 =head1 HISTORY
 
-$Revision: 1.1 $ $Date: 2019/09/24 07:49:40 $ GMT 
+$Revision: 1.2 $ $Date: 2021/10/26 19:26:12 $ GMT 
 
 =cut
 EOF
-	exit 1
+    exit 1
 } # fUsage
 
 # --------------------------------
-function fError
+function fError()
 {
-	# Usage:
-	#     fError pMsg [pLine [pErr]]
-	# Print the error message.  Then call fCleanUp, and exit
+    # Usage:
+    #     fError pMsg [pLine [pErr]]
+    # Print the error message.  Then call fCleanUp, and exit
 
-	local pMsg="$1"
-	local pLine=$2
-	local pErr=$3
+    local pMsg="$1"
+    local pLine=$2
+    local pErr=$3
 
-	fLog crit "$pMsg" $pLine $pErr
-	fUsage
+    fLog crit "$pMsg" $pLine $pErr
+    fUsage
 } # fError
 
 # ------------------
-function fLog
+function fLog()
 {
-	# Usage:
-	#     gErr=8801		# optional
-	#     fLog notice "Just testing" $LINENO 8
-	# pLevel - emerg alert crit err warning notice info debug
+    # Usage:
+    #     gErr=8801		# optional
+    #     fLog notice "Just testing" $LINENO 8
+    # pLevel - emerg alert crit err warning notice info debug
 
-	local pLevel=$1
-	local pMsg="$2"
-	# optional
-	local pLine=$3
-	# optional
-	local pErr=$4
+    local pLevel=$1
+    local pMsg="$2"
+    # optional
+    local pLine=$3
+    # optional
+    local pErr=$4
 
-	local tVerbose=""
-	local tErr=""
-	if [ -n "$pErr" ]; then
-		tErr="$pErr"
-	fi
-	if [ $gErr -ne 0 ]; then
-		tErr="$tErr,$gErr"
-	fi
-	if [ -n "$tErr" ]; then
-		tErr="($tErr)"
-	fi
+    local tVerbose=""
+    local tErr=""
+    if [ -n "$pErr" ]; then
+        tErr="$pErr"
+    fi
+    if [ $gErr -ne 0 ]; then
+        tErr="$tErr,$gErr"
+    fi
+    if [ -n "$tErr" ]; then
+        tErr="($tErr)"
+    fi
 
-	local tLine=""
-	if [ -n "$pLine" ]; then
-		tLine="[$pLine]"
-	fi
+    local tLine=""
+    if [ -n "$pLine" ]; then
+        tLine="[$pLine]"
+    fi
 
-	if [ $gpLog -eq 0 ]; then
-		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
-	else
-		if [ -n "$gpVerbose" ]; then
-			tVerbose="-s"
-		fi
-		logger $tVerbose -i -t $cName -p local1.$pLevel "$pLevel: $pMsg $tLine$tErr"
-	fi
+    if [ $gpLog -eq 0 ]; then
+        echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+    else
+        if [ -n "$gpVerbose" ]; then
+            tVerbose="-s"
+        fi
+        logger $tVerbose -i -t $cName -p local1.$pLevel "$pLevel: $pMsg $tLine$tErr"
+    fi
 } # fLog
 
 # =========================================
 # Main
-export	cBin cCurdir gErr gpDebug cName cVer gpVerbose PWD
+export cBin cCurdir gErr gpDebug cName cVer gpVerbose PWD
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
 # jobs PWD is not set.
 if [ -z "$PWD" ]; then
-	PWD=$(pwd)
+    PWD=$(pwd)
 fi
 cCurDir=$PWD
 
@@ -254,7 +254,7 @@ gErr=0
 
 # -------------------
 # Define the version number for this script
-cVer='$Revision: 1.1 $'
+cVer='$Revision: 1.2 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
@@ -264,64 +264,64 @@ cVer=${cVer%' '*}
 # -------------------
 # Get Options Section
 if [ $# -eq 0 ]; then
-	fError "Missing options." $LINENO
+    fError "Missing options." $LINENO
 fi
 gpFileList=""
 gpRelDir=""
 gpRunGetRel=0
 while getopts :d:uhlxv tArg; do
-	case $tArg in
-		d)	gpRelDir=$OPTARG;;
-		u)	gpRunGetRel=1;;
+    case $tArg in
+        d) gpRelDir=$OPTARG ;;
+        u) gpRunGetRel=1 ;;
 
-		h)	fUsage long;;
-		l)	gpLog=1;;
-		v)	gpVerbose="-v";;
-		x)	let gpDebug=gpDebug+1;;
-		:)	fError "Value required for option: $OPTARG" $LINENO;;
-		\?)	fError "Unknown option: $OPTARG" $LINENO;;
-	esac
+        h) fUsage long ;;
+        l) gpLog=1 ;;
+        v) gpVerbose="-v" ;;
+        x) let gpDebug=gpDebug+1 ;;
+        :) fError "Value required for option: $OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	gpFileList="$*"
+    gpFileList="$*"
 fi
 
 # -------------------
 # Validate Options Section
 
 if [ -z "$gpFileList" ]; then
-	fError "Missing files" $LINENO
+    fError "Missing files" $LINENO
 fi
 
 tArchive=0
 case $gpRelDir in
-	arc|archive)
-		tArchive=1
-		tRelDir=/rel/archive/video/own/[YYYY-MM-DD]
-	;;
-	dev|develop|development)
-		tRelDir=/rel/development/video/[ProjectName]
-	;;
-	rel|release|released)
-		tRelDir=/rel/released/video/[ProjectName]
-	;;
-	*)	fError "Invalid -d option: $gpRelDir" $LINENO;;
+    arc | archive)
+        tArchive=1
+        tRelDir=/rel/archive/video/own/[YYYY-MM-DD]
+        ;;
+    dev | develop | development)
+        tRelDir=/rel/development/video/[ProjectName]
+        ;;
+    rel | release | released)
+        tRelDir=/rel/released/video/[ProjectName]
+        ;;
+    *) fError "Invalid -d option: $gpRelDir" $LINENO ;;
 esac
 
 export tProjectName=${PWD#/home/video/}
 if [ "$tProjectName" = "$PWD" ]; then
-	fError "You are not in a /home/video project dir" $LINENO
+    fError "You are not in a /home/video project dir" $LINENO
 fi
 export tProjectName=${tProjectName%%/*}
 
 if [ ! -d CVS ]; then
-	fError "You are not in a CVS working dir" $LINENO
+    fError "You are not in a CVS working dir" $LINENO
 fi
 
 if [ ! -d /mnt/usb-video/repo/video ]; then
-	fError "/mnt/usb-video is not mounted" $LINENO
+    fError "/mnt/usb-video is not mounted" $LINENO
 fi
 
 # -------------------
@@ -329,22 +329,22 @@ fi
 
 tDestDir=$tRelDir
 for tFile in $gpFileList; do
-	echo "Copying $tFile"
-	tFileVer=$(cvs log $tFile | grep head | sed 's/head: //')
-	tFileDate=$(cvs log -r$tFileVer $tFile | grep date: | awk '{print $2}')
-	tDestFile=$tProjectName_$tFileDate_$tFileVer_$tFileName
-	if [ $tArchive -eq 1 ]; then
-		tDestDir=$tRelDir/$tFileDate
-		mkdir -p $tDestDir 2>/dev/null
-	fi
+    echo "Copying $tFile"
+    tFileVer=$(cvs log $tFile | grep head | sed 's/head: //')
+    tFileDate=$(cvs log -r$tFileVer $tFile | grep date: | awk '{print $2}')
+    tDestFile=$tProjectName_$tFileDate_$tFileVer_$tFileName
+    if [ $tArchive -eq 1 ]; then
+        tDestDir=$tRelDir/$tFileDate
+        mkdir -p $tDestDir 2>/dev/null
+    fi
 
-	cvs add $tFile 2>/dev/null
-	if ! cvs commit -m "Copy to $tDistDir" $tFile; then
-		fError "cvs commit error with $tFile" $LINENO
-	fi
+    cvs add $tFile 2>/dev/null
+    if ! cvs commit -m "Copy to $tDistDir" $tFile; then
+        fError "cvs commit error with $tFile" $LINENO
+    fi
 
-	rsync -aP $tFile $tDistDir/$tDestFile
-	cat <<EOF | tee -a README.html >>$tDistDir/README.html
+    rsync -aP $tFile $tDistDir/$tDestFile
+    cat <<EOF | tee -a README.html >>$tDistDir/README.html
 
 $(date)
 Source: $PWD/$tFile
@@ -353,12 +353,12 @@ EOF
 done
 
 if [ $gpRunGetRel -eq 1 ]; then
-	cd $tRelDir
-	if [ $tArchive -eq 1 ]; then
-		getrel -uLl
-	else
-		getrel -uL
-	fi
+    cd $tRelDir
+    if [ $tArchive -eq 1 ]; then
+        getrel -uLl
+    else
+        getrel -uL
+    fi
 fi
 
 echo "See: README.html file for the list of copied files."

@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	if [ $# -ne 0 ]; then
-		pod2text $0
-	else
-		pod2usage $0
-	fi
-	exit 1
-	# See also: pod2html, and pod2man, pod2pdf, pod2md
-	cat <<EOF >/dev/null
+    if [ $# -ne 0 ]; then
+        pod2text $0
+    else
+        pod2usage $0
+    fi
+    exit 1
+    # See also: pod2html, and pod2man, pod2pdf, pod2md
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -146,143 +146,144 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.22 $ $Date: 2021/08/18 23:12:21 $ GMT 
+$Revision: 1.23 $ $Date: 2021/10/26 19:26:13 $ GMT 
 
 =cut
 EOF
-	exit 1
+    exit 1
 } # fUsage
 
 # --------------------------------
-function fError
+function fError()
 {
-	# Usage:
-	#     fError pMsg [pLine [pErr]]
-	# Print the error message.  Then call fCleanUp, and exit
+    # Usage:
+    #     fError pMsg [pLine [pErr]]
+    # Print the error message.  Then call fCleanUp, and exit
 
-	local pMsg="$1"
-	local pLine=$2
-	local pErr=$3
+    local pMsg="$1"
+    local pLine=$2
+    local pErr=$3
 
-	fLog crit "$pMsg" $pLine $pErr
-	fUsage
+    fLog crit "$pMsg" $pLine $pErr
+    fUsage
 } # fError
 
 # ------------------
-function fLog
+function fLog()
 {
-	# Usage:
-	#     gErr=8801		# optional
-	#     fLog notice "Just testing" $LINENO 8
-	# pLevel - emerg alert crit err warning notice info debug
+    # Usage:
+    #     gErr=8801		# optional
+    #     fLog notice "Just testing" $LINENO 8
+    # pLevel - emerg alert crit err warning notice info debug
 
-	local pLevel=$1
-	local pMsg="$2"
-	# optional
-	local pLine=$3
-	# optional
-	local pErr=$4
+    local pLevel=$1
+    local pMsg="$2"
+    # optional
+    local pLine=$3
+    # optional
+    local pErr=$4
 
-	local tVerbose=""
-	local tErr=""
-	if [ -n "$pErr" ]; then
-		tErr="$pErr"
-	fi
-	if [ $gErr -ne 0 ]; then
-		tErr="$tErr,$gErr"
-	fi
-	if [ -n "$tErr" ]; then
-		tErr="($tErr)"
-	fi
+    local tVerbose=""
+    local tErr=""
+    if [ -n "$pErr" ]; then
+        tErr="$pErr"
+    fi
+    if [ $gErr -ne 0 ]; then
+        tErr="$tErr,$gErr"
+    fi
+    if [ -n "$tErr" ]; then
+        tErr="($tErr)"
+    fi
 
-	local tLine=""
-	if [ -n "$pLine" ]; then
-		tLine="[$pLine]"
-	fi
+    local tLine=""
+    if [ -n "$pLine" ]; then
+        tLine="[$pLine]"
+    fi
 
-	if [ $gpLog -eq 0 ]; then
-		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
-	else
-		if [ -n "$gpVerbose" ]; then
-			tVerbose="-s"
-		fi
-		logger $tVerbose -i -t $cName -p local1.$pLevel "$pLevel: $pMsg $tLine$tErr"
-	fi
+    if [ $gpLog -eq 0 ]; then
+        echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+    else
+        if [ -n "$gpVerbose" ]; then
+            tVerbose="-s"
+        fi
+        logger $tVerbose -i -t $cName -p local1.$pLevel "$pLevel: $pMsg $tLine$tErr"
+    fi
 } # fLog
 
 # ------------------
-function fFileCheck
+function fFileCheck()
 {
-	# Input: gpFile
-	# Ouput: gFileVer
-	if [ -z "$gpFile" ]; then
-		gFileVer=""
-		return
-	fi
+    # Input: gpFile
+    # Ouput: gFileVer
+    if [ -z "$gpFile" ]; then
+        gFileVer=""
+        return
+    fi
 
-	if [ ! -w $gpFile ]; then
-		if [ ! -w $gpFile.kdenlive ]; then
-			fError "Could not find $gpFile, or it is not writable." $LINENO
-		fi
-		gpFile=$gpFile.kdenlive
-	fi
+    if [ ! -w $gpFile ]; then
+        if [ ! -w $gpFile.kdenlive ]; then
+            fError "Could not find $gpFile, or it is not writable." $LINENO
+        fi
+        gpFile=$gpFile.kdenlive
+    fi
 
-	gFileVer=$(grep kdenliveversion $gpFile | sed 's/[<>]/ /g' | awk '{print $3}')
-	gFileVer=${gFileVer%.*}
+    gFileVer=$(grep kdenliveversion $gpFile | sed 's/[<>]/ /g' | awk '{print $3}')
+    gFileVer=${gFileVer%.*}
 
-	if [ -z "$gFileVer" ]; then
-		fError "kdenliveversion not found. Is $gpFile a kdenlive file?" $LINENO
-	fi
+    if [ -z "$gFileVer" ]; then
+        fError "kdenliveversion not found. Is $gpFile a kdenlive file?" $LINENO
+    fi
 } # fFileCheck
 
 # ------------------
-function fKLVer
+function fKLVer()
 {
-	# Input: gpVer, gFileVer, cLatestVer, cKLBin
-	# Output: gKLProg, gpVer, gFileVer
-	if [ ! -d $cKLBin ]; then
-		fError "Could not find directory: $cKLBin" $LINENO
-	fi
-	if [ -z "$gFileVer" ]; then
-		gFileVer=$cLatestVer
-	fi
-	if [ -z "$gpVer" ]; then
-		gpVer=$gFileVer
-	fi
+    # Input: gpVer, gFileVer, cLatestVer, cKLBin
+    # Output: gKLProg, gpVer, gFileVer
+    if [ ! -d $cKLBin ]; then
+        fError "Could not find directory: $cKLBin" $LINENO
+    fi
+    if [ -z "$gFileVer" ]; then
+        gFileVer=$cLatestVer
+    fi
+    if [ -z "$gpVer" ]; then
+        gpVer=$gFileVer
+    fi
 
-	case $gpVer in
-		16.11)	tUse=kdenlive-16.12-alpha1-x86_64.AppImage;;
-		16.12)	tUse=kdenlive-16.12-alpha1-x86_64.AppImage;;
-		17.04)	tUse=Kdenlive-17.04.1b-x86_64.AppImage;;
-		17.12)	tUse=Kdenlive-17.12.0d-x86_64.AppImage;;
-		18.12)	tUse=kdenlive-18.12.1-x86_64.appimage;;
-		19.04)	tUse=kdenlive-19.04.3-x86_64.appimage;;
-		19.08)	tUse=kdenlive-19.08.3-x86_64.appimage;;
-		19.12)	tUse=kdenlive-19.12.0a-x86_64.appimage;;
-		20.04)	tUse=kdenlive-20.04.0b-x86_64.appimage;;
-		20.12)	tUse=kdenlive-20.12.3a-x86_64.appimage;;
-		21.04)	tUse=kdenlive-21.04.3b-x86_64.appimage;;
-		*)	fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
-		;;
-	esac
-	gKLProg=$cKLBin/$tUse
-	if [ ! -x $gKLProg ]; then
-		fError "Not found: $gKLProg" $LINENO
-	fi
-	if [ "$gpVer" != "$gFileVer" ]; then
-		fLog warning "$gpVer is different from the file version: $gFileVer" $LINENO
-	fi
+    case $gpVer in
+        16.11) tUse=kdenlive-16.12-alpha1-x86_64.AppImage ;;
+        16.12) tUse=kdenlive-16.12-alpha1-x86_64.AppImage ;;
+        17.04) tUse=Kdenlive-17.04.1b-x86_64.AppImage ;;
+        17.12) tUse=Kdenlive-17.12.0d-x86_64.AppImage ;;
+        18.12) tUse=kdenlive-18.12.1-x86_64.appimage ;;
+        19.04) tUse=kdenlive-19.04.3-x86_64.appimage ;;
+        19.08) tUse=kdenlive-19.08.3-x86_64.appimage ;;
+        19.12) tUse=kdenlive-19.12.0a-x86_64.appimage ;;
+        20.04) tUse=kdenlive-20.04.0b-x86_64.appimage ;;
+        20.12) tUse=kdenlive-20.12.3a-x86_64.appimage ;;
+        21.04) tUse=kdenlive-21.04.3b-x86_64.appimage ;;
+        *)
+            fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
+            ;;
+    esac
+    gKLProg=$cKLBin/$tUse
+    if [ ! -x $gKLProg ]; then
+        fError "Not found: $gKLProg" $LINENO
+    fi
+    if [ "$gpVer" != "$gFileVer" ]; then
+        fLog warning "$gpVer is different from the file version: $gFileVer" $LINENO
+    fi
 } # fKLVer
 
 # ------------------
-function fCVSCheck
+function fCVSCheck()
 {
-	if [ $gpCVS -ne 1 ]; then
-		return
-	fi
+    if [ $gpCVS -ne 1 ]; then
+        return
+    fi
 
-	if [ ! -r CVS/Entries ]; then
-		cat <<EOF
+    if [ ! -r CVS/Entries ]; then
+        cat <<EOF
 		
 Error: there are no CVS directories in this directory. You need to
 add files to CVS, so that files can be versioned.
@@ -293,67 +294,67 @@ Recommend:
 	export CVS_RSH=ssh
 	export CVSUMASK=0003
 EOF
-		fError "To fix, add $gpFile to a CVS repository." $LINENO
-	fi
+        fError "To fix, add $gpFile to a CVS repository." $LINENO
+    fi
 
-	if grep ':ext:' CVS/Root ; then
-		ps -ef | grep ssh-agent
-		if [ $? -eq 0 ]; then
-			. sshagent -s
-		else
-			fLog warning "Things will go smoother if you start a sshagent" $LINENO
-		fi
-	else
-		tRoot=$(cat CVS/Root)
-		if [ ! -d $tRoot ]; then
-			fError "$tRoot is not mounted" $LINENO
-		fi
-	fi
+    if grep ':ext:' CVS/Root; then
+        ps -ef | grep ssh-agent
+        if [ $? -eq 0 ]; then
+            . sshagent -s
+        else
+            fLog warning "Things will go smoother if you start a sshagent" $LINENO
+        fi
+    else
+        tRoot=$(cat CVS/Root)
+        if [ ! -d $tRoot ]; then
+            fError "$tRoot is not mounted" $LINENO
+        fi
+    fi
 
-	if [ -z "$gpFile" ]; then
-		return
-	fi
-	if grep -q $gpFile CVS/Entries; then
-		# Commit the file
-		cvs commit -m "Updated with script vid-edit" $gpFile
-	else
-		fLog info "The file isn't versioned."
-		if [ $gpBatch -ne 0 ]; then
-			return
-		fi
-		read -p "Version the file? (y/n) "
-		if [ "$REPLY" = "y" ]; then
-			cvs add $gpFile
-			cvs commit -m "Added with script vid-edit"
-		fi
-	fi
+    if [ -z "$gpFile" ]; then
+        return
+    fi
+    if grep -q $gpFile CVS/Entries; then
+        # Commit the file
+        cvs commit -m "Updated with script vid-edit" $gpFile
+    else
+        fLog info "The file isn't versioned."
+        if [ $gpBatch -ne 0 ]; then
+            return
+        fi
+        read -p "Version the file? (y/n) "
+        if [ "$REPLY" = "y" ]; then
+            cvs add $gpFile
+            cvs commit -m "Added with script vid-edit"
+        fi
+    fi
 } # fCVSCheck
 
 # ------------------
-function fTag
+function fTag()
 {
-	if [ $gpCVS -ne 1 -o $gpBatch -eq 1 ]; then
-		return
-	fi
-	
-	echo
-	read -p "Was the video rendered (y/n)? "
-	if [ "$REPLY" != "y" ]; then
-		return
-	fi
-	tTag="rendered_${gpFile%.*}_$(date +%F)"
-	logtime "$tTag"
+    if [ $gpCVS -ne 1 -o $gpBatch -eq 1 ]; then
+        return
+    fi
 
-	echo
-	read -p "Tag the files with: $tTag (y/n)? "
-	if [ "$REPLY" != "y" ]; then
-		return
-	fi
+    echo
+    read -p "Was the video rendered (y/n)? "
+    if [ "$REPLY" != "y" ]; then
+        return
+    fi
+    tTag="rendered_${gpFile%.*}_$(date +%F)"
+    logtime "$tTag"
 
-	cd ..
-	cvs ci -m "$tTag"
-	cvs tag -F "$tTag"
-	cd -
+    echo
+    read -p "Tag the files with: $tTag (y/n)? "
+    if [ "$REPLY" != "y" ]; then
+        return
+    fi
+
+    cd ..
+    cvs ci -m "$tTag"
+    cvs tag -F "$tTag"
+    cd -
 } # fTag
 
 # ===================================================
@@ -380,33 +381,33 @@ export cKLBin=/usr/local/bin
 # -------------------
 # Get Options Section
 if [ $# -eq 0 ]; then
-	fError "Missing options." $LINENO
+    fError "Missing options." $LINENO
 fi
 export gpFile=""
 export gpCVS=1
 export gpVer=""
 export gpBatch=0
 while getopts :bclv:hLVx tArg; do
-	case $tArg in
-		b)	gpBatch=1;;
-		c)	gpCVS=0;;
-		l)	gpVer=cLatestVer;;
-		v)	gpVer=$OPTARG;;
+    case $tArg in
+        b) gpBatch=1 ;;
+        c) gpCVS=0 ;;
+        l) gpVer=cLatestVer ;;
+        v) gpVer=$OPTARG ;;
 
-		h)	fUsage long;;
-		L)	gpLog=1;;
-		V)	gpVerbose="-v";;
-		x)	let gpDebug=gpDebug+1;;
-		:)	fError "Value required for option: $OPTARG" $LINENO;;
-		\?)	fError "Unknown option: $OPTARG" $LINENO;;
-	esac
+        h) fUsage long ;;
+        L) gpLog=1 ;;
+        V) gpVerbose="-v" ;;
+        x) let gpDebug=gpDebug+1 ;;
+        :) fError "Value required for option: $OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -eq 1 ]; then
-	gpFile="$1"
+    gpFile="$1"
 else
-	fError "Unknown options: $*" $LINENO
+    fError "Unknown options: $*" $LINENO
 fi
 
 # -------------------

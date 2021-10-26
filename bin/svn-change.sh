@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/svn-change.sh,v 1.2 2012/04/20 23:57:11 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/svn-change.sh,v 1.3 2021/10/26 19:26:12 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -21,12 +21,12 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	# Print usage help for this script, using pod2text.
-	pod2text $0
-	exit 1
-	cat <<EOF >/dev/null
+    # Print usage help for this script, using pod2text.
+    pod2text $0
+    exit 1
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -103,63 +103,63 @@ Bruce Rafnel
 
 Bruce R.
 
-$Revision: 1.2 $ GMT 
+$Revision: 1.3 $ GMT 
 
 =cut
 EOF
 }
 
 # --------------------------------
-function fError
+function fError()
 {
-	# Input:
-	#	$1 - Error number (usually $LINENO)
-	#	$2 - Error message
-	# 	$gNoExit - if =1, then don't exit, and clear the flag
+    # Input:
+    #	$1 - Error number (usually $LINENO)
+    #	$2 - Error message
+    # 	$gNoExit - if =1, then don't exit, and clear the flag
 
-	# Print the error message (fError options).  Then call
-	# fCleanUp to exit (if $gNoExit=0)
-	gErr=$1
-	shift
-	set -f
-	echo "Error: $* [$gErr]" 1>&2
-	set +f
-	if [ $gNoExit -ne 0 ]; then
-		gNoExit=0
-		return
-	fi
-	cat <<EOF 1>&2
+    # Print the error message (fError options).  Then call
+    # fCleanUp to exit (if $gNoExit=0)
+    gErr=$1
+    shift
+    set -f
+    echo "Error: $* [$gErr]" 1>&2
+    set +f
+    if [ $gNoExit -ne 0 ]; then
+        gNoExit=0
+        return
+    fi
+    cat <<EOF 1>&2
 Usage: 	$gName -n version [-h[elp]] [-v[erbose]] [-d[ebug] level]  Type: "$gName -h" for more help.
 EOF
-	exit 1
+    exit 1
 }
 
 # ------------------
-function fLog
+function fLog()
 {
-	# Input:
-	#	$1 level (# emerg alert crit err warning notice info debug)
-	#	$2 message
-	tErr=""
-	if [ $gErr -ne 0 ]; then
-		tErr="[$gErr]"
-	fi
-	echo "$1: $2 $tErr" 1>&2
-	if [ $pDebug -ne 0 ]; then
-		return
-	fi
-	logger -i -t mirror.release1 -p local1.$1 "$2 $tErr"
+    # Input:
+    #	$1 level (# emerg alert crit err warning notice info debug)
+    #	$2 message
+    tErr=""
+    if [ $gErr -ne 0 ]; then
+        tErr="[$gErr]"
+    fi
+    echo "$1: $2 $tErr" 1>&2
+    if [ $pDebug -ne 0 ]; then
+        return
+    fi
+    logger -i -t mirror.release1 -p local1.$1 "$2 $tErr"
 } # fLog
 
 # Main --------------------------------------------------------------
-export	gBin gCurdir gErr gDebug gName \
-	gNoExit gVer gVerbose PWD
+export gBin gCurdir gErr gDebug gName \
+    gNoExit gVer gVerbose PWD
 
 # -------------------
 # Set current directory location in PWD and gCurDir, because with cron
 # jobs PWD is not set.
 if [ -z $PWD ]; then
-	PWD=$(pwd)
+    PWD=$(pwd)
 fi
 gCurDir=$PWD
 
@@ -171,10 +171,10 @@ gName=${0##*/}
 # -------------------
 # Define the location of the script
 if [ $0 = ${0%/*} ]; then
-	gBin=$(whence $gName)
-	gBin=${gBin%/*}
+    gBin=$(whence $gName)
+    gBin=${gBin%/*}
 else
-	gBin=${0%/*}
+    gBin=${0%/*}
 fi
 cd $gBin
 gBin=$PWD
@@ -189,7 +189,7 @@ gVerbose=${gVerbose:-0}
 
 # -------------------
 # Define the version number for this script
-gVer='$Revision: 1.2 $'
+gVer='$Revision: 1.3 $'
 gVer=${gVer#*' '}
 gVer=${gVer%' '*}
 
@@ -197,10 +197,10 @@ gVer=${gVer%' '*}
 # Setup a temporary directory for each user.
 Tmp=${Tmp:-"/tmp/$LOGNAME"}
 if [ ! -d $Tmp ]; then
-	mkdir -p $Tmp 2>/dev/null
-	if [ ! -d $Tmp ]; then
-		fError $LINENO "Could not find directory $Tmp (\$Tmp)."
-	fi
+    mkdir -p $Tmp 2>/dev/null
+    if [ ! -d $Tmp ]; then
+        fError $LINENO "Could not find directory $Tmp (\$Tmp)."
+    fi
 fi
 
 # -------------------
@@ -208,10 +208,10 @@ fi
 # the file names can be any name, but the file name pattern should be:
 # "${cTmpF}[0-9]*.tmp"
 if [ $gDebug -eq 0 ]; then
-	cTmpF=$Tmp/syst$$
+    cTmpF=$Tmp/syst$$
 else
-	cTmpF=$Tmp/syst
-	rm -f ${cTmpF}*.tmp 2>/dev/null
+    cTmpF=$Tmp/syst
+    rm -f ${cTmpF}*.tmp 2>/dev/null
 fi
 cTmp1=${cTmpF}1.tmp
 export cTmpF cTmp1 cTmp2
@@ -224,22 +224,23 @@ export cTmpF cTmp1 cTmp2
 pFileList=''
 pVersion=''
 while getopts :hcn:t:x tArg; do
-	case $tArg in
-		h)	fUsage
-			exit 1
-		;;
-		n)	pVersion=$OPTARG;;
+    case $tArg in
+        h)
+            fUsage
+            exit 1
+            ;;
+        n) pVersion=$OPTARG ;;
 
-		x)	gDebug=1;;
-		+x)	gDebug=0;;
-		:)	fError $LINENO "Value required for option: $OPTARG";;
-		\?)	fError $LINENO "Unknown option: $OPTARG";;
-	esac
+        x) gDebug=1 ;;
+        +x) gDebug=0 ;;
+        :) fError $LINENO "Value required for option: $OPTARG" ;;
+        \?) fError $LINENO "Unknown option: $OPTARG" ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	pFileList="$*"
+    pFileList="$*"
 fi
 
 # -------------------
@@ -248,34 +249,32 @@ fi
 
 # Print dump of variables
 if [ $gDebug -ne 0 ]; then
-	for i in \
-		PWD \
-		gBin \
-		gCurDir \
-		gName \
-		gVer \
-		gDebug \
-		gVerbose \
-		gErr \
-		pTag \
-		pHostName \
-		Tmp \
-	; do
-		eval echo -R "$i=\$$i" | $gBin/log -d
-	done
+    for i in \
+        PWD \
+        gBin \
+        gCurDir \
+        gName \
+        gVer \
+        gDebug \
+        gVerbose \
+        gErr \
+        pTag \
+        pHostName \
+        Tmp; do
+        eval echo -R "$i=\$$i" | $gBin/log -d
+    done
 fi
 
 # -------------------
 # Validate Options Section
 
 if [ -z $pVersion ]; then
-	fError $LINENO "The -n option is required."
+    fError $LINENO "The -n option is required."
 fi
 
 if [ ! -d .svn ]; then
-	fError $LINENO "You are not in a svn directory."
+    fError $LINENO "You are not in a svn directory."
 fi
-
 
 # -------------------
 # Functional Section

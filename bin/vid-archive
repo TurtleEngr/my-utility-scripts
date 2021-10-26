@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-archive,v 1.1 2018/02/25 21:37:30 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-archive,v 1.2 2021/10/26 19:26:12 bruce Exp $
 # Usage:
 #	vid-archive
 #	vid-archive /rel/archive/video/own
@@ -9,12 +9,12 @@ cArchive=/rel/archive/video/own
 cLog=$PWD/vid-archive.log
 
 if [ $# -ne 0 ]; then
-	cArchive=$1
+    cArchive=$1
 fi
 
 if [ ! -d $cArchive ]; then
-	echo "Error: Missing $cArchive"
-	exit 1
+    echo "Error: Missing $cArchive"
+    exit 1
 fi
 
 tCount1=$(find * -name '*.MP4' | wc -l)
@@ -28,42 +28,42 @@ echo "cp $PWD to $cArchive" | tee -a $cLog
 echo "Process: $tCount files" | tee -a $cLog
 
 for i in $(find * -name '*.MP4') $(find * -name '*.MOD'); do
-	if [ ! -f $i.info ]; then
-		exiftool $i >$i.info
-	fi
-	if [ ! -f $i.info ]; then
-		echo "Error: No info file for $i" | tee -a $cLog
-		continue
-	fi
-	tDate=$(grep 'Date.*Original' $i.info | awk '{gsub(":","-",$4); print $4}')
-	if [ -z "$tDate" ]; then
-		tDate=$(grep 'File Modification Date/Time' $i.info | awk '{gsub(":","-",$5); print $5}')
-	fi
-	if [ -z "$tDate" ]; then
-		echo "Error: could not get date for $i" | tee -a $cLog
-		continue
-	fi
-	tDiff=1
-	if [ ! -d $cArchive/$tDate ]; then
-		echo "mkdir $cArchive/$tDate" | tee -a $cLog
-		mkdir $cArchive/$tDate
-	fi
-	if [ -f  $cArchive/$tDate/${i##*/} ]; then
-		echo "diff -q $i $cArchive/$tDate/${i##*/}" | tee -a $cLog
-		diff -q $i $cArchive/$tDate/${i##*/} | tee -a $cLog
-		tDiff=$?
-		if [ $tDiff -eq 0 ]; then
-			echo -e "\t $i is already at $cArchive/$tDate" | tee -a $cLog
-		else
-			echo -e "\t Error: $i is different at $cArchive/$tDate" | tee -a $cLog
-			continue
-		fi
-	fi
-	if [ $tDiff -ne 0 ]; then
-		echo "cp -nv --perserve=all $i $cArchive/$tDate" | tee -a $cLog
-		cp -nv --preserve=all $i $cArchive/$tDate
-		cp -nv --preserve=all $i.info $cArchive/$tDate
-	fi
+    if [ ! -f $i.info ]; then
+        exiftool $i >$i.info
+    fi
+    if [ ! -f $i.info ]; then
+        echo "Error: No info file for $i" | tee -a $cLog
+        continue
+    fi
+    tDate=$(grep 'Date.*Original' $i.info | awk '{gsub(":","-",$4); print $4}')
+    if [ -z "$tDate" ]; then
+        tDate=$(grep 'File Modification Date/Time' $i.info | awk '{gsub(":","-",$5); print $5}')
+    fi
+    if [ -z "$tDate" ]; then
+        echo "Error: could not get date for $i" | tee -a $cLog
+        continue
+    fi
+    tDiff=1
+    if [ ! -d $cArchive/$tDate ]; then
+        echo "mkdir $cArchive/$tDate" | tee -a $cLog
+        mkdir $cArchive/$tDate
+    fi
+    if [ -f $cArchive/$tDate/${i##*/} ]; then
+        echo "diff -q $i $cArchive/$tDate/${i##*/}" | tee -a $cLog
+        diff -q $i $cArchive/$tDate/${i##*/} | tee -a $cLog
+        tDiff=$?
+        if [ $tDiff -eq 0 ]; then
+            echo -e "\t $i is already at $cArchive/$tDate" | tee -a $cLog
+        else
+            echo -e "\t Error: $i is different at $cArchive/$tDate" | tee -a $cLog
+            continue
+        fi
+    fi
+    if [ $tDiff -ne 0 ]; then
+        echo "cp -nv --perserve=all $i $cArchive/$tDate" | tee -a $cLog
+        cp -nv --preserve=all $i $cArchive/$tDate
+        cp -nv --preserve=all $i.info $cArchive/$tDate
+    fi
 done
 
 echo "See log file: $cLog"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/v4l2loopback-init,v 1.1 2020/11/19 19:55:46 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/v4l2loopback-init,v 1.2 2021/10/26 19:26:12 bruce Exp $
 
 # Install this script:
 #   Put it in /etc/init.d
@@ -24,93 +24,93 @@
 # --------------------
 # Configure
 if [ -f /etc/default/v4l2loopback-init ]; then
-	. /etc/default/v4l2loopback-init
+    . /etc/default/v4l2loopback-init
 else
-	cVideo=4
-	cName="OBSCam"
-	cOptions="exclusive_caps=1"
+    cVideo=4
+    cName="OBSCam"
+    cOptions="exclusive_caps=1"
 fi
 
 # --------------------
 fStart()
 {
-	rootUser
-	lsmod 2>&1 | grep -q v4l2loopback
-	if [ $? -eq 0 ]; then
-		echo v4l2loopback is already running
-		exit 1
-	fi
-	modprobe v4l2loopback $cOptions devices=1 video_nr=$cVideo card_label="$cName"
-	fStatus
+    rootUser
+    lsmod 2>&1 | grep -q v4l2loopback
+    if [ $? -eq 0 ]; then
+        echo v4l2loopback is already running
+        exit 1
+    fi
+    modprobe v4l2loopback $cOptions devices=1 video_nr=$cVideo card_label="$cName"
+    fStatus
 }
 
 # --------------------
 fStop()
 {
-	rootUser
-	lsmod 2>&1 | grep -q v4l2loopback
-	if [ $? -eq 0 ]; then
-		rmmod v4l2loopback
-	fi
-	fStatus
+    rootUser
+    lsmod 2>&1 | grep -q v4l2loopback
+    if [ $? -eq 0 ]; then
+        rmmod v4l2loopback
+    fi
+    fStatus
 }
 
 # --------------------
 fStatus()
 {
-	# Status doesn't require root
-	tState=0
-	lsmod 2>&1 | grep -q v4l2loopback
-	if [ $? -eq 0 ]; then
-		let ++tState
-	fi
-	ls /dev | grep -q video4
-	if [ $? -eq 0 ]; then
-		let ++tState
-	fi
-	if [ $tState -eq 2 ]; then
-		echo v4l2loopback running: /dev/video$cVideo $cName
-	else
-		echo v4l2loopback is NOT running
-	fi
+    # Status doesn't require root
+    tState=0
+    lsmod 2>&1 | grep -q v4l2loopback
+    if [ $? -eq 0 ]; then
+        let ++tState
+    fi
+    ls /dev | grep -q video4
+    if [ $? -eq 0 ]; then
+        let ++tState
+    fi
+    if [ $tState -eq 2 ]; then
+        echo v4l2loopback running: /dev/video$cVideo $cName
+    else
+        echo v4l2loopback is NOT running
+    fi
 }
 
 # --------------------
 rootUser()
 {
-	if [ "$(whoami)" != "root" ]; then
-		echo "Error: you are not root user"
-		fUsage
-		exit 1
-	fi
+    if [ "$(whoami)" != "root" ]; then
+        echo "Error: you are not root user"
+        fUsage
+        exit 1
+    fi
 }
 
 # --------------------
 fUsage()
 {
-	echo $"Usage: $0 {start|stop|restart|status}"
+    echo $"Usage: $0 {start|stop|restart|status}"
 }
 
 # ========================================
 case "$1" in
-	start)
-		fStart
-	;;
-	stop)
-		fStop
-	;;
-	restart)
-		fStop
-		sleep 2
-		fStart
-	;;
-	status)
-		fStatus
-	;;
-	*)
-		fUsage
-		exit 1
-	;;
+    start)
+        fStart
+        ;;
+    stop)
+        fStop
+        ;;
+    restart)
+        fStop
+        sleep 2
+        fStart
+        ;;
+    status)
+        fStatus
+        ;;
+    *)
+        fUsage
+        exit 1
+        ;;
 esac
 
 exit 0

@@ -1,10 +1,10 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/speedtest.sh,v 1.5 2021/03/02 04:49:05 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/speedtest.sh,v 1.6 2021/10/26 19:26:12 bruce Exp $
 
 # This despends on: SpeedTest
-  # Source: https://github.com/taganaka/SpeedTest
-  # See /etc/CHANGE for details
-  # Local code at: /home/bruce/ver/public/app/SpeedTest
+# Source: https://github.com/taganaka/SpeedTest
+# See /etc/CHANGE for details
+# Local code at: /home/bruce/ver/public/app/SpeedTest
 
 # ----------
 if [ ! -x /usr/local/bin/SpeedTest ]; then
@@ -30,7 +30,7 @@ if [ ".$1" = ".-n" ]; then
     pRun=0
     if [ ! -r $cOutput ]; then
         echo $cOutput does not exist. First run with no -n
-	exit 1
+        exit 1
     fi
 fi
 
@@ -45,14 +45,14 @@ fi
 
 export tDone=1
 if ! grep -q DOWNLOAD_SPEED $cOutput; then
-   tDone=0
+    tDone=0
 fi
 if ! grep -q UPLOAD_SPEED $cOutput; then
-   tDone=0
+    tDone=0
 fi
 if [ $tDone -ne 1 ]; then
-   echo SpeedTest timedout after 5 min. So no results available.
-   exit 1
+    echo SpeedTest timedout after 5 min. So no results available.
+    exit 1
 fi
 
 tDown=$(grep DOWNLOAD_SPEED $cOutput | tail -n 1)
@@ -68,11 +68,11 @@ echo $tUp Mbps, expected $cMinUp to $cMaxUp
 
 tErr=0
 if [ $tDown -lt $cMinDown ]; then
-   tErr=1
-   echo Problem: download is slow
+    tErr=1
+    echo Problem: download is slow
 fi
 if [ $tUp -lt $cMinUp ]; then
-   tErr=1
-   echo Problem: upload is slow
+    tErr=1
+    echo Problem: upload is slow
 fi
 exit $tErr

@@ -2,15 +2,15 @@
 
 tHelp=0
 if [ $# -lt 2 ]; then
-	tHelp=1
+    tHelp=1
 else
-	if [ ".$1" = ".-h" ]; then
-		tHelp=1
-	fi
+    if [ ".$1" = ".-h" ]; then
+        tHelp=1
+    fi
 fi
 
 if [ $tHelp -ne 0 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage
 	cvsbranch.sh [-h] TAG FILE [FILE...]
 
@@ -22,7 +22,7 @@ Description
 	cvs tag -b TAG-BRANCH FILE
 	cvs tag -r TAG-BRANCH FILE
 EOF
-	exit
+    exit
 fi
 
 pTag=$1

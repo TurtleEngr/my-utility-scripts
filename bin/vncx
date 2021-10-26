@@ -7,45 +7,44 @@ cBase=499
 cPort=$(id -u)
 let cPort=cPort-cBase
 
-function fView
+function fView()
 {
-	if [ $# -eq 0 ]; then
-		echo "Cmd: vncviewer $cDefHost:$cDefPort &"
-		vncviewer -shared $cDefHost:$cDefPort &
-	else
-		echo "Cmd: vncviewer $* &"
-		vncviewer -shared $* &
-	fi
+    if [ $# -eq 0 ]; then
+        echo "Cmd: vncviewer $cDefHost:$cDefPort &"
+        vncviewer -shared $cDefHost:$cDefPort &
+    else
+        echo "Cmd: vncviewer $* &"
+        vncviewer -shared $* &
+    fi
 }
 
 if [ $# -eq 0 ]; then
-	PS3="Select the server: "
-	select tServer in \
-		left-orange.ad.xxxx.com:0 \
-		right-grape.xxxx.com:0 \
-		apple.xxxx.com:0 \
-		orange.ad.xxxx.com:0 \
-		grape.xxxx.com:0 \
-		NONE \
-	    ; do
-		case $tServer in
-			NONE)	exit;;
-		esac
-		break;
-	done
-	case $tServer in
-		left*)
-			x2vnc -shared -west ${tServer#left-}
-		;;
-		right*)
-			x2vnc -shared -east ${tServer#right-}
-		;;
-		*)	fView $tServer;;
-	esac
+    PS3="Select the server: "
+    select tServer in \
+        left-orange.ad.xxxx.com:0 \
+        right-grape.xxxx.com:0 \
+        apple.xxxx.com:0 \
+        orange.ad.xxxx.com:0 \
+        grape.xxxx.com:0 \
+        NONE; do
+        case $tServer in
+            NONE) exit ;;
+        esac
+        break
+    done
+    case $tServer in
+        left*)
+            x2vnc -shared -west ${tServer#left-}
+            ;;
+        right*)
+            x2vnc -shared -east ${tServer#right-}
+            ;;
+        *) fView $tServer ;;
+    esac
 else
-	case $1 in
-		help|-h|--help)
-			cat <<EOF
+    case $1 in
+        help | -h | --help)
+            cat <<EOF
 Usage:
 	vnc help
 	vnc start
@@ -54,28 +53,29 @@ Usage:
 	vnc server:port
 	vnc
 EOF
-		;;
-		start)
-			echo "Cmd: vncserver :$cPort -depth 24 -name $LOGNAME:$HOSTNAME"
-			vncserver :$cPort -depth 24 -name $LOGNAME:$HOSTNAME
-			echo "Started vnc: $HOSTNAME:$cPort for user: $LOGNAME "		;;
-		stop|kill)
-			if [ ! -f ~/.vnc/$HOSTNAME:$cPort.pid ]; then
-				if [ "$(whoami)" != "root" ]; then
-					echo "Cmd: killall Xvnc"
-					killall Xvnc
-				fi
-			else
-				echo "Cmd: vncserver -kill :$cPort"
-				vncserver -kill :$cPort
-			fi
-		;;
-		pass|passwd|password)
-			echo "Cmd: vncpasswd"
-			vncpasswd
-		;;
-		*)
-			fView $*
-		;;
-	esac
+            ;;
+        start)
+            echo "Cmd: vncserver :$cPort -depth 24 -name $LOGNAME:$HOSTNAME"
+            vncserver :$cPort -depth 24 -name $LOGNAME:$HOSTNAME
+            echo "Started vnc: $HOSTNAME:$cPort for user: $LOGNAME "
+            ;;
+        stop | kill)
+            if [ ! -f ~/.vnc/$HOSTNAME:$cPort.pid ]; then
+                if [ "$(whoami)" != "root" ]; then
+                    echo "Cmd: killall Xvnc"
+                    killall Xvnc
+                fi
+            else
+                echo "Cmd: vncserver -kill :$cPort"
+                vncserver -kill :$cPort
+            fi
+            ;;
+        pass | passwd | password)
+            echo "Cmd: vncpasswd"
+            vncpasswd
+            ;;
+        *)
+            fView $*
+            ;;
+    esac
 fi

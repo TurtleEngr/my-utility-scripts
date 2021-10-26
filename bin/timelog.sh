@@ -1,9 +1,9 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/timelog.sh,v 1.3 2019/12/04 21:20:15 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/timelog.sh,v 1.4 2021/10/26 19:26:12 bruce Exp $
 
 # --------------------
-if [  $# -ne 1 -o "x$1" = "x-h" ]; then
-	cat <<EOF
+if [ $# -ne 1 -o "x$1" = "x-h" ]; then
+    cat <<EOF
 Usage
 	timelog.sh logtime.csv
 Description
@@ -16,15 +16,15 @@ Output:
 See also:
 	logtime
 EOF
-	exit 1
+    exit 1
 fi
 
 # --------------------
 pFile=$1
 
 if [ ! -f $pFile ]; then
-	echo "Error: could not find $pFile"
-	exit 1
+    echo "Error: could not find $pFile"
+    exit 1
 fi
 
 # --------------------

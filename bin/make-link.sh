@@ -1,8 +1,8 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/make-link.sh,v 1.5 2020/10/28 02:14:26 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/make-link.sh,v 1.6 2021/10/26 19:26:10 bruce Exp $
 
 if [ $# -ne 0 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	make-link.sh <InFile.dat >OutFile.html
 
@@ -83,7 +83,7 @@ firefox OutFile.html
 If it looks OK, then cut paste the <dt> sections to the top of the <dl> list.
 
 EOF
-	exit 1
+    exit 1
 fi
 
 # ==================================
@@ -280,7 +280,7 @@ cat <<EOF
 EOF
 
 # --------------------
-awk -v pDate=$cDate -v pTime=$cTime  -f /tmp/make-link.awk
+awk -v pDate=$cDate -v pTime=$cTime -f /tmp/make-link.awk
 
 # --------------------
 # Footer

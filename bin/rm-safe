@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/rm-safe,v 1.1 2016/10/11 01:50:28 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/rm-safe,v 1.2 2021/10/26 19:26:11 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -18,16 +18,16 @@
 # cName - script's name
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	if [ $# -ne 0 ]; then
-		pod2text $0
-	else
-		pod2usage $0
-	fi
-	gErr=1
-	exit 1
-	cat <<EOF >/dev/null
+    if [ $# -ne 0 ]; then
+        pod2text $0
+    else
+        pod2usage $0
+    fi
+    gErr=1
+    exit 1
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -169,72 +169,72 @@ BAR
 
 =head1 HISTORY
 
-$Revision: 1.1 $ $Date: 2016/10/11 01:50:28 $ GMT
+$Revision: 1.2 $ $Date: 2021/10/26 19:26:11 $ GMT
 
 =cut
 EOF
-	exit 1
+    exit 1
 } # fUsage
 
 # --------------------------------
-function fError
+function fError()
 {
-	# Usage:
-	#     fError pMsg [pLine [pErr]]
-	# Print the error message, then exit
+    # Usage:
+    #     fError pMsg [pLine [pErr]]
+    # Print the error message, then exit
 
-	local pMsg="$1"
-	local pLine=$2
-	local pErr=$3
+    local pMsg="$1"
+    local pLine=$2
+    local pErr=$3
 
-	gpVerbose="-v"
-	fLog crit "$pMsg" $pLine $pErr
-	fUsage
+    gpVerbose="-v"
+    fLog crit "$pMsg" $pLine $pErr
+    fUsage
 } # fError
 
 # ------------------
-function fLog
+function fLog()
 {
-	# Usage:
-	#     gErr=8801		# optional
-	#     fLog notice "Just testing" $LINENO 8
-	# pLevel - emerg alert crit err warning notice info debug
+    # Usage:
+    #     gErr=8801		# optional
+    #     fLog notice "Just testing" $LINENO 8
+    # pLevel - emerg alert crit err warning notice info debug
 
-	local pLevel=$1
-	local pMsg="$2"
-	# optional
-	local pLine=$3
-	# optional
-	local pErr=$4
+    local pLevel=$1
+    local pMsg="$2"
+    # optional
+    local pLine=$3
+    # optional
+    local pErr=$4
 
-	local tVerbose=""
-	local tErr=""
-	if [ -n "$pErr" ]; then
-		tErr="$pErr"
-	fi
-	if [ $gErr -ne 0 ]; then
-		tErr="$tErr,$gErr"
-	fi
-	if [ -n "$tErr" ]; then
-		tErr="($tErr)"
-	fi
+    local tVerbose=""
+    local tErr=""
+    if [ -n "$pErr" ]; then
+        tErr="$pErr"
+    fi
+    if [ $gErr -ne 0 ]; then
+        tErr="$tErr,$gErr"
+    fi
+    if [ -n "$tErr" ]; then
+        tErr="($tErr)"
+    fi
 
-	local tLine=""
-	if [ -n "$pLine" ]; then
-		tLine="[$pLine]"
-	fi
+    local tLine=""
+    if [ -n "$pLine" ]; then
+        tLine="[$pLine]"
+    fi
 
-	if [ $gpLog -eq 0 -o $gpDebug -ne 0 ]; then
-		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
-	else
-		if [ -n "$gpVerbose" ]; then
-			tVerbose="-s"
-		fi
-		logger $tVerbose -i -t $cName -p user.$pLevel "$pLevel: $pMsg $tLine$tErr"
-	fi
+    if [ $gpLog -eq 0 -o $gpDebug -ne 0 ]; then
+        echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+    else
+        if [ -n "$gpVerbose" ]; then
+            tVerbose="-s"
+        fi
+        logger $tVerbose -i -t $cName -p user.$pLevel "$pLevel: $pMsg $tLine$tErr"
+    fi
 
-
-} # fLog
+}
+# fLog
 
 # Main --------------------------------------------------------------
 
@@ -244,14 +244,14 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-cVer='$Revision: 1.1 $'
+cVer='$Revision: 1.2 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
 # -------------------
 # Get Options Section
 if [ $# -eq 0 ]; then
-	fUsage
+    fUsage
 fi
 export gStatus="notice"
 export gpDebug=${gpDebug:-0}
@@ -263,105 +263,108 @@ export gpMove=0
 export gpRecursive=""
 export gpVerbose=""
 while getopts :filmrRhvx-: tArg; do
-	case $tArg in
-		f)	gpForce="-f"
-			gpInteractive=""
-		;;
-		i)	gpInteractive="-i"
-			gpForce=""
-		;;
-		l)	gpLog=1;;
-		m)	gpMove=1;;
-		r|R)	gpRecursive="-r";;
-		h)	fUsage long;;
-		v)	gpVerbose="-v";;
-		x)	let gpDebug=gpDebug+1
-			gStatus="debug"
-		;;
-		+x)	gpDebug=0
-			gStatus="notice"
-		;;
-		\-)	fError "Invalid option: ${tArg}-$OPTARG" $LINENO;;
-		:)	fError "Value required for option: $OPTARG" $LINENO;;
-		\?)	fError "Unknown option: $tArg $OPTARG" $LINENO;;
-	esac
+    case $tArg in
+        f)
+            gpForce="-f"
+            gpInteractive=""
+            ;;
+        i)
+            gpInteractive="-i"
+            gpForce=""
+            ;;
+        l) gpLog=1 ;;
+        m) gpMove=1 ;;
+        r | R) gpRecursive="-r" ;;
+        h) fUsage long ;;
+        v) gpVerbose="-v" ;;
+        x)
+            let gpDebug=gpDebug+1
+            gStatus="debug"
+            ;;
+        +x)
+            gpDebug=0
+            gStatus="notice"
+            ;;
+        \-) fError "Invalid option: ${tArg}-$OPTARG" $LINENO ;;
+        :) fError "Value required for option: $OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $tArg $OPTARG" $LINENO ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	gpFileList="$*"
+    gpFileList="$*"
 else
-	fError "No files were specified." $LINENO
+    fError "No files were specified." $LINENO
 fi
 
 # -------------------
 # Validate
 
 if [ "$PWD" = "/" ]; then
-	fError "PWD = /" $LINENO
+    fError "PWD = /" $LINENO
 fi
 
 tList=""
 for i in $gpFileList; do
-	if [ "$i" != "${i#/}" ]; then
-		# Check absolute paths
-		c=$(echo $i | tr -dc '/')
-		if [ ${#c} -le 2 ]; then
-			fError "$i has less than 2 dir levels" $LINENO
-		fi
-	fi
-	if [ -e $i ]; then
-		tList="$tList $i"
-	else
-		fLog $gStatus "$i does not exist" $LINENO
-	fi
+    if [ "$i" != "${i#/}" ]; then
+        # Check absolute paths
+        c=$(echo $i | tr -dc '/')
+        if [ ${#c} -le 2 ]; then
+            fError "$i has less than 2 dir levels" $LINENO
+        fi
+    fi
+    if [ -e $i ]; then
+        tList="$tList $i"
+    else
+        fLog $gStatus "$i does not exist" $LINENO
+    fi
 done
 if [ -z "$tList" ]; then
-	fError "Already removed: $gpFileList" $LINENO
+    fError "Already removed: $gpFileList" $LINENO
 fi
 gpFileList="$tList"
 
 # -------------------
 # Setup a temporary directory
 if [ $gpMove -ne 0 ]; then
-	export Tmp
-	if [ "$USER" = "root" ]; then
-		tList="/var/tmp /tmp"
-	else
-		tList="$HOME/tmp /var/tmp /tmp"
-	fi
-	for i in $Tmp $tList; do
-		if [ -d $i -a -w $i ]; then
-			Tmp=$i
-			break
-		fi
-	done
+    export Tmp
+    if [ "$USER" = "root" ]; then
+        tList="/var/tmp /tmp"
+    else
+        tList="$HOME/tmp /var/tmp /tmp"
+    fi
+    for i in $Tmp $tList; do
+        if [ -d $i -a -w $i ]; then
+            Tmp=$i
+            break
+        fi
+    done
 fi
 
 # -------------------
 # Debug
 
 if [ $gpDebug -gt 2 ]; then
-	echo
-	for i in \
-		cName \
-		cVer \
-		gErr \
-		Tmp \
-		gpDebug \
-		gpForce \
-		gpInteractive \
-		gpLog \
-		gpMove \
-		gpRecursive \
-		gpVerbose \
-		gpOpt \
-		gpFileList \
-	; do
-		tMsg=$(eval echo -R "$i=\$$i")
-		fLog debug "$tMsg" $LINENO
-	done
-	echo
+    echo
+    for i in \
+        cName \
+        cVer \
+        gErr \
+        Tmp \
+        gpDebug \
+        gpForce \
+        gpInteractive \
+        gpLog \
+        gpMove \
+        gpRecursive \
+        gpVerbose \
+        gpOpt \
+        gpFileList; do
+        tMsg=$(eval echo -R "$i=\$$i")
+        fLog debug "$tMsg" $LINENO
+    done
+    echo
 fi
 
 # -------------------
@@ -370,29 +373,29 @@ fi
 # ----------
 # Move files to Tmp
 if [ $gpMove -ne 0 ]; then
-	fLog $gStatus "mv $gpForce $gpInteractive $gpVerbose $gpFileList $Tmp" $LINENO
-	if [ $gpDebug -eq 0 ]; then
-		mv $gpForce $gpInteractive $gpVerbose $gpFileList $Tmp
-	fi
-	exit $?
+    fLog $gStatus "mv $gpForce $gpInteractive $gpVerbose $gpFileList $Tmp" $LINENO
+    if [ $gpDebug -eq 0 ]; then
+        mv $gpForce $gpInteractive $gpVerbose $gpFileList $Tmp
+    fi
+    exit $?
 fi
 
 # ----------
 # Remove all symlinks
 if [ -n "$gpRecursive" ]; then
-	if [ -n "$gpVerbose" -o $gpDebug -gt 1 ]; then
-		echo "Will remove these symlinks:"
-		find $gpFileList -type l -exec ls -l {} \; | awk '{print "\t",$10,$11,$12}'
-	fi
-	fLog $gStatus "find $gpFileList -type l -exec rm $gpForce $gpInteractive $gpVerbose {} \;" $LINENO
-	if [ $gpDebug -eq 0 ]; then
-		find $gpFileList -type l -exec rm $gpForce $gpInteractive $gpVerbose {} \;
-	fi
+    if [ -n "$gpVerbose" -o $gpDebug -gt 1 ]; then
+        echo "Will remove these symlinks:"
+        find $gpFileList -type l -exec ls -l {} \; | awk '{print "\t",$10,$11,$12}'
+    fi
+    fLog $gStatus "find $gpFileList -type l -exec rm $gpForce $gpInteractive $gpVerbose {} \;" $LINENO
+    if [ $gpDebug -eq 0 ]; then
+        find $gpFileList -type l -exec rm $gpForce $gpInteractive $gpVerbose {} \;
+    fi
 fi
 
 # ----------
 # Remove files (and dirs if -r)
 fLog $gStatus "rm $gpForce $gpInteractive $gpRecursive $gpVerbose $gpFileList" $LINENO
 if [ $gpDebug -eq 0 ]; then
-	rm $gpForce $gpForce $gpInteractive $gpRecursive $gpVerbose $gpFileList
+    rm $gpForce $gpForce $gpInteractive $gpRecursive $gpVerbose $gpFileList
 fi

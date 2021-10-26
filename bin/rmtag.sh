@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -ne 3 -a $# -ne 1 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	rmtag.sh TAG INFILE OUTFILE
 	rmtag.sh TAG <INFILE >OUTFILE
@@ -13,12 +13,12 @@ tmp=/tmp/rmtag.$$
 pRmTag=$1
 
 if [ $# -eq 3 ]; then
-	pInFile=$2
-	pOutFile=$3
+    pInFile=$2
+    pOutFile=$3
 else
-	pInFile=$tmp.in
-	pOutFile=$tmp.out
-	cat >$pInFile
+    pInFile=$tmp.in
+    pOutFile=$tmp.out
+    cat >$pInFile
 fi
 
 cat <<EOF >$tmp.rmtag.xsl
@@ -50,7 +50,7 @@ EOF
 xsltproc -o $pOutFile $tmp.rmtag.xsl $pInFile
 
 if [ $# -eq 1 ]; then
-	cat $pOutFile
+    cat $pOutFile
 fi
 
 rm $tmp.*

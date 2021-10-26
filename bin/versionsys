@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: versionsys,v 1.4 2015/07/19 03:30:07 bruce Exp $
+# $Id: versionsys,v 1.5 2021/10/26 19:26:12 bruce Exp $
 
 # This script may be different for each server that it is installed
 # on, so don't just over-write it with newer versions.
@@ -9,8 +9,8 @@
 # or ownership changes, that CVS may make.
 
 if [ "$(whoami)" != "root" ]; then
-	echo "Error: You have to be root to run this."
-	exit 1
+    echo "Error: You have to be root to run this."
+    exit 1
 fi
 
 export CVSROOT=$(cat /CVS/Root)

@@ -22,17 +22,18 @@ fi
 PS3="Functional area? "
 echo
 select pFunctional in QUIT HELP prod qa eng ops; do
-	case $pFunctional in
-		QUIT)	exit 1;;
-		HELP)	cat <<EOF
+    case $pFunctional in
+        QUIT) exit 1 ;;
+        HELP)
+            cat <<EOF
 prod - prod* db dumps
 qa   - sit* db dumps
 eng  - dit* or dev* db dumps
 ops  - misc dumps
 EOF
-		;;
-		*)	break;;
-	esac
+            ;;
+        *) break ;;
+    esac
 done
 
 # ----------------------
@@ -41,22 +42,23 @@ echo "S3 Path: $tRepo/$pFunctional/$tDir"
 PS3="Direction? "
 echo
 select pUpDown in QUIT HELP up down; do
-	case $pFunctional in
-		QUIT)	exit 1;;
-		HELP)	cat <<EOF
+    case $pFunctional in
+        QUIT) exit 1 ;;
+        HELP)
+            cat <<EOF
 up   - Upload the FILE in current dir to 
 down - Download the FILE in from S3 to the current dir
 EOF
-		;;
-		*)	break;;
-	esac
+            ;;
+        *) break ;;
+    esac
 done
 
 # ----------------------
 pFile=$1
 if [ $pUpDown = "up" -a ! -r $pFile ]; then
-	echo "Could not read file: $pFile"
-	exit 1
+    echo "Could not read file: $pFile"
+    exit 1
 fi
 
 # ----------------------

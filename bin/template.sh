@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.47 $ $Date: 2021/09/06 18:34:34 $ GMT
+# $Revision: 1.52 $ $Date: 2021/10/26 19:26:12 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -10,53 +10,68 @@
 # Set current directory location in PWD and cCurDir, because with cron
 # jobs PWD is not set.
 if [ -z "$PWD" ]; then
-	PWD=$(pwd)
+    PWD=$(pwd)
 fi
 cCurDir=$PWD
 
 # -------------------
-# Define the location of the script
-cBin=${0%/*}
-if [ "$cBin" = "." ]; then
+# Define cBin, location of common scripts (pick one)
+tBin=home
+case $tBin in
+    current)
         cBin=$PWD
-fi
-cd $cBin
-cBin=$PWD
-cd $cCurDir
+        ;;
+    home) cBin=~/bin ;;
+    local) cBin=/usr/local/bin ;;
+    system) cBin=/usr/bin ;;
+    this)
+        cBin=${0%/*}
+        if [ "$cBin" = "." ]; then
+            cBin=$PWD
+        fi
+        cd $cBin
+        cBin=$PWD
+        cd $cCurDir
+        ;;
+esac
 
 . $cBin/bash-com.inc
 
 # ========================================
+# Script Functions
+
+# --------------------------------
 fUsage()
 {
-	# Quick help, run this:
-	# SCRIPTNAME -h | less
+    # Quick help, run this:
+    # SCRIPTNAME -h | less
 
-	local pStyle="$1"
+    local pStyle="$1"
 
-	case $pStyle in
-		short|usage|man|long|text|md)
-			fComUsage -f $cBin/$cName -s $pStyle
-		;;
-		html)
-			fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
-		;;
-		int)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
-		;;
-		int-html)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
-		;;
-		int-md)
-			fComUsage -a -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
-		;;
-		*)
-			fComUsage -f $cBin/$cName -s short
-		;;
-	esac
-	exit 1
+    case $pStyle in
+        short | usage | man | long | text | md)
+            fComUsage -f $cCurDir/$cName -s $pStyle
+            ;;
+        html)
+            fComUsage -f $cCurDir/$cName -s $pStyle -t "$cName Usage"
+            ;;
+        int)
+            fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+            ;;
+        int-html)
+            fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+            ;;
+        int-md)
+            fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+            ;;
+        *)
+            fComUsage -f $cCurDir/$cName -s short
+            ;;
+    esac
+    exit 1
 
-	cat <<\EOF >/dev/null
+    # POD Syntax: https://perldoc.perl.org/perlpod
+    cat <<\EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -65,7 +80,7 @@ SCRIPTNAME - DESCRIPTION
 
 =head1 SYNOPSIS
 
-	SCRIPTNAME [-o "Name=Value"] [-h] [-H Style] [-l] [-v] [-x] [-T Test]
+	SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 =head1 DESCRIPTION
 
@@ -83,9 +98,9 @@ Describe the script.
 
 Output this "long" usage help. See "-H long"
 
-=item B<-H Style>
+=item B<-H pStyle>
 
-Style is used to select the type of help and how it is formatted.
+pStyle is used to select the type of help and how it is formatted.
 
 Styles:
 
@@ -118,13 +133,13 @@ Or you can set gpDebug before running the script.
 
 See: fLog and fLog2 (Internal documentation)
 
-=item B<-T Test>
+=item B<-T pTest>
 
 Run the unit test functions in this script.
 
-If Test is "all", then all of the functions that begin with "test"
-will be run. Otherwise "Test" should match the test function names
-separated with commas.
+"-T all" will run all of the functions that begin with "test".
+Otherwise "pTest" should match the test function names separated with
+commas. "-T com" will run all the tests for bash-com.inc
 
 For more details about shunit2 (or shunit2.1), see
 shunit2/shunit2-manual.html
@@ -291,11 +306,11 @@ NAME
 
 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.47 $ $Date: 2021/09/06 18:34:34 $ GMT 
+$Revision: 1.52 $ $Date: 2021/10/26 19:26:12 $ GMT 
 
 =cut
 EOF
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head1 SCRIPTNAME Internal Documentation
@@ -310,141 +325,13 @@ This function selects the type of help output. See -h and -H options.
 EOF
 } # fUsage
 
-# ========================================
-# Tests
-
-# --------------------------------
-fUDebug()
-{
-	# See also fUDebug
-	if [ ${gpUnitDebug:-0} -ne 0 ]; then
-		echo "fUDebug: $*"
-	fi
-	return
-
-    	cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head2 Unit Test Functions
-
-=internal-cut
-EOF
-} # fUDebug
-
-# --------------------------------
-testUsage()
-{
-	local tResult
-	
-	gpUnitDebug=0
-
-	#-----
-	tResult=$(fUsage short 2>&1)
-	fUDebug "tResult=$tResult"
-	assertContains "tu-short" "$tResult" "Usage:"
-	
-	#-----
-	tResult=$(fUsage foo 2>&1)
-	fUDebug "tResult=$tResult"
-	assertContains "tu-foo.1" "$tResult" "Usage:"
-	assertContains "tu-foo.2 change SCRIPTNAME" "$tResult" "$cName"
-
-	#-----
-	tResult=$(fUsage text 2>&1)
-	assertContains "tu-long.1" "$tResult" "DESCRIPTION"
-	assertContains "tu-long.2" "$tResult" "HISTORY"
-
-	#-----
-	tResult=$(fUsage man 2>&1)
-	assertContains "tu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
-	assertContains "tu-man.2" "$tResult" '.IX Header "HISTORY"'
-
-	#-----
-	tResult=$(fUsage html 2>&1)
-	assertContains "tu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
-	assertContains "tu-html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
-	assertContains "tu-html.3" "$tResult" "<title>$cName Usage</title>"
-
-	#-----
-	tResult=$(fUsage md 2>&1)
-	assertContains "tu-md.1" "$tResult" '# DESCRIPTION'
-	assertContains "tu-md.2" "$tResult" '# HISTORY'
-
-	#-----
-	tResult=$(fUsage int 2>&1)
-	fUDebug "tResult=$tResult"
-	assertContains "tu-internal.1" "$tResult" 'Template Use'
-	assertContains "tu-internal.2" "$tResult" 'fComSetGlobals'
-
-	#-----
-	tResult=$(fUsage int-html 2>&1)
-	fUDebug "tResult=$tResult"
-	assertContains "tu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
-	assertContains "tu-int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
-	assertContains "tu-int-html.3" "$tResult" 'Internal Doc</title>'
-	assertContains "tu-int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
-
-	#-----
-	tResult=$(fUsage int-md 2>&1)
-	assertContains "tu-int-md.1" "$tResult" '## Template Use'
-	assertContains "tu-int-md.2" "$tResult" '### fComSetGlobals'
-	assertContains "tu-int-md.3" "$tResult" '### testComUsage'
-
-	#-----
-	gpUnitDebug=0
-	return
-	
-    	cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 testUsage
-
-Test fUsage. Verify the different output styles work. See also testComUsage
-in bash-com.test.
-
-=internal-cut
-EOF
-} # testUsage
-
-# --------------------------------
-testScriptFunctions()
-{
-	local tResult
-
-	tResult=$(fSetGlobals 2>&1)
-	assertTrue "tsf-fSetGlobals" "[ $? -eq 0 ]"
-
-	gpHostName="foobar"
-	tResult=$(fValidateHostName 2>&1)
-	assertTrue "tsf-fValidateHostName.1" "[ $? -eq 0 ]"
-
-	gpHostName=""
-	tResult=$(fValidateHostName 2>&1)
-	assertContains "tsf-fValidateHostName.2" "$tResult" "required."
-
-	return
-	
-    	cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 testScriptFunctions
-
-This is just a starting point for creating script functionality tests.
-
-=internal-cut
-EOF
-} # testScriptFunctions
-
-# ========================================
-# Script Functions
-
 # --------------------------------
 fCleanUp()
 {
-	fComCleanUp
-	exit
+    fComCleanUp
+    exit
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head2 Script Functions
@@ -460,16 +347,16 @@ EOF
 # -------------------
 fSetGlobals()
 {
-	fComSetGlobals
-	
-	# Put your globals here
-	gpTag=${gpTag:-build}
+    fComSetGlobals
 
-	# Define the Required and the Optional progs, space separated
-	fComCheckDeps "cat" "cat"
-	return
+    # Put your globals here
+    gpTag=${gpTag:-build}
 
-    	cat <<EOF >/dev/null
+    # Define the Required and the Optional progs, space separated
+    fComCheckDeps "cat" "cat"
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fSetGlobals
@@ -487,12 +374,12 @@ EOF
 # -------------------
 fValidateHostName()
 {
-	if [ -z $gpHostName ]; then
-		fError "The -n or -c option is required." $LINENO
-	fi
-	return
+    if [ -z $gpHostName ]; then
+        fError "The -n or -c option is required." $LINENO
+    fi
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fValidateHostName
@@ -503,25 +390,150 @@ Exit if missing.
 EOF
 } # fValidateHostName
 
+# ========================================
+# Tests
+
+# --------------------------------
+fUDebug()
+{
+    # See also fUDebug
+    if [ ${gpUnitDebug:-0} -ne 0 ]; then
+        echo "fUDebug: $*"
+    fi
+    return
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head2 Unit Test Functions
+
+=internal-cut
+EOF
+} # fUDebug
+
+# --------------------------------
+testUsage()
+{
+    local tResult
+
+    gpUnitDebug=0
+
+    #-----
+    tResult=$(fUsage short 2>&1)
+    fUDebug "tResult=$tResult"
+    assertContains "tu-short" "$tResult" "Usage:"
+
+    #-----
+    tResult=$(fUsage foo 2>&1)
+    fUDebug "tResult=$tResult"
+    assertContains "tu-foo.1" "$tResult" "Usage:"
+    assertContains "tu-foo.2 change SCRIPTNAME" "$tResult" "$cName"
+
+    #-----
+    tResult=$(fUsage text 2>&1)
+    assertContains "tu-long.1" "$tResult" "DESCRIPTION"
+    assertContains "tu-long.2" "$tResult" "HISTORY"
+
+    #-----
+    tResult=$(fUsage man 2>&1)
+    assertContains "tu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
+    assertContains "tu-man.2" "$tResult" '.IX Header "HISTORY"'
+
+    #-----
+    tResult=$(fUsage html 2>&1)
+    assertContains "tu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+    assertContains "tu-html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+    assertContains "tu-html.3" "$tResult" "<title>$cName Usage</title>"
+
+    #-----
+    tResult=$(fUsage md 2>&1)
+    assertContains "tu-md.1" "$tResult" '# DESCRIPTION'
+    assertContains "tu-md.2" "$tResult" '# HISTORY'
+
+    #-----
+    tResult=$(fUsage int 2>&1)
+    fUDebug "tResult=$tResult"
+    assertContains "tu-internal.1" "$tResult" 'Template Use'
+    assertContains "tu-internal.2" "$tResult" 'fComSetGlobals'
+
+    #-----
+    tResult=$(fUsage int-html 2>&1)
+    fUDebug "tResult=$tResult"
+    assertContains "tu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
+    assertContains "tu-int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
+    assertContains "tu-int-html.3" "$tResult" 'Internal Doc</title>'
+    assertContains "tu-int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
+
+    #-----
+    tResult=$(fUsage int-md 2>&1)
+    assertContains "tu-int-md.1" "$tResult" '## Template Use'
+    assertContains "tu-int-md.2" "$tResult" '### fComSetGlobals'
+    assertContains "tu-int-md.3" "$tResult" '### testComUsage'
+
+    #-----
+    gpUnitDebug=0
+    return
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testUsage
+
+Test fUsage. Verify the different output styles work. See also testComUsage
+in bash-com.test.
+
+=internal-cut
+EOF
+} # testUsage
+
+# --------------------------------
+testScriptFunctions()
+{
+    local tResult
+
+    tResult=$(fSetGlobals 2>&1)
+    assertTrue "tsf-fSetGlobals" "[ $? -eq 0 ]"
+
+    gpHostName="foobar"
+    tResult=$(fValidateHostName 2>&1)
+    assertTrue "tsf-fValidateHostName.1" "[ $? -eq 0 ]"
+
+    gpHostName=""
+    tResult=$(fValidateHostName 2>&1)
+    assertContains "tsf-fValidateHostName.2" "$tResult" "required."
+
+    return
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testScriptFunctions
+
+This is just a starting point for creating script functionality tests.
+
+=internal-cut
+EOF
+} # testScriptFunctions
+
 # -------------------
 # This should be the last defined function
 fRunTests()
 {
-	gpUnitDebug=${gpUnitDebug:-0}
-	if [ "$gpTest" = "all" ]; then
-		# shellcheck disable=SC1091
-		. /usr/local/bin/shunit2.1
-		exit $?
-	fi
-	if [ "$gpTest" = "com" ]; then
-		$cBin/bash-com.test
-		exit $?
-	fi
-	# shellcheck disable=SC1091
-	. /usr/local/bin/shunit2.1 -- $gpTest
-	exit $?
-	
-    	cat <<EOF >/dev/null
+    gpUnitDebug=${gpUnitDebug:-0}
+    if [ "$gpTest" = "all" ]; then
+        # shellcheck disable=SC1091
+        . /usr/local/bin/shunit2.1
+        exit $?
+    fi
+    if [ "$gpTest" = "com" ]; then
+        $cBin/bash-com.test
+        exit $?
+    fi
+    # shellcheck disable=SC1091
+    . /usr/local/bin/shunit2.1 -- $gpTest
+    exit $?
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fRunTests
@@ -545,46 +557,46 @@ export gErr gpDebug gpFacility gpLog gpVerbose
 # Test globals
 export gpTest gpUnitDebug SHUNIT_COLOR
 
-cVer='$Revision: 1.47 $'
+# shellcheck disable=SC2016
+cVer='$Revision: 1.52 $'
 fSetGlobals
 
 # -------------------
 # Get Args Section
 if [ $# -eq 0 ]; then
-	fError2 -m "Missing options." -l $LINENO
-	fUsage short
+    fError2 -m "Missing options." -l $LINENO
 fi
 while getopts :cn:t:hH:lT:vx tArg; do
-	case $tArg in
-		# Script arguments
-		c)	gpHostName=$(hostname);;
-		n)	gpHostName="$OPTARG";;
-		t)	gpTag="$OPTARG";;
-		# Common arguments
-		h)	fUsage long;;
-		H)	fUsage "$OPTARG";;
-		l)	gpLog=1;;
-		v)	let gpVerbose=gpVerbose+1;;
-		x)	let gpDebug=gpDebug+1;;
-		T)	gpTest="$OPTARG";;
-		# Problem arguments
-		:)	fError "Value required for option: -$OPTARG" $LINENO;;
-		\?)	fError "Unknown option: $OPTARG" $LINENO;;
-	esac
+    case $tArg in
+        # Script arguments
+        c) gpHostName=$(hostname) ;;
+        n) gpHostName="$OPTARG" ;;
+        t) gpTag="$OPTARG" ;;
+        # Common arguments
+        h) fUsage long ;;
+        H) fUsage "$OPTARG" ;;
+        l) gpLog=1 ;;
+        v) let ++gpVerbose ;;
+        x) let ++gpDebug ;;
+        T) gpTest="$OPTARG" ;;
+        # Problem arguments
+        :) fError "Value required for option: -$OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+    esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 if [ $# -ne 0 ]; then
-	# File names are usually the only arguments not matched.
-	# If nothing is expected, then change this to fError...
-	gpFileList="$*"
+    # File names are usually the only arguments not matched.
+    # If nothing is expected, then change this to fError...
+    gpFileList="$*"
 fi
 while [ $# -ne 0 ]; do
-	shift
+    shift
 done
 
 # -------------------
 if [ -n "$gpTest" ]; then
-    	fRunTests
+    fRunTests
 fi
 
 # -------------------
@@ -614,10 +626,10 @@ timeout 5 awk -f $cTmp1 >$cTmp2
 
 tList=""
 for i in $(seq 2 40); do
-	if [ -e "File$i" ]; then
-		fLog2 -m "Found File$i"
-		tList="$tList File$i"
-	fi
+    if [ -e "File$i" ]; then
+        fLog2 -m "Found File$i"
+        tList="$tList File$i"
+    fi
 done >>$cTmp2
 
 # -------------------

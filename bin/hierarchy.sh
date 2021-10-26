@@ -1,14 +1,14 @@
 #!/bin/bash
 # Usage:
-#	heirarchy.sh 
+#	heirarchy.sh
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	# Print usage help for this script, using pod2text.
-	pod2text $0
-	exit 1
-	cat <<EOF >/dev/null
+    # Print usage help for this script, using pod2text.
+    pod2text $0
+    exit 1
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -128,7 +128,7 @@ Outputs:
 
 =cut
 EOF
-	exit
+    exit
 } # fUsage
 
 # ==================================================
@@ -138,11 +138,11 @@ EOF
 cAWK=awk
 which nawk 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
-	cAWK=nawk
+    cAWK=nawk
 fi
 which gawk 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
-	cAWK=gawk
+    cAWK=gawk
 fi
 
 # ---------------------
@@ -159,26 +159,29 @@ pDirOnly="cat"
 
 # ---------------------
 while getopts :hl:td tArg; do
-	case $tArg in
-		h)	fUsage;;
-		l)	pLevel=$OPTARG
-			let pLevel=pLevel-1
-		;;
-		t)	pTab="";;
-		d)	pDirOnly="grep '/$'";;
-		:)	echo "Error: Value required for option: $OPTARG"
-			exit 1
-		;;
-		\?)	echo "Error: Unknown option: $OPTARG"
-			exit 1
-		;;
-	esac
+    case $tArg in
+        h) fUsage ;;
+        l)
+            pLevel=$OPTARG
+            let pLevel=pLevel-1
+            ;;
+        t) pTab="" ;;
+        d) pDirOnly="grep '/$'" ;;
+        :)
+            echo "Error: Value required for option: $OPTARG"
+            exit 1
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG"
+            exit 1
+            ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	echo "Error: Unknown option: $*"
-	exit 1
+    echo "Error: Unknown option: $*"
+    exit 1
 fi
 
 # ---------------------

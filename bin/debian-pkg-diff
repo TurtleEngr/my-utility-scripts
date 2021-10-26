@@ -2,8 +2,8 @@
 # debian-pkg-diff
 
 if [ $# -ne 2 ]; then
-	echo "Usage: debian-pkg-diff Host1 Host2"
-	exit 1
+    echo "Usage: debian-pkg-diff Host1 Host2"
+    exit 1
 fi
 
 # debian-pkgdiff host1.pkg3 host2.pkg3

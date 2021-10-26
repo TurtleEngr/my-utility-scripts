@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: svn-diff-branch.sh,v 1.3 2015/07/19 03:30:07 bruce Exp $
+# $Id: svn-diff-branch.sh,v 1.4 2021/10/26 19:26:12 bruce Exp $
 
 # ------------------------------
 # Config var
@@ -9,7 +9,7 @@ cTmpFile=/tmp/diff-report.tmp
 # ------------------------------
 # Get and validate options
 if [ $# -ne 2 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	$0 path1 path2
 
@@ -19,17 +19,17 @@ Example:
 	svn update -r 13471 2009-12-09
 	svn-diff-branch.sh trunk 2009-12-09
 EOF
-	exit 1;
+    exit 1
 fi
 
 pB1=$1
 pB2=$2
 
 for i in $pB1 $pB2; do
-	if [ ! -d $i ]; then
-		echo "Error: $i svn dir not found.";
-		exit 1;
-	fi
+    if [ ! -d $i ]; then
+        echo "Error: $i svn dir not found."
+        exit 1
+    fi
 done
 
 # ------------------------------
@@ -85,16 +85,16 @@ echo 'db' >>/tmp/svn-diff.tmp
 echo 'cache.var' >>/tmp/svn-diff.tmp
 
 # Diff, and clean the output, so that it can be used directly, in a 'cp' cmd
-diff -rqw --exclude-from=/tmp/svn-diff.tmp $pB1 $pB2 | \
-	egrep -v '~' | \
-	sed '
+diff -rqw --exclude-from=/tmp/svn-diff.tmp $pB1 $pB2 |
+    egrep -v '~' |
+    sed '
 		s/Files /diff /
 		s/ and /   /
 		s/ differ//
 		s/: /\//
-	' | \
-	sort -fi \
-	>$cTmpFile
+	' |
+    sort -fi \
+        >$cTmpFile
 cat $cTmpFile >>$cOutFile
 
 cat <<EOF >>$cOutFile
@@ -107,10 +107,10 @@ cat <<EOF >>$cOutFile
 EOF
 
 grep 'diff ' $cTmpFile | while read c1 f1 f2; do
-	tKeyWord=$(diff $f1 $f2 |  egrep -v '\$Author: bruce $Date: 2015/07/19 03:30:07 $HeadURL:|\$Id: svn-diff-branch.sh,v 1.3 2015/07/19 03:30:07 bruce Exp $LastChangedBy:|\$LastChangedDate:|\$LastChangedRevision:|\$Rev:|\$Revision|\$URL:|^---$|^[0-9,c]+$' | head -n 1)
-	if [ -n "$tKeyWord" ]; then
-		echo $c1 $f1 $f2
-	fi
+    tKeyWord=$(diff $f1 $f2 | egrep -v '\$Author: bruce $Date: 2021/10/26 19:26:12 $HeadURL:|\$Id: svn-diff-branch.sh,v 1.4 2021/10/26 19:26:12 bruce Exp $LastChangedBy:|\$LastChangedDate:|\$LastChangedRevision:|\$Rev:|\$Revision|\$URL:|^---$|^[0-9,c]+$' | head -n 1)
+    if [ -n "$tKeyWord" ]; then
+        echo $c1 $f1 $f2
+    fi
 done >>$cOutFile
 
 cat <<EOF >>$cOutFile

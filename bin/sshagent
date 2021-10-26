@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.58 2015/07/19 03:30:07 bruce Exp $
+# $Id: sshagent,v 1.59 2021/10/26 19:26:12 bruce Exp $
 
 # Note: Because this script is usually sourced, exits and functions
 # are not used.  So that is why the "if" logic is so messy, with
@@ -13,33 +13,36 @@ pHelp=0
 pKill=0
 pScript=0
 while getopts :'hksx' tArg; do
-	case $tArg in
-		a)	pAdd=1;;
-		h)	pHelp=1;;
-		k)	pKill=1
-			pScript=1
-		;;
-		s)	pScript=1;;
-		x)	pDebug=1;;
-		?)	gErr=2
-			echo "Error: Unknown option: -$OPTARG [$gErr]"
-		;;
-		*)	gErr=3
-			echo "Error: Unknown option: $tArg [$gErr]"
-		;;
-	esac
+    case $tArg in
+        a) pAdd=1 ;;
+        h) pHelp=1 ;;
+        k)
+            pKill=1
+            pScript=1
+            ;;
+        s) pScript=1 ;;
+        x) pDebug=1 ;;
+        ?)
+            gErr=2
+            echo "Error: Unknown option: -$OPTARG [$gErr]"
+            ;;
+        *)
+            gErr=3
+            echo "Error: Unknown option: $tArg [$gErr]"
+            ;;
+    esac
 done
 let OPTIND=OPTIND-1
 shift $OPTIND
 pParm=""
 if [ $# -ne 0 ]; then
-	pParm="$*"
+    pParm="$*"
 fi
 
 if [ $pHelp -ne 0 -o $gErr -ne 0 ]; then
-	if [ $pHelp -ne 0 ]; then
-		pod2text $0
-		cat <<'EOF' >/dev/null
+    if [ $pHelp -ne 0 ]; then
+        pod2text $0
+        cat <<'EOF' >/dev/null
 =pod
 
 =head1 NAME
@@ -169,69 +172,69 @@ sshagent only works well with bash.
 
 (c) Copyright 2009 by TrustedID
 
-$Revision: 1.58 $ GMT 
+$Revision: 1.59 $ GMT 
 
 =cut
 
 EOF
-	fi
+    fi
 else
 
-# ------------------------------------------
+    # ------------------------------------------
 
-export cgAgentOwner=${cgAgentOwner:-$USER}
-export cgEnvDir=/home/$cgAgentOwner/.ssh
-export cgEnvFile=$cgEnvDir/.sshagent.env
+    export cgAgentOwner=${cgAgentOwner:-$USER}
+    export cgEnvDir=/home/$cgAgentOwner/.ssh
+    export cgEnvFile=$cgEnvDir/.sshagent.env
 
-# Create cgEnvDir if it doesn't exist
-if [ ! -d $cgEnvdir ]; then
-	mkdir -p $cgEnvDir
-fi
-# Keep the permissions low
-chown -R $cgAgentOwner $cgEnvDir
-chmod u=rwx,go= $cgEnvDir
-chmod -R go= $cgEnvDir
+    # Create cgEnvDir if it doesn't exist
+    if [ ! -d $cgEnvdir ]; then
+        mkdir -p $cgEnvDir
+    fi
+    # Keep the permissions low
+    chown -R $cgAgentOwner $cgEnvDir
+    chmod u=rwx,go= $cgEnvDir
+    chmod -R go= $cgEnvDir
 
-# Kill all agents.
-if [ $pKill -ne 0 ]; then
-	# Setup so that all agents will be killed and none started
-	echo "Killing all of your ssh-agents"
-	killall ssh-agent 2>/dev/null
-	rm -f $cgEnvFile 2>/dev/null
-fi
+    # Kill all agents.
+    if [ $pKill -ne 0 ]; then
+        # Setup so that all agents will be killed and none started
+        echo "Killing all of your ssh-agents"
+        killall ssh-agent 2>/dev/null
+        rm -f $cgEnvFile 2>/dev/null
+    fi
 
-# Check to see if an agent is running
-tSARunning=0
-if [ -f $cgEnvFile ]; then
-	chmod u+rwx,go= $cgEnvFile
-	. $cgEnvFile >/dev/null
-	ps -ef | egrep "($cgAgentOwner|$(id -u $cgAgentOwner))" | grep -v grep | grep $SSH_AGENT_PID >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		tSARunning=1
-		ssh-add -l
-		if [ -n "$pParm" ]; then
-			ssh-add $pParm
-		fi
-		ssh-add -l
-	fi
-fi
-if [ $tSARunning -eq 0 ]; then
-	unset SSH_AUTH_SOCK SSH_AGENT_PID
-	if [ $pScript -eq 0 ]; then
-	    killall ssh-agent 2>/dev/null
-	    rm -f $cgEnvFile 2>/dev/null
-	fi
-fi
+    # Check to see if an agent is running
+    tSARunning=0
+    if [ -f $cgEnvFile ]; then
+        chmod u+rwx,go= $cgEnvFile
+        . $cgEnvFile >/dev/null
+        ps -ef | egrep "($cgAgentOwner|$(id -u $cgAgentOwner))" | grep -v grep | grep $SSH_AGENT_PID >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            tSARunning=1
+            ssh-add -l
+            if [ -n "$pParm" ]; then
+                ssh-add $pParm
+            fi
+            ssh-add -l
+        fi
+    fi
+    if [ $tSARunning -eq 0 ]; then
+        unset SSH_AUTH_SOCK SSH_AGENT_PID
+        if [ $pScript -eq 0 ]; then
+            killall ssh-agent 2>/dev/null
+            rm -f $cgEnvFile 2>/dev/null
+        fi
+    fi
 
-if [ $pScript -eq 0 -a $tSARunning -eq 0 ]; then
-	echo Starting a new ssh-agent:
-	ssh-agent >$cgEnvFile
-	chmod u+rwx,go= $cgEnvFile
-	. $cgEnvFile >/dev/null
-	echo ssh-add $pParm
-	ssh-add $pParm
-fi
+    if [ $pScript -eq 0 -a $tSARunning -eq 0 ]; then
+        echo Starting a new ssh-agent:
+        ssh-agent >$cgEnvFile
+        chmod u+rwx,go= $cgEnvFile
+        . $cgEnvFile >/dev/null
+        echo ssh-add $pParm
+        ssh-add $pParm
+    fi
 
-unset tSARunning pScript pParm cgEnvDir cgEnvFile
+    unset tSARunning pScript pParm cgEnvDir cgEnvFile
 
 fi
