@@ -1,9 +1,9 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.2 2021/09/15 18:32:25 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.3 2021/10/26 19:26:11 bruce Exp $
 
-function fUsage
+function fUsage()
 {
-	cat <<EOF
+    cat <<EOF
 Usage
 	obs-project
 
@@ -14,7 +14,7 @@ This script will set the obs config dir to "obs-config" in the current directory
 For how this is done, see:
 https://maex.me/2019/12/the-power-of-the-xdg-base-directory-specification/
 EOF
-	exit 1
+    exit 1
 }
 
 # --------------------
@@ -24,19 +24,19 @@ cConfigDir=$PWD/obs-config
 # --------------------
 # Validate
 if [ ! -d $cConfigDir ]; then
-	echo
-	echo "Error: missing directory: $cConfigDir"
-	fUsage
+    echo
+    echo "Error: missing directory: $cConfigDir"
+    fUsage
 fi
 
 if [ ! -d $cConfigDir/obs-studio ]; then
-	echo
-	echo "Warning: missing directory: $cConfigDir/obs-studio"
-	echo '(this is OK for the first run.)'
+    echo
+    echo "Warning: missing directory: $cConfigDir/obs-studio"
+    echo '(this is OK for the first run.)'
 fi
 
 if [ ! -d $cConfigDir/obs-studio/basic/scenes/CVS ]; then
-	cat <<EOF
+    cat <<EOF
 
 You should version these dirs and files:
 obs-config/obs-studio/global.ini
@@ -53,7 +53,7 @@ export XDG_CONFIG_HOME=$cConfigDir
 export XDG_CACHE_HOME=$HOME/.cache
 
 if [ -d $cConfigDir/obs-studio ] && [ ! -f $cConfigDir/obs-studio/.cvsignore ]; then
-	cat <<EOF >$cConfigDir/obs-studio/.cvsignore
+    cat <<EOF >$cConfigDir/obs-studio/.cvsignore
 logs
 plugin_config
 profiler_data

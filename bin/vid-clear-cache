@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-clear-cache,v 1.1 2020/11/03 21:16:07 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-clear-cache,v 1.2 2021/10/26 19:26:12 bruce Exp $
 
 # Doc:
 # https://maex.me/2019/12/the-power-of-the-xdg-base-directory-specification/
@@ -11,19 +11,19 @@ cCache=~/.cache/kdenlive
 cProxyDir=~/.cache/kdenlive/proxy
 
 if [ -n "$XDG_CACHE_HOME" ]; then
-	cCache=$XDG_CACHE_HOME
+    cCache=$XDG_CACHE_HOME
 fi
 if [ ! -d $cCache ]; then
-	cCache=~/.cache/kdenlive
+    cCache=~/.cache/kdenlive
 fi
 if [ ! -d $cCache ]; then
-	echo "Error: could not find $cCache"
-	exit 1
+    echo "Error: could not find $cCache"
+    exit 1
 fi
 
 # --------------------
 if [ $# -lt 2 -o ".$1" != '.-d' ]; then
-	cat <<EOF
+    cat <<EOF
 Usage
 	vid-clear-cache -d N [-p]
 
@@ -32,7 +32,7 @@ Usage
 
 Cache dir: $cCache
 EOF
-	exit 1
+    exit 1
 fi
 
 # --------------------
@@ -41,19 +41,19 @@ fi
 declare -i pDays
 pDays=$2
 if [ $pDays -lt 1 ]; then
-	echo "Error: -d must be >= 1"
-	exit 1
+    echo "Error: -d must be >= 1"
+    exit 1
 fi
 
 pProxy=0
 if [ $# -eq 3 ]; then
-	if [ ".$3" = '.-p' ]; then
-		pProxy=1
-		cCache=$cCache/proxy
-	else
-		echo "Error: $3 is invalid"
-		exit 1
-	fi
+    if [ ".$3" = '.-p' ]; then
+        pProxy=1
+        cCache=$cCache/proxy
+    else
+        echo "Error: $3 is invalid"
+        exit 1
+    fi
 fi
 
 cat <<EOF
@@ -64,7 +64,7 @@ EOF
 
 read -p "OK? "
 if [ "$REPLY" != "y" ]; then
-	exit 1
+    exit 1
 fi
 
 # --------------------

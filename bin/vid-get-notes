@@ -14,5 +14,5 @@ fi
 #awk '{ gsub("<[/]*documentnotes>",""); print $0 }'
 
 awk '/<property name="kdenlive:documentnotes">/,/<\/property>/ { print $0 }' |
-sed 's/&lt;/</g' | \
-awk '{ gsub("<[/]*property[^>]*>",""); print $0 }'
+    sed 's/&lt;/</g' |
+    awk '{ gsub("<[/]*property[^>]*>",""); print $0 }'

@@ -1,10 +1,10 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/cvs-commit-log.sh,v 1.1 2017/03/08 08:02:34 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/cvs-commit-log.sh,v 1.2 2021/10/26 19:26:09 bruce Exp $
 
 for i in $(find doc src -type f | egrep -v 'CVS|raw|proxy|thumbs|titles'); do
-        cvs log $i
-done | egrep 'Working file:|date: ' | \
-awk '
+    cvs log $i
+done | egrep 'Working file:|date: ' |
+    awk '
 	/Working / {
 		Name = $3
 		next

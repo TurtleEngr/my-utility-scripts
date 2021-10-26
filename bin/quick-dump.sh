@@ -1,11 +1,11 @@
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	quick-dump.sh DBNAME
 EOF
-	exit 1
+    exit 1
 fi
 
 tHost=$(hostname)

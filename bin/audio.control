@@ -18,4 +18,3 @@ pulseaudio --start
 or
 reboot
 EOF
-

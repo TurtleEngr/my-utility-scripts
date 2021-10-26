@@ -1,9 +1,9 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/proj2html.sh,v 1.1 2015/07/25 22:23:00 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/proj2html.sh,v 1.2 2021/10/26 19:26:11 bruce Exp $
 
 # -------------------
 if [ $# -ne 1 ]; then
-	cat <<EOF
+    cat <<EOF
 Usage:
 	proj2html.sh OPEN_PROJ_FILE.xml
 Input:
@@ -11,30 +11,30 @@ Input:
 Output:
 	OPEN_PROJ_FILE.csv
 EOF
-	exit 1
+    exit 1
 fi
 
 pFileIn=$1
 if [ ! -w "$pFileIn" ]; then
-	echo "Error: could not find, or write to file: $pFileIn"
-	exit 1
+    echo "Error: could not find, or write to file: $pFileIn"
+    exit 1
 fi
 
 tFileOut="${pFileIn%.xml}.html"
 touch $tFileOut
 if [ ! -w $tFileOut ]; then
-	echo "Error: could not write to file: $tFileOut"
-	exit 1
+    echo "Error: could not write to file: $tFileOut"
+    exit 1
 fi
 
 # -------------------
 # Define the location of the script
 export gCurDir=$PWD
 if [ $0 = ${0%/*} ]; then
-        gBin=$(whence $gName)
-        gBin=${gBin%/*}
+    gBin=$(whence $gName)
+    gBin=${gBin%/*}
 else
-        gBin=${0%/*}
+    gBin=${0%/*}
 fi
 cd $gBin
 export gBin=$PWD

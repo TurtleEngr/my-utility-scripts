@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/counter,v 1.6 2020/11/25 10:02:14 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/counter,v 1.7 2021/10/26 19:26:09 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -21,27 +21,27 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fCleanUp
+function fCleanUp()
 {
-	trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
-	# Called when script ends (see trap) to remove temporary files,
-	rm $gpTimerFile >/dev/null 2>&1
-	fLog notice "Removing $gpTimerFile" $LINENO 8801
-	exit $gErr
+    trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+    # Called when script ends (see trap) to remove temporary files,
+    rm $gpTimerFile >/dev/null 2>&1
+    fLog notice "Removing $gpTimerFile" $LINENO 8801
+    exit $gErr
 } # fCleanUp
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	if [ $# -ne 0 ]; then
-		pod2text $0
-	else
-		pod2usage $0
-	fi
-	gErr=1
-	fCleanUp
-	exit 1
-	cat <<EOF >/dev/null
+    if [ $# -ne 0 ]; then
+        pod2text $0
+    else
+        pod2usage $0
+    fi
+    gErr=1
+    fCleanUp
+    exit 1
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -206,75 +206,75 @@ date
 
 =head1 HISTORY
 
-$Revision: 1.6 $ GMT 
+$Revision: 1.7 $ GMT 
 
 =cut
 EOF
-	fCleanUp 1
-	exit 1
+    fCleanUp 1
+    exit 1
 } # fUsage
 
 # --------------------------------
-function fError
+function fError()
 {
-	# Usage:
-	#     fError pMsg [pLine [pErr]]
-	# Print the error message.  Then call fCleanUp, and exit
+    # Usage:
+    #     fError pMsg [pLine [pErr]]
+    # Print the error message.  Then call fCleanUp, and exit
 
-	local pMsg="$1"
-	local pLine=$2
-	local pErr=$3
+    local pMsg="$1"
+    local pLine=$2
+    local pErr=$3
 
-	fLog crit "$pMsg" $pLine $pErr
-	fUsage
+    fLog crit "$pMsg" $pLine $pErr
+    fUsage
 } # fError
 
 # ------------------
-function fLog
+function fLog()
 {
-	# Usage:
-	#     gErr=8801		# optional
-	#     fLog notice "Just testing" $LINENO 8
-	# pLevel - emerg alert crit err warning notice info debug
+    # Usage:
+    #     gErr=8801		# optional
+    #     fLog notice "Just testing" $LINENO 8
+    # pLevel - emerg alert crit err warning notice info debug
 
-	local pLevel=$1
-	local pMsg="$2"
-	# optional
-	local pLine=$3
-	# optional
-	local pErr=$4
+    local pLevel=$1
+    local pMsg="$2"
+    # optional
+    local pLine=$3
+    # optional
+    local pErr=$4
 
-	local tVerbose=""
-	local tErr=""
-	if [ -n "$pErr" ]; then
-		tErr="$pErr"
-	fi
-	if [ $gErr -ne 0 ]; then
-		tErr="$tErr,$gErr"
-	fi
-	if [ -n "$tErr" ]; then
-		tErr="($tErr)"
-	fi
+    local tVerbose=""
+    local tErr=""
+    if [ -n "$pErr" ]; then
+        tErr="$pErr"
+    fi
+    if [ $gErr -ne 0 ]; then
+        tErr="$tErr,$gErr"
+    fi
+    if [ -n "$tErr" ]; then
+        tErr="($tErr)"
+    fi
 
-	local tLine=""
-	if [ -n "$pLine" ]; then
-		tLine="[$pLine]"
-	fi
+    local tLine=""
+    if [ -n "$pLine" ]; then
+        tLine="[$pLine]"
+    fi
 
-	if [ $gpLog -eq 0 ]; then
-		echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
-	else
-		if [ -n "$gpVerbose" ]; then
-			tVerbose="-s"
-		fi
-		logger $tVerbose -i -t $cName -p user.$pLevel "$pLevel: $pMsg $tLine$tErr"
-	fi
+    if [ $gpLog -eq 0 ]; then
+        echo "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+    else
+        if [ -n "$gpVerbose" ]; then
+            tVerbose="-s"
+        fi
+        logger $tVerbose -i -t $cName -p user.$pLevel "$pLevel: $pMsg $tLine$tErr"
+    fi
 } # fLog
 
 # ==========================================================
 # Main
-export	cBin cCurdir gErr gpDebug cName \
-	gNoExit cVer gpVerbose PWD
+export cBin cCurdir gErr gpDebug cName \
+    gNoExit cVer gpVerbose PWD
 
 # -------------------
 # Set name of this script
@@ -290,7 +290,7 @@ gErr=0
 
 # -------------------
 # Define the version number for this script
-cVer='$Revision: 1.6 $'
+cVer='$Revision: 1.7 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
@@ -301,7 +301,7 @@ export cTag=systag
 # -------------------
 # Get Options Section
 if [ $# -eq 0 ]; then
-	fError "Missing options." $LINENO 8801
+    fError "Missing options." $LINENO 8801
 fi
 
 export gpTimerFile="/tmp/counter.tmp"
@@ -315,74 +315,74 @@ export gpInterval=1
 export gpUpDown=d
 export gpPause=0
 while getopts :m:s:t:T:udpi:f:S:E:h tArg; do
-	case $tArg in
-		m)	gpMin=$OPTARG;;
-		s)	gpSec=$OPTARG;;
-		t)	gpTime=$OPTARG;;
-		T)	gpTimeStart=$OPTARG;;
-		i)	gpInterval=$OPTARG;;
-		u)	gpUpDown="u";;
-		d)	gpUpDown="d";;
-		p)	gpPause=1;;
-		f)	gpTimerFile=$OPTARG;;
-		S)	gpStart=$OPTARG;;
-		E)	gpEnd=$OPTARG;;
-		h)	fUsage long;;
-		:)	fError "Value required for option: $OPTARG" $LINENO 8802;;
-		\?)	fError "Unknown option: $OPTARG" $LINENO 8803;;
-	esac
+    case $tArg in
+        m) gpMin=$OPTARG ;;
+        s) gpSec=$OPTARG ;;
+        t) gpTime=$OPTARG ;;
+        T) gpTimeStart=$OPTARG ;;
+        i) gpInterval=$OPTARG ;;
+        u) gpUpDown="u" ;;
+        d) gpUpDown="d" ;;
+        p) gpPause=1 ;;
+        f) gpTimerFile=$OPTARG ;;
+        S) gpStart=$OPTARG ;;
+        E) gpEnd=$OPTARG ;;
+        h) fUsage long ;;
+        :) fError "Value required for option: $OPTARG" $LINENO 8802 ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO 8803 ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	fError "Unexpeted argument: $*" $LINENO 8804
+    fError "Unexpeted argument: $*" $LINENO 8804
 fi
 
 # -------------------
 # Validate Options Section
 
 if [ $gpInterval -le 0 ]; then
-	fError "Invalid -i: $gpInterval" $LINENO 8805
+    fError "Invalid -i: $gpInterval" $LINENO 8805
 fi
 
 if [ -f $gpTimerFile ]; then
-	fLog notice "Another counter using $gpTimerFile is running. Waiting for it to die." $LINENO 8806
-	rm -f $gpTimerFile
-	sleep 3
-	fLog notice "Continuing..." $LINENO 8807
+    fLog notice "Another counter using $gpTimerFile is running. Waiting for it to die." $LINENO 8806
+    rm -f $gpTimerFile
+    sleep 3
+    fLog notice "Continuing..." $LINENO 8807
 fi
 
 if [ -n "$gpTimeStart" -a -z "$gpTime" ]; then
-	fError "Invalid: -T option requires -t option." $LINENO 8808
+    fError "Invalid: -T option requires -t option." $LINENO 8808
 fi
 
 if [ -n "$gpTime" ]; then
-	if [ -n "$gpTimeStart" ]; then
-		tTimeBegin=$(date --date="$gpTimeStart" +'%s')
-		date --date="$gpTimeStart"
-		if [ -z "$tTimeBegin" ]; then
-			fError "Invalid -T option: $gpTimeStart" $LINENO 8809
-		fi
-	else
-		tTimeBegin=$(date +'%s')
-	fi
-	
-	tTimeEnd=$(date --date="$gpTime" +'%s')
-	date --date="$gpTime"
-	if [ -z "$tTimeEnd" ]; then
-		fError "Invalid -t option: $gpTime" $LINENO 8810
-	fi
+    if [ -n "$gpTimeStart" ]; then
+        tTimeBegin=$(date --date="$gpTimeStart" +'%s')
+        date --date="$gpTimeStart"
+        if [ -z "$tTimeBegin" ]; then
+            fError "Invalid -T option: $gpTimeStart" $LINENO 8809
+        fi
+    else
+        tTimeBegin=$(date +'%s')
+    fi
 
-	if [ $tTimeBegin -ge $tTimeEnd ]; then
-		fError "Invalid: -t time must be greater than -T time." $LINENO 8811
-	fi
+    tTimeEnd=$(date --date="$gpTime" +'%s')
+    date --date="$gpTime"
+    if [ -z "$tTimeEnd" ]; then
+        fError "Invalid -t option: $gpTime" $LINENO 8810
+    fi
 
-	gpMin=0
-	let gpSec=tTimeEnd-tTimeBegin
-	
-	if [ -z "$gpSec" ]; then
-		fError "Invalid -t or -T option" $LINENO 8812
-	fi
+    if [ $tTimeBegin -ge $tTimeEnd ]; then
+        fError "Invalid: -t time must be greater than -T time." $LINENO 8811
+    fi
+
+    gpMin=0
+    let gpSec=tTimeEnd-tTimeBegin
+
+    if [ -z "$gpSec" ]; then
+        fError "Invalid -t or -T option" $LINENO 8812
+    fi
 fi
 
 # -------------------
@@ -395,30 +395,30 @@ touch $gpTimerFile
 export tCounter
 
 if [ "$gpUpDown" = "d" ]; then
-	let tCounter=gpMin*60+gpSec
-	tEndCount=0
-	if [ -n "$gpStart" ]; then
-		echo -n $gpStart >$gpTimerFile
-		echo "$gpStart"
-		sleep 1
-	else
-		printf "%i:%02i" $gpMin $gpSec >$gpTimerFile
-		printf "%i:%02i\n" $gpMin $gpSec
-	fi
+    let tCounter=gpMin*60+gpSec
+    tEndCount=0
+    if [ -n "$gpStart" ]; then
+        echo -n $gpStart >$gpTimerFile
+        echo "$gpStart"
+        sleep 1
+    else
+        printf "%i:%02i" $gpMin $gpSec >$gpTimerFile
+        printf "%i:%02i\n" $gpMin $gpSec
+    fi
 else
-	tCounter=0
-	let tEndCount=gpMin*60+gpSec
-	if [ -n "$gpStart" ]; then
-		echo -n $gpStart >$gpTimerFile
-		echo "$gpStart"
-	else
-		printf "%i:%02i" 0 0 >$gpTimerFile
-		echo printf "%i:%02i\n" 0 0
-	fi
+    tCounter=0
+    let tEndCount=gpMin*60+gpSec
+    if [ -n "$gpStart" ]; then
+        echo -n $gpStart >$gpTimerFile
+        echo "$gpStart"
+    else
+        printf "%i:%02i" 0 0 >$gpTimerFile
+        echo printf "%i:%02i\n" 0 0
+    fi
 fi
 
 if [ $gpPause -ne 0 ]; then
-	read -p "Press return to start"
+    read -p "Press return to start"
 fi
 
 export m s
@@ -427,38 +427,38 @@ let s=tCounter-60*m
 fLog notice "$(printf "Starting counter for %i:%02i to %s\n" $m $s $gpTimerFile)" $LINENO 8814
 
 while [ $tCounter -ne $tEndCount ]; do
-	if [ ! -f $gpTimerFile ]; then
-		fLog notice "Another counter using $gpTimerFile started. So exiting." $LINENO 8815
-		fCleanUp
-	fi
-	let m=tCounter/60
-	let s=tCounter-60*m
-	printf "%i:%02i" $m $s >$gpTimerFile
-	printf "%i:%02i\n" $m $s
-	if [ "$gpUpDown" = "d" ]; then
-		let tCounter=tCounter-gpInterval
-	else
-		let tCounter=tCounter+gpInterval
-	fi
-	sleep $gpInterval
+    if [ ! -f $gpTimerFile ]; then
+        fLog notice "Another counter using $gpTimerFile started. So exiting." $LINENO 8815
+        fCleanUp
+    fi
+    let m=tCounter/60
+    let s=tCounter-60*m
+    printf "%i:%02i" $m $s >$gpTimerFile
+    printf "%i:%02i\n" $m $s
+    if [ "$gpUpDown" = "d" ]; then
+        let tCounter=tCounter-gpInterval
+    else
+        let tCounter=tCounter+gpInterval
+    fi
+    sleep $gpInterval
 done
 sleep 1
 if [ "$gpUpDown" = "d" ]; then
-	printf "0:00" >$gpTimerFile
-	printf "0:00\n"
+    printf "0:00" >$gpTimerFile
+    printf "0:00\n"
 else
-	printf "%i:%02i" $gpMin $gpSec >$gpTimerFile
-	printf "%i:%02i\n" $gpMin $gpSec
+    printf "%i:%02i" $gpMin $gpSec >$gpTimerFile
+    printf "%i:%02i\n" $gpMin $gpSec
 fi
-	sleep 1
+sleep 1
 
 if [ -n "$gpEnd" ]; then
-	echo -n $gpEnd >$gpTimerFile
-	echo "$gpEnd"
-	sleep 1
+    echo -n $gpEnd >$gpTimerFile
+    echo "$gpEnd"
+    sleep 1
 fi
 if [ $gpPause -ne 0 ]; then
-	read -t 600 -p "Press return to end"
+    read -t 600 -p "Press return to end"
 fi
 
 # -------------------

@@ -4,8 +4,8 @@
 # -T: | tr -d '|' | awk '{gsub("   ","\t"); print $0}'
 
 if [ $# -ne 0 ]; then
-   if [ ".$1" = ".-h" ]; then
-      cat <<EOF
+    if [ ".$1" = ".-h" ]; then
+        cat <<EOF
 Usage:
 	lsg [-d] [-L N] [-C] [-T] [dir...]
 -d - dir only

@@ -1,15 +1,15 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/s3-put-get,v 1.1 2015/07/25 22:23:00 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/s3-put-get,v 1.2 2021/10/26 19:26:12 bruce Exp $
 
 # Usage:
-#     
+#
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	# Print usage help for this script, using pod2text.
-	pod2text $0
-	exit 1
-	cat <<EOF >/dev/null
+    # Print usage help for this script, using pod2text.
+    pod2text $0
+    exit 1
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -94,26 +94,27 @@ pPath=""
 pDirection=""
 gDebug=0
 while getopts :hgpb:c:d:x tArg; do
-	case $tArg in
-		h)	fUsage
-			exit 1
-		;;
-		g)	pDirection="get";;
-		p)	pDirection="put";;
-		b)	pBucket=$OPTARG;;
-		c)	pConfig=$OPTARG;;
-		d)	pPath=$OPTARG;;
+    case $tArg in
+        h)
+            fUsage
+            exit 1
+            ;;
+        g) pDirection="get" ;;
+        p) pDirection="put" ;;
+        b) pBucket=$OPTARG ;;
+        c) pConfig=$OPTARG ;;
+        d) pPath=$OPTARG ;;
 
-		x)	gDebug=1;;
-		+x)	gDebug=0;;
-		:)	echo "Error: Value required for option: $OPTARG ($LINENO)";;
-		\?)	echo "Error Unknown option: $OPTARG ($LINENO)";;
-	esac
+        x) gDebug=1 ;;
+        +x) gDebug=0 ;;
+        :) echo "Error: Value required for option: $OPTARG ($LINENO)" ;;
+        \?) echo "Error Unknown option: $OPTARG ($LINENO)" ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	pFileList="$*"
+    pFileList="$*"
 fi
 
 # ----------------------
@@ -158,8 +159,8 @@ fi
 if [ "$pDirection" = "put" ]; then
     for i in $pFileList; do
         if [ ! -r $i ]; then
-  	    echo "Could not read file: $i"
-	    exit 1
+            echo "Could not read file: $i"
+            exit 1
         fi
     done
 fi

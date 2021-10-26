@@ -1,8 +1,8 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pic-gen.sh,v 1.1 2019/12/14 22:08:22 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/pic-gen.sh,v 1.2 2021/10/26 19:26:11 bruce Exp $
 
 if [ $# -ne 3 ]; then
-   cat <<EOF
+    cat <<EOF
 Usage:
 	export cInc=10		# Optional. 1 is default.
 	pic-shuffle.sh SuffleFile GenN SetSize
@@ -18,7 +18,7 @@ Execute ./pic-shuffle-raw1-gen1.txt to generate:
 See also:
 	pic-shuffle.sh
 EOF
-	exit 1
+    exit 1
 fi
 
 # Get options
@@ -34,8 +34,8 @@ tSetDir="gen$pGen/set"
 
 # Validate
 if [ ! -f $pShuffleFile ]; then
-   echo "Error: Missing $pShuffleFile"
-   exit 1
+    echo "Error: Missing $pShuffleFile"
+    exit 1
 fi
 
 s=1
@@ -47,9 +47,9 @@ echo mkdir -p ${tSetDir}${s} >>$tGenFile
 cat $pShuffleFile | while read tPic; do
     let st=p%$pSize
     if [ $st -eq 0 ]; then
-       let ++s
-       echo mkdir -p ${tSetDir}${s} >>$tGenFile
-       t=0
+        let ++s
+        echo mkdir -p ${tSetDir}${s} >>$tGenFile
+        t=0
     fi
     let t+=cInc
     tOrder=$(printf "%04d" $t)

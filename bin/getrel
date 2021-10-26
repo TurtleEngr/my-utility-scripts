@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage
+function fUsage()
 {
-	if [ $# -ne 0 -a -x /usr/bin/pod2usage ]; then
-		pod2usage $0
-		exit 1
-	elif [ /usr/bin/pod2text ]; then
-		pod2text $0
-		exit 1
-	fi
-	cat <<EOF >/dev/null
+    if [ $# -ne 0 -a -x /usr/bin/pod2usage ]; then
+        pod2usage $0
+        exit 1
+    elif [ /usr/bin/pod2text ]; then
+        pod2text $0
+        exit 1
+    fi
+    cat <<EOF >/dev/null
 =pod
 
 =head1 getrel
@@ -173,11 +173,11 @@ Bruce Rafnel
 =cut
 
 EOF
-	exit 1
+    exit 1
 } # fUsage
 
 # --------------------------------
-function fDefaultConfig
+function fDefaultConfig()
 {
     export cRemoteHome=/rel
     export cRemoteSym=/rel
@@ -197,7 +197,7 @@ function fDefaultConfig
 } # fDefaultConfig
 
 # --------------------------------
-function fSetVar
+function fSetVar()
 {
     local tVar=$1
     local tConf=$2
@@ -210,11 +210,11 @@ function fSetVar
 } # fSetVar
 
 # --------------------------------
-function fGetConfig
+function fGetConfig()
 {
     if [ -r $GIT_CONFIG ]; then
-	fSetVar cRemoteHome remote.${pRel}.home
-	fSetVar cRemoteSym remote.${pRel}.sym
+        fSetVar cRemoteHome remote.${pRel}.home
+        fSetVar cRemoteSym remote.${pRel}.sym
         fSetVar cRemoteHostWan remote.${pRel}.host-wan
         fSetVar cRemoteHostLan remote.${pRel}.host-lan
         fSetVar cRemoteUser remote.${pRel}.user
@@ -232,7 +232,7 @@ function fGetConfig
 } # fGetConfig
 
 # --------------------------------
-function fSaveConfig
+function fSaveConfig()
 {
     if [ ! -w $GIT_CONFIG ]; then
         echo "Error: can not write to: $GIT_CONFIG"
@@ -260,7 +260,7 @@ function fSaveConfig
 } # fSaveConfig
 
 # --------------------------------
-function fStatus
+function fStatus()
 {
     echo "Config file: $GIT_CONFIG values:"
     git config --list | cat -n
@@ -301,39 +301,46 @@ export pStatus=0
 export pUpdate=0
 while getopts :r:gudsbflLhx tArg; do
     case $tArg in
-	r)      pRel="$OPTARG"
-	;;
-	g)      pGet=1
-		pUpdate=0
-		pDir=0
-	;;
-	u)      pUpdate=1
-		pGet=0
-		pDir=0
-	;;
-	d)      pDir=1
-		pGet=0
-		pUpdate=0
-	;;
-	s)	pStatus=1;;
-	b)	pBatch=1;;
-	f)	pForce=1;;
-	+f)	pForce=0;;
-	l)	pLocal=1;;
-	+l)	pLocal=0;;
-	L)	getrel_onlan=1;;
-	+L)	getrel_onlan=0;;
-        h)      fUsage
-		exit 1
-	;;
-	x)	gDebug=1;;
-	+x)	gDebug=0;;
-	:)	echo "Error: Value required for option: $OPTARG"
-		exit 1
-	;;
-	\?)	echo "Error: Unknown option: $OPTARG"
-		exit 1
-	;;
+        r)
+            pRel="$OPTARG"
+            ;;
+        g)
+            pGet=1
+            pUpdate=0
+            pDir=0
+            ;;
+        u)
+            pUpdate=1
+            pGet=0
+            pDir=0
+            ;;
+        d)
+            pDir=1
+            pGet=0
+            pUpdate=0
+            ;;
+        s) pStatus=1 ;;
+        b) pBatch=1 ;;
+        f) pForce=1 ;;
+        +f) pForce=0 ;;
+        l) pLocal=1 ;;
+        +l) pLocal=0 ;;
+        L) getrel_onlan=1 ;;
+        +L) getrel_onlan=0 ;;
+        h)
+            fUsage
+            exit 1
+            ;;
+        x) gDebug=1 ;;
+        +x) gDebug=0 ;;
+        :)
+            echo "Error: Value required for option: $OPTARG"
+            exit 1
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG"
+            exit 1
+            ;;
     esac
 done
 let tOptInd=OPTIND-1

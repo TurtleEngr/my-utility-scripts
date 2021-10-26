@@ -2,13 +2,13 @@
 # Translate all file/dir names with special char to use '_'
 # Valid file/dir names [_-.a-zA-Z0-9]
 
-function fRename
+function fRename()
 {
-	local pOld="$*"
-	local tNew
-	local tDup
+    local pOld="$*"
+    local tNew
+    local tDup
 
-	tNew=$(echo $pOld | perl -ne '
+    tNew=$(echo $pOld | perl -ne '
 		chomp;
 		s/:/-/g;
 		tr/-_.a-zA-Z0-9/_/cs;
@@ -31,24 +31,24 @@ function fRename
 		s/^-+//;
 		print $_;
 	')
-	
-	if [ "$pOld" != "$tNew" ]; then
-		tDup=''
-		if [ -e $tNew ]; then
-			tDup='\t"y"'
-			echo "Collision: $tNew"
-		fi
-		echo mv "$pOld" $tNew
-		mv --backup=numbered "$pOld" $tNew 2>&1
-		echo -e "\"$PWD\"\t\"${pOld}\"\t\"${tNew}\"${tDup}" >>$gLog
-		touch $tNew
-	fi
+
+    if [ "$pOld" != "$tNew" ]; then
+        tDup=''
+        if [ -e $tNew ]; then
+            tDup='\t"y"'
+            echo "Collision: $tNew"
+        fi
+        echo mv "$pOld" $tNew
+        mv --backup=numbered "$pOld" $tNew 2>&1
+        echo -e "\"$PWD\"\t\"${pOld}\"\t\"${tNew}\"${tDup}" >>$gLog
+        touch $tNew
+    fi
 } # fRename
 
 # ========================
 pgFileOnly=0
 if [ $# -eq 0 -o ".$1" = ".-h" ]; then
-	cat <<EOF
+    cat <<EOF
 Translate all file/dir names with special char to use '_'
 Valid file/dir names [_-.a-zA-Z0-9]
 
@@ -61,74 +61,74 @@ Translate all files and dirs in current dir on down:
 Translate only the one file listed:
  	trans-sp -f FILENAME
 EOF
-	exit
+    exit
 fi
 
 export gFirst=1
 if [ ".$1" = ".-c" ]; then
-	pgCurrentOnly=1
+    pgCurrentOnly=1
 elif [ ".$1" = ".-a" ]; then
-	pgCurrentOnly=0
+    pgCurrentOnly=0
 elif [ ".$1" = ".-A" ]; then
-	pgCurrentOnly=0
-	gFirst=0
+    pgCurrentOnly=0
+    gFirst=0
 elif [ ".$1" = ".-f" ]; then
-	shift
-	pgFile="$*"
-	if [ -f "$pgFile" ]; then
-		pgFileOnly=1
-	else
-		echo "Error: could not find: $pgFile"
-		exit
-	fi
+    shift
+    pgFile="$*"
+    if [ -f "$pgFile" ]; then
+        pgFileOnly=1
+    else
+        echo "Error: could not find: $pgFile"
+        exit
+    fi
 else
-	echo "Error: Unknown option: $*"
-	exit
+    echo "Error: Unknown option: $*"
+    exit
 fi
 
 export gLog
 if [ $gFirst -eq 1 ]; then
-	export gLog=$PWD/trans-sp_LOG.csv
-	date '+%F %H:%M:%S' >>$gLog
-	echo -e '"Directory"\t"OldName"\t"NewName"\t"Collision"' >>$gLog
+    export gLog=$PWD/trans-sp_LOG.csv
+    date '+%F %H:%M:%S' >>$gLog
+    echo -e '"Directory"\t"OldName"\t"NewName"\t"Collision"' >>$gLog
 fi
 
 if [ $pgFileOnly -ne 0 ]; then
-	fRename "$pgFile"
-	exit
+    fRename "$pgFile"
+    exit
 fi
 
 for f in *; do
-	case "$f" in
-		*~)	continue;;
-		*.bak)	continue;;
-		*.tmp)	continue;;
-		*.sav)	continue;;
-		CVS)	continue;;
-		.svn)	continue;;
-		.git)	continue;;
-		.ssh)	continue;;
-		.gnupg)	continue;;
-	esac
-	fRename "$f"
+    case "$f" in
+        *~) continue ;;
+        *.bak) continue ;;
+        *.tmp) continue ;;
+        *.sav) continue ;;
+        CVS) continue ;;
+        .svn) continue ;;
+        .git) continue ;;
+        .ssh) continue ;;
+        .gnupg) continue ;;
+    esac
+    fRename "$f"
 done
 
 if [ $pgCurrentOnly -ne 0 ]; then
-	exit
+    exit
 fi
 
 for d in $(find * -prune -type d); do
-	case "$d" in
-		CVS)	continue;;
-		.svn)	continue;;
-		.git)	continue;;
-		.ssh)	continue;;
-		.gnupg)	continue;;
-	esac
-	cd "$d" &>/dev/null
-	trans-sp -A
+    case "$d" in
+        CVS) continue ;;
+        .svn) continue ;;
+        .git) continue ;;
+        .ssh) continue ;;
+        .gnupg) continue ;;
+    esac
+    cd "$d" &>/dev/null
+    trans-sp -A
 done
 
 if [ $gFirst -eq 1 ]; then
-	echo "See: ${gLog##*/}"
+    echo "See: ${gLog##*/}"
 fi

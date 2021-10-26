@@ -10,40 +10,44 @@ pKill=0
 pScript=0
 
 if [ $# -eq 0 ]; then
-	pHelp=1
+    pHelp=1
 fi
 
 while getopts :'haksx' tArg; do
-	case $tArg in
-		a)	pAdd=1;;
-		h)	pHelp=1;;
-		k)	pKill=1
-			pAdd=0
-			pScript=0
-		;;
-		s)	pScript=1
-			pAdd=0
-		;;
-		x)	pDebug=1;;
-		?)	echo "Error: Unknown option: -$OPTARG [1]"
-			pExit=1
-		;;
-		*)	echo "Error: Unknown option: $tArg [2]"
-			pExit=1
-		;;
-	esac
+    case $tArg in
+        a) pAdd=1 ;;
+        h) pHelp=1 ;;
+        k)
+            pKill=1
+            pAdd=0
+            pScript=0
+            ;;
+        s)
+            pScript=1
+            pAdd=0
+            ;;
+        x) pDebug=1 ;;
+        ?)
+            echo "Error: Unknown option: -$OPTARG [1]"
+            pExit=1
+            ;;
+        *)
+            echo "Error: Unknown option: $tArg [2]"
+            pExit=1
+            ;;
+    esac
 done
 let OPTIND=OPTIND-1
 shift $OPTIND
 pParm=""
 if [ $# -ne 0 ]; then
-	pParm="$*"
+    pParm="$*"
 fi
 
 if [ $pHelp -eq 1 -o $pExit -eq 1 ]; then
-	if [ $pHelp -ne 0 ]; then
-		pod2text $0
-		cat <<'EOF' >/dev/null
+    if [ $pHelp -ne 0 ]; then
+        pod2text $0
+        cat <<'EOF' >/dev/null
 =pod
 
 =head1 NAME
@@ -176,105 +180,105 @@ gpgagent only works well with bash.
 
 (c) Copyright 2009 by TrustedID
 
-$Revision: 1.2 $ GMT 
+$Revision: 1.3 $ GMT 
 
 =cut
 EOF
-	fi
+    fi
 else
-	# ------------------------------------------
-	export cgAgentOwner=${cgAgentOwner:-$LOGNAME}
-	export cgEnvDir=/home/$cgAgentOwner/.gnupg
-	export cgEnvFile=$cgEnvDir/.gpg-agent-info
-	export GPG_TTY=$(tty)
+    # ------------------------------------------
+    export cgAgentOwner=${cgAgentOwner:-$LOGNAME}
+    export cgEnvDir=/home/$cgAgentOwner/.gnupg
+    export cgEnvFile=$cgEnvDir/.gpg-agent-info
+    export GPG_TTY=$(tty)
 
-	if [ ! -d $cgEnvDir ]; then
-		echo "Error: $cgEnvDir does not exist [3]"
-		pExit=1
-	fi
+    if [ ! -d $cgEnvDir ]; then
+        echo "Error: $cgEnvDir does not exist [3]"
+        pExit=1
+    fi
 
-	if [ $pExit -eq 0 ]; then
-		tPerm=$('ls' -ld $cgEnvDir/ | awk '{print $1}')
-	fi
-	if [ "$tPerm" != 'drwx------' -a $pExit -eq 0 ]; then
-		echo "Error: $cgEnvDir can not be group or other readable [4]"
-		pExit=1
-	fi
+    if [ $pExit -eq 0 ]; then
+        tPerm=$('ls' -ld $cgEnvDir/ | awk '{print $1}')
+    fi
+    if [ "$tPerm" != 'drwx------' -a $pExit -eq 0 ]; then
+        echo "Error: $cgEnvDir can not be group or other readable [4]"
+        pExit=1
+    fi
 
-	if [ $pScript -eq 1 -o $pAdd -eq 1 ]; then
-		if [ $pExit -eq 0 ]; then 
-			if [ ! -r $cgEnvFile ]; then
-				echo "Error: Can not read file $cgEnvFile [5]"
-				exit
-			fi
-			eval $(cat $cgEnvFile)
-			eval $(cut -d= -f 1 < $cgEnvFile | xargs echo export)
-		fi
-	fi
-	if [ $pScript -eq 1 ]; then
-		ssh-add -l
-		pExit=1
-	fi
+    if [ $pScript -eq 1 -o $pAdd -eq 1 ]; then
+        if [ $pExit -eq 0 ]; then
+            if [ ! -r $cgEnvFile ]; then
+                echo "Error: Can not read file $cgEnvFile [5]"
+                exit
+            fi
+            eval $(cat $cgEnvFile)
+            eval $(cut -d= -f 1 <$cgEnvFile | xargs echo export)
+        fi
+    fi
+    if [ $pScript -eq 1 ]; then
+        ssh-add -l
+        pExit=1
+    fi
 
-	# Kill all agents
-	if [ $pKill -eq 1 -o $pAdd -eq 0 ]; then
-		if [ $pExit -eq 0 ]; then 
-			tPID=$(ps -ef | grep gpg-agent | grep -v grep  | grep $cgAgentOwner | awk '{print $2}')
-			if [ -n "$tPID" ]; then
-				kill -9 $tPID
-			fi
-			rm -f $cgEnvFile 2>/dev/null
-		fi
-	fi
-	if [ $pKill -ne 0 -a $pExit -eq 0 ]; then
-		echo "Killed all of your ssh-agents"
-		pExit=1
-	fi
+    # Kill all agents
+    if [ $pKill -eq 1 -o $pAdd -eq 0 ]; then
+        if [ $pExit -eq 0 ]; then
+            tPID=$(ps -ef | grep gpg-agent | grep -v grep | grep $cgAgentOwner | awk '{print $2}')
+            if [ -n "$tPID" ]; then
+                kill -9 $tPID
+            fi
+            rm -f $cgEnvFile 2>/dev/null
+        fi
+    fi
+    if [ $pKill -ne 0 -a $pExit -eq 0 ]; then
+        echo "Killed all of your ssh-agents"
+        pExit=1
+    fi
 
-	if [ $pAdd -eq 0 -a $pExit -eq 0 ]; then
-		export tYear=31536000
-		export tMonth=2678400
+    if [ $pAdd -eq 0 -a $pExit -eq 0 ]; then
+        export tYear=31536000
+        export tMonth=2678400
 
-		gpg-agent --daemon --enable-ssh-support \
-			--default-cache-ttl=$tYear  \
-			--default-cache-ttl-ssh=$tYear \
-			--max-cache-ttl=$tYear \
-			--max-cache-ttl-ssh=$tYear \
-			--write-env-file=$cgEnvFile
-		if [ ! -r $cgEnvFile ]; then
-			echo "Error: Can not read file $cgEnvFile [6]"
-			pExit=0
-		else
-			chmod go= $cgEnvFile
-			eval $(cat $cgEnvFile)
-			eval $(cut -d= -f 1 < $cgEnvFile | xargs echo export)
-		fi
-	fi
+        gpg-agent --daemon --enable-ssh-support \
+            --default-cache-ttl=$tYear \
+            --default-cache-ttl-ssh=$tYear \
+            --max-cache-ttl=$tYear \
+            --max-cache-ttl-ssh=$tYear \
+            --write-env-file=$cgEnvFile
+        if [ ! -r $cgEnvFile ]; then
+            echo "Error: Can not read file $cgEnvFile [6]"
+            pExit=0
+        else
+            chmod go= $cgEnvFile
+            eval $(cat $cgEnvFile)
+            eval $(cut -d= -f 1 <$cgEnvFile | xargs echo export)
+        fi
+    fi
 
-	if [ $pExit -eq 0 ]; then
-		for i in $pParm; do
-			if [ ${i#*@} = $i ]; then
-				if [ ! -r $i ]; then
-					echo "Error: could not read key: $i [7]"
-				fi
-				echo "Add ssh key: $i (enter password and yes to all prompts)"
-				ssh-add $i
-				ssh $(hostname) ls /tmp
-			else
-				echo "Add gpg key: $i (enter password to all prompts)"
-				rm -f /tmp/foo.tmp /tmp/foo.tmp.asc 2>/dev/null
-				echo test >/tmp/foo.tmp
-				gpg -a -r $i --encrypt /tmp/foo.tmp
-				rm -f /tmp/foo.tmp 2>/dev/null
-				gpg --use-agent /tmp/foo.tmp.asc
-				rm -f /tmp/foo.tmp 2>/dev/null
-				gpg --use-agent /tmp/foo.tmp.asc
-				rm -f /tmp/foo.tmp /tmp/foo.tmp.asc 2>/dev/null
-			fi
-		done
-		ssh-add -l
-	fi
+    if [ $pExit -eq 0 ]; then
+        for i in $pParm; do
+            if [ ${i#*@} = $i ]; then
+                if [ ! -r $i ]; then
+                    echo "Error: could not read key: $i [7]"
+                fi
+                echo "Add ssh key: $i (enter password and yes to all prompts)"
+                ssh-add $i
+                ssh $(hostname) ls /tmp
+            else
+                echo "Add gpg key: $i (enter password to all prompts)"
+                rm -f /tmp/foo.tmp /tmp/foo.tmp.asc 2>/dev/null
+                echo test >/tmp/foo.tmp
+                gpg -a -r $i --encrypt /tmp/foo.tmp
+                rm -f /tmp/foo.tmp 2>/dev/null
+                gpg --use-agent /tmp/foo.tmp.asc
+                rm -f /tmp/foo.tmp 2>/dev/null
+                gpg --use-agent /tmp/foo.tmp.asc
+                rm -f /tmp/foo.tmp /tmp/foo.tmp.asc 2>/dev/null
+            fi
+        done
+        ssh-add -l
+    fi
 
-	unset cgEnvDir cgEnvFile gErr i pAdd pDebug pHelp pKill pParm
-	unset pScript tMonth tPerm tYear tPID pExit
+    unset cgEnvDir cgEnvFile gErr i pAdd pDebug pHelp pKill pParm
+    unset pScript tMonth tPerm tYear tPID pExit
 fi

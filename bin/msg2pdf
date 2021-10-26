@@ -5,8 +5,8 @@
 # Output: ~/tmp/message.pdf
 
 if [ ! -f ~/tmp/message.eml ]; then
-	echo "Error: Could not find ~/tmp/message.eml"
-	exit 1
+    echo "Error: Could not find ~/tmp/message.eml"
+    exit 1
 fi
 
 awk '

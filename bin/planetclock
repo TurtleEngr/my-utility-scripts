@@ -21,52 +21,51 @@ export Tmp=/tmp/$LOGNAME
 
 pVerbose=0
 if [ $# -ne 0 ]; then
-	if [ ".$1" = ".-v" ]; then
-		pVerbose=1
-		shift
-	fi
+    if [ ".$1" = ".-v" ]; then
+        pVerbose=1
+        shift
+    fi
 fi
 
 if [ ! -f ~/.earthclock ]; then
-	if [ ! -f ~/.earthclock.off ]; then
-		cat <<-ENDHERE >~/.earthclock
+    if [ ! -f ~/.earthclock.off ]; then
+        cat <<-ENDHERE >~/.earthclock
 			cLocalLong=$cLocalLong
 			cLocalLat=$cLocalLat
 			cHourLat=$cLocalLat
 			cCmdParm=$cCmdParm
 		ENDHERE
-	fi
+    fi
 fi
 
 if [ $# -ne 0 ]; then
-	case $1 in
-		start|on|yes)
-			if [ -f ~/.earthclock.off ]; then
-				mv ~/.earthclock.off ~/.earthclock
-			fi
-			if [ $pVerbose -ne 0 ]; then echo 'Starting earthclock.'; fi
-			shift
-		;;
-		stop|off|no)
-			if [ -f ~/.earthclock ]; then
-				mv ~/.earthclock ~/.earthclock.off
-			fi
-			if [ $pVerbose -ne 0 ]; then echo 'Stopping earthclock.'; fi
-			exit 0
-		;;
-	esac
+    case $1 in
+        start | on | yes)
+            if [ -f ~/.earthclock.off ]; then
+                mv ~/.earthclock.off ~/.earthclock
+            fi
+            if [ $pVerbose -ne 0 ]; then echo 'Starting earthclock.'; fi
+            shift
+            ;;
+        stop | off | no)
+            if [ -f ~/.earthclock ]; then
+                mv ~/.earthclock ~/.earthclock.off
+            fi
+            if [ $pVerbose -ne 0 ]; then echo 'Stopping earthclock.'; fi
+            exit 0
+            ;;
+    esac
 fi
 
 if [ ! -f ~/.earthclock ]; then
-	if [ $pVerbose -ne 0 ]; then echo 'No ~/.earthclock file, so do nothing.'; fi
-	exit 0
+    if [ $pVerbose -ne 0 ]; then echo 'No ~/.earthclock file, so do nothing.'; fi
+    exit 0
 fi
-
 
 w -sh | grep gnome-session
 if [ $? -ne 0 ]; then
-	if [ $pVerbose -ne 0 ]; then echo 'User is not logged in with X Windows, so do nothing.'; fi
-	exit 0
+    if [ $pVerbose -ne 0 ]; then echo 'User is not logged in with X Windows, so do nothing.'; fi
+    exit 0
 fi
 
 #uptime | awk '{
@@ -85,7 +84,7 @@ fi
 
 gParm=""
 if [ $# -ne 0 ]; then
-	$gParm="$*"
+    $gParm="$*"
 fi
 
 # Initialize time and UTC Longitude location
@@ -98,10 +97,10 @@ tUTCTime=$(date -u '+%H:%M')
 
 gDebug=0
 if [ $# -ne 0 ]; then
-	if [ ".$1" = ".-x" ]; then
-		shift
-		gDebug=1
-	fi
+    if [ ".$1" = ".-x" ]; then
+        shift
+        gDebug=1
+    fi
 fi
 
 # Temp files
@@ -111,65 +110,65 @@ touch $cMarker
 chmod u+r,go= $cMarker
 
 if [ $tM -eq 0 ]; then
-	let tL=$cRefLong+15
+    let tL=$cRefLong+15
 else
-	let tL=cRefLong-tM*15/60+15
+    let tL=cRefLong-tM*15/60+15
 fi
 if [ $tL -gt 360 ]; then
-	let tL=tL-360
+    let tL=tL-360
 fi
 
 let tLH=$tH+1
 if [ $tLH -lt 0 ]; then
-	tLH=23
+    tLH=23
 fi
 if [ $tLH -gt 23 ]; then
-	tLH=0
+    tLH=0
 fi
 
 # Output hour markers
 while [ $tLH -ne $tH ]; do
-	i=$tL
-	if [ $i -gt 180 ]; then
-		let i=i-360
-	fi
-	echo "$cHourLat $i \"$tLH\" align=below" >>$cMarker
-	let tL=tL+15
-	if [ $tL -gt 360 ]; then
-		let tL=tL-360
-	fi
-	let tLH=tLH+1
-	if [ $tLH -lt 0 ]; then
-		tLH=23
-	fi
-	if [ $tLH -gt 23 ]; then
-		tLH=0
-	fi
+    i=$tL
+    if [ $i -gt 180 ]; then
+        let i=i-360
+    fi
+    echo "$cHourLat $i \"$tLH\" align=below" >>$cMarker
+    let tL=tL+15
+    if [ $tL -gt 360 ]; then
+        let tL=tL-360
+    fi
+    let tLH=tLH+1
+    if [ $tLH -lt 0 ]; then
+        tLH=23
+    fi
+    if [ $tLH -gt 23 ]; then
+        tLH=0
+    fi
 done
 i=$tL
 if [ $i -gt 180 ]; then
-	let i=i-360
+    let i=i-360
 fi
 echo "$cHourLat $i \"$tLH\" align=below" >>$cMarker
 
 # Output Artic Circle
 i=0
 while [ $i -lt 360 ]; do
-	t=$i
-	if [ $t -gt 180 ]; then
-		let t=t-360
-	fi
-	echo "66.55 $t \" \"" >>$cMarker
-#	let i=i+12
-	let i=i+15
+    t=$i
+    if [ $t -gt 180 ]; then
+        let t=t-360
+    fi
+    echo "66.55 $t \" \"" >>$cMarker
+    #	let i=i+12
+    let i=i+15
 done
 
 # Output hour-hand markers
 
 i=85
 while [ $i -gt ${cHourLat%.*} ]; do
-	echo "$i $cLocalLong \" \"" >>$cMarker
-	let i=i-5
+    echo "$i $cLocalLong \" \"" >>$cMarker
+    let i=i-5
 done
 
 # Output labeled marker
@@ -180,12 +179,12 @@ cat <<ENDHERE >>$cMarker
 ENDHERE
 
 if [ -r ~/.earthclock.marker ]; then
-	cat ~/.earthclock.marker >>$cMarker
+    cat ~/.earthclock.marker >>$cMarker
 fi
 
 tCmd="xplanet -markers -markerfile $cMarker -once -nice 15 $cCmdParm $gParm"
 
 if [ $pVerbose -ne 0 ]; then
-	echo "$tCmd"
+    echo "$tCmd"
 fi
 $tCmd

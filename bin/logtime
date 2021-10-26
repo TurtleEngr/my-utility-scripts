@@ -1,9 +1,9 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/logtime,v 1.15 2020/03/18 05:21:11 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logtime,v 1.16 2021/10/26 19:26:10 bruce Exp $
 
 # --------------------
 if [ $# -eq 0 -o "x$1" = "x-h" ]; then
-	cat <<EOF
+    cat <<EOF
 Usage
 	logtime	- this help
 	logtime	-h this help
@@ -34,7 +34,7 @@ Description
 See also:
 	timelog.sh
 EOF
-	exit 1
+    exit 1
 fi
 
 # ==================================
@@ -47,57 +47,57 @@ export cCurDir=$PWD
 
 # --------------------
 if [ ! -d CVS ]; then
-	echo "Error: you should be in a CVS work space"
-	exit 1
+    echo "Error: you should be in a CVS work space"
+    exit 1
 fi
 
 # --------------------
 # Find logtime.csv
 tFound=0
 if [ ${cCurDir#/home/video} != $cCurDir ]; then
-	tDir=${cCurDir#/home/video/}
-	tDir=${tDir%%/*}
-	tLog=/home/video/$tDir/logtime.csv
-	if [ -w $tLog ]; then
-		tFound=1
-	fi
+    tDir=${cCurDir#/home/video/}
+    tDir=${tDir%%/*}
+    tLog=/home/video/$tDir/logtime.csv
+    if [ -w $tLog ]; then
+        tFound=1
+    fi
 fi
 
 # Look for log file, but don't go above the top repository level
 if [ $tFound -eq 0 ]; then
-	tLevel=$(cat CVS/Repository | awk '{n = gsub("/","-"); print n'})
-	while [ $tLevel -ge 0 ]; do
-		tLog=$PWD/logtime.csv
-		if [ -w $tLog ]; then
-			tFound=1
-			break
-		fi
-		let tLevel-=1
-		cd ..
-	done
+    tLevel=$(cat CVS/Repository | awk '{n = gsub("/","-"); print n'})
+    while [ $tLevel -ge 0 ]; do
+        tLog=$PWD/logtime.csv
+        if [ -w $tLog ]; then
+            tFound=1
+            break
+        fi
+        let tLevel-=1
+        cd ..
+    done
 fi
 cd $cCurDir
 
 # --------------------
 case $pTag in
-	start)	pMsg=${pMsg#start };;
-	stop)	pMsg=${pMsg#stop };;
-	begin)	pTag="start";;
-	done|end|finish)
-		pTag="stop"
-	;;
-	*)	pTag="";;
+    start) pMsg=${pMsg#start } ;;
+    stop) pMsg=${pMsg#stop } ;;
+    begin) pTag="start" ;;
+    done | end | finish)
+        pTag="stop"
+        ;;
+    *) pTag="" ;;
 esac
 
 if [ $tFound -eq 0 ]; then
-	if [ "$pTag" = "start" ]; then
-		tLog=$PWD/logtime.csv
-		touch $tLog
-		echo "Notice: created: $PWD/logtime.csv"
-	else
-		echo "Error: you need to create the initial logtime.csv file"
-		exit 1
-	fi
+    if [ "$pTag" = "start" ]; then
+        tLog=$PWD/logtime.csv
+        touch $tLog
+        echo "Notice: created: $PWD/logtime.csv"
+    else
+        echo "Error: you need to create the initial logtime.csv file"
+        exit 1
+    fi
 fi
 
 # --------------------
@@ -106,9 +106,9 @@ tText="$(date +'%F,%H:%M:%S,%z,%s'),$HOSTNAME,$cCurDir,${pTag} $pMsg"
 echo $tText | tee -a $tLog
 
 case $pTag in
-	done|end|stop|finish)
-		cd ${tLog%/logtime.csv}
-		cvs commit -m "$pMsg" logtime.csv
-		echo "Have you committed ALL your work?"
-	;;
+    done | end | stop | finish)
+        cd ${tLog%/logtime.csv}
+        cvs commit -m "$pMsg" logtime.csv
+        echo "Have you committed ALL your work?"
+        ;;
 esac

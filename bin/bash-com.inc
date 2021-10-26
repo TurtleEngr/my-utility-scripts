@@ -1,13 +1,13 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.4 $ $Date: 2021/10/20 01:07:50 $ GMT
+# $Revision: 1.6 $ $Date: 2021/10/26 19:26:08 $ GMT
 
 # --------------------------------
 fBashComInternalDoc()
 {
-	return
-	# This should be the first =internal-pod
-    	cat <<\EOF >/dev/null
+    return
+    # This should be the first =internal-pod
+    cat <<\EOF >/dev/null
 =internal-pod
 
 =internal-head1 bash-com.inc Internal Documentation
@@ -88,7 +88,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.4 $'
+	cVer='$Revision: 1.6 $'
 
 =internal-head3 Documentation Format
 
@@ -109,7 +109,8 @@ The internal documentation uses POD commands that begin with "=internal-".
 See fComInternalDoc() for how this is used.
 
 Also TDD (Test Driven Development) should make refactoring easy,
-because the tests are also embedded in the script.
+because the tests are often embedded in the script. See template.sh
+for how.
 
 =internal-head2 Common Script Functions
 
@@ -123,86 +124,86 @@ EOF
 # -------------------
 fComSetGlobals()
 {
-	# -------------------
-	# Set name of this script
-	local tName=${0##*/}
-	cName=${cName:-$tName}
+    # -------------------
+    # Set name of this script
+    local tName=${0##*/}
+    cName=${cName:-$tName}
 
-	# -------------------
-	# Set current directory location in PWD and cCurDir, because with cron
-	# jobs PWD is not set.
-	if [ -z "$PWD" ]; then
-		PWD=$(pwd)
-	fi
-	cCurDir=${cCurDir:-$PWD}
+    # -------------------
+    # Set current directory location in PWD and cCurDir, because with cron
+    # jobs PWD is not set.
+    if [ -z "$PWD" ]; then
+        PWD=$(pwd)
+    fi
+    cCurDir=${cCurDir:-$PWD}
 
-	# -------------------
-	# Define the location of the com script if not already set
-	if [ -z "$cBin" ]; then
-		cBin=${0%/*}
-		if [ "$cBin" = "." ]; then
-		        cBin=$PWD
-		fi
-		cd $cBin
-		cBin=$PWD
-		cd $cCurDir
-	fi
+    # -------------------
+    # Define the location of the com script if not already set
+    if [ -z "$cBin" ]; then
+        cBin=${0%/*}
+        if [ "$cBin" = "." ]; then
+            cBin=$PWD
+        fi
+        cd $cBin
+        cBin=$PWD
+        cd $cCurDir
+    fi
 
-	# -------------------
-	# Setup log variables
-	# -x
-	gpDebug=${gpDebug:-0}
-	# -v
-	gpVerbose=${gpVerbose:-0}
-	# -l
-	gpLog=${gpLog:-0}
-	gpFacility=${gpFacility:=user}
-	gErr=0
+    # -------------------
+    # Setup log variables
+    # -x
+    gpDebug=${gpDebug:-0}
+    # -v
+    gpVerbose=${gpVerbose:-0}
+    # -l
+    gpLog=${gpLog:-0}
+    gpFacility=${gpFacility:=user}
+    gErr=0
 
-	# -------------------
-	# If your script defines a version with the Revision keyword, clean it
-	# shellcheck disable=SC2016
-	#cVer='$Revision: 1.4 $'
-	
-	if [ "$cVer" !=  "${cVer#*' '}" ]; then
-		cVer=${cVer#*' '}
-		cVer=${cVer%' '*}
-	fi
-	
-	# -------------------
-	# Setup a temporary directory for each user/script.
-	Tmp=${Tmp:-"/tmp/$USER/$cName"}
-	if [ ! -d $Tmp ]; then
-		mkdir -p $Tmp 2>/dev/null
-		if [ ! -d $Tmp ]; then
-			fError "Could not find directory $Tmp (\$Tmp)." $LINENO
-		fi
-	fi
+    # -------------------
+    # If your script defines a version with the Revision keyword, clean it
+    # shellcheck disable=SC2016
+    #cVer='$Revision: 1.6 $'
 
-	# -------------------
-	# Define temporary file names used by this script.  The
-	# variables for the file names can be any name, but the file
-	# name pattern should be:
-	# "${cTmpF}-*.tmp"
-	cPID=$$
-	cTmpF=$Tmp/file-$cPID
-	if [ $gpDebug -ne 0 ]; then
-		cTmpF=$Tmp/file
-		rm -f ${cTmpF}*.tmp 2>/dev/null
-	fi
-	# shellcheck disable=SC2034
-	cTmp1=${cTmpF}-1.tmp
-	# shellcheck disable=SC2034
-	cTmp2=${cTmpF}-2.tmp
-	# shellcheck disable=SC2172
-	trap fCleanUp 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+    if [ "$cVer" != "${cVer#*' '}" ]; then
+        cVer=${cVer#*' '}
+        cVer=${cVer%' '*}
+    fi
 
-	# -------------------
-	gpTest=${gpTest:-""};
-	gpUnitDebug=${gpUnitDebug:-0}
-	return
+    # -------------------
+    # Setup a temporary directory for each user/script.
+    Tmp=${Tmp:-"/tmp/$USER/$cName"}
+    if [ ! -d $Tmp ]; then
+        mkdir -p $Tmp 2>/dev/null
+        if [ ! -d $Tmp ]; then
+            fError "Could not find directory $Tmp (\$Tmp)." $LINENO
+        fi
+    fi
 
-    	cat <<EOF >/dev/null
+    # -------------------
+    # Define temporary file names used by this script.  The
+    # variables for the file names can be any name, but the file
+    # name pattern should be:
+    # "${cTmpF}-*.tmp"
+    cPID=$$
+    cTmpF=$Tmp/file-$cPID
+    if [ $gpDebug -ne 0 ]; then
+        cTmpF=$Tmp/file
+        rm -f ${cTmpF}*.tmp 2>/dev/null
+    fi
+    # shellcheck disable=SC2034
+    cTmp1=${cTmpF}-1.tmp
+    # shellcheck disable=SC2034
+    cTmp2=${cTmpF}-2.tmp
+    # shellcheck disable=SC2172
+    trap fCleanUp 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+
+    # -------------------
+    gpTest=${gpTest:-""}
+    gpUnitDebug=${gpUnitDebug:-0}
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fComSetGlobals
@@ -218,15 +219,15 @@ EOF
 # --------------------------------
 fComCleanUp()
 {
-	# shellcheck disable=SC2172
-	trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
-	if [ $gpDebug -eq 0 ]; then
-		'rm' -f ${cTmpF}*.tmp 2>/dev/null
-	fi
-	fLog notice "Done" $LINENO 9900
-	exit $gErr
-	
-    	cat <<EOF >/dev/null
+    # shellcheck disable=SC2172
+    trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+    if [ $gpDebug -eq 0 ]; then
+        'rm' -f ${cTmpF}*.tmp 2>/dev/null
+    fi
+    fLog notice "Done" $LINENO 9900
+    exit $gErr
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fCleanUp
@@ -241,38 +242,38 @@ EOF
 # --------------------------------
 fComCheckDeps()
 {
-	local pRequired="$1"
-	local pOptional="$2"
-    
-	local tProg
-	local tErr=0
-	local tComReq='logger pod2text pod2usage'
-	local tComOpt='pod2html pod2man pod2markdown tidy shunit2.1 awk tr'
+    local pRequired="$1"
+    local pOptional="$2"
 
-	for tProg in $pOptional $tComOpt; do
-		if ! which $tProg &>/dev/null; then
-			echo "Optional: Missing $tProg"
-			tErr=1
-		fi
-	done
+    local tProg
+    local tErr=0
+    local tComReq='logger pod2text pod2usage'
+    local tComOpt='pod2html pod2man pod2markdown tidy shunit2.1 gawk sed tr fmt'
 
-	for tProg in $pRequired $tComReq; do
-		if ! which $tProg &>/dev/null; then
-			echo "Required: Missing $tProg"
-			tErr=2
-		fi
-	done
+    for tProg in $pOptional $tComOpt; do
+        if ! which $tProg &>/dev/null; then
+            echo "Optional: Missing $tProg"
+            tErr=1
+        fi
+    done
 
-	if [ $tErr -eq 2 ]; then
-		echo "Error: Missing one or more required programs."
-		fCleanUp
-	fi
-	if [ $tErr -eq 1 ]; then
-		fLog2 -p warning -m "Missing some some optional programs." -l $LINENO
-	fi
-	return
+    for tProg in $pRequired $tComReq; do
+        if ! which $tProg &>/dev/null; then
+            echo "Required: Missing $tProg"
+            tErr=2
+        fi
+    done
 
-    	cat <<EOF >/dev/null
+    if [ $tErr -eq 2 ]; then
+        echo "Error: Missing one or more required programs."
+        fCleanUp
+    fi
+    if [ $tErr -eq 1 ]; then
+        fLog2 -p warning -m "Missing some some optional programs." -l $LINENO
+    fi
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fComCheckDeps "pRequired List" "pOptional List"
@@ -287,10 +288,10 @@ EOF
 # --------------------------------
 fComInternalDoc()
 {
-	local pAll=$1
+    local pAll=$1
 
-	if [ ".$pAll" = ".-a" ]; then
-		awk '
+    if [ ".$pAll" = ".-a" ]; then
+        awk '
 			/^=internal-pod/,/^=internal-cut/ {
 				sub(/^=internal-/,"=");
 			}
@@ -298,17 +299,17 @@ fComInternalDoc()
 				print $0;
 			}
 		'
-	else
-		awk '
+    else
+        awk '
 			/^=internal-pod/,/^=internal-cut/ {
 				sub(/^=internal-/,"=");
 				print $0;
 			}
 		'
-	fi
-	return
+    fi
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fComInternalDoc [-a]
@@ -325,108 +326,109 @@ EOF
 # --------------------------------
 fComUsage()
 {
-	local pFileList=""
-	local pStyle="long"
-	local pInt=0
-	local pAll=""
-	local pTitle="$cName Usage"
+    local pFileList=""
+    local pStyle="long"
+    local pInt=0
+    local pAll=""
+    local pTitle="$cName Usage"
 
-	local tProg=""
-	local tFileList=""
-	local tTidy='tidy -m -q -i -w 78 -asxhtml --break-before-br yes --indent-attributes yes --indent-spaces 2 --tidy-mark no --vertical-space no'
+    local tProg=""
+    local tFileList=""
+    local tTidy='tidy -m -q -i -w 78 -asxhtml --break-before-br yes --indent-attributes yes --indent-spaces 2 --tidy-mark no --vertical-space no'
 
-	local OPTIND=1
-	local OPTARG
-	local tArg
+    local OPTIND=1
+    local OPTARG
+    local tArg
 
-	while getopts :f:s:t:ia tArg; do
-		case $tArg in
-			f) pFileList="$pFileList $OPTARG";;
-			s) pStyle="$OPTARG";;
-			t) pTitle="$OPTARG";;
-			i) pInt=1;;
-			a) pInt=1
-			   pAll='-a'
-			;;
-			:)  fError2 -i -m "fComUsage: Value required for option: -$OPTARG" -l $LINENO;;
-			\?) fError2 -i "fComUsage: Unknown option: $OPTARG" -l $LINENO;;
-		esac
-	done
-	shift $((OPTIND-1))
-	if [ $# -ne 0 ]; then
-		fError2 -i -m "fComUsage: Unknown option: $*" -l $LINENO
-	fi
-	while [ $# -ne 0 ]; do
-		shift
-	done
+    while getopts :f:s:t:ia tArg; do
+        case $tArg in
+            f) pFileList="$pFileList $OPTARG" ;;
+            s) pStyle="$OPTARG" ;;
+            t) pTitle="$OPTARG" ;;
+            i) pInt=1 ;;
+            a)
+                pInt=1
+                pAll='-a'
+                ;;
+            :) fError2 -i -m "fComUsage: Value required for option: -$OPTARG" -l $LINENO ;;
+            \?) fError2 -i "fComUsage: Unknown option: $OPTARG" -l $LINENO ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    if [ $# -ne 0 ]; then
+        fError2 -i -m "fComUsage: Unknown option: $*" -l $LINENO
+    fi
+    while [ $# -ne 0 ]; do
+        shift
+    done
 
-	case $pStyle in
-		short|usage)
-			tProg=pod2usage
-			if [ $pInt -ne 0 ]; then
-				tProg="pod2text | head -n 24"
-			fi
-		;;
-		man)
-			tProg=pod2man
-			if [ $pInt -ne 0 ]; then
-				tProg=pod2text
-			fi
-		;;
-		long|text)
-			tProg=pod2text
-		;;
-		html)
-			tProg="pod2html"
-		;;
-		md)
-			tProg=pod2markdown
-		;;
-		*)
-			tProg=pod2text
-		;;
-	esac
+    case $pStyle in
+        short | usage)
+            tProg=pod2usage
+            if [ $pInt -ne 0 ]; then
+                tProg="pod2text | head -n 24"
+            fi
+            ;;
+        man)
+            tProg=pod2man
+            if [ $pInt -ne 0 ]; then
+                tProg=pod2text
+            fi
+            ;;
+        long | text)
+            tProg=pod2text
+            ;;
+        html)
+            tProg="pod2html"
+            ;;
+        md)
+            tProg=pod2markdown
+            ;;
+        *)
+            tProg=pod2text
+            ;;
+    esac
 
-	# Validate
-	pFileList=$pFileList
-	if [ -z "$pFileList" ]; then
-		fError2 -i -m "fComUsage missing pFileList" -l $LINENO
-	fi
-	for tFile in $pFileList; do
-		if [ -r $tFile ]; then
-			tFileList="$tFileList $tFile"
-		else
-			fError2 -i -m "fComUsage cannot read: $tFile" -l $LINENO
-		fi
-	done
-	tFileList=$tFileList
-	if [ -z "$tFileList" ]; then
-		fError2 -i -m "fComUsage missing a valid pFileList" -l $LINENO
-	fi
-	
-	if [ $pInt -eq 0 ]; then
-		if [ "$pStyle" = "html" ]; then
-			# shellcheck disable=SC2002
-			cat $pFileList | $tProg --title="$pTitle" | $tTidy
-		else
-			# shellcheck disable=SC2002
-			cat $pFileList | $tProg
-		fi
-	else
-		if [ "$pStyle" = "html" ]; then
-			# shellcheck disable=SC2002
-			cat $pFileList | fComInternalDoc $pAll | $tProg --title="$pTitle" | $tTidy
-		else
-			# shellcheck disable=SC2002
-			cat $pFileList | fComInternalDoc $pAll | $tProg
-		fi
-	fi
+    # Validate
+    pFileList=$pFileList
+    if [ -z "$pFileList" ]; then
+        fError2 -i -m "fComUsage missing pFileList" -l $LINENO
+    fi
+    for tFile in $pFileList; do
+        if [ -r $tFile ]; then
+            tFileList="$tFileList $tFile"
+        else
+            fError2 -i -m "fComUsage cannot read: $tFile" -l $LINENO
+        fi
+    done
+    tFileList=$tFileList
+    if [ -z "$tFileList" ]; then
+        fError2 -i -m "fComUsage missing a valid pFileList" -l $LINENO
+    fi
 
-	gErr=1
-	fCleanUp
-	exit 1
+    if [ $pInt -eq 0 ]; then
+        if [ "$pStyle" = "html" ]; then
+            # shellcheck disable=SC2002
+            cat $pFileList | $tProg --title="$pTitle" | $tTidy
+        else
+            # shellcheck disable=SC2002
+            cat $pFileList | $tProg
+        fi
+    else
+        if [ "$pStyle" = "html" ]; then
+            # shellcheck disable=SC2002
+            cat $pFileList | fComInternalDoc $pAll | $tProg --title="$pTitle" | $tTidy
+        else
+            # shellcheck disable=SC2002
+            cat $pFileList | fComInternalDoc $pAll | $tProg
+        fi
+    fi
 
-    	cat <<EOF >/dev/null
+    gErr=1
+    fCleanUp
+    exit 1
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fComUsage -f pFileList -s pStyle [-t pTitle] [-i] [-a]
@@ -458,75 +460,75 @@ EOF
 # ------------------
 fFmtLog()
 {
-	local pLevel=$1
-	local pMsg="$2"
-	local pLine=$3
-	local pErr=$4
+    local pLevel=$1
+    local pMsg="$2"
+    local pLine=$3
+    local pErr=$4
 
-	local tDebugLevel
-	local tLevel
-	local tLine
-	local tErr
-	# Use this to turn PID on/off in logs
-	local tPID_Flag=0
-	local tPID=""
-	local tPID_Opt=""
+    local tDebugLevel
+    local tLevel
+    local tLine
+    local tErr
+    # Use this to turn PID on/off in logs
+    local tPID_Flag=0
+    local tPID=""
+    local tPID_Opt=""
 
-	# Set any missing globals
-	gpLog=${gpLog:-0}
-	gpFacility=${gpFacility:-user}
-	gpVerbose=${gpVerbose:-0}
-	gpDebug=${gpDebug:-0}
+    # Set any missing globals
+    gpLog=${gpLog:-0}
+    gpFacility=${gpFacility:-user}
+    gpVerbose=${gpVerbose:-0}
+    gpDebug=${gpDebug:-0}
 
-	tLevel=$pLevel
+    tLevel=$pLevel
 
-	# Check debug
-	if [ $gpDebug -eq 0 ] && [ "${pLevel%-*}" = "debug" ]; then
-		return
-	fi
-	if [ $gpDebug -ne 0 ] && [ "${pLevel%%-*}" != "$pLevel" ]; then
-		tDebugLevel=${pLevel##*-}
-		if [ $tDebugLevel -gt $gpDebug ]; then
-			return
-		fi
-		tLevel=debug
-	fi
+    # Check debug
+    if [ $gpDebug -eq 0 ] && [ "${pLevel%-*}" = "debug" ]; then
+        return
+    fi
+    if [ $gpDebug -ne 0 ] && [ "${pLevel%%-*}" != "$pLevel" ]; then
+        tDebugLevel=${pLevel##*-}
+        if [ $tDebugLevel -gt $gpDebug ]; then
+            return
+        fi
+        tLevel=debug
+    fi
 
-	# Check verbose
-	if [ $gpVerbose -eq 0 ] &&
-	     [ "$pLevel" = "notice" -o "$pLevel" = "info" ]; then
-		return
-	fi
-	if [ $gpVerbose -eq 1 ] && [ "$pLevel" = "info" ]; then
-		return
-	fi
+    # Check verbose
+    if [ $gpVerbose -eq 0 ] &&
+        [ "$pLevel" = "notice" -o "$pLevel" = "info" ]; then
+        return
+    fi
+    if [ $gpVerbose -eq 1 ] && [ "$pLevel" = "info" ]; then
+        return
+    fi
 
-	# LineNo format
-	tLine=""
-	if [ -n "$pLine" ]; then
-		tLine="[$pLine]"
-	fi
+    # LineNo format
+    tLine=""
+    if [ -n "$pLine" ]; then
+        tLine="[$pLine]"
+    fi
 
-	# Err format
-	tErr=""
-	if [ -n "$pErr" ]; then
-		tErr="($pErr)"
-	fi
+    # Err format
+    tErr=""
+    if [ -n "$pErr" ]; then
+        tErr="($pErr)"
+    fi
 
-	if [ $tPID_Flag -eq 1 ]; then
-		tPID="[$cPID]"
-		tPID_Opt="-i"
-	fi
+    if [ $tPID_Flag -eq 1 ]; then
+        tPID="[$cPID]"
+        tPID_Opt="-i"
+    fi
 
-	# Output
-	if [ $gpLog -eq 0 ]; then
-		echo "${cName}$tPID $pLevel: $pMsg $tLine$tErr" 1>&2
-	else
-		logger -s $tPID_Opt -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
-	fi
-	return
+    # Output
+    if [ $gpLog -eq 0 ]; then
+        echo "${cName}$tPID $pLevel: $pMsg $tLine$tErr" 1>&2
+    else
+        logger -s $tPID_Opt -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
+    fi
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fFmtLog pLevel "pMsg" pLine pErr
@@ -541,45 +543,45 @@ EOF
 # ------------------
 fLog()
 {
-	local pLevel="alert"
-	local pMsg="Missing message"
-	local pLine=""
-	local pErr=""
+    local pLevel="alert"
+    local pMsg="Missing message"
+    local pLine=""
+    local pErr=""
 
-	# Get args
-	case $# in
-		1)
-			pLevel=$1
-		;;
-		2)
-			pLevel=$1
-			pMsg=$2
-		;;
-		3)
-			pLevel=$1
-			pMsg=$2
-			pLine=$3
-		;;
-		4)
-			pLevel=$1
-			pMsg=$2
-			pLine=$3
-			pErr=$4
-		;;
-		*)
-			pLevel=$1
-			pMsg=$2
-			pLine=$3
-			pErr=$4
-			shift 4
-			pMsg="$pMsg - $*"
-		;;
-	esac
+    # Get args
+    case $# in
+        1)
+            pLevel=$1
+            ;;
+        2)
+            pLevel=$1
+            pMsg=$2
+            ;;
+        3)
+            pLevel=$1
+            pMsg=$2
+            pLine=$3
+            ;;
+        4)
+            pLevel=$1
+            pMsg=$2
+            pLine=$3
+            pErr=$4
+            ;;
+        *)
+            pLevel=$1
+            pMsg=$2
+            pLine=$3
+            pErr=$4
+            shift 4
+            pMsg="$pMsg - $*"
+            ;;
+    esac
 
-	fFmtLog $pLevel "$pMsg" $pLine $pErr
-	return
+    fFmtLog $pLevel "$pMsg" $pLine $pErr
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fLog pLevel "pMsg" [$LINENO] [pErr]
@@ -603,19 +605,19 @@ EOF
 # --------------------------------
 fError()
 {
-	# Usage:
-	#     fError pMsg [pLine [pErr]]
-	# Print the error message.  Then call fCleanUp, and exit
+    # Usage:
+    #     fError pMsg [pLine [pErr]]
+    # Print the error message.  Then call fCleanUp, and exit
 
-	local pMsg="$1"
-	local pLine=$2
-	local pErr=$3
+    local pMsg="$1"
+    local pLine=$2
+    local pErr=$3
 
-	fLog crit "$pMsg" ${pLine:-.} ${pErr:-1}
-	fUsage short
-	return
+    fLog crit "$pMsg" ${pLine:-.} ${pErr:-1}
+    fUsage short
+    return
 
-    	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fError "pMsg" [$LINENO] [pErr]
@@ -631,37 +633,37 @@ EOF
 # ------------------
 fLog2()
 {
-	local pLevel="info"
-	local pMsg=""
-	local pLine=""
-	local pErr=""
-	
-	local OPTARG=1
-	local OPTIND
-	local tArg
+    local pLevel="info"
+    local pMsg=""
+    local pLine=""
+    local pErr=""
 
-	while getopts :m:p:l:e: tArg; do
-		case $tArg in
-			m)	pMsg="${OPTARG}";;
-			l)	pLine="${OPTARG}";;
-			p)	pLevel="${OPTARG}";;
-			e)
-				pErr="${OPTARG}"
-				gErr="${OPTARG}"
-			;;
-			:)  echo "Internal: Value required for option: -$OPTARG [$LINENO]";;
-			\?) echo "Internal: Unknown option: $OPTARG [$LINENO]";;
-		esac
-	done
-	shift $((OPTIND-1))
-	while [ $# -ne 0 ]; do
-		shift
-	done
+    local OPTARG=1
+    local OPTIND
+    local tArg
 
-	fFmtLog $pLevel "$pMsg" $pLine $pErr
-	return
+    while getopts :m:p:l:e: tArg; do
+        case $tArg in
+            m) pMsg="${OPTARG}" ;;
+            l) pLine="${OPTARG}" ;;
+            p) pLevel="${OPTARG}" ;;
+            e)
+                pErr="${OPTARG}"
+                gErr="${OPTARG}"
+                ;;
+            :) echo "Internal: Value required for option: -$OPTARG [$LINENO]" ;;
+            \?) echo "Internal: Unknown option: $OPTARG [$LINENO]" ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    while [ $# -ne 0 ]; do
+        shift
+    done
 
-    	cat <<EOF >/dev/null
+    fFmtLog $pLevel "$pMsg" $pLine $pErr
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fLog2 -m pMsg [-p pLevel] [-l $LINENO] [-e pErr]
@@ -677,45 +679,45 @@ EOF
 # --------------------------------
 fError2()
 {
-	local pMsg="Error"
-	local pLine="."
-	local pErr=1
-	local pInt=0
+    local pMsg="Error"
+    local pLine="."
+    local pErr=1
+    local pInt=0
 
-	local OPTIND=1
-	local OPTARG
-	local tArg
-	
-	while getopts :m:l:e:i tArg; do
-		case $tArg in
-			m)	pMsg="${OPTARG}";;
-			l)	pLine="${OPTARG}";;
-			e)	pErr="${OPTARG}";;
-			i)	pInt=1;;
-			:)  echo "Internal: Value required for option: -$OPTARG [$LINENO]";;
-			\?) echo "Internal: Unknown option: $OPTARG [$LINENO]";;
-		esac
-	done
-	shift $((OPTIND-1))
-	if [ $# -ne 0 ]; then
-		pMsg="$pMsg $*"
-	fi
-	while [ $# -ne 0 ]; do
-		shift
-	done
-	gErr=$pErr
+    local OPTIND=1
+    local OPTARG
+    local tArg
 
-	if [ $pInt -eq 1 ]; then
-		pMsg="Internal: $pMsg"
-	fi
-	fLog2 -p crit -l $pLine -e $pErr -m "$pMsg"
-	if [ $pInt -eq 0 ]; then
-		fUsage short
-	fi
-	exit 1
-	return
+    while getopts :m:l:e:i tArg; do
+        case $tArg in
+            m) pMsg="${OPTARG}" ;;
+            l) pLine="${OPTARG}" ;;
+            e) pErr="${OPTARG}" ;;
+            i) pInt=1 ;;
+            :) echo "Internal: Value required for option: -$OPTARG [$LINENO]" ;;
+            \?) echo "Internal: Unknown option: $OPTARG [$LINENO]" ;;
+        esac
+    done
+    shift $((OPTIND - 1))
+    if [ $# -ne 0 ]; then
+        pMsg="$pMsg $*"
+    fi
+    while [ $# -ne 0 ]; do
+        shift
+    done
+    gErr=$pErr
 
-    	cat <<EOF >/dev/null
+    if [ $pInt -eq 1 ]; then
+        pMsg="Internal: $pMsg"
+    fi
+    fLog2 -p crit -l $pLine -e $pErr -m "$pMsg"
+    if [ $pInt -eq 0 ]; then
+        fUsage short
+    fi
+    exit 1
+    return
+
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fError2 -m pMsg [-l $LINENO] [-e pErr] [-i]
@@ -731,27 +733,27 @@ EOF
 # --------------------------------
 fTimeoutFunction()
 {
-	# Number of seconds
-	declare -i pTimeout
-	# Cmd including args
-	local pCmd
+    # Number of seconds
+    declare -i pTimeout
+    # Cmd including args
+    local pCmd
 
-	pTimeout=$1
-	pCmd="$2"
+    pTimeout=$1
+    pCmd="$2"
 
-	declare -x tChild
-	( 
-		eval "$pCmd" &>/dev/null &
-		tChild=$!
-		trap -- "" SIGTERM
-		(
-			sleep $pTimeout
-			kill $tChild 2> /dev/null
-		) &
-		wait $tChild
-	)
-	return
-    	cat <<EOF >/dev/null
+    declare -x tChild
+    (
+        eval "$pCmd" &>/dev/null &
+        tChild=$!
+        trap -- "" SIGTERM
+        (
+            sleep $pTimeout
+            kill $tChild 2>/dev/null
+        ) &
+        wait $tChild
+    )
+    return
+    cat <<EOF >/dev/null
 =internal-pod
 
 =internal-head3 fTimeoutFunction pSec "pCmd [args...]"

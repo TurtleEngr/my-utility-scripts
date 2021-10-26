@@ -4,9 +4,9 @@
 # /release/mirror/ or /release/pachage/) to the corresponding directory
 # in /release/cd.archive/
 
-function fUsage
+function fUsage()
 {
-	cat <<EOF
+    cat <<EOF
 mv2cd file...
 
 If you are on the master release/mirror server and in a subdirectory
@@ -23,64 +23,64 @@ files will be moved, not directories.
 A date stamp, with directory names, and file names, will be put on the
 cd.archive/readme.txt file.  Remove this file after you have burned a CD.
 EOF
-	exit 1
+    exit 1
 } # fUsage
 
 # ====================================
 cLog=/release/package/cd.archive/readme.txt
 
 if [ $# -eq 0 ]; then
-	fUsage
+    fUsage
 fi
 
 if [ $(hostname) != "bender.int.pao1.imeem" ]; then
-	echo "Error: this script is only for use on: dance.int.imeem"
-	fUsage
+    echo "Error: this script is only for use on: dance.int.imeem"
+    fUsage
 fi
 
 gCurDir=$PWD
 tDirOK=0
 case $gCurDir in
-	/release/mirror/*/*)
-		tDirOK=1
-	;;
-	/release/package/archive/*)
-		tDirOK=1
-	;;
-	/release/package/development/*)
-		tDirOK=1
-	;;
-	/release/package/released/*)
-		tDirOK=1
-	;;
-	*)
-		echo "Error: $gCurDir is not a vaild.  cd to another dir."
-		fUsage
-	;;
+    /release/mirror/*/*)
+        tDirOK=1
+        ;;
+    /release/package/archive/*)
+        tDirOK=1
+        ;;
+    /release/package/development/*)
+        tDirOK=1
+        ;;
+    /release/package/released/*)
+        tDirOK=1
+        ;;
+    *)
+        echo "Error: $gCurDir is not a vaild.  cd to another dir."
+        fUsage
+        ;;
 esac
 
 pFileList=""
 for f in $*; do
-	if [ "$f" != "${f#*/}" ]; then
-		echo "Warning: $f contains a directory path, skipping."
-		continue
-	fi
-	if [ ! -f $f ]; then
-		echo "Warning: $f is not a file, skipping."
-		continue
-	fi
-	pFileList="$pFileList $f"
+    if [ "$f" != "${f#*/}" ]; then
+        echo "Warning: $f contains a directory path, skipping."
+        continue
+    fi
+    if [ ! -f $f ]; then
+        echo "Warning: $f is not a file, skipping."
+        continue
+    fi
+    pFileList="$pFileList $f"
 done
 
 tFromDir=${gCurDir#/release/}
 tToDir=/release/package/cd.archive/$tFromDir
 if [ ! -d $tToDir ]; then
-	mkdir -p $tToDir
-	if [ ! -d $tToDir ]; then
-		echo "Error: can not create $tToDir."
-		exit
-	fi
-	chmod u+rwx,g+rwxs,o= $tToDir
+    mkdir -p $tToDir
+    if [ ! -d $tToDir ]; then
+        echo "Error: can not create $tToDir."
+        exit
+    fi
+    chmod u+rwx,g+rwxs,o= $tToDir
 fi
 
 echo >>$cLog
@@ -89,6 +89,6 @@ date >>$cLog
 echo "Moving files from: $tFromDir to: $tToDir" | fold -s >>$cLog
 echo "Moving files from: $tFromDir to: $tToDir" | fold -s
 for f in $pFileList; do
-	mv $f $tToDir
-	echo "$f" >>$cLog
+    mv $f $tToDir
+    echo "$f" >>$cLog
 done

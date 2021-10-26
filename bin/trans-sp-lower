@@ -4,28 +4,28 @@
 # Uppercase char converted to lower case
 
 for f in *; do
-	ns=$(echo "$f" | perl -ne 'chomp; tr:-_.~a-zA-Z0-9/:_:cs; tr:A-Z:a-z:; s/_+/_/g; s/-+/-/g; s/_-_/-/g; s/_$//; print $_;')
-	if [ "$f" != "$ns" ]; then
-		echo "mv $f $ns"
-		mv --backup=numbered "$f" $ns 2>&1
-	fi
+    ns=$(echo "$f" | perl -ne 'chomp; tr:-_.~a-zA-Z0-9/:_:cs; tr:A-Z:a-z:; s/_+/_/g; s/-+/-/g; s/_-_/-/g; s/_$//; print $_;')
+    if [ "$f" != "$ns" ]; then
+        echo "mv $f $ns"
+        mv --backup=numbered "$f" $ns 2>&1
+    fi
 done
 
 for f in *_.mp4; do
-	ns=${f%_.mp4}.mp4
-	if [ "$ns" = '*.mp4' ]; then
-		continue
-	fi
-	mv --backup=numbered "$f" $ns 2>&1
+    ns=${f%_.mp4}.mp4
+    if [ "$ns" = '*.mp4' ]; then
+        continue
+    fi
+    mv --backup=numbered "$f" $ns 2>&1
 done
 exit
 
 for d in $(find * -prune -type d); do
-	case $d in
-		CVS)	continue;;
-		.git)	continue;;
-		.svn)	continue;;
-	esac
-	cd $d 2>&1
-	trans-sp
+    case $d in
+        CVS) continue ;;
+        .git) continue ;;
+        .svn) continue ;;
+    esac
+    cd $d 2>&1
+    trans-sp
 done

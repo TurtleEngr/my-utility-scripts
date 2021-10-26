@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-rm-ver,v 1.4 2020/09/18 20:59:32 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-rm-ver,v 1.5 2021/10/26 19:26:13 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -15,16 +15,16 @@
 # gErr - error code (0 = no error)
 # cName - script's name
 
-function fUsage
+function fUsage()
 {
-	if [[ $# -ne 0 ]]; then
-		pod2text $0
-	else
-		pod2usage $0
-	fi
-	fCleanUp 1
+    if [[ $# -ne 0 ]]; then
+        pod2text $0
+    else
+        pod2usage $0
+    fi
+    fCleanUp 1
 
-	cat <<EOF >/dev/null
+    cat <<EOF >/dev/null
 =pod
 
 =head1 NAME
@@ -133,83 +133,83 @@ They should only use the characters: [a-zA-Z][0-9][.-_]
 
 =head1 HISTORY
 
- $Revision: 1.4 $;
- $Date: 2020/09/18 20:59:32 $ GMT 
+ $Revision: 1.5 $;
+ $Date: 2021/10/26 19:26:13 $ GMT 
 
 =cut
 EOF
 } # fUsage
 
 # --------------------------------
-function fCleanUp
+function fCleanUp()
 {
-	local pExit=$1
-	
-	rm -f $cTmp.tmp* >/dev/null 2>&1
-	exit $pExit
+    local pExit=$1
+
+    rm -f $cTmp.tmp* >/dev/null 2>&1
+    exit $pExit
 }
 
 # --------------------------------
-function fError
+function fError()
 {
-	# Usage:
-	#     fError pMsg [pLine [pErr]]
-	# Print the error message.  Then call fCleanUp, and exit
+    # Usage:
+    #     fError pMsg [pLine [pErr]]
+    # Print the error message.  Then call fCleanUp, and exit
 
-	local pMsg="$1"
-	local pLine=$2
-	local pErr=$3
+    local pMsg="$1"
+    local pLine=$2
+    local pErr=$3
 
-	fLog crit "$pMsg" $pLine $pErr
-	fUsage
+    fLog crit "$pMsg" $pLine $pErr
+    fUsage
 } # fError
 
 # ------------------
-function fLog
+function fLog()
 {
-	# Usage:
-	#     fLog notice "Just testing" $LINENO 8
-	# pLevel - emerg alert crit err warning notice info debug
+    # Usage:
+    #     fLog notice "Just testing" $LINENO 8
+    # pLevel - emerg alert crit err warning notice info debug
 
-	local pLevel=$1
-	local pMsg="$2"
-	# optional
-	local pLine=$3
-	# optional
-	local pErr=$4
+    local pLevel=$1
+    local pMsg="$2"
+    # optional
+    local pLine=$3
+    # optional
+    local pErr=$4
 
-	local tVerbose=""
-	local tErr=""
+    local tVerbose=""
+    local tErr=""
 
-	if [[ "$pLevel" = "debug" && $gpDebug -eq 0 ]]; then
-		return
-	fi
+    if [[ "$pLevel" = "debug" && $gpDebug -eq 0 ]]; then
+        return
+    fi
 
-	if [[ -n "$pErr" ]]; then
-		tErr="$pErr"
-	fi
-	if [[ -n "$tErr" ]]; then
-		tErr="($tErr)"
-	fi
+    if [[ -n "$pErr" ]]; then
+        tErr="$pErr"
+    fi
+    if [[ -n "$tErr" ]]; then
+        tErr="($tErr)"
+    fi
 
-	local tLine=""
-	if [[ -n "$pLine" ]]; then
-		tLine="[$pLine]"
-	fi
+    local tLine=""
+    if [[ -n "$pLine" ]]; then
+        tLine="[$pLine]"
+    fi
 
-	if [[ $gpLog -eq 0 ]]; then
-		#echo -e "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
-		echo -e "${cName} $pLevel: $pMsg $tLine$tErr" 1>&2
-	else
-		if [[ -n "$gpVerbose" ]]; then
-			tVerbose="-s"
-		fi
-		logger $tVerbose -i -t $cName -p local1.$pLevel "$pLevel: $pMsg $tLine$tErr"
-	fi
+    if [[ $gpLog -eq 0 ]]; then
+        #echo -e "${cName}[$$] $pLevel: $pMsg $tLine$tErr" 1>&2
+        echo -e "${cName} $pLevel: $pMsg $tLine$tErr" 1>&2
+    else
+        if [[ -n "$gpVerbose" ]]; then
+            tVerbose="-s"
+        fi
+        logger $tVerbose -i -t $cName -p local1.$pLevel "$pLevel: $pMsg $tLine$tErr"
+    fi
 } # fLog
 
 # Main ======================================================
-export	gErr gpDebug cName gpVerbose gpLog cTmp cVer
+export gErr gpDebug cName gpVerbose gpLog cTmp cVer
 
 # -------------------
 # Set name and version of this script
@@ -217,7 +217,7 @@ export	gErr gpDebug cName gpVerbose gpLog cTmp cVer
 cName=${0##*/}
 
 # Define the version number for this script
-cVer='$Revision: 1.4 $'
+cVer='$Revision: 1.5 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
@@ -235,74 +235,73 @@ fLog notice "$cName version $cVer" $LINENO
 # -------------------
 # Get Options Section
 if [[ $# -eq 0 ]]; then
-	fError "Missing options." $LINENO
+    fError "Missing options." $LINENO
 fi
 gpFileList=""
 gpBinary=0
 gpNoExecute=0
 while getopts :bnhlxv tArg; do
-	case $tArg in
-		b)	gpBinary=1;;
-		n)	gpNoExecute=1;;
+    case $tArg in
+        b) gpBinary=1 ;;
+        n) gpNoExecute=1 ;;
 
-		h)	fUsage long;;
-		l)	gpLog=1;;
-		v)	gpVerbose="-v";;
-		x)	let gpDebug=gpDebug+1;;
-		:)	fError "Value required for option: $OPTARG" $LINENO;;
-		\?)	fError "Unknown option: $OPTARG" $LINENO;;
-	esac
+        h) fUsage long ;;
+        l) gpLog=1 ;;
+        v) gpVerbose="-v" ;;
+        x) let gpDebug=gpDebug+1 ;;
+        :) fError "Value required for option: $OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [[ $# -ne 0 ]]; then
-	gpFileList="$*"
+    gpFileList="$*"
 fi
 
 # -------------------
 # Print dump of variables
 if [[ $gpDebug -gt 2 ]]; then
-	for i in \
-		gpBinary \
-		gpNoExecute \
-		PWD \
-		cName \
-		gpDebug \
-		gpVerbose \
-		gpLog \
-		gErr \
-	; do
-		tMsg=$(eval echo -R "$i=\$$i")
-		fLog debug "$tMsg" $LINENO
-	done
+    for i in \
+        gpBinary \
+        gpNoExecute \
+        PWD \
+        cName \
+        gpDebug \
+        gpVerbose \
+        gpLog \
+        gErr; do
+        tMsg=$(eval echo -R "$i=\$$i")
+        fLog debug "$tMsg" $LINENO
+    done
 fi
 
 # -------------------
 # Validate Options and Collect File List
 
 if [[ -z "$gpFileList" ]]; then
-	fError "Missing files." $LINENO
-fi	
+    fError "Missing files." $LINENO
+fi
 
 if [[ ! -d CVS ]]; then
-	fError "You are not in a CVS working directory." $LINENO
+    fError "You are not in a CVS working directory." $LINENO
 fi
 
 export tFileList=""
 for i in $gpFileList; do
-	if [[ -d $i ]]; then
-		fLog warning "Skipping directory: $i" $LINENO
-		continue
-	fi
-	if [[ ! -f $i ]]; then
-		fLog warning "Skipping missing file: $i" $LINENO
-		continue
-	fi
-	if ! grep -q $i CVS/Entries*; then
-		fLog warning "Skipping, no CVS entry for file: $i" $LINENO
-		continue
-	fi
-	tFileList1="$tFileList1 $i"
+    if [[ -d $i ]]; then
+        fLog warning "Skipping directory: $i" $LINENO
+        continue
+    fi
+    if [[ ! -f $i ]]; then
+        fLog warning "Skipping missing file: $i" $LINENO
+        continue
+    fi
+    if ! grep -q $i CVS/Entries*; then
+        fLog warning "Skipping, no CVS entry for file: $i" $LINENO
+        continue
+    fi
+    tFileList1="$tFileList1 $i"
 done
 
 # Note: this is done with one cvs call so that it would be fast and
@@ -310,7 +309,7 @@ done
 fLog info "cvs log -h $tFileList1" $LNENO
 cvs log -h $tFileList1 2>/dev/null >$cTmp.tmp1
 if [[ $? -ne 0 ]]; then
-	fError "Could not access cvs file: $i" $LINENO
+    fError "Could not access cvs file: $i" $LINENO
 fi
 
 # Parse $cTmp.tmp1 into file keys
@@ -321,81 +320,80 @@ export tFile
 # Note: this will not work because the pipe is run in another shell
 # cat $cTmp.tmp1 | while read -a tLine; do
 
-exec 5< $cTmp.tmp1
+exec 5<$cTmp.tmp1
 while read -u 5 -a tLine; do
-	fLog debug "${tLine[0]} ${tLine[1]} ${tLine[2]} ${tLine[3]}" $LINENO
-	if [[ "${tLine[0]} ${tLine[1]}" = "Working file:" ]]; then
-		tKey=${tLine[2]}
-		tFile["${tKey}-bin"]=0
-		fLog debug "tKey=x${tKey}x" $LINENO
-		continue
-	fi
-	if [[ "${tLine[1]}" = "substitution:" && "${tLine[2]}" = "b" ]]; then
-		tFile["${tKey}-bin"]=1
-		fLog debug "binary" $LINENO
-		continue
-	fi
-	if [[ "${tLine[1]}" = "revisions:" ]]; then
-		tFile["${tKey}-rev"]=${tLine[2]}
-		fLog debug "rev=${tLine[2]}" $LINENO
-		tt=${tFile["${tKey}-rev"]}
-		fLog debug "tFile[tKey-rev]=$tt" $LINENO
-	fi
+    fLog debug "${tLine[0]} ${tLine[1]} ${tLine[2]} ${tLine[3]}" $LINENO
+    if [[ "${tLine[0]} ${tLine[1]}" = "Working file:" ]]; then
+        tKey=${tLine[2]}
+        tFile["${tKey}-bin"]=0
+        fLog debug "tKey=x${tKey}x" $LINENO
+        continue
+    fi
+    if [[ "${tLine[1]}" = "substitution:" && "${tLine[2]}" = "b" ]]; then
+        tFile["${tKey}-bin"]=1
+        fLog debug "binary" $LINENO
+        continue
+    fi
+    if [[ "${tLine[1]}" = "revisions:" ]]; then
+        tFile["${tKey}-rev"]=${tLine[2]}
+        fLog debug "rev=${tLine[2]}" $LINENO
+        tt=${tFile["${tKey}-rev"]}
+        fLog debug "tFile[tKey-rev]=$tt" $LINENO
+    fi
 done
 
 fLog debug "Keys: ${!tFile[@]}" $LINENO
 fLog debug "Values: ${!tFile[@]}" $LINENO
 
-
 tFileList2=""
 for tKey in $tFileList1; do
-	fLog debug "tKey=x${tKey}x" $LINENO
-	tRev=${tFile["${tKey}-rev"]}
-	fLog debug "tFile-rev=$tRev" $LINENO
-	tBin=${tFile["${tKey}-bin"]}
-	fLog debug "tFile-bin=$tBin" $LINENO
-	if [[ ${tFile["${tKey}-rev"]} -eq 1 ]]; then
-		fLog warning "Skipping, only one revision for: $tKey" $LINENO
-		continue
-	fi
-	if [[ $gpBinary -ne 0 && ${tFile["${tKey}-bin"]} -eq 0 ]]; then
-		fLog warning "Skipping, not a binary file: $tKey" $LINENO
-		continue
-	fi
-	tFileList2="$tFileList2 $tKey"
+    fLog debug "tKey=x${tKey}x" $LINENO
+    tRev=${tFile["${tKey}-rev"]}
+    fLog debug "tFile-rev=$tRev" $LINENO
+    tBin=${tFile["${tKey}-bin"]}
+    fLog debug "tFile-bin=$tBin" $LINENO
+    if [[ ${tFile["${tKey}-rev"]} -eq 1 ]]; then
+        fLog warning "Skipping, only one revision for: $tKey" $LINENO
+        continue
+    fi
+    if [[ $gpBinary -ne 0 && ${tFile["${tKey}-bin"]} -eq 0 ]]; then
+        fLog warning "Skipping, not a binary file: $tKey" $LINENO
+        continue
+    fi
+    tFileList2="$tFileList2 $tKey"
 done
 
 # -------------------
 # Functional Section
 
 if [[ -z "$tFileList2" ]]; then
-	fLog notice "No files were found for trimming." $LINENO
-	fCleanUp 0
+    fLog notice "No files were found for trimming." $LINENO
+    fCleanUp 0
 fi
 
 # -------------------
 if [[ $gpNoExecute -ne 0 ]]; then
-	fLog notice "Not executing." $LINENO
-	cat <<EOF
+    fLog notice "Not executing." $LINENO
+    cat <<EOF
 
 These are the files that will have revisions trimmed,
 if the -n option is not used.
 EOF
-	for i in $tFileList2; do
-		echo $i
-	done
-	fCleanUp 1
+    for i in $tFileList2; do
+        echo $i
+    done
+    fCleanUp 1
 fi
 
 # -------------------
 if [[ $gpDebug -gt 0 ]]; then
-	fLog debug "cvs admin -o ::HEAD $tFileList2" $LINENO
-	fCleanUp 1
+    fLog debug "cvs admin -o ::HEAD $tFileList2" $LINENO
+    fCleanUp 1
 fi
 
 cvs admin -o ::HEAD $tFileList2
 if [[ $? -ne 0 ]]; then
-	fError "There was an error executing:\n cvs admin -o ::HEAD $tFileList2" $LINENO
+    fError "There was an error executing:\n cvs admin -o ::HEAD $tFileList2" $LINENO
 fi
 
 fCleanUp 0

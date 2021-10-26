@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-repair-upgrade.sh,v 1.1 2019/12/17 01:45:00 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-repair-upgrade.sh,v 1.2 2021/10/26 19:26:13 bruce Exp $
 
 cat <<EOF
 Repair the kdenlive files, by doing an upgrades across the versions.
@@ -29,15 +29,14 @@ exit 1
 rm t.tmp
 tName=2017-07-29-raw3.kdenlive
 for i in \
-  Kdenlive-17.04.1b-x86_64.AppImage \
-  Kdenlive-17.12.0d-x86_64.AppImage \
-  kdenlive-18.12.1-x86_64.appimage \
-  kdenlive-19.04.3-x86_64.appimage \
-  kdenlive-19.08.3-x86_64.appimage \
-; do
-  tVer=$(grep kdenliveversion $tName | sed 's;[<>/]; ;g' | awk '{print $3}')
-  echo $i $tVer >>t.tmp
-  /rel/archive/software/ThirdParty/kdenlive/$i $tName
+    Kdenlive-17.04.1b-x86_64.AppImage \
+    Kdenlive-17.12.0d-x86_64.AppImage \
+    kdenlive-18.12.1-x86_64.appimage \
+    kdenlive-19.04.3-x86_64.appimage \
+    kdenlive-19.08.3-x86_64.appimage; do
+    tVer=$(grep kdenliveversion $tName | sed 's;[<>/]; ;g' | awk '{print $3}')
+    echo $i $tVer >>t.tmp
+    /rel/archive/software/ThirdParty/kdenlive/$i $tName
 done
 tVer=$(grep kdenliveversion $tName | sed 's;[<>/]; ;g' | awk '{print $3}')
 echo $tVer >>t.tmp

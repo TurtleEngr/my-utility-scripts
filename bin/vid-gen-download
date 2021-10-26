@@ -1,13 +1,13 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-gen-download,v 1.4 2021/05/25 07:18:09 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-gen-download,v 1.5 2021/10/26 19:26:13 bruce Exp $
 # https://www.reddit.com/r/DataHoarder/comments/aa0b1z/how_to_download_pornhub_videos_with_high_speed/
 
 pURL=$1
 
-youtube-dl --external-downloader aria2c  --external-downloader-args "-c -j 5 -x 10 --summary-interval=0" $pURL
+youtube-dl --external-downloader aria2c --external-downloader-args "-c -j 5 -x 10 --summary-interval=0" $pURL
 
 trans-sp -c
 for i in *-ph*.mp4; do
-	touch $i
-	mv -iv $i ${i%%-ph*.mp4}.mp4
+    touch $i
+    mv -iv $i ${i%%-ph*.mp4}.mp4
 done

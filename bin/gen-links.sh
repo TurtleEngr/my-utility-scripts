@@ -1,8 +1,8 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/gen-links.sh,v 1.4 2020/05/13 17:20:45 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/gen-links.sh,v 1.5 2021/10/26 19:26:09 bruce Exp $
 
 if [ $# -eq 0 ]; then
-	cat <<\EOF2
+    cat <<\EOF2
 Usage
 
 # Define vars
@@ -22,7 +22,7 @@ gen-links.sh OutFile.tmp
 
 # Now copy content of OutFile.tmp to your links.html file.
 EOF2
-	exit 1
+    exit 1
 fi
 
 # =========================
@@ -36,9 +36,9 @@ tDate=""
 
 sleep 1
 if [ -z "$tMyDate" ]; then
-	tDate="$(date +%F)"
+    tDate="$(date +%F)"
 else
-	tDate=$(date -d "$tMyDate" +%F)
+    tDate=$(date -d "$tMyDate" +%F)
 fi
 tTime="$(date +%H-%M-%S)"
 tDateId="ref-$(date -d $tDate +%F_$tTime)"

@@ -9,6 +9,6 @@ pTitle=$4
 pOrder=$5
 
 ffmpeg -i $pIn \
-	-vn -ab 128k -metadata album=$pAlbum -metadata artist=$pArtist \
-	-metadata title=${pOrder}_$pTitle -metadata track=$pOrder \
-	$tOut
+    -vn -ab 128k -metadata album=$pAlbum -metadata artist=$pArtist \
+    -metadata title=${pOrder}_$pTitle -metadata track=$pOrder \
+    $tOut

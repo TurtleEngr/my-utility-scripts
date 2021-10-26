@@ -9,7 +9,7 @@
 cAWK=awk
 which nawk 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
-	cAWK=nawk
+    cAWK=nawk
 fi
 
 # -------------------
@@ -18,22 +18,22 @@ pFileList=""
 pLevel=100
 pTab="s/	/   |/g"
 while getopts :tl: tArg; do
-	case $tArg in
-		t)	pTab="";;
-		l)	pLevel=$OPTARG;;
-		:)	echo "Error: 2 Value required for option: $OPTARG";;
-		\?)	echo "Error: 3 Unknown option: $OPTARG";;
-	esac
+    case $tArg in
+        t) pTab="" ;;
+        l) pLevel=$OPTARG ;;
+        :) echo "Error: 2 Value required for option: $OPTARG" ;;
+        \?) echo "Error: 3 Unknown option: $OPTARG" ;;
+    esac
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -ne 0 ]; then
-	pFileList="$*"
+    pFileList="$*"
 fi
 let pLevel=pLevel-1
 
-cat $pFileList | \
-$cAWK -v pLevel=$pLevel '{
+cat $pFileList |
+    $cAWK -v pLevel=$pLevel '{
 	sub("/$","",$1)
 	level = gsub("[^/]*/", "", $1)
 	if (level > pLevel) {

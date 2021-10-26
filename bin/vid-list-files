@@ -1,12 +1,12 @@
 #!/bin/bash
-#$Header: /repo/local.cvs/per/bruce/bin/vid-list-files,v 1.7 2020/11/15 23:17:46 bruce Exp $
+#$Header: /repo/local.cvs/per/bruce/bin/vid-list-files,v 1.8 2021/10/26 19:26:13 bruce Exp $
 
 if [ $# -ne 1 ]; then
     cat <<EOF
 Usage:
 	vid-list-files NAME.kdenlive
 EOF
-   exit 1
+    exit 1
 fi
 pFile=$1
 
@@ -22,8 +22,8 @@ if [ -z "$tVer" ]; then
 fi
 
 if [ -z "$tVer" ]; then
-	echo "Error: Is $pFile a kdenlive file?" >&2
-	exit 1
+    echo "Error: Is $pFile a kdenlive file?" >&2
+    exit 1
 fi
 
 rm /tmp/vid-list-files.tmp
@@ -38,43 +38,43 @@ rm /tmp/vid-list-files.tmp
 #esac
 
 for i in $(
-    grep '<property name=".*resource">' $pFile | \
-    grep -v proxy | \
-    tr ' ' '_' \
-    ); do
-	i=${i#*<property_name=\"*resource\">}
-	i=${i%</property>}
-	echo $i >>/tmp/vid-list-files.tmp
+    grep '<property name=".*resource">' $pFile |
+        grep -v proxy |
+        tr ' ' '_'
+); do
+    i=${i#*<property_name=\"*resource\">}
+    i=${i%</property>}
+    echo $i >>/tmp/vid-list-files.tmp
 done
 
 for i in $(
-    grep 'content url=' $pFile | \
-    grep -v proxy | \
-    tr ' ' '_' \
-    ); do
-	i=${i#*url=\"}
-	i=${i%\"*}
-	echo $i >>/tmp/vid-list-files.tmp
+    grep 'content url=' $pFile |
+        grep -v proxy |
+        tr ' ' '_'
+); do
+    i=${i#*url=\"}
+    i=${i%\"*}
+    echo $i >>/tmp/vid-list-files.tmp
 done
 
 tFound=0
 tMissing=0
 tSkip=0
 for i in $(sort -u /tmp/vid-list-files.tmp); do
-	if [ $i = ${i#*/*} ]; then
-		if [ ! -f $i ]; then
-			echo $i skipped >&2
-			let ++tSkip
-			continue
-		fi
-	fi
-	if [ -f $i ]; then
-		echo $i
-		let ++tFound
-	else	    
-		echo $i missing >&2
-		let ++tMissing
-	fi
+    if [ $i = ${i#*/*} ]; then
+        if [ ! -f $i ]; then
+            echo $i skipped >&2
+            let ++tSkip
+            continue
+        fi
+    fi
+    if [ -f $i ]; then
+        echo $i
+        let ++tFound
+    else
+        echo $i missing >&2
+        let ++tMissing
+    fi
 done
 cat <<EOF >&2
 Skipped: $tSkip

@@ -12,52 +12,52 @@ bash -n $tFile
 echo
 echo '================================'
 echo 'Matching []'
-cat $tFile |  grep -n '\[' | grep -v '\]'
-cat $tFile |  grep -n '\]' | grep -v '\['
-cat $tFile |  grep -n '\[ ' | grep -v ' \]'
-cat $tFile |  grep -n ' \]' | grep -v '\[ '
-cat $tFile |  grep -n 'if *\[' | grep -v '\[ '
-cat $tFile |  grep -n 'if .*\]' | grep -v ' \]'
+cat $tFile | grep -n '\[' | grep -v '\]'
+cat $tFile | grep -n '\]' | grep -v '\['
+cat $tFile | grep -n '\[ ' | grep -v ' \]'
+cat $tFile | grep -n ' \]' | grep -v '\[ '
+cat $tFile | grep -n 'if *\[' | grep -v '\[ '
+cat $tFile | grep -n 'if .*\]' | grep -v ' \]'
 echo -n 'Number of []: '
 tr -cd '[]' <$tFile | wc -c
 
 echo
 echo 'Matching ()'
-cat $tFile |  grep -n '(' | grep -v ')'
-cat $tFile |  grep -n ')' | grep -v '('
+cat $tFile | grep -n '(' | grep -v ')'
+cat $tFile | grep -n ')' | grep -v '('
 echo -n 'Number of (): '
 tr -cd '()' <$tFile | wc -c
 
 echo
 echo 'Matching {}'
-cat $tFile |  grep -n '{' | grep -v '}'
-cat $tFile |  grep -n '}' | grep -v '{'
+cat $tFile | grep -n '{' | grep -v '}'
+cat $tFile | grep -n '}' | grep -v '{'
 echo -n 'Number of {}: '
 tr -cd '{}' <$tFile | wc -c
 
 echo
 echo 'Matching ""'
-cat $tFile |  grep -n '"' | while read; do
-	c=$(echo $REPLY | tr -cd '"' | wc -c)
-	let m=c%2	
-	if [ $m -ne 0 ]; then
-		echo $REPLY
-	fi
+cat $tFile | grep -n '"' | while read; do
+    c=$(echo $REPLY | tr -cd '"' | wc -c)
+    let m=c%2
+    if [ $m -ne 0 ]; then
+        echo $REPLY
+    fi
 done
 echo -n 'Number of ": '
 tr -cd '"' <$tFile | wc -c
 
 echo
 echo "Matching ''"
-cat $tFile |  grep -n "'" | while read; do
-	c=$(echo $REPLY | tr -cd "'" | wc -c)
-	let m=c%2	
-	if [ $m -ne 0 ]; then
-		echo $REPLY
-	fi
+cat $tFile | grep -n "'" | while read; do
+    c=$(echo $REPLY | tr -cd "'" | wc -c)
+    let m=c%2
+    if [ $m -ne 0 ]; then
+        echo $REPLY
+    fi
 done
 echo -n "Number of ': "
-tr -cd "'" <$tFile  | wc -c
+tr -cd "'" <$tFile | wc -c
 
 # ----------
 # spellcheck codes

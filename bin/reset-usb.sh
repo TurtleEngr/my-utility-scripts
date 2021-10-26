@@ -5,5 +5,5 @@
 modprobe -r ftdi_sio
 modprobe -r usbserial
 
-modprobe  ftdi_sio
-modprobe  usbserial
+modprobe ftdi_sio
+modprobe usbserial
