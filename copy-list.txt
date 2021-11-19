@@ -38,6 +38,7 @@ disable-screen-saver
 dosunix
 dump-to-from-s3
 dup-words.sh
+duration.sh
 earthclock
 ed
 encrypt.sh
