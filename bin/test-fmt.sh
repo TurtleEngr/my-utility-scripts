@@ -1,10 +1,10 @@
-#!/usr/bin/bash
+#!/bin/bash
 # $Header: /repo/local.cvs/per/bruce/bin/vid-trim-rev,v 1.3 2021/10/26 19:26:13 bruce Exp $
 
 if [ $# -ne 2 -o "x$1" = "x-h" ]; then
-	cat <<EOF
+    cat     <<EOF
 Usage:
-	vid-rm-trim File Rel
+        vid-rm-trim File Rel
 
 Rel syntax:
     rev1:rev2   Between rev1 and rev2, including rev1 and rev2.
@@ -29,23 +29,23 @@ export gpRel=$2
 # Validate
 
 if [ ! -f $gpFile ]; then
-    	echo "Error: could not find $gpFile"
-    	exit 1
+    echo     "Error: could not find $gpFile"
+    exit     1
 fi
 if [ ! -f CVS/Root ]; then
-    	  echo "Error: You are not in a CVS workspace."
-    	  exit 1
+    echo       "Error: You are not in a CVS workspace."
+    exit       1
 fi
 
 export CVSROOT=$(cat CVS/Root)
 export cPath=$(cat CVS/Repository)
 
 if [ ! -f $CVSROOT/$cPath/${gpFile},v ]; then
-    	cat <<EOF
+    cat     <<EOF
 Error: could not find $CVSROOT/$cPath/${gpFile},v
-	Is $CVSROOT mounted?
+        Is $CVSROOT mounted?
 EOF
-    	exit 1
+    exit     1
 fi
 
 echo
