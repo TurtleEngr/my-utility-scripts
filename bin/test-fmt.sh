@@ -33,8 +33,8 @@ if [ ! -f $gpFile ]; then
     exit     1
 fi
 if [ ! -f CVS/Root ]; then
-    echo     "Error: You are not in a CVS workspace."
-    exit     1
+    echo       "Error: You are not in a CVS workspace."
+    exit       1
 fi
 
 export CVSROOT=$(cat CVS/Root)
