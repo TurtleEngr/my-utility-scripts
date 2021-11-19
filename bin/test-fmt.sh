@@ -2,7 +2,7 @@
 # $Header: /repo/local.cvs/per/bruce/bin/vid-trim-rev,v 1.3 2021/10/26 19:26:13 bruce Exp $
 
 if [ $# -ne 2 -o "x$1" = "x-h" ]; then
-    cat <<EOF
+    cat       <<EOF
 Usage:
         vid-rm-trim File Rel
 
