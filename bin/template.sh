@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.52 $ $Date: 2021/10/26 19:26:12 $ GMT
+# $Revision: 1.54 $ $Date: 2021/10/29 04:14:06 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -56,13 +56,13 @@ fUsage()
             fComUsage -f $cCurDir/$cName -s $pStyle -t "$cName Usage"
             ;;
         int)
-            fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
             ;;
         int-html)
-            fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
             ;;
         int-md)
-            fComUsage -a -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
             ;;
         *)
             fComUsage -f $cCurDir/$cName -s short
@@ -71,12 +71,19 @@ fUsage()
     exit 1
 
     # POD Syntax: https://perldoc.perl.org/perlpod
+    # pod2man wants the sections defined in this order.
+    # Empty sections can be commented out with "=for comment". For example:
+    # =for comment =head1 ERRORS
     cat <<\EOF >/dev/null
 =pod
 
-=head1 NAME
+=for text ========================================
 
-SCRIPTNAME - DESCRIPTION
+=for html <hr/>
+
+=head1 NAME SCRIPTNAME
+
+SHORT-DESCRIPTION
 
 =head1 SYNOPSIS
 
@@ -272,21 +279,19 @@ See Globals section for details.
 
 HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug, gpUnitDebug
 
-=head1 FILES
+=for comment =head1 FILES
 
 =head1 SEE ALSO
 
 shunit2
 
-=head1 NOTES
+=for comment =head1 NOTES
 
 =head1 CAVEATS
 
 [Things to take special care with; sometimes called WARNINGS.]
 
 =head1 DIAGNOSTICS
-
-[All possible messages the program can print out--and what they mean.]
 
 To verify the script is internally OK, run: SCRIPTNAME -T all
 
@@ -304,9 +309,9 @@ NAME
 
 =head1 HISTORY
 
-(c) Copyright 2021 by COMPANY
+GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.52 $ $Date: 2021/10/26 19:26:12 $ GMT 
+$Revision: 1.54 $ $Date: 2021/10/29 04:14:06 $ GMT 
 
 =cut
 EOF
@@ -558,7 +563,7 @@ export gErr gpDebug gpFacility gpLog gpVerbose
 export gpTest gpUnitDebug SHUNIT_COLOR
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.52 $'
+cVer='$Revision: 1.54 $'
 fSetGlobals
 
 # -------------------

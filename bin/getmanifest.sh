@@ -185,7 +185,9 @@ fPkgList()
 
     if which dpkg >/dev/null 2>&1; then
         fCmd PkgList 'dpkg -l'
-        fCmd PkgInfo "dpkg -i \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+	# Fix these, so they list the pkg name, then the desc
+##        fCmd PkgInfo "dpkg -p \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+##        fCmd PkgFiles "dpkg -L \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
     fi
 
     if [ -d /etc/zypp ]; then
@@ -214,7 +216,13 @@ fLinuxCommon()
     if which inxi &>/dev/null; then
         fCmd SysInfo 'inxi -c 0 -F'
     fi
-
+    if which lshw &>/dev/null; then
+        fCmd lshw 'lshw'
+    fi
+    if which hwinfo &>/dev/null; then
+        fCmd hwinfo 'hwinfo --short'
+    fi
+    
     fCmd Partition 'cat /proc/partitions' /proc/partitions
     fCmd Mount 'cat /proc/mounts' /proc/mounts
     fCmd DiskSize 'df -m'

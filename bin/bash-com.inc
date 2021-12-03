@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.6 $ $Date: 2021/10/26 19:26:08 $ GMT
+# $Revision: 1.7 $ $Date: 2021/10/29 04:14:06 $ GMT
 
 # --------------------------------
 fBashComInternalDoc()
@@ -9,6 +9,10 @@ fBashComInternalDoc()
     # This should be the first =internal-pod
     cat <<\EOF >/dev/null
 =internal-pod
+
+=internal-for text ========================================
+
+=internal-for html <hr/>
 
 =internal-head1 bash-com.inc Internal Documentation
 
@@ -88,7 +92,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.6 $'
+	cVer='$Revision: 1.7 $'
 
 =internal-head3 Documentation Format
 
@@ -163,7 +167,7 @@ fComSetGlobals()
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.6 $'
+    #cVer='$Revision: 1.7 $'
 
     if [ "$cVer" != "${cVer#*' '}" ]; then
         cVer=${cVer#*' '}
@@ -265,8 +269,7 @@ fComCheckDeps()
     done
 
     if [ $tErr -eq 2 ]; then
-        echo "Error: Missing one or more required programs."
-        fCleanUp
+        fError2 -m "Missing one or more required programs." -l $LINENO
     fi
     if [ $tErr -eq 1 ]; then
         fLog2 -p warning -m "Missing some some optional programs." -l $LINENO
@@ -366,7 +369,9 @@ fComUsage()
         short | usage)
             tProg=pod2usage
             if [ $pInt -ne 0 ]; then
-                tProg="pod2text | head -n 24"
+	        # This fails, don't know why
+                tProg='pod2text | head -n 24'
+                tProg=pod2text
             fi
             ;;
         man)
@@ -379,7 +384,7 @@ fComUsage()
             tProg=pod2text
             ;;
         html)
-            tProg="pod2html"
+            tProg=pod2html
             ;;
         md)
             tProg=pod2markdown
@@ -411,8 +416,13 @@ fComUsage()
             # shellcheck disable=SC2002
             cat $pFileList | $tProg --title="$pTitle" | $tTidy
         else
-            # shellcheck disable=SC2002
-            cat $pFileList | $tProg
+	    if [ "$pStyle" = "short" ]; then
+		# shellcheck disable=SC2002
+            	cat $tFileList | pod2text | head -n 20
+	    else
+		# shellcheck disable=SC2002
+            	cat $tFileList | $tProg
+	    fi
         fi
     else
         if [ "$pStyle" = "html" ]; then
@@ -469,6 +479,7 @@ fFmtLog()
     local tLevel
     local tLine
     local tErr
+
     # Use this to turn PID on/off in logs
     local tPID_Flag=0
     local tPID=""
@@ -496,7 +507,7 @@ fFmtLog()
 
     # Check verbose
     if [ $gpVerbose -eq 0 ] &&
-        [ "$pLevel" = "notice" -o "$pLevel" = "info" ]; then
+        [ "$pLevel" = "notice" ] || [ "$pLevel" = "info" ]; then
         return
     fi
     if [ $gpVerbose -eq 1 ] && [ "$pLevel" = "info" ]; then
@@ -516,7 +527,7 @@ fFmtLog()
     fi
 
     if [ $tPID_Flag -eq 1 ]; then
-        tPID="[$cPID]"
+        tPID="[$tPID]"
         tPID_Opt="-i"
     fi
 
@@ -641,7 +652,6 @@ fLog2()
     local OPTARG=1
     local OPTIND
     local tArg
-
     while getopts :m:p:l:e: tArg; do
         case $tArg in
             m) pMsg="${OPTARG}" ;;

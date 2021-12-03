@@ -88,6 +88,7 @@ if [ $tLogIt -ne 0 ]; then
     if [ -z $tFirstFile ]; then
         tFirstFile=$tDefLog
     fi
+    head -n 2 $tFirstFile
     if [ $tArchive -ne 0 -a -d ~/bc ]; then
         read -p "Archive $tFirstFile (y/n)? "
         if [ "$REPLY" = 'y' ]; then
@@ -101,8 +102,9 @@ if [ $tLogIt -ne 0 ]; then
                 echo "Archiving: $tFirstFile"
                 cd $cMyLogs
                 cvs update
-                cp $tFirstFile $cMyLogs
+                cp $tFirstFile .
                 cvs ci -m "Updated"
+		cp ${tFirstFile##*/} $tFirstFile
                 cd - 2>/dev/null
             else
                 echo "Not archived. Missing $cMyLogs"

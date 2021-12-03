@@ -74,12 +74,13 @@ tr -cd "'" <$tFile | wc -c
 # SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
 # SC2219: Instead of 'let expr', prefer (( expr )) .
 # SC2230: which is non-standard. Use builtin 'command -v' instead.
+# SC2103: Use a ( subshell ) to avoid having to cd back.
 
 echo
 echo '================================'
-echo 'shellcheck -e SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230'
+echo 'shellcheck -e SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230,SC2103'
 echo
-shellcheck -e SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230 $tFile
+shellcheck -x -e SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230,SC2103 $tFile
 
 cat <<EOF
 
