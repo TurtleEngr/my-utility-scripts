@@ -99,6 +99,7 @@ proj2html.sh
 proj2html.xsl
 ps2pdf.sh
 quick-dump.sh
+random.sh
 rc.local
 re-encrypt.sh
 reset-usb.sh
