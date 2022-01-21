@@ -1,0 +1,77 @@
+#!/bin/bash
+
+if [ $# -ne 0 ]; then
+    cat <<\EOF
+
+This script has been designed to work as a "git clean filter" Read
+from stdin and output to stdout. Expand tabs and remove trailing
+whitespace.  If problems, it exits with an error and outputs nothing,
+so check!
+
+To use as a "git clean filter"
+
+    In ~/.gitconfig add:
+        [filter "bash-fmt"]
+	    clean = bash-fmt
+
+    In the top repo's dir add .gitattributes
+    For example:
+        *.sh	filter=bash-fmt
+        *.inc	filter=bash-fmt
+
+To use as "safe" script:
+
+    for tFile in $*; do
+        # optional: leave a backup copy
+        cp -pf --backup=t $tFile .$tFile.bak
+        # this is done to preserve permissions
+        cp -pf $tFile .$tFile.tmp
+        if bash-fmt <$tFile >.$tFile.tmp; then
+            mv .$tFile.tmp $tFile
+        else
+            rm .$tFile.tmp
+        fi
+    done
+
+EOF
+    exit 1
+fi
+
+# --------------------
+cInFile=/tmp/in-$$.tmp
+cOutFile=/tmp/out-$$.tmp
+
+cat >$cInFile
+
+head -n 1 <$cInFile | grep -q '#!/bin/bash' >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    rm -f $cInFile $cOutFile >/dev/null 2>&1
+    exit 1
+fi
+
+bash -n <$cInFile >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    rm -f $cInFile $cOutFile >/dev/null 2>&1
+    exit 1
+fi
+
+# expand tabs, remove trailing whitespace, and try formatting
+expand <$cInFile | \
+    sed -E 's/[[:space:]]*$//' | \
+    'shfmt' -i 4 -ci -fn >$cOutFile 2>/dev/null
+if [ $? -ne 0 ]; then
+    rm -f $cInFile $cOutFile >/dev/null 2>&1
+    exit 1
+fi
+
+# Is the formatted file empty?
+if [ ! -s $cOutFile ]; then
+    rm -f $cInFile $cOutFile >/dev/null 2>&1
+    exit 1
+fi
+
+# All OK so output the formatted file
+cat <$cOutFile
+rm -f $cInFile $cOutFile >/dev/null 2>&1
+
+exit 0
