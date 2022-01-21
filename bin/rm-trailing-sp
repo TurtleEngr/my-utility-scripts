@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# --------------------
+fIsBinary()
+{
+    local pFile="$1"
+    grep -Hm1 '^' <"$pFile" | grep -q '^Binary'
+    # Copied from: https://unix.stackexchange.com/questions/275516/is-there-a-convenient-way-to-classify-files-as-binary-or-text
+}
+
+# ========================================
+# Main
+
+# ----------
+if [ $# -eq 0 ]; then
+    cat <<EOF
+Usage:
+    rm-trailing-sp FILE...
+    
+Remove trailing whitespace. Also convert tabs to spaces with
+"expand". This helps tracking differences between file versions.
+For normalizing indents, in scripts, see: bash-fmt
+
+Only use this on text files. The script skips files when the "file"
+command does not show "ASCII text". But don't depend on this check.
+It is best to only specifiy text files in the command line.  Backup
+the files, if you want to be sure non-text files are not damaged.
+
+EOF
+    exit 1
+fi
+
+# ----------
+for tFile in $*; do
+    if [ ! -f $tFile ]; then
+        echo "Skipping non-file $tFile"
+        continue
+    fi
+
+    if [ ! -w $tFile ]; then
+        echo "Skipping non-writable $tFile"
+        continue
+    fi
+
+    file $tFile | grep -q 'text'
+    if [ $? -ne 0 ]; then
+        echo "Skipping binary $tFile"
+        continue
+    fi
+
+    if fIsBinary $tFile; then
+        echo "Skipping binary $tFile"
+        continue
+    fi
+
+    if [ ! -w $tFile ]; then
+        echo "Skipping read-only $tFile"
+        continue
+    fi
+
+    tExec=0
+    if [ -x $tFile ]; then
+        tExec=1
+    fi
+
+    expand <$tFile | sed -E 's/[[:space:]]*$//' >$tFile.tmp
+    mv $tFile.tmp $tFile
+    if [ $tExec -ne 0 ]; then
+        chmod a+rx $tFile
+    fi
+done
