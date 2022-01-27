@@ -15,9 +15,9 @@ fIsBinary()
 if [ $# -eq 0 ]; then
     cat <<EOF
 Usage:
-    rm-trailing-sp FILE...
-    
-Remove trailing whitespace. Also convert tabs to spaces with
+    rm-trailing-sp [-t] FILE...
+
+Remove trailing whitespace. If -t, also convert tabs to spaces with
 "expand". This helps tracking differences between file versions.
 For normalizing indents, in scripts, see: bash-fmt
 
@@ -31,6 +31,11 @@ EOF
 fi
 
 # ----------
+pTab=0
+if [ "x$1" = "x-t" ]; then
+    pTab=1
+fi
+
 for tFile in $*; do
     if [ ! -f $tFile ]; then
         echo "Skipping non-file $tFile"
@@ -63,7 +68,12 @@ for tFile in $*; do
         tExec=1
     fi
 
-    expand <$tFile | sed -E 's/[[:space:]]*$//' >$tFile.tmp
+    if [ ${pTab:-0} -eq 1 ]; then
+        expand <$tFile | sed -E 's/[[:space:]]*$//' >$tFile.tmp
+    else
+        cat <$tFile | sed -E 's/[[:space:]]*$//' >$tFile.tmp
+    fi
+
     mv $tFile.tmp $tFile
     if [ $tExec -ne 0 ]; then
         chmod a+rx $tFile
