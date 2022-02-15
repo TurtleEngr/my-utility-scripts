@@ -146,7 +146,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.23 $ $Date: 2021/10/26 19:26:13 $ GMT 
+$Revision: 1.24 $ $Date: 2021/12/22 03:14:08 $ GMT 
 
 =cut
 EOF
@@ -262,6 +262,9 @@ function fKLVer()
         20.04) tUse=kdenlive-20.04.0b-x86_64.appimage ;;
         20.12) tUse=kdenlive-20.12.3a-x86_64.appimage ;;
         21.04) tUse=kdenlive-21.04.3b-x86_64.appimage ;;
+	21.08) tUse=kdenlive-21.08.0a-x86_64.appimage ;;
+	21.11) tUse=kdenlive-21.11.70-9295653-x86_64.appimage ;;
+	21.12) tUse=kdenlive-21.12.0-x86_64.appimage ;;
         *)
             fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
             ;;
@@ -374,7 +377,7 @@ export gErr=0
 
 # -------------------
 # Configuration
-export cLatestVer=20.12
+export cLatestVer=21.12
 #export cKLBin=/rel/archive/software/ThirdParty/kdenlive
 export cKLBin=/usr/local/bin
 
