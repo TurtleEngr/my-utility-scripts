@@ -1,26 +1,56 @@
 #!/bin/bash
 
-if [ $# -ne 0 ]; then
-    if [ ".$1" = ".-h" ]; then
-        cat <<EOF
+fUsage()
+{
+    cat <<\EOF
 Usage:
-	lstree [-d] [-L N] [other "tree" options] [dir...]
+    lstree [-d] [-L N] [-C] [-T] [-c] [-p] [other "tree" options] [dir...]
+
 -d - dir only
 -L N - limit to N levels
+-C adds - -I 'CVS|.git|.svn|*~|tmp|*.tmp'
+-T - replace '|' with tabs
+-c - compact, replace tabs with 4 spaces
+-p - use '--' before names
+
 dir - default $PWD
 
 For more options see: man tree
-Note: do not use tree's -I opton.
+Note: do not use the tree's -I opton with -C
+
+Current options used:
+    -a -Q -F --dirsfirst --charset=ascii -n --noreport
+
 EOF
-        exit 1
-    fi
+    exit 1
+} # fUsage
+
+export tDefault="-a -Q -F --dirsfirst --charset=ascii -n --noreport"
+
+export pDirOnly=""
+export pCode=""
+export pTab=""
+export pCompact="cat"
+export pPlain="s/|-- /|/g; s/    |/|   |/g"
+while getopts :hdL:CTcp tArg; do
+    case $tArg in
+        h) fUsage ;;
+	d) pDirOnly="-d" ;;
+	L) pLevel="-L $OPTARG" ;;
+	C) pCode="-I 'CVS|.git|.svn|*~|tmp|*.tmp'" ;;
+	T) pTab="s/|//g; s/   /\t/g" ;;
+	c) pCompact="expand -t 4" ;;
+	p) pPlain=""
+    esac
+done
+shift $((OPTIND - 1))
+if [ $# -ne 0 ]; then
+    pOpt="$*"
 fi
 
-# -C:  -I 'CVS|*~|tmp|*.tmp' $* | tr -d '"'
-# -T: | tr -d '|' | awk '{gsub("   ","\t"); print $0}'
-
-tree -a -Q -F -n --dirsfirst --charset=ascii --noreport -I 'CVS|*~|tmp|*.tmp' $* | sed '
-s/`/|/g;
-s/|-- /|/g;
-s/    |/|   |/g
-' | tr -d '"' | tr -d '|' | awk '{gsub("   ","\t"); print $0}'
+tree $tDefault $pDirOnly $pLevel $pCode $pOpt | sed "
+    s/\`/|/g
+    $pPlain
+    s/\"//g
+    $pTab
+" | $pCompact
