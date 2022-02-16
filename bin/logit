@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.5 2022/02/16 00:04:08 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.6 2022/02/16 02:27:24 bruce Exp $
 
 # --------------------
 fUsage()
@@ -239,7 +239,7 @@ function fCalc(pStartSec,pStartMsg,pStopSec,pStopMsg) {
    tDiff = pStopSec - pStartSec
    gTotal += tDiff
    tDiffStr = fTime(tDiff)
-   print tDiffStr ",\"" pStartMsg "\",\"" pStopMsg "\""
+   print tDiffStr "," pStartMsg "," pStopMsg
 } # fCalc
 
 BEGIN {
@@ -247,7 +247,7 @@ BEGIN {
     InStart = 0
 }
 
-/, *start/ {
+/," *start/ {
     if (InStart) {
         # Implied stop
         fCalc(gSec,gMsg,$4,$7)
@@ -258,7 +258,7 @@ BEGIN {
    next
 }
 
-/, *stop/ {
+/," *stop/ {
    InStart = 0
    fCalc(gSec,gMsg,$4,$7)
    gSec = $4
@@ -311,7 +311,7 @@ while getopts hd:s:mr tArg; do
 	    gpFile=$gpLogDir/$gpFile
 	    ;;
         s)
-	    if ! date --date="$OPTARG" >/dev/nul 2>&1; then
+	    if ! date --date="$OPTARG" >/dev/null 2>&1; then
 	        echo "Error: Invalid date: -s $OPTARG"
 	    fi
 	    gpDate="$OPTARG"
