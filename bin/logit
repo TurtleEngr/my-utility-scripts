@@ -1,54 +1,99 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/Attic/logit,v 1.4 2022/02/15 20:50:39 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.5 2022/02/16 00:04:08 bruce Exp $
 
 # --------------------
 fUsage()
 {
+    # Quick help, run this:
+    # SCRIPTNAME -h
+
+    local pLong="$1"
+
+    if [ -z "$pLong" ]; then
+        pod2usage $0
+	exit 1
+    fi
+    pod2text $0 | more
+    exit 1
+    # -----------
     cat <<\EOF
-Usage
-	logit    - this help
-	logit -h - this help
+=head1 NAME logit
+
+Keep a log of your activity.
+
+=head1 SYNOPSIS
+
+	logit		# usage help
+	logit -h   	# long help
 
 	logit [-d pDir] [-s "pDate"] [start|begin] [pText]
 	logit [-d pDir] [-s "pDate"] [stop|done|end|finish] [pText]
-	logit [-d pDir] [-s "pDate"] [pText]
+	logit [-d pDir] [-s "pDate"] pText
 
-	logit -m
-	logit -r
+	logit -m  	# merge log files
+	logit -r 	# report (after merge)
+	
+=head1 DESCRIPTION
 
-Env Var:
-	gpLogDate=${$gpDate:-now}	# -s
-	gpLogDir=${gpLogDir:-$PWD}	# -d
-	gpLogFile=${gpFile:-logtime.csv}
+logit is a simpler version of logtime. It will log pText to
+logtime.csv. The first "word" of pText will be looked at to
+see if the log is a start or stop. The word will be normalized
+to only be a lower case start/stop.
 
-Description
-	logit is a simpler version of logtime. It will log pText to
-	logtime.csv. The first "word" of pText will be looked at to
-	see if the log is a start or stop. The word will be normalized
-	to only be a lower case start/stop.
+=head1 OPTIONS
 
-Format of logtime.csv
-	YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
-	1          2        3  4   5    6   7
-Options
-	-d pDir - log to pDir/logtime.csv. Default: $PWD
-	          Can also be set with env.var gpLogDate
+=over 4
 
-	-s pDate - Change the date/time pDate. Default: now
-	   	   This is useful if you forgot to enter a start time.
+=item B<-d pDir>
 
-	-m - merge all the logtime.csv files found in current dir and
-	     below. The lines will be sorted and duplicates removed.
-	     The output will be saved in $PWD/logtime.csv
+log to pDir/logtime.csv. Can also be set with env.var gpLogDate
+Default: $PWD
+
+=item B<-s pDate>
+
+Change the date/time pDate.  This is useful if you forgot to enter a
+start time.  Default: now
+
+=item B<-m>
+
+Merge all the logtime.csv files found in current dir and below. The
+lines will be sorted and duplicates removed.  The output will be saved
+in $PWD/logtime.csv
 	    
-	-r - Output a summary report 
-Example
+=item B<-r>
+
+Output a summary report. There needs to be an equal number of "start"
+an "stop" logs.
+
+Report output format:
+
+	,Text
+	ElapsedTime,StartText,StopText
+
+=item B<-h>
+
+This help.
+
+=back
+
+=head1 RETURN VALUE
+
+ 0  - OK
+ !0 - problem
+
+=for comment =head1 ERRORS
+
+=head1 EXAMPLES
+
 	cd project/beach
 	logit start project
+	# Creates: project/beach/logtime.csv
+
 	cd project/beach/edit
 	# Run editor
 	logit fixed format
 	# Creates: project/beach/edit/logtime.csv
+
 	cd ../render
 	# Add forgotten start time:
 	logit -s 7:00pm start editing
@@ -58,17 +103,65 @@ Example
 	sleep 300
 	logit stop  rendering
 	logit stop project
+
 	cd ..
 	logit -m
 	# Creates: project/beach/logtime.csv
-	# Merged: project/beach/logtime.csv,
+	# Merges: project/beach/logtime.csv,
 	# project/beach/edit/logtime.csv,
 	# project/beach/render/logtime.csv
 
 	logit -r
 
-See also
-	logtime, and timelog.sh
+=head1 ENVIRONMENT
+
+	gpLogDate=${$gpDate:-now}	# -s
+	gpLogDir=${gpLogDir:-$PWD}	# -d
+	gpLogFile=${gpFile:-logtime.csv}
+
+=head1 FILES
+
+	logtime.csv
+
+=head2 Format of logtime.csv
+	
+	YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
+	1          2        3  4   5    6   7
+
+=head1 SEE ALSO
+
+	logtime
+	timelog.sh
+
+=head1 NOTES
+
+logit is designed so that you can run it in any directory. It is
+simpler than the "logtime" script, which tries to find a "top"
+logtime.csv file
+
+For the report, if another 'start' is seen before a 'stop', then that
+start's time will be used as and implied stop.
+
+If a 'stop' is seen, but there was not 'start', then the time of the
+last log message will be used for an implied start.
+
+=for comment =head1 CAVEATS
+
+=for comment =head1 DIAGNOSTICS
+
+=for comment =head1 BUGS
+
+=for comment =head1 RESTRICTIONS
+
+=head1 AUTHOR
+
+TurtleEngr
+
+=head1 HISTORY
+
+GPLv3 (c) Copyright 2022
+
+=cut
 EOF
     exit 1
 } # fUsage
@@ -89,13 +182,18 @@ fLogIt()
 	    gpTag="stop"
 	    gpText="$gpTag $gpText"
 	    ;;
-        *) gpTag="" ;;
+	na)
+	    gpTag=""
+	    ;;
+        *)
+	    gpTag=""
+	    ;;
     esac
 
     # --------------------
     # Log the message
 
-    tMsg="$(date --date="$gpDate" +'%F,%H:%M:%S,%z,%s'),$HOSTNAME,$cCurDir,${gpTag} $gpText"
+    tMsg="$(date --date="$gpDate" +'%F,%H:%M:%S,%z,%s'),$HOSTNAME,$cCurDir,\"$gpText\""
     echo $tMsg | tee -a $gpFile
 } # fLogIt
 
@@ -121,9 +219,8 @@ fReport()
     tStartCount=$(grep ', start' $gpFile | wc -l)
     tStopCount=$(grep ', stop' $gpFile | wc -l)
     if [ $tStartCount -ne $tStopCount ]; then
-        echo "Error: StartCount=$tStartCount; StopCount=$tStopCount"
+        echo "Warning: StartCount=$tStartCount; StopCount=$tStopCount"
 	echo "Fix by manually adding (with -s) for missing starts or stops."
-	exit 1
     fi
 
     # YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
@@ -137,33 +234,49 @@ function fTime(pSec) {
     tStr = sprintf("%02dd:%02dh:%02dm:%02ds", tDay, tHour, tMin, tSec)
     return tStr
 } # fTime
-BEGIN {
-   i = 0
-}
-/, start/ {
-   ++i
-   tSecStack[i] = $4
-   tMsgStack[i] = $7
-   next
-}
-/, stop/ {
-   tStartSec = tSecStack[i]
-   tStartMsg = tMsgStack[i]
-   --i
-   tStopSec = $4
-   tStopMsg = $7
-   tDiff = tStopSec - tStartSec
-   tTotal += tDiff
+
+function fCalc(pStartSec,pStartMsg,pStopSec,pStopMsg) {
+   tDiff = pStopSec - pStartSec
+   gTotal += tDiff
    tDiffStr = fTime(tDiff)
-   print tDiffStr "," tStartMsg "," tStopMsg
+   print tDiffStr ",\"" pStartMsg "\",\"" pStopMsg "\""
+} # fCalc
+
+BEGIN {
+    i = 0
+    InStart = 0
+}
+
+/, *start/ {
+    if (InStart) {
+        # Implied stop
+        fCalc(gSec,gMsg,$4,$7)
+    }
+   InStart = 1
+   gSec = $4
+   gMsg = $7
    next
 }
+
+/, *stop/ {
+   InStart = 0
+   fCalc(gSec,gMsg,$4,$7)
+   gSec = $4
+   gMsg = $7
+   next
+}
+
 {
+    if (! InStart)
+        gSec = $4
+	gMsg = $7
+    fi
     print "," $7
     next
 }
+
 END {
-    tTotalStr = fTime(tTotal)
+    tTotalStr = fTime(gTotal)
     print tTotalStr ",total"
 }
 '
@@ -182,17 +295,20 @@ declare -l gpTag
 export gpLogDir=${gpLogDir:-$cCurDir}
 export gpFile=${gpFile:-logtime.csv}
 export gpDate=${gpDate:-now}
+export gpText=none
+export gpTag=na
+
 while getopts hd:s:mr tArg; do
     case $tArg in
         h)
-	    fUsage
+	    fUsage long
 	    ;;
         d)
 	    if [ ! -d $OPTARG ]; then
 	        echo "Error: Could not fine directory: -d $OPTARG"
 	    fi
 	    gpLogDir=$OPTARG
-	    gpFile=$gpLogDir/logtime.csv
+	    gpFile=$gpLogDir/$gpFile
 	    ;;
         s)
 	    if ! date --date="$OPTARG" >/dev/nul 2>&1; then
