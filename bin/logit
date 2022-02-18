@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.6 2022/02/16 02:27:24 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.7 2022/02/18 04:10:24 bruce Exp $
 
 # --------------------
 fUsage()
@@ -115,9 +115,9 @@ This help.
 
 =head1 ENVIRONMENT
 
-	gpLogDate=${$gpDate:-now}	# -s
+	gpLogDate=${$gpLogDate:-now}	# -s
 	gpLogDir=${gpLogDir:-$PWD}	# -d
-	gpLogFile=${gpFile:-logtime.csv}
+	gpLogFile=${gpLogFile:-logtime.csv}
 
 =head1 FILES
 
@@ -171,38 +171,38 @@ fLogIt()
 {
     local tMsg
 
-    case $gpTag in
+    case $gpLogTag in
         start|begin)
-    	    gpText=${gpText#$gpTag}
-	    gpTag="start"
-	    gpText="$gpTag $gpText"
+    	    gpLogText=${gpLogText#$gpLogTag}
+	    gpLogTag="start"
+	    gpLogText="$gpLogTag $gpLogText"
 	    ;;
         stop|done|end|finish)
-	    gpText=${gpText#$gpTag}
-	    gpTag="stop"
-	    gpText="$gpTag $gpText"
+	    gpLogText=${gpLogText#$gpLogTag}
+	    gpLogTag="stop"
+	    gpLogText="$gpLogTag $gpLogText"
 	    ;;
 	na)
-	    gpTag=""
+	    gpLogTag=""
 	    ;;
         *)
-	    gpTag=""
+	    gpLogTag=""
 	    ;;
     esac
 
     # --------------------
     # Log the message
 
-    tMsg="$(date --date="$gpDate" +'%F,%H:%M:%S,%z,%s'),$HOSTNAME,$cCurDir,\"$gpText\""
-    echo $tMsg | tee -a $gpFile
+    tMsg="$(date --date="$gpDate" +'%F,%H:%M:%S,%z,%s'),$HOSTNAME,$cCurDir,\"$gpLogText\""
+    echo $tMsg | tee -a $gpLogFile
 } # fLogIt
 
 # --------------------
 fMerge()
 {
-    echo "Merging: $(find * -type f -name $gpFile)"
-    cat $(find * -type f -name $gpFile) | sort -u >t.tmp
-    mv -f t.tmp $gpFile
+    echo "Merging: $(find * -type f -name $gpLogFile)"
+    cat $(find * -type f -name $gpLogFile) | sort -u >t.tmp
+    mv -f t.tmp $gpLogFile
     exit 0
 } # fMerge
 
@@ -212,12 +212,12 @@ fReport()
     local tStartCount
     local tStopCount
     
-    if [ ! -f $gpFile ]; then
-	echo "Error: Not found: $gpFile"
+    if [ ! -f $gpLogFile ]; then
+	echo "Error: Not found: $gpLogFile"
         exit 1
     fi
-    tStartCount=$(grep ', start' $gpFile | wc -l)
-    tStopCount=$(grep ', stop' $gpFile | wc -l)
+    tStartCount=$(grep ', start' $gpLogFile | wc -l)
+    tStopCount=$(grep ', stop' $gpLogFile | wc -l)
     if [ $tStartCount -ne $tStopCount ]; then
         echo "Warning: StartCount=$tStartCount; StopCount=$tStopCount"
 	echo "Fix by manually adding (with -s) for missing starts or stops."
@@ -225,7 +225,7 @@ fReport()
 
     # YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
     # 1          2        3  4   5    6   7
-    cat $gpFile | awk -F, '
+    cat $gpLogFile | awk -F, '
 function fTime(pSec) {
     tDay = int(pSec/60/60/24)
     tHour = int(pSec/60/60) - tDay*24
@@ -291,12 +291,12 @@ fi
 # --------------------
 # Get args
 export cCurDir=$PWD
-declare -l gpTag
+declare -l gpLogTag
 export gpLogDir=${gpLogDir:-$cCurDir}
-export gpFile=${gpFile:-logtime.csv}
+export gpLogFile=${gpLogFile:-logtime.csv}
 export gpDate=${gpDate:-now}
-export gpText=none
-export gpTag=na
+export gpLogText=none
+export gpLogTag=na
 
 while getopts hd:s:mr tArg; do
     case $tArg in
@@ -308,7 +308,7 @@ while getopts hd:s:mr tArg; do
 	        echo "Error: Could not fine directory: -d $OPTARG"
 	    fi
 	    gpLogDir=$OPTARG
-	    gpFile=$gpLogDir/$gpFile
+	    gpLogFile=$gpLogDir/$gpLogFile
 	    ;;
         s)
 	    if ! date --date="$OPTARG" >/dev/null 2>&1; then
@@ -328,8 +328,8 @@ while getopts hd:s:mr tArg; do
 done
 shift $((OPTIND - 1))
 if [ $# -ne 0 ]; then
-    gpText="$*"
-    gpTag=$1
+    gpLogText="$*"
+    gpLogTag=$1
 fi
 
 fLogIt
