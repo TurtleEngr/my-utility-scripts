@@ -119,7 +119,7 @@ AppImage binaries.
 
 =head1 SEE ALSO
 
-logtime
+logit
 
 =head1 NOTES
 
@@ -146,7 +146,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.24 $ $Date: 2021/12/22 03:14:08 $ GMT 
+$Revision: 1.25 $ $Date: 2022/02/18 04:10:24 $ GMT 
 
 =cut
 EOF
@@ -213,25 +213,25 @@ function fLog()
 # ------------------
 function fFileCheck()
 {
-    # Input: gpFile
+    # Input: gpKdenFile
     # Ouput: gFileVer
-    if [ -z "$gpFile" ]; then
+    if [ -z "$gpKdenFile" ]; then
         gFileVer=""
         return
     fi
 
-    if [ ! -w $gpFile ]; then
-        if [ ! -w $gpFile.kdenlive ]; then
-            fError "Could not find $gpFile, or it is not writable." $LINENO
+    if [ ! -w $gpKdenFile ]; then
+        if [ ! -w $gpKdenFile.kdenlive ]; then
+            fError "Could not find $gpKdenFile, or it is not writable." $LINENO
         fi
-        gpFile=$gpFile.kdenlive
+        gpKdenFile=$gpKdenFile.kdenlive
     fi
 
-    gFileVer=$(grep kdenliveversion $gpFile | sed 's/[<>]/ /g' | awk '{print $3}')
+    gFileVer=$(grep kdenliveversion $gpKdenFile | sed 's/[<>]/ /g' | awk '{print $3}')
     gFileVer=${gFileVer%.*}
 
     if [ -z "$gFileVer" ]; then
-        fError "kdenliveversion not found. Is $gpFile a kdenlive file?" $LINENO
+        fError "kdenliveversion not found. Is $gpKdenFile a kdenlive file?" $LINENO
     fi
 } # fFileCheck
 
@@ -264,7 +264,7 @@ function fKLVer()
         21.04) tUse=kdenlive-21.04.3b-x86_64.appimage ;;
 	21.08) tUse=kdenlive-21.08.0a-x86_64.appimage ;;
 	21.11) tUse=kdenlive-21.11.70-9295653-x86_64.appimage ;;
-	21.12) tUse=kdenlive-21.12.0-x86_64.appimage ;;
+	21.12) tUse=kdenlive-21.12.2-x86_64.appimage ;;
         *)
             fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
             ;;
@@ -297,7 +297,7 @@ Recommend:
 	export CVS_RSH=ssh
 	export CVSUMASK=0003
 EOF
-        fError "To fix, add $gpFile to a CVS repository." $LINENO
+        fError "To fix, add $gpKdenFile to a CVS repository." $LINENO
     fi
 
     if grep ':ext:' CVS/Root; then
@@ -314,12 +314,12 @@ EOF
         fi
     fi
 
-    if [ -z "$gpFile" ]; then
+    if [ -z "$gpKdenFile" ]; then
         return
     fi
-    if grep -q $gpFile CVS/Entries; then
+    if grep -q $gpKdenFile CVS/Entries; then
         # Commit the file
-        cvs commit -m "Updated with script vid-edit" $gpFile
+        cvs commit -m "Updated with script vid-edit" $gpKdenFile
     else
         fLog info "The file isn't versioned."
         if [ $gpBatch -ne 0 ]; then
@@ -327,7 +327,7 @@ EOF
         fi
         read -p "Version the file? (y/n) "
         if [ "$REPLY" = "y" ]; then
-            cvs add $gpFile
+            cvs add $gpKdenFile
             cvs commit -m "Added with script vid-edit"
         fi
     fi
@@ -345,8 +345,8 @@ function fTag()
     if [ "$REPLY" != "y" ]; then
         return
     fi
-    tTag="rendered_${gpFile%.*}_$(date +%F)"
-    logtime "$tTag"
+    tTag="rendered_${gpKdenFile%.*}_$(date +%F)"
+    logit "$tTag"
 
     echo
     read -p "Tag the files with: $tTag (y/n)? "
@@ -386,7 +386,7 @@ export cKLBin=/usr/local/bin
 if [ $# -eq 0 ]; then
     fError "Missing options." $LINENO
 fi
-export gpFile=""
+export gpKdenFile=""
 export gpCVS=1
 export gpVer=""
 export gpBatch=0
@@ -408,7 +408,7 @@ done
 let tOptInd=OPTIND-1
 shift $tOptInd
 if [ $# -eq 1 ]; then
-    gpFile="$1"
+    gpKdenFile="$1"
 else
     fError "Unknown options: $*" $LINENO
 fi
@@ -416,7 +416,7 @@ fi
 # -------------------
 # Validate Options Section
 
-# gpFile is defined, check file, and get version
+# gpKdenFile is defined, check file, and get version
 export gFileVer
 fFileCheck
 
@@ -430,11 +430,11 @@ fCVSCheck
 # -------------------
 # Functional Section
 
-logtime start vid-edit $gpFile
+logit start vid-edit $gpKdenFile
 
-echo $gKLProg $gpFile
-$gKLProg $gpFile >/tmp/kdenlive.log 2>&1
+echo $gKLProg $gpKdenFile
+$gKLProg $gpKdenFile >/tmp/kdenlive.log 2>&1
 
-logtime stop vid-edit $gpFile
+logit stop vid-edit $gpKdenFile
 
 fTag
