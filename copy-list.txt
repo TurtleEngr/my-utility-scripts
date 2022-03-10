@@ -11,6 +11,7 @@ bash-lint
 bcmnt
 cert-expire-date
 check-status
+clean-cache
 com-bash-lib.inc
 conv-text.sed
 convert-txt2html.sh
