@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Remove ~/.cache/* files more the cAge days old
+
+export cAge=400
+
+for tFile in $(find $HOME/.cache -type f -mtime +400 | grep -v winetricks); do
+    rm -fv $tFile
+done

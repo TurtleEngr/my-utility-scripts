@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.4 2021/11/03 19:48:29 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.5 2022/03/10 23:55:32 bruce Exp $
 
 function fUsage()
 {
@@ -63,3 +63,5 @@ fi
 # --------------------
 # Run
 (obs 2>&1 | logger -t obs) &
+echo "For logs:"
+echo "tail -f /var/log/user.log | grep obs"
