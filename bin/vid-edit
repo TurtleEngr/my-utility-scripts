@@ -146,7 +146,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.25 $ $Date: 2022/02/18 04:10:24 $ GMT 
+$Revision: 1.26 $ $Date: 2022/03/26 22:07:48 $ GMT 
 
 =cut
 EOF
@@ -333,33 +333,6 @@ EOF
     fi
 } # fCVSCheck
 
-# ------------------
-function fTag()
-{
-    if [ $gpCVS -ne 1 -o $gpBatch -eq 1 ]; then
-        return
-    fi
-
-    echo
-    read -p "Was the video rendered (y/n)? "
-    if [ "$REPLY" != "y" ]; then
-        return
-    fi
-    tTag="rendered_${gpKdenFile%.*}_$(date +%F)"
-    logit "$tTag"
-
-    echo
-    read -p "Tag the files with: $tTag (y/n)? "
-    if [ "$REPLY" != "y" ]; then
-        return
-    fi
-
-    cd ..
-    cvs ci -m "$tTag"
-    cvs tag -F "$tTag"
-    cd -
-} # fTag
-
 # ===================================================
 # Main
 
@@ -436,5 +409,3 @@ echo $gKLProg $gpKdenFile
 $gKLProg $gpKdenFile >/tmp/kdenlive.log 2>&1
 
 logit stop vid-edit $gpKdenFile
-
-fTag

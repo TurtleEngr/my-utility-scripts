@@ -1,13 +1,14 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.5 2022/03/10 23:55:32 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.6 2022/03/26 22:07:47 bruce Exp $
 
 function fUsage()
 {
     cat <<EOF
 Usage
-	obs-project
+	obs-project [-c]
 
-The "obs-config" directory  must be found the current directory.
+The "obs-config" directory must be found the current directory. Or use
+the -c option to create that directory.
 
 This script will set the obs config dir to "obs-config" in the current directory. This overides the default directory at ~/.config/obs-studio/.
 
@@ -23,6 +24,9 @@ cConfigDir=$PWD/obs-config
 
 # --------------------
 # Validate
+if [[ $# -ne 0  && "x$1" = "x-c" ]]; then
+    mkdir $cConfigDir >/dev/null 2>&1
+fi
 if [ ! -d $cConfigDir ]; then
     echo
     echo "Error: missing directory: $cConfigDir"

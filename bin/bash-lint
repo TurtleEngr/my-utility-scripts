@@ -76,8 +76,8 @@ fi
 
 echo
 echo '================================'
-tAlwaysSkip='SC1090,SC2003,SC2086,SC2155,SC2164,SC2219,SC2230,SC2103'
-tWarning='SC2016,SC2154,SC2166,SC2172'
+tAlwaysSkip='SC1090,SC2003,SC2086,SC2088,SC2155,SC2164,SC2219,SC2230,SC2103,SC2181'
+tWarning='SC2016,SC2044,SC2034,SC2154,SC2166,SC2172'
 
 echo "shellcheck -x -e $tAlwaysSkip"
 echo
@@ -104,12 +104,16 @@ exit $gErr
 # SC2003: s expr is antiquated. Consider rewriting this using $((..)), ${} or [[ ]].
 # SC2006: s Use $(...) notation instead of legacy backticked `...`.
 # SC2016: w Expressions don't expand in single quotes, use double quotes for that.
+# SC2034: w VAR appears unused. Verify use (or export if used externally).
+# SC2044: w For loops over find output are fragile. Use find -exec or a while read loop.
 # SC2086: s Double quote to prevent globbing and word splitting.
+# SC2088:  Tilde does not expand in quotes
 # SC2103: s Use a ( subshell ) to avoid having to cd back.
 # SC2154: w NNN is referenced but not assigned.
 # SC2155: s Declare and assign separately to avoid masking return values.
 # SC2164: s Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
 # SC2166: w Prefer [ p ] && [ q ] as [ p -a q ] is not well defined.
 # SC2172: w Trapping signals by number is not well defined. Prefer signal names.
+# SC2181: s Check exit code directly
 # SC2219: s Instead of 'let expr', prefer (( expr )) .
 # SC2230: s which is non-standard. Use builtin 'command -v' instead.
