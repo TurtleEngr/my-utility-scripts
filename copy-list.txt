@@ -166,7 +166,9 @@ vid-rm-ver
 vid-set-aspect
 vid-split
 vid-trim-rev
+vid-trim-vid
 video2audio
 vncx
 xearth.start
 xp.sh
+
