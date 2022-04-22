@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.7 2022/02/18 04:10:24 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.8 2022/04/06 07:23:45 bruce Exp $
 
 # --------------------
 fUsage()
@@ -239,12 +239,20 @@ function fCalc(pStartSec,pStartMsg,pStopSec,pStopMsg) {
    tDiff = pStopSec - pStartSec
    gTotal += tDiff
    tDiffStr = fTime(tDiff)
-   print tDiffStr "," pStartMsg "," pStopMsg
+   print tDiffStr "," tDiff "," pStartMsg "," pStopMsg
 } # fCalc
 
 BEGIN {
     i = 0
     InStart = 0
+    LastDate = ""
+}
+
+{
+    if ($1 != LastDate) {
+        print $1 ",,\"----------\""
+	LastDate = $1
+    }
 }
 
 /," *start/ {
@@ -271,13 +279,13 @@ BEGIN {
         gSec = $4
 	gMsg = $7
     fi
-    print "," $7
+    print ",," $7
     next
 }
 
 END {
     tTotalStr = fTime(gTotal)
-    print tTotalStr ",total"
+    print tTotalStr "," gTotal ",total"
 }
 '
     exit 0
