@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-rm-ver,v 1.5 2021/10/26 19:26:13 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-rm-ver,v 1.6 2022/04/22 00:50:04 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -18,7 +18,7 @@
 function fUsage()
 {
     if [[ $# -ne 0 ]]; then
-        pod2text $0
+        pod2text $0 | more
     else
         pod2usage $0
     fi
@@ -133,8 +133,8 @@ They should only use the characters: [a-zA-Z][0-9][.-_]
 
 =head1 HISTORY
 
- $Revision: 1.5 $;
- $Date: 2021/10/26 19:26:13 $ GMT 
+ $Revision: 1.6 $;
+ $Date: 2022/04/22 00:50:04 $ GMT 
 
 =cut
 EOF
@@ -217,7 +217,7 @@ export gErr gpDebug cName gpVerbose gpLog cTmp cVer
 cName=${0##*/}
 
 # Define the version number for this script
-cVer='$Revision: 1.5 $'
+cVer='$Revision: 1.6 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
@@ -289,6 +289,11 @@ fi
 
 export tFileList=""
 for i in $gpFileList; do
+    tDir=${i%/*}
+    tFile=${i##*/}
+    if [ "$tDir" = "$tFile" ]; then
+        tDir="."
+    fi
     if [[ -d $i ]]; then
         fLog warning "Skipping directory: $i" $LINENO
         continue
@@ -297,7 +302,7 @@ for i in $gpFileList; do
         fLog warning "Skipping missing file: $i" $LINENO
         continue
     fi
-    if ! grep -q $i CVS/Entries*; then
+    if ! grep -q $tFile $tDir/CVS/Entries*; then
         fLog warning "Skipping, no CVS entry for file: $i" $LINENO
         continue
     fi
@@ -309,7 +314,7 @@ done
 fLog info "cvs log -h $tFileList1" $LNENO
 cvs log -h $tFileList1 2>/dev/null >$cTmp.tmp1
 if [[ $? -ne 0 ]]; then
-    fError "Could not access cvs file: $i" $LINENO
+    fError "Could not access cvs files" $LINENO
 fi
 
 # Parse $cTmp.tmp1 into file keys
