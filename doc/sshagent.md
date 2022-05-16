@@ -121,4 +121,4 @@ sshagent only works well with bash.
 
 (c) Copyright 2009 by TrustedID
 
-$Revision: 1.3 $ GMT 
+$Revision: 1.4 $ GMT 
