@@ -1,6 +1,11 @@
 #!/bin/bash
 if [ $# -eq 0 ]; then
     man dc
+
+    cat <<EOF
+Example:
+    calc '2 3 * 4 +'
+EOF
     exit 1
 fi
-echo "2 k $* p" | dc
+echo "2 k $* f" | dc
