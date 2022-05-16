@@ -9,6 +9,7 @@ bash-com.test
 bash-fmt
 bash-lint
 bcmnt
+calc
 cert-expire-date
 check-status
 clean-cache
@@ -35,6 +36,7 @@ decrypt.sh
 diff-month
 diff-time.pl
 diff-time.sh
+dir-collapse
 dir-level
 disable-screen-saver
 dosunix
@@ -85,6 +87,7 @@ msg2pdf
 mv2cd
 obs-project
 os-release-info
+outline2html
 pbm.progs
 pdf2jpg
 pic-gen.sh
@@ -171,4 +174,3 @@ video2audio
 vncx
 xearth.start
 xp.sh
-

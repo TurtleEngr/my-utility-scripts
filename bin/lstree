@@ -37,7 +37,7 @@ while getopts :hdL:CTcp tArg; do
         h) fUsage ;;
 	d) pDirOnly="-d" ;;
 	L) pLevel="-L $OPTARG" ;;
-	C) pCode="-I 'CVS|.git|.svn|*~|tmp|*.tmp'" ;;
+	C) pCode="-I CVS|.git|.svn|*~|tmp|*.tmp" ;;
 	T) pTab="s/|//g; s/   /\t/g" ;;
 	c) pCompact="expand -t 4" ;;
 	p) pPlain=""

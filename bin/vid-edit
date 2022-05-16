@@ -265,6 +265,7 @@ function fKLVer()
 	21.08) tUse=kdenlive-21.08.0a-x86_64.appimage ;;
 	21.11) tUse=kdenlive-21.11.70-9295653-x86_64.appimage ;;
 	21.12) tUse=kdenlive-21.12.2-x86_64.appimage ;;
+	22.04) tUse=kdenlive-22.04.0-2-x86_64.AppImage ;;
         *)
             fError "No version available for $pVer. $cLatestVer is the lastest version. You will need to upgrade." $LINENO
             ;;
@@ -350,7 +351,7 @@ export gErr=0
 
 # -------------------
 # Configuration
-export cLatestVer=21.12
+export cLatestVer=22.04
 #export cKLBin=/rel/archive/software/ThirdParty/kdenlive
 export cKLBin=/usr/local/bin
 
