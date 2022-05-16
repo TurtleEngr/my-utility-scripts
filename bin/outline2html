@@ -1,0 +1,258 @@
+#!/usr/bin/perl
+
+=pod
+
+=head1 NAME
+
+outline2html.pl - Simple outline tagging
+
+=head1 SYNOPSIS
+
+    outline2html.pl [-weight P|B|H] [-style P|N|R] [-trim] [-help] [Files] 
+
+=head1 DESCRIPTION
+
+A simple text file is converted to a html file.
+
+=over 4
+
+=item * Define the title and the H1 head with a line like this a the
+beginning of the file (no []).
+
+    TITLE: [this is the title]
+
+=item * Outline headings begin with leading a '*'
+
+=item * The first outline level will be formated according to the
+-weight and -style options
+
+=item * The number of "TABs" define the outline level.
+
+=item * After the first level, the levels will be ordered lists with
+upper case letters, numbers, lower case letters, numberss, then repeat.
+
+=item * Lines that don't begin with an '*' are included as plain
+paragraphs at the current level.
+
+=item * Line breaks end a paragraph or item level.
+
+=item * Blank lines are ignored.
+
+=item * Lines beginning with a '#' are ignored.
+
+=back
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-w[eight] P|B|H>
+
+For first level items, define the weight.
+P - plain; B - bold; H - H2
+
+Default: -weight B
+
+=item B<-s[tyle] P|N|R>
+
+For first level items, define the outline style.
+P - plain, no numbers; N - Arabic numbers; R - Roman numbers
+
+Default: -style R
+
+=item B<-t[rim]>
+
+If the -trim option is defined, then lines that don't begin with a '*'
+will be trimmed from the output.
+
+=item B<-h[elp]>
+
+This help.
+
+=back
+
+=for comment =head1 RETURN VALUE
+
+=for comment =head1 ERRORS
+
+=head1 EXAMPLES
+
+    ./txt2html.pl <outline.txt | \
+        tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no >outline.html
+
+    ./txt2html.pl -t outline.txt | \
+        tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no >outline-long.html
+
+=for comment =head1 ENVIRONMENT
+
+=for comment =head1 SEE ALSO
+
+=for comment =head1 NOTES
+
+=for comment =head1 CAVEATS
+
+=for comment =head1 DIAGNOSTICS
+
+=for comment =head1 BUGS
+
+=for comment =head1 RESTRICTIONS
+
+=for comment =head1 AUTHOR
+
+=for comment =head1 HISTORY
+
+$Revision: 1.2 $
+
+=cut
+
+# ===================================
+use Getopt::Long;
+
+# Constants
+@cType = ('', 'A', '1', 'a', '1', 'A', '1', 'a', '1',  'A', '1', 'a', '1',  'A', '1', 'a', '1');
+
+# Get Options
+$gpHelp = 0;
+$gpTrim = 0;
+$gpStyle='R';
+$gpWeight='B';
+&GetOptions(
+	"help" => \$gpHelp,
+	"trim" => \$gpTrim,
+	'weight=s' => \$gpWeight,
+	"style=s" =>  \$gpStyle,
+);
+$gpWeight =~ tr/pbh/PBH/;
+$gpStyle =~ tr/pnr/PNR/;
+
+# Validate
+if ($gpWeight !~ /[PBH]/) {
+    system("echo 'Error: Invalid -weight option' 1>&2");
+    $gpHelp=1;
+}
+
+if ($gpStyle !~ /[PNR]/ ) {
+    system("echo 'Error: Invalid -style option' 1>&2");
+    $gpHelp=1;
+}
+
+if ($gpHelp) {
+	system("pod2text $0 1>&2| more");
+	exit 1;
+}
+
+# Generate
+$tCurLevel = 0;
+while (<>) {
+	chomp;
+	# Skip comments
+	if (/^ *#/) {
+		next;
+	}
+	# Skip blank lines
+	if (/^ *$/) {
+		next;
+	}
+	if (/TITLE: (.*)/) {
+		$tTitle = $1;
+		if ($gpTrim and ! /^\s*\* /) {
+			$tTitle .= ' - Summary';
+		}
+		print "<?xml version=\"1.0\"?>\n";
+		print "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n";
+		print "    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
+		print "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n";
+		print "<head>\n";
+		print "  <title>$tTitle</title>\n";
+		print "  <style type=\"text/css\">\n";
+		print "  <!--\n";
+		print "/*<![CDATA[*/\n";
+		print "  body {\n";
+		print "        font-family: Times, serif;\n";
+		print "        font-size: 12pt;\n";
+		print "        line-height: 100\%;";
+		print "  }\n";
+		print "  /*]]>*/\n";
+		print "  // -->\n";
+		print "  </style>\n";
+		print "</head>\n";
+		print "<body>\n";
+		print "<h1>$tTitle</h1>\n";
+		if ($gpStyle eq  'R') {
+	            print "<ol type=\"I\">\n";
+		}
+		if ($gpStyle eq  'N') {
+		    print "<ol type=\"1\">\n";
+		}
+		next;
+	}
+	if ($gpTrim and ! /^\s*\* /) {
+		next;
+	}
+
+	# Remove leading *
+	$tMajor = 0;
+	s/^(\s*)(\*) /$1/;
+	if ("$2" ne "") {
+		$tMajor = 1;
+	}
+
+        s/\$Source: /\Source: /;
+	s/\$Revision: /\Revision: /;
+	s/\$Date: /\Date: /;
+
+	if (! /^\t/) {
+		for (; $tCurLevel > 0; --$tCurLevel) {
+			print "</ol>\n";
+		}
+		if ($gpStyle ne 'P') {
+		    print "<li>";
+		}
+		if ($gpWeight eq 'P') {
+		    print "<p>$_</p>";
+		}
+		if ($gpWeight eq 'B') {
+		    print "<p><b>$_</b></p>";
+		}
+		if ($gpWeight eq 'H') {
+		    print "<h2>$_</h2>";
+		}
+		if ($gpStyle ne 'P') {
+		    print "</li>";
+		}
+		print "\n";
+		next;
+	}
+
+	s/^(\t+)//;
+	$tLevel = length($1);
+
+	if ($tLevel > $tCurLevel) {
+		for (; $tCurLevel < $tLevel; ++$tCurLevel) {
+			print "<ol type=\"" . $cType[$tLevel] . "\">\n";
+		}
+	}
+
+	if ($tLevel < $tCurLevel) {
+		for (; $tCurLevel > $tLevel; --$tCurLevel) {
+			print "</ol>\n";
+		}
+	}
+
+	# indent
+	for ($i = $tLevel; $i > 0; --$i) {
+		print "\t";
+	}
+
+	if ($tMajor) {
+		print "<li><p>$_</p></li>\n";
+	} else {
+		print "<p>$_</p>\n";
+	}
+}
+
+if ($gpStyle =~ /[NR]/) {
+    print "</ol>\n";
+}
+print "</body>\n";
+print "</html>\n";

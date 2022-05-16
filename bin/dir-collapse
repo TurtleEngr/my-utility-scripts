@@ -1,0 +1,60 @@
+#!/bin/bash
+
+export gpNoUpdate=0
+if [ "x$1" = "x-n" ]; then
+    gpNoUpdate=1
+    shift
+fi
+
+if [ $# -eq 0 ]; then
+    cat <<EOF
+Usage:
+    dir-collapse [-n] DIR
+
+Description
+
+    This only works for DIRs that are versioned with CVS.  And only
+    the files that are versioned will be removed.  Files the are not
+    versioned will be listed..  Use dir-expand or "cvs update" to get
+    the files back.
+
+EOF
+    exit 1
+fi
+
+export cCurDir=$PWD
+export gpDir=$1
+
+if [ ! -f $gpDir/CVS/Entries ]; then
+    echo "Error: $gpDir is not versioned with CVS"
+    exit 1
+fi
+
+cd $gpDir
+if [ $gpNoUpdate -eq 0 ]; then
+    if ! cvs update; then
+        echo "Error: Fix cvs update errors, then run again."
+	cd $cCurDir
+        exit 1
+    fi
+fi
+if ! cvs ci -m Updated; then
+    echo "Error: Fix cvs ci errors, then run again. Maybe with -u option."
+    cd $cCurDir
+    exit 1
+fi
+
+for tE in $(find * -name Entries); do
+    tDir=${tE%/*}
+    tDir=${tDir%/*}
+    for tF in $(cat $tE | grep -v '^D' | awk '{sub(/^\//,""); gsub(/\/.*/,""); print $1}'); do
+        if [ -f $tDir/$tF ]; then
+            echo rm $tDir/$tF
+            rm $tDir/$tF
+	fi
+    done
+done
+# list files not removed
+find * -type f -name '*~' -exec rm {} \;
+find * -type f | grep -v CVS
+cd $cCurDir

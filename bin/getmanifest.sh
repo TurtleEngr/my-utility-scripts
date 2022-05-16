@@ -202,6 +202,37 @@ fPkgList()
 } # fPkgList
 
 # --------------------
+fPkgListVer()
+{
+#    if [ -d /etc/yum.repos.d ]; then
+#        fCmd PkgListVer 'rpm -qa | sort -i'
+#        for i in $(rpm -qa | sort -i); do
+#            fCmd PkgInfo "rpm -qi $i"
+#        done
+#        for i in $(rpm -qa | sort -i); do
+#            fCmd PkgFiles "rpm -ql $i"
+#        done
+#    fi
+
+    if which dpkg >/dev/null 2>&1; then
+        fCmd PkgListVer "dpkg -l | awk '{print \$2,\$3}'"
+	# Fix these, so they list the pkg name, then the desc
+##        fCmd PkgInfo "dpkg -p \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+##        fCmd PkgFiles "dpkg -L \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+    fi
+
+#    if [ -d /etc/zypp ]; then
+#        fCmd PkgListVer 'rpm -qa | sort -i'
+#        for i in $(rpm -qa | sort -i); do
+#            fCmd PkgInfo "rpm -qi $i"
+#        done
+#        for i in $(rpm -qa | sort -i); do
+#            fCmd PkgFiles "rpm -ql $i"
+#        done
+#    fi
+} # fPkgListVer
+
+# --------------------
 fLinuxCommon()
 {
     fCmd SerialNum '/usr/sbin/dmidecode | egrep -i "serial number" | head -n 1'
@@ -247,11 +278,12 @@ fLinux()
     fLinuxCommon
     fApps
     fOSRel
+    fPkgListVer
     fPkgList
 } # fLinux
 
 # ============================================
-export cVer=3.2
+export cVer=4.1
 export cOS=$(uname -s)
 export gOut
 export gTagTmp=/tmp/getmanifext-tag.tmp
@@ -314,7 +346,7 @@ case $cOS in
 esac
 echo "</server>" >>$gOut
 
-gzip -f $gOut
+##gzip -f $gOut
 
 sort -uf <$gTagTmp >$gTagList
 chmod a+rw $gTagList
