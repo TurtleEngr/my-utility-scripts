@@ -1,6 +1,10 @@
-# NAME
+<div>
+    <hr/>
+</div>
 
-SCRIPTNAME - DESCRIPTION
+# NAME SCRIPTNAME
+
+SHORT-DESCRIPTION
 
 # SYNOPSIS
 
@@ -188,21 +192,15 @@ See Globals section for details.
 
 HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug, gpUnitDebug
 
-# FILES
-
 # SEE ALSO
 
 shunit2
-
-# NOTES
 
 # CAVEATS
 
 \[Things to take special care with; sometimes called WARNINGS.\]
 
 # DIAGNOSTICS
-
-\[All possible messages the program can print out--and what they mean.\]
 
 To verify the script is internally OK, run: SCRIPTNAME -T all
 
@@ -220,6 +218,6 @@ NAME
 
 # HISTORY
 
-(c) Copyright 2021 by COMPANY
+GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.3 $ $Date: 2021/10/20 01:07:51 $ GMT 
+$Revision: 1.4 $ $Date: 2022/05/16 21:09:12 $ GMT 
