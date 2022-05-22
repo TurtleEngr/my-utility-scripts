@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.59 2021/10/26 19:26:12 bruce Exp $
+# $Id: sshagent,v 1.60 2022/05/17 23:25:49 bruce Exp $
 
 # Note: Because this script is usually sourced, exits and functions
 # are not used.  So that is why the "if" logic is so messy, with
@@ -78,7 +78,7 @@ If cgAgentOwner env. is set, then that will be used instead of
 $LOGNAME, to find the sshagent.env file.  This is useful for scripts
 that are run by other users, who have read access to the user's home
 dir (usually only the "root" user).
-/home/$cgAgentOwner/.ssh/.sshagent.env file.  (The script just
+$cHomeDir/$cgAgentOwner/.ssh/.sshagent.env file.  (The script just
 "sources" the file.)
 
 =head1 OPTIONS
@@ -143,8 +143,8 @@ Kill all agents:
 
 =head1 FILES
 
- /home/$LOGNAME/.ssh/.sshagent.env
- /home/$cgAgentOwner/.ssh/.sshagent.env
+ $cHomeDir/$LOGNAME/.ssh/.sshagent.env
+ $cHomeDir/$cgAgentOwner/.ssh/.sshagent.env
 
 =head1 SEE ALSO
 
@@ -172,7 +172,7 @@ sshagent only works well with bash.
 
 (c) Copyright 2009 by TrustedID
 
-$Revision: 1.59 $ GMT 
+$Revision: 1.60 $ GMT 
 
 =cut
 
@@ -181,9 +181,9 @@ EOF
 else
 
     # ------------------------------------------
-
+    export cHomeDir=${HOME%/*}
     export cgAgentOwner=${cgAgentOwner:-$USER}
-    export cgEnvDir=/home/$cgAgentOwner/.ssh
+    export cgEnvDir=$cHomeDir/$cgAgentOwner/.ssh
     export cgEnvFile=$cgEnvDir/.sshagent.env
 
     # Create cgEnvDir if it doesn't exist
