@@ -33,6 +33,7 @@ case $tHost in
         ;;
     asimov*)
         tDefLog=~/tmp/a.tmp
+        tEdit=emacs
         tArchive=1
         ;;
     plasma)
@@ -49,6 +50,11 @@ case $tHost in
         ;;
     windell5)
         tDefLog=~/tmp/w.tmp
+        ;;
+    uucc-mac*)
+	tDefLog=/tmp/u.tmp
+        tEdit=emacs
+        tBG=1
         ;;
     *)
         tDefLog=~/tmp/t.tmp
