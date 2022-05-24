@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.54 $ $Date: 2021/10/29 04:14:06 $ GMT
+# $Revision: 1.56 $ $Date: 2022/05/24 05:51:20 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -283,7 +283,9 @@ HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug, gpUnitDebug
 
 =head1 SEE ALSO
 
-shunit2
+shunit2.1
+bash-com.inc
+bash-com.test
 
 =for comment =head1 NOTES
 
@@ -311,7 +313,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.54 $ $Date: 2021/10/29 04:14:06 $ GMT 
+$Revision: 1.56 $ $Date: 2022/05/24 05:51:20 $ GMT 
 
 =cut
 EOF
@@ -421,18 +423,17 @@ testUsage()
 {
     local tResult
 
-    gpUnitDebug=0
+    gpUnitDebug=${gpUnitDebug:-0}
 
     #-----
     tResult=$(fUsage short 2>&1)
     fUDebug "tResult=$tResult"
-    assertContains "tu-short" "$tResult" "Usage:"
+    assertContains "tu-short" "$tResult" "NAME SCRIPTNAME"
 
     #-----
     tResult=$(fUsage foo 2>&1)
     fUDebug "tResult=$tResult"
-    assertContains "tu-foo.1" "$tResult" "Usage:"
-    assertContains "tu-foo.2 change SCRIPTNAME" "$tResult" "$cName"
+    assertContains "tu-foo.1" "$tResult" "NAME SCRIPTNAME"
 
     #-----
     tResult=$(fUsage text 2>&1)
@@ -476,7 +477,7 @@ testUsage()
     assertContains "tu-int-md.3" "$tResult" '### testComUsage'
 
     #-----
-    gpUnitDebug=0
+    gpUnitDebug=${gpUnitDebug:-0}
     return
 
     cat <<EOF >/dev/null
@@ -555,15 +556,8 @@ EOF
 # -------------------
 # Configuration Section
 
-# bash-com.inc globals
-export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
-export gErr gpDebug gpFacility gpLog gpVerbose
-
-# Test globals
-export gpTest gpUnitDebug SHUNIT_COLOR
-
 # shellcheck disable=SC2016
-cVer='$Revision: 1.54 $'
+cVer='$Revision: 1.56 $'
 fSetGlobals
 
 # -------------------
