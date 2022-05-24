@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.test,v $
-# $Revision: 1.4 $ $Date: 2021/10/29 04:14:06 $ GMT
+# $Revision: 1.5 $ $Date: 2022/05/24 05:02:19 $ GMT
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -81,7 +81,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.4 $ $Date: 2021/10/29 04:14:06 $ GMT 
+$Revision: 1.5 $ $Date: 2022/05/24 05:02:19 $ GMT 
 
 =cut
 EOF
@@ -206,7 +206,7 @@ testComInitialConfig()
     #assertEquals "$LINENO tcic-17" "$Tmp/file-$cPID" "$cTmpF"
     assertEquals "$LINENO tcic-18" "${cTmpF}-1.tmp" "$cTmp1"
 
-    # ADJUST
+    # ADJUST?
     assertEquals "$LINENO tcic-19" "/tmp/$USER/$cName" "$Tmp"
 
     for tProg in logger pod2text pod2usage pod2html pod2man pod2markdown tidy awk tr; do
@@ -325,6 +325,7 @@ testComSysLog()
     local tTestMsg
 
     # ADJUST? This is dependent on your syslog configuration.
+    # ADJUST? Also these files should be readable (a+r)
     export tSyslog=/var/log/user.log
     #export tSyslog=/var/log/messages.log
     #export tSyslog=/var/log/syslog
@@ -465,7 +466,7 @@ testComUsage()
     #-----
     tResult=$(fComUsage -s short -f $cBin/$cName 2>&1)
     fComUDebug "tResult=$tResult"
-    assertContains "$LINENO tcu-short" "$tResult" "Usage:"
+    assertContains "$LINENO tcu-short" "$tResult" "NAME"
 
     #-----
     tResult=$(fComUsage -s foo -f $cBin/$cName 2>&1)

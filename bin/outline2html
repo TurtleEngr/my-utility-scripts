@@ -23,13 +23,13 @@ beginning of the file (no []).
 
 =item * Outline headings begin with leading a '*'
 
-=item * The first outline level will be formated according to the
+=item * The first outline level will be formatted according to the
 -weight and -style options
 
 =item * The number of "TABs" define the outline level.
 
 =item * After the first level, the levels will be ordered lists with
-upper case letters, numbers, lower case letters, numberss, then repeat.
+upper case letters, numbers, lower case letters, numbers, then repeat.
 
 =item * Lines that don't begin with an '*' are included as plain
 paragraphs at the current level.
@@ -77,10 +77,10 @@ This help.
 
 =head1 EXAMPLES
 
-    ./txt2html.pl <outline.txt | \
+    outline2html.pl <outline.txt | \
         tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no >outline.html
 
-    ./txt2html.pl -t outline.txt | \
+    outline2html.pl -t outline.txt | \
         tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no >outline-long.html
 
 =for comment =head1 ENVIRONMENT
@@ -101,7 +101,7 @@ This help.
 
 =for comment =head1 HISTORY
 
-$Revision: 1.2 $
+$Revision: 1.3 $
 
 =cut
 
@@ -137,7 +137,7 @@ if ($gpStyle !~ /[PNR]/ ) {
 }
 
 if ($gpHelp) {
-	system("pod2text $0 1>&2| more");
+	system("pod2text $0 | more");
 	exit 1;
 }
 
