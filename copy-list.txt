@@ -130,6 +130,7 @@ svn-diff-branch.sh
 svn-propset-exe.sh
 svn-propset-keywords.sh
 svn-propset.sh
+tag-collect.sh
 talk.dict
 talk.pl
 template.pl

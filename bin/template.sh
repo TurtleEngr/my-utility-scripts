@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.56 $ $Date: 2022/05/24 05:51:20 $ GMT
+# $Revision: 1.58 $ $Date: 2022/05/24 08:12:30 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -313,7 +313,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.56 $ $Date: 2022/05/24 05:51:20 $ GMT 
+$Revision: 1.58 $ $Date: 2022/05/24 08:12:30 $ GMT 
 
 =cut
 EOF
@@ -477,6 +477,12 @@ testUsage()
     assertContains "tu-int-md.3" "$tResult" '### testComUsage'
 
     #-----
+    # When calling cmd, unset gpTest to prevent infinite loop
+    gpTest=""
+    tResult=$(./template.sh 2>&1)
+    assertContains "tu-cmd-call" "$tResult" "NAME SCRIPTNAME"
+
+    #-----
     gpUnitDebug=${gpUnitDebug:-0}
     return
 
@@ -527,11 +533,13 @@ fRunTests()
 {
     gpUnitDebug=${gpUnitDebug:-0}
     if [ "$gpTest" = "all" ]; then
+        gpTest=""
         # shellcheck disable=SC1091
         . /usr/local/bin/shunit2.1
         exit $?
     fi
     if [ "$gpTest" = "com" ]; then
+        gpTest=""
         $cBin/bash-com.test
         exit $?
     fi
@@ -557,7 +565,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.56 $'
+cVer='$Revision: 1.58 $'
 fSetGlobals
 
 # -------------------
