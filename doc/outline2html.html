@@ -1,0 +1,116 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>outline2html</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body>
+
+
+
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#EXAMPLES">EXAMPLES</a></li>
+</ul>
+
+<h1 id="NAME">NAME</h1>
+
+<p>outline2html.pl - Simple outline tagging</p>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>    outline2html.pl [-weight P|B|H] [-style P|N|R] [-trim] [-help] [Files] </code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>A simple text file is converted to a html file.</p>
+
+<ul>
+
+<li><p>Define the title and the H1 head with a line like this a the beginning of the file (no []).</p>
+
+<pre><code>    TITLE: [this is the title]</code></pre>
+
+</li>
+<li><p>Outline headings begin with leading a &#39;*&#39;</p>
+
+</li>
+<li><p>The first outline level will be formated according to the -weight and -style options</p>
+
+</li>
+<li><p>The number of &quot;TABs&quot; define the outline level.</p>
+
+</li>
+<li><p>After the first level, the levels will be ordered lists with upper case letters, numbers, lower case letters, numberss, then repeat.</p>
+
+</li>
+<li><p>Lines that don&#39;t begin with an &#39;*&#39; are included as plain paragraphs at the current level.</p>
+
+</li>
+<li><p>Line breaks end a paragraph or item level.</p>
+
+</li>
+<li><p>Blank lines are ignored.</p>
+
+</li>
+<li><p>Lines beginning with a &#39;#&#39; are ignored.</p>
+
+</li>
+</ul>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
+<dl>
+
+<dt id="w-eight-P-B-H"><b>-w[eight] P|B|H</b></dt>
+<dd>
+
+<p>For first level items, define the weight. P - plain; B - bold; H - H2</p>
+
+<p>Default: -weight B</p>
+
+</dd>
+<dt id="s-tyle-P-N-R"><b>-s[tyle] P|N|R</b></dt>
+<dd>
+
+<p>For first level items, define the outline style. P - plain, no numbers; N - Arabic numbers; R - Roman numbers</p>
+
+<p>Default: -style R</p>
+
+</dd>
+<dt id="t-rim"><b>-t[rim]</b></dt>
+<dd>
+
+<p>If the -trim option is defined, then lines that don&#39;t begin with a &#39;*&#39; will be trimmed from the output.</p>
+
+</dd>
+<dt id="h-elp"><b>-h[elp]</b></dt>
+<dd>
+
+<p>This help.</p>
+
+</dd>
+</dl>
+
+<h1 id="EXAMPLES">EXAMPLES</h1>
+
+<pre><code>    ./txt2html.pl &lt;outline.txt | \
+        tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no &gt;outline.html
+
+    ./txt2html.pl -t outline.txt | \
+        tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no &gt;outline-long.html</code></pre>
+
+<p>$Revision: 1.1 $</p>
+
+
+</body>
+
+</html>
+
+
