@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.58 $ $Date: 2022/05/24 08:12:30 $ GMT
+# $Revision: 1.59 $ $Date: 2022/05/25 19:08:03 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -146,7 +146,9 @@ Run the unit test functions in this script.
 
 "-T all" will run all of the functions that begin with "test".
 Otherwise "pTest" should match the test function names separated with
-commas. "-T com" will run all the tests for bash-com.inc
+spaces (between quotes).
+
+"-T com" will run all the tests for bash-com.inc
 
 For more details about shunit2 (or shunit2.1), see
 shunit2/shunit2-manual.html
@@ -313,7 +315,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.58 $ $Date: 2022/05/24 08:12:30 $ GMT 
+$Revision: 1.59 $ $Date: 2022/05/25 19:08:03 $ GMT 
 
 =cut
 EOF
@@ -428,59 +430,59 @@ testUsage()
     #-----
     tResult=$(fUsage short 2>&1)
     fUDebug "tResult=$tResult"
-    assertContains "tu-short" "$tResult" "NAME SCRIPTNAME"
+    assertContains "$LINENO tu-short" "$tResult" "NAME SCRIPTNAME"
 
     #-----
     tResult=$(fUsage foo 2>&1)
     fUDebug "tResult=$tResult"
-    assertContains "tu-foo.1" "$tResult" "NAME SCRIPTNAME"
+    assertContains "$LINENO tu-foo.1" "$tResult" "NAME SCRIPTNAME"
 
     #-----
     tResult=$(fUsage text 2>&1)
-    assertContains "tu-long.1" "$tResult" "DESCRIPTION"
-    assertContains "tu-long.2" "$tResult" "HISTORY"
+    assertContains "$LINENO tu-long.1" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO tu-long.2" "$tResult" "HISTORY"
 
     #-----
     tResult=$(fUsage man 2>&1)
-    assertContains "tu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
-    assertContains "tu-man.2" "$tResult" '.IX Header "HISTORY"'
+    assertContains "$LINENO tu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
+    assertContains "$LINENO tu-man.2" "$tResult" '.IX Header "HISTORY"'
 
     #-----
     tResult=$(fUsage html 2>&1)
-    assertContains "tu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
-    assertContains "tu-html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
-    assertContains "tu-html.3" "$tResult" "<title>$cName Usage</title>"
+    assertContains "$LINENO tu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+    assertContains "$LINENO tu-html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+    assertContains "$LINENO tu-html.3" "$tResult" "<title>$cName Usage</title>"
 
     #-----
     tResult=$(fUsage md 2>&1)
-    assertContains "tu-md.1" "$tResult" '# DESCRIPTION'
-    assertContains "tu-md.2" "$tResult" '# HISTORY'
+    assertContains "$LINENO tu-md.1" "$tResult" '# DESCRIPTION'
+    assertContains "$LINENO tu-md.2" "$tResult" '# HISTORY'
 
     #-----
     tResult=$(fUsage int 2>&1)
     fUDebug "tResult=$tResult"
-    assertContains "tu-internal.1" "$tResult" 'Template Use'
-    assertContains "tu-internal.2" "$tResult" 'fComSetGlobals'
+    assertContains "$LINENO tu-internal.1" "$tResult" 'Template Use'
+    assertContains "$LINENO tu-internal.2" "$tResult" 'fComSetGlobals'
 
     #-----
     tResult=$(fUsage int-html 2>&1)
     fUDebug "tResult=$tResult"
-    assertContains "tu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
-    assertContains "tu-int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
-    assertContains "tu-int-html.3" "$tResult" 'Internal Doc</title>'
-    assertContains "tu-int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
+    assertContains "$LINENO tu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
+    assertContains "$LINENO tu-int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
+    assertContains "$LINENO tu-int-html.3" "$tResult" 'Internal Doc</title>'
+    assertContains "$LINENO tu-int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
 
     #-----
     tResult=$(fUsage int-md 2>&1)
-    assertContains "tu-int-md.1" "$tResult" '## Template Use'
-    assertContains "tu-int-md.2" "$tResult" '### fComSetGlobals'
-    assertContains "tu-int-md.3" "$tResult" '### testComUsage'
+    assertContains "$LINENO tu-int-md.1" "$tResult" '## Template Use'
+    assertContains "$LINENO tu-int-md.2" "$tResult" '### fComSetGlobals'
+    assertContains "$LINENO tu-int-md.3" "$tResult" '### testComUsage'
 
     #-----
     # When calling cmd, unset gpTest to prevent infinite loop
     gpTest=""
     tResult=$(./template.sh 2>&1)
-    assertContains "tu-cmd-call" "$tResult" "NAME SCRIPTNAME"
+    assertContains "$LINENO tu-cmd-call" "$tResult" "NAME SCRIPTNAME"
 
     #-----
     gpUnitDebug=${gpUnitDebug:-0}
@@ -504,15 +506,15 @@ testScriptFunctions()
     local tResult
 
     tResult=$(fSetGlobals 2>&1)
-    assertTrue "tsf-fSetGlobals" "[ $? -eq 0 ]"
+    assertTrue "$LINENO tsf-fSetGlobals" "[ $? -eq 0 ]"
 
     gpHostName="foobar"
     tResult=$(fValidateHostName 2>&1)
-    assertTrue "tsf-fValidateHostName.1" "[ $? -eq 0 ]"
+    assertTrue "$LINENO tsf-fValidateHostName.1" "[ $? -eq 0 ]"
 
     gpHostName=""
     tResult=$(fValidateHostName 2>&1)
-    assertContains "tsf-fValidateHostName.2" "$tResult" "required."
+    assertContains "$LINENO tsf-fValidateHostName.2" "$tResult" "required."
 
     return
 
@@ -565,7 +567,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.58 $'
+cVer='$Revision: 1.59 $'
 fSetGlobals
 
 # -------------------

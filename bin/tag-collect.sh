@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.4 $ $Date: 2022/05/24 21:59:18 $ GMT
+# $Revision: 1.5 $ $Date: 2022/05/25 19:07:57 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -89,7 +89,7 @@ Output file contents based on the desired "tags"
 
 =head1 SYNOPSIS
 
-	tag-collect.sh -t pTag ... [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest] pFiles...
+	tag-collect.sh -t pTag ... [-h] [-H pStyle] [-T pTest] pFiles...
 
 =head1 DESCRIPTION
 
@@ -130,37 +130,15 @@ Styles:
 	int-html    - Also output internal documentation as html.
 	int-md 	    - Also output internal documentation as markdown.
 
-=item B<-l>
-
-Send log messages to syslog. Default is to just send output to stderr.
-
-=item B<-v>
-
-Currently there are no log messages.
-
-Verbose output. Default is is only output (or log) messages with
-level "warning" and higher.
-
--v - output "notice" and higher.
-
--vv - output "info" and higher.
-
-=item B<-x>
-
-Currently there are no debug messages.
-
-Set the gpDebug level. Add 1 for each -x.
-Or you can set gpDebug before running the script.
-
-See: fLog and fLog2 (Internal documentation)
-
 =item B<-T pTest>
 
 Run the unit test functions in this script.
 
 "-T all" will run all of the functions that begin with "test".
 Otherwise "pTest" should match the test function names separated with
-commas. "-T com" will run all the tests for bash-com.inc
+spaces (between quotes).
+
+"-T com" will run all the tests for bash-com.inc
 
 For more details about shunit2 (or shunit2.1), see
 shunit2/shunit2-manual.html
@@ -172,105 +150,20 @@ Also for more help, use the "-H int" option.
 
 =back
 
-=head2 Globals
-
-These are globals that may affect how the script runs. Just about all
-of these globals that begin with "gp" can be set and exported before
-the script is run. That way you can set your own defaults, by putting
-them in your ~/.bashrc or ~/.bash_profile files.
-
-The the "common" CLI flags will override the initial variable settings.
-
-=over 4
-
-=item B<gpLog>
-
-If set to 0, log messages will only be sent to stderr.
-
-If set to 1, log messages will be sent to stderr and syslog.
-
-See -l, fLog and fErr for details
-
-Default: 0
-
-=item B<gpFacility>
-
-Log messages sent to syslog will be sent to the "facility" specified
-by by gpFacility.
-
-"user" log messages will be sent to /var/log/user.log, or
-/var/log/syslog, or /var/log/messages.log
-
-See: fLog
-
-Default: user
-
-Allowed facility names:
-
- local0 through local7 - local system facilities
- user - misc scripts, generic user-level messages
- auth - security/authorization messages
- authpriv - security/authorization messages (private)
- cron - clock daemon (cron and at)
- daemon - system daemons without separate facility value
- ftp - ftp daemon
- kern - kernel  messages  (these  can't be generated from user processes)
- lpr - line printer subsystem
- mail - mail subsystem
- news - USENET news subsystem
- syslog - messages generated internally by syslogd(8)
- uucp - UUCP subsystem
-
-These are some suggested uses for the localN facilities:
-
- local0 - system or application configuration
- local1 - application processes
- local2 - web site errors
- local3 - web site access
- local4 - backend processes
- local5 - publishing
- local6 - available
- local7 - available
-
-=item B<gpVerbose>
-
-If set to 0, only log message at "warning" level and above will be output.
-
-If set to 1, all non-debug messages will be output.
-
-See -v, fLog
-
-Default: 0
-
-=item B<gpDebug>
-
-If set to 0, all "debug" and "debug-N" level messages will be skipped.
-
-If not 0, all "debug" level messages will be output.
-
-Or if "debug-N" level is used, then if gpDebug is <= N, then the
-log message will be output, otherwise it is skipped.
-
-See -x
-
-=back
-
 =for comment =head1 RETURN VALUE
-
 =for comment [What the program or function returns if successful.]
 
 =head1 ERRORS
 
 Fatal Errors:
 
-    Missing -t option.
-    A pFile does not exist
+* Missing -t option.
+
+* A pFile does not exist
 
 =for comment Warning:
-
 =for comment Many error messages may describe where the error is located, with the
 =for comment following log message format:
-
 =for comment  Program: PID NNNN: Message [LINE](ErrNo)
 
 =head1 EXAMPLES
@@ -301,15 +194,13 @@ Fatal Errors:
     
 =head2 Example command runs
 
-    $  tag-collect-sh -t tag1 file[12].txt
-
+    $ tag-collect-sh -t tag1 file[12].txt
     {tag1}
     Testing 123
     {tag3} {tag1}
     Testing 789
 
     $ tag-collect-sh -t tag1 -t tag3  file[12].txt
-
     {tag1}
     Testing 123
     {tag3} {tag1}
@@ -320,12 +211,7 @@ is in different files. Duplicate section text is not output (the tags
 are ignored when looking for duplicates). Also the {tag3} {tag1} could
 have been output twice, but only one copy is output.
 
-=head1 ENVIRONMENT
-
-See Globals section for details.
-
-gpLog, gpFacility, gpVerbose, gpDebug
-
+=for comment =head1 ENVIRONMENT
 =for comment =head1 FILES
 
 =head1 SEE ALSO
@@ -334,33 +220,53 @@ shunit2.1
 bash-com.inc
 bash-com.test
 
-=for comment =head1 NOTES
+=head1 NOTES
+
+=head2 How to use this script effectively?
+
+* Define a common tag that will be on all items.
+
+* Put more than one tag on the different item parts in a text file.
+
+* Since a new tag will end a tag block, be sure to have some tag after
+the last tag, or the last tag will take all text until the end of the
+file.
+
+* Ideally the tags should be on a line of their own, no other text.
+
+* Note: Anything between {} on a line, will be concidered a tag, so
+don't use {} in the "item" text.
+
+=head3 To sift through the tags
+
+* Start with the the most general categories. Include all files, but
+select with only one tag, and put those items into separate files.
+
+* For each of the top category files, use other sub tags to create the
+sub-category files.
+
+* There will likely be duplicate items, so to remove them, use the
+common tag to select the items, putting the list of category and
+sub-category files in the desired order on the command line. Duplicate
+items will removed, and only the first item found will be in the final
+output.
 
 =for comment =head1 CAVEATS
-
 =for comment [Things to take special care with; sometimes called WARNINGS.]
-
 =for comment =head1 DIAGNOSTICS
-
 =for comment To verify the script is internally OK, run: tag-collect.sh -T all
-
 =for comment =head1 BUGS
-
 =for comment [Things that are broken or just don't work quite right.]
-
 =for comment =head1 RESTRICTIONS
-
 =for comment [Bugs you don't plan to fix :-)]
-
 =for comment =head1 AUTHOR
-
 =for comment NAME
 
 =head1 HISTORY
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.4 $ $Date: 2022/05/24 21:59:18 $ GMT 
+$Revision: 1.5 $ $Date: 2022/05/25 19:07:57 $ GMT 
 
 =cut
 EOF
@@ -402,7 +308,10 @@ EOF
 fSetGlobals()
 {
     fComSetGlobals
-
+    gpLog=0
+    gpVerbose=0
+    gpDebug=0
+    
     # Put your globals here
     gpFileList=""
     gpTag=""
@@ -479,7 +388,14 @@ fGetChunk()
 	    echo "$REPLY" >>${cTmpF}-$tCount.tmp
 	fi
     done
-    
+
+    'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        # No files were generated
+	echo
+        return
+    fi
+
     for tFile in ${cTmpF}-*.tmp; do
         tHash=$(sed 's/{.*}//g' $tFile | md5sum)
 	grep -q ${tHash% *} $Tmp/unique.tmp >/dev/null 2>&1
@@ -490,8 +406,17 @@ fGetChunk()
 	echo ${tHash% *} >>$Tmp/unique.tmp
     done
 
+    'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        # No files to output
+	echo
+        return
+    fi
+
     cat ${cTmpF}-*.tmp 2>/dev/null
     rm -f ${cTmpF}-*.tmp >/dev/null 2>&1
+
+    return
 } # fGetChunk
 
 # -------------------
@@ -764,7 +689,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.4 $'
+cVer='$Revision: 1.5 $'
 fSetGlobals
 
 # -------------------
@@ -772,7 +697,7 @@ fSetGlobals
 if [ $# -eq 0 ]; then
     fError2 -m "Missing options." -l $LINENO
 fi
-while getopts :t:hH:lT:vx tArg; do
+while getopts :t:hH:T: tArg; do
     case $tArg in
         # Script arguments
         t)  # Don't add dups
@@ -783,9 +708,6 @@ while getopts :t:hH:lT:vx tArg; do
         # Common arguments
         h) fUsage long ;;
         H) fUsage "$OPTARG" ;;
-        l) gpLog=1 ;;
-        v) let ++gpVerbose ;;
-        x) let ++gpDebug ;;
         T) gpTest="$OPTARG" ;;
         # Problem arguments
         :) fError "Value required for option: -$OPTARG" $LINENO ;;
