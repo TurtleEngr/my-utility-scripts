@@ -3,11 +3,11 @@ SHELL = /bin/bash
 update copy :
 	git co develop
 	git pull origin develop
-	-for i in $$(cat copy-list.txt); do \
+	-for i in $$(cat ../copy-list.txt); do \
 		cp -a ../$$i bin; \
 		cp -a ../doc/$$i.* doc 2>/dev/null; \
 	done
-	echo Check: git st
+	git st
 	echo if OK, make ci
 
 ci checkin commit save :
