@@ -1,41 +1,8 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.59 $ $Date: 2022/05/25 19:08:03 $ GMT
+# $Revision: 1.62 $ $Date: 2022/05/29 18:36:24 $ GMT
 
-# ========================================
-# Include common bash functions at $cBin/bash-com.inc But first we
-# need to set cBin
-
-# -------------------
-# Set current directory location in PWD and cCurDir, because with cron
-# jobs PWD is not set.
-if [ -z "$PWD" ]; then
-    PWD=$(pwd)
-fi
-cCurDir=$PWD
-
-# -------------------
-# Define cBin, location of common scripts (pick one)
-tBin=home
-case $tBin in
-    current)
-        cBin=$PWD
-        ;;
-    home) cBin=~/bin ;;
-    local) cBin=/usr/local/bin ;;
-    system) cBin=/usr/bin ;;
-    this)
-        cBin=${0%/*}
-        if [ "$cBin" = "." ]; then
-            cBin=$PWD
-        fi
-        cd $cBin
-        cBin=$PWD
-        cd $cCurDir
-        ;;
-esac
-
-. $cBin/bash-com.inc
+export gpHostName gpTag
 
 # ========================================
 # Script Functions
@@ -50,24 +17,26 @@ fUsage()
 
     case $pStyle in
         short | usage | man | long | text | md)
-            fComUsage -f $cCurDir/$cName -s $pStyle
+            fComUsage -f $cBin/$cName -s $pStyle
             ;;
         html)
-            fComUsage -f $cCurDir/$cName -s $pStyle -t "$cName Usage"
+            fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
             ;;
         int)
-            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
             ;;
         int-html)
-            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
             ;;
         int-md)
-            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
             ;;
         *)
-            fComUsage -f $cCurDir/$cName -s short
+            fComUsage -f $cBin/$cName -s short
             ;;
     esac
+    fCleanUp
+    # Defect: this exit doesn't seem to work.
     exit 1
 
     # POD Syntax: https://perldoc.perl.org/perlpod
@@ -154,7 +123,7 @@ For more details about shunit2 (or shunit2.1), see
 shunit2/shunit2-manual.html
 L<Source|https://github.com/kward/shunit2>
 
-See shunit2, shunit2.1, and global: gpUnitDebug
+See shunit2, shunit2.1
 
 Also for more help, use the "-H int" option.
 
@@ -249,13 +218,6 @@ log message will be output, otherwise it is skipped.
 
 See -x
 
-=item B<gpUnitDebug>
-
-If set to non-zero, then the fUDebug function calls will output
-the messages when in test functions.
-
-See -T, fUDebug
-
 =back
 
 =head1 RETURN VALUE
@@ -279,7 +241,7 @@ following log message format:
 
 See Globals section for details.
 
-HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug, gpUnitDebug
+HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
 
 =for comment =head1 FILES
 
@@ -315,7 +277,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.59 $ $Date: 2022/05/25 19:08:03 $ GMT 
+$Revision: 1.62 $ $Date: 2022/05/29 18:36:24 $ GMT 
 
 =cut
 EOF
@@ -360,6 +322,7 @@ fSetGlobals()
 
     # Put your globals here
     gpTag=${gpTag:-build}
+    gpHostName=$HOSTNAME
 
     # Define the Required and the Optional progs, space separated
     fComCheckDeps "cat" "cat"
@@ -403,90 +366,90 @@ EOF
 # Tests
 
 # --------------------------------
-fUDebug()
+oneTimeSetUp()
 {
-    # See also fUDebug
-    if [ ${gpUnitDebug:-0} -ne 0 ]; then
-        echo "fUDebug: $*"
-    fi
-    return
+    return 0
+} # oneTimeSetUp()
 
-    cat <<EOF >/dev/null
-=internal-pod
+# --------------------------------
+oneTimeTearDown()
+{
+    return 0
+} # oneTearDown()
 
-=internal-head2 Unit Test Functions
+# --------------------------------
+setUp()
+{
+    return 0
+} # setUp()
 
-=internal-cut
-EOF
-} # fUDebug
+# --------------------------------
+tearDown()
+{
+    return 0
+} # tearDown()
 
 # --------------------------------
 testUsage()
 {
     local tResult
 
-    gpUnitDebug=${gpUnitDebug:-0}
-
     #-----
     tResult=$(fUsage short 2>&1)
-    fUDebug "tResult=$tResult"
-    assertContains "$LINENO tu-short" "$tResult" "NAME SCRIPTNAME"
+    assertContains "$LINENO short" "$tResult" "NAME SCRIPTNAME"
 
     #-----
     tResult=$(fUsage foo 2>&1)
-    fUDebug "tResult=$tResult"
-    assertContains "$LINENO tu-foo.1" "$tResult" "NAME SCRIPTNAME"
+    assertContains "$LINENO foo.1" "$tResult" "NAME SCRIPTNAME"
 
     #-----
     tResult=$(fUsage text 2>&1)
-    assertContains "$LINENO tu-long.1" "$tResult" "DESCRIPTION"
-    assertContains "$LINENO tu-long.2" "$tResult" "HISTORY"
+    assertContains "$LINENO long.1" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO long.2" "$tResult" "HISTORY"
 
     #-----
     tResult=$(fUsage man 2>&1)
-    assertContains "$LINENO tu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
-    assertContains "$LINENO tu-man.2" "$tResult" '.IX Header "HISTORY"'
+    assertContains "$LINENO man.1" "$tResult" '.IX Header "DESCRIPTION"'
+    assertContains "$LINENO man.2" "$tResult" '.IX Header "HISTORY"'
 
     #-----
     tResult=$(fUsage html 2>&1)
-    assertContains "$LINENO tu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
-    assertContains "$LINENO tu-html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
-    assertContains "$LINENO tu-html.3" "$tResult" "<title>$cName Usage</title>"
+    assertContains "$LINENO html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+    assertContains "$LINENO html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+    assertContains "$LINENO html.3" "$tResult" "<title>$cName Usage</title>"
 
     #-----
     tResult=$(fUsage md 2>&1)
-    assertContains "$LINENO tu-md.1" "$tResult" '# DESCRIPTION'
-    assertContains "$LINENO tu-md.2" "$tResult" '# HISTORY'
+    assertContains "$LINENO md.1" "$tResult" '# DESCRIPTION'
+    assertContains "$LINENO md.2" "$tResult" '# HISTORY'
 
     #-----
     tResult=$(fUsage int 2>&1)
-    fUDebug "tResult=$tResult"
-    assertContains "$LINENO tu-internal.1" "$tResult" 'Template Use'
-    assertContains "$LINENO tu-internal.2" "$tResult" 'fComSetGlobals'
+    assertContains "$LINENO internal.1" "$tResult" 'Template Use'
+    assertContains "$LINENO internal.2" "$tResult" 'fComSetGlobals'
 
     #-----
     tResult=$(fUsage int-html 2>&1)
-    fUDebug "tResult=$tResult"
-    assertContains "$LINENO tu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
-    assertContains "$LINENO tu-int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
-    assertContains "$LINENO tu-int-html.3" "$tResult" 'Internal Doc</title>'
-    assertContains "$LINENO tu-int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
+    assertContains "$LINENO int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
+    assertContains "$LINENO int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
+    assertContains "$LINENO int-html.3" "$tResult" 'Internal Doc</title>'
+    assertContains "$LINENO int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
 
     #-----
     tResult=$(fUsage int-md 2>&1)
-    assertContains "$LINENO tu-int-md.1" "$tResult" '## Template Use'
-    assertContains "$LINENO tu-int-md.2" "$tResult" '### fComSetGlobals'
-    assertContains "$LINENO tu-int-md.3" "$tResult" '### testComUsage'
+    assertContains "$LINENO int-md.1" "$tResult" '## Template Use'
+    assertContains "$LINENO int-md.2" "$tResult" '### fComSetGlobals'
+    assertContains "$LINENO int-md.3" "$tResult" '### testComUsage'
 
     #-----
     # When calling cmd, unset gpTest to prevent infinite loop
     gpTest=""
-    tResult=$(./template.sh 2>&1)
-    assertContains "$LINENO tu-cmd-call" "$tResult" "NAME SCRIPTNAME"
+    tResult=$($cBin/template.sh 2>&1)
+    assertContains "$LINENO cmd-call" "$tResult" "Usage:"
+    assertContains "$LINENO cmd-call" "$tResult" "SCRIPTNAME"
 
     #-----
-    gpUnitDebug=${gpUnitDebug:-0}
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
@@ -516,7 +479,7 @@ testScriptFunctions()
     tResult=$(fValidateHostName 2>&1)
     assertContains "$LINENO tsf-fValidateHostName.2" "$tResult" "required."
 
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
@@ -533,7 +496,6 @@ EOF
 # This should be the last defined function
 fRunTests()
 {
-    gpUnitDebug=${gpUnitDebug:-0}
     if [ "$gpTest" = "all" ]; then
         gpTest=""
         # shellcheck disable=SC1091
@@ -564,10 +526,45 @@ EOF
 # Main
 
 # -------------------
+# Include common bash functions at $cBin/bash-com.inc But first we
+# need to set cBin
+
+# -------------------
+# Set current directory location in PWD and cCurDir, because with cron
+# jobs PWD is not set.
+if [ -z "$PWD" ]; then
+    PWD=$(pwd)
+fi
+cCurDir=$PWD
+
+# -------------------
+# Define cBin, location of common scripts (pick one)
+tBin=home
+case $tBin in
+    current)
+        cBin=$PWD
+        ;;
+    home) cBin=~/bin ;;
+    local) cBin=/usr/local/bin ;;
+    system) cBin=/usr/bin ;;
+    this)
+        cBin=${0%/*}
+        if [ "$cBin" = "." ]; then
+            cBin=$PWD
+        fi
+        cd $cBin
+        cBin=$PWD
+        cd $cCurDir
+        ;;
+esac
+
+. $cBin/bash-com.inc
+
+# -------------------
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.59 $'
+cVer='$Revision: 1.62 $'
 fSetGlobals
 
 # -------------------
@@ -582,8 +579,12 @@ while getopts :cn:t:hH:lT:vx tArg; do
         n) gpHostName="$OPTARG" ;;
         t) gpTag="$OPTARG" ;;
         # Common arguments
-        h) fUsage long ;;
-        H) fUsage "$OPTARG" ;;
+        h) fUsage long
+	    exit 1
+	    ;;
+        H) fUsage "$OPTARG"
+	    exit 1
+	    ;;
         l) gpLog=1 ;;
         v) let ++gpVerbose ;;
         x) let ++gpDebug ;;

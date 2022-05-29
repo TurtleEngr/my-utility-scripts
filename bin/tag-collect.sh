@@ -1,12 +1,12 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.5 $ $Date: 2022/05/25 19:07:57 $ GMT
+# $Revision: 1.6 $ $Date: 2022/05/26 00:03:35 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
 # need to set cBin
 
-export  gpFileList
+export  gpFileList gpTag
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -266,7 +266,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.5 $ $Date: 2022/05/25 19:07:57 $ GMT 
+$Revision: 1.6 $ $Date: 2022/05/26 00:03:35 $ GMT 
 
 =cut
 EOF
@@ -309,9 +309,9 @@ fSetGlobals()
 {
     fComSetGlobals
     gpLog=0
-    gpVerbose=0
+    gpVerbose=1
     gpDebug=0
-    
+
     # Put your globals here
     gpFileList=""
     gpTag=""
@@ -339,12 +339,23 @@ EOF
 fValidate()
 {
     local tFile
+    local tNewList=""
 
     for tFile in $gpFileList; do
         if [ ! -f $tFile ]; then
-    	    fError2 -m "File not found: $tFile" -l $LINENO
+    	    fLog2 -p warn -m "File not found: $tFile" -l $LINENO
+	    continue
 	fi
+	if ! grep -q '{.*}' $tFile; then
+    	    fLog2 -p warn  -m "No tags found in: $tFile" -l $LINENO
+	    continue
+	fi
+	tNewList="$tNewList $tFile"
     done
+    if [ -z "$tNewList" ]; then
+        fError2 -m "No files are left to process" -l $LINENO
+    fi
+    gpFileList="$tNewList"
     
     if [ -z "$gpTag" ]; then
         fError2 -m "Missing -t option" -l $LINENO
@@ -391,7 +402,7 @@ fGetChunk()
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        # No files were generated
+	fLog2 -m "No files were generated" -p warn -l $LINENO
 	echo
         return
     fi
@@ -408,7 +419,7 @@ fGetChunk()
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        # No files to output
+	fLog2 -m "No files were generated" -p warn -l $LINENO
 	echo
         return
     fi
@@ -555,11 +566,11 @@ testValidate()
     assertContains "$LINENO tv-no-tags" "$tResult" "Missing -t option"
 
     #-----
-    echo "test" >~/tmp/tag-collect-test.tmp
-    tResult=$(./tag-collect.sh -t tagxx ~/tmp/tag-collect-test.tmp 2>&1)
-    assertNull "$LINENO tv-cmd-tags-ok $tResult" "$tResult"
-    rm ~/tmp/tag-collect-test.tmp
-    
+    echo "{test}" >$Tmp/tag-collect-test.tmp
+    tResult=$(./tag-collect.sh -t tagxx $Tmp/tag-collect-test.tmp 2>&1)
+    assertContains "$LINENO tv-cmd-tags-ok $tResult" "$tResult" "No files were generated"
+    rm $Tmp/tag-collect-test.tmp
+
     return 0
 } # testValidate
 
@@ -568,9 +579,7 @@ testGetTag()
     local tResult
 
     # Setup
-    gpTestDir=~/tmp/test-tag-collect
-    mkdir -p $gpTestDir
-    cat <<EOF >$gpTestDir/tag-file1.txt
+    cat <<EOF >$Tmp/tag-file1.txt
 tag1
 NOT
 {tag1}
@@ -584,7 +593,7 @@ Testing 123
 EOF
 
     gpTag="tagxy"
-    gpFileList=$gpTestDir/tag-file1.txt
+    gpFileList=$Tmp/tag-file1.txt
     tResult=$(fGetTaggedText 2>&1)
     assertNotContains "$LINENO tgt-nothing" "$tResult" "Testing 123"
 
@@ -633,19 +642,19 @@ EOF
     gpTag=" "
     gpFileList=""
     gpTest=""
-    tResult=$(./tag-collect.sh  tag1 $gpTestDir/tag-file1.txt 2>&1)
+    tResult=$(./tag-collect.sh  tag1 $Tmp/tag-file1.txt 2>&1)
     assertNotContains "$LINENO tgt-cmd-found-1" "$tResult" "Testing 123"
     assertNotContains "$LINENO tgt-cmd-not-1" "$tResult" "NOT"
     assertNotContains "$LINENO tgt-cmd-not-1" "$tResult" "Testing 456"
     assertContains "$LINENO tgt-cmd-not-1 crit" "$tResult" "crit"
 
-    tResult=$(./tag-collect.sh  -t tag1 $gpTestDir/tag-file1.txt 2>&1)
+    tResult=$(./tag-collect.sh  -t tag1 $Tmp/tag-file1.txt 2>&1)
     assertContains "$LINENO tgt-cmd-found-2" "$tResult" "Testing 123"
     assertNotContains "$LINENO tgt-cmd-not-2" "$tResult" "NOT"
     assertNotContains "$LINENO tgt-cmd-not-2" "$tResult" "Testing 456"
     assertNotContains "$LINENO tgt-cmd-not-2 crit" "$tResult" "crit"
 
-    tResult=$(./tag-collect.sh  -t tag3 -t tag2 $gpTestDir/tag-file1.txt 2>&1)
+    tResult=$(./tag-collect.sh  -t tag3 -t tag2 $Tmp/tag-file1.txt 2>&1)
     assertContains "$LINENO tgt-cmd-found-3" "$tResult" "Testing 456"
     assertContains "$LINENO tgt-cmd-found-4" "$tResult" "Testing 789"
 
@@ -689,7 +698,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.5 $'
+cVer='$Revision: 1.6 $'
 fSetGlobals
 
 # -------------------
@@ -735,12 +744,8 @@ fValidate
 # -------------------
 # Read-only section
 
-##timeout 5 awk -f $cTmp1 >$cTmp2
-
 # -------------------
 # Write section
-
-##fProcess $tList
 
 # -------------------
 # Output section

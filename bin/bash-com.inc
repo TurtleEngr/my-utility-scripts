@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.9 $ $Date: 2022/05/24 05:51:20 $ GMT
+# $Revision: 1.11 $ $Date: 2022/05/29 18:36:23 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -95,7 +95,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.9 $'
+	cVer='$Revision: 1.11 $'
 
 =internal-head3 Documentation Format
 
@@ -170,7 +170,7 @@ fComSetGlobals()
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.9 $'
+    #cVer='$Revision: 1.11 $'
 
     if [ "$cVer" != "${cVer#*' '}" ]; then
         cVer=${cVer#*' '}
@@ -207,8 +207,7 @@ fComSetGlobals()
 
     # -------------------
     gpTest=${gpTest:-""}
-    gpUnitDebug=${gpUnitDebug:-0}
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
@@ -231,7 +230,7 @@ fComCleanUp()
     if [ $gpDebug -eq 0 ]; then
         'rm' -f ${cTmpF}*.tmp 2>/dev/null
     fi
-    fLog notice "Done" $LINENO 9900
+    ##fLog notice "Done" $LINENO 9900
     exit $gErr
 
     cat <<EOF >/dev/null
@@ -509,11 +508,10 @@ fFmtLog()
     fi
 
     # Check verbose
-    if [ $gpVerbose -eq 0 ] &&
-        [ "$pLevel" = "notice" ] || [ "$pLevel" = "info" ]; then
+    if [[ $gpVerbose -eq 0 && ("$pLevel" = "notice" || "$pLevel" = "info") ]]; then
         return
     fi
-    if [ $gpVerbose -eq 1 ] && [ "$pLevel" = "info" ]; then
+    if [[ $gpVerbose -eq 1 && "$pLevel" = "info" ]]; then
         return
     fi
 
@@ -725,7 +723,7 @@ fError2()
     fi
     fLog2 -p crit -l $pLine -e $pErr -m "$pMsg"
     if [ $pInt -eq 0 ]; then
-        fUsage short
+        fUsage usage
     fi
     exit 1
     return
