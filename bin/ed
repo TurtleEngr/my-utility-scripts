@@ -52,7 +52,7 @@ case $tHost in
         tDefLog=~/tmp/w.tmp
         ;;
     uucc-mac*)
-	tDefLog=/tmp/u.tmp
+	tDefLog=~/tmp/u.tmp
         tEdit=emacs
         tBG=1
         ;;

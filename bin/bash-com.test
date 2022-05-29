@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.test,v $
-# $Revision: 1.5 $ $Date: 2022/05/24 05:02:19 $ GMT
+# $Revision: 1.6 $ $Date: 2022/05/29 18:36:24 $ GMT
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -81,7 +81,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.5 $ $Date: 2022/05/24 05:02:19 $ GMT 
+$Revision: 1.6 $ $Date: 2022/05/29 18:36:24 $ GMT 
 
 =cut
 EOF
@@ -186,32 +186,32 @@ testComInitialConfig()
     local tProg
     local tResult
 
-    assertEquals "$LINENO tcic-1" "$PWD" "$cCurDir"
-    assertTrue "$LINENO tcic-2" "[ -d $cCurDir ]"
+    assertEquals "$LINENO init" "$PWD" "$cCurDir"
+    assertTrue "$LINENO init" "[ -d $cCurDir ]"
 
-    assertNotNull "$LINENO tcic-3" "$cBin"
-    assertTrue "$LINENO tcic-4" "[ -d $cBin ]"
-    assertTrue "$LINENO tcic-5" "[ -f $cBin/$cName ]"
-    assertTrue "$LINENO tcic-6" "[ -x $cBin/$cName ]"
-    assertTrue "$LINENO tcic-7" "[ -x $cBin/bash-com.inc ]"
-    assertTrue "$LINENO tcic-8" "[ -x $cBin/bash-com.test ]"
+    assertNotNull "$LINENO init" "$cBin"
+    assertTrue "$LINENO init" "[ -d $cBin ]"
+    assertTrue "$LINENO init" "[ -f $cBin/$cName ]"
+    assertTrue "$LINENO init" "[ -x $cBin/$cName ]"
+    assertTrue "$LINENO init" "[ -x $cBin/bash-com.inc ]"
+    assertTrue "$LINENO init" "[ -x $cBin/bash-com.test ]"
 
-    assertEquals "$LINENO tcic-10" "0" "$gpDebug"
-    assertEquals "$LINENO tcic-11" "0" "$gpVerbose"
-    assertEquals "$LINENO tcic-12" "0" "$gpLog"
-    assertEquals "$LINENO tcic-13" "user" "$gpFacility"
-    assertEquals "$LINENO tcic-14" "0" "$gErr"
-    assertNull "$LINENO tcic-15" "$(echo $cVer | tr -d '.[:digit:]')"
-    assertEquals "$LINENO tcic-16" "/tmp/$USER/$cName" "$Tmp"
-    #assertEquals "$LINENO tcic-17" "$Tmp/file-$cPID" "$cTmpF"
-    assertEquals "$LINENO tcic-18" "${cTmpF}-1.tmp" "$cTmp1"
+    assertEquals "$LINENO init" "0" "$gpDebug"
+    assertEquals "$LINENO init" "0" "$gpVerbose"
+    assertEquals "$LINENO init" "0" "$gpLog"
+    assertEquals "$LINENO init" "user" "$gpFacility"
+    assertEquals "$LINENO init" "0" "$gErr"
+    assertNull "$LINENO init" "$(echo $cVer | tr -d '.[:digit:]')"
+    assertEquals "$LINENO init" "/tmp/$USER/$cName" "$Tmp"
+    #assertEquals "$LINENO init" "$Tmp/file-$cPID" "$cTmpF"
+    assertEquals "$LINENO init" "${cTmpF}-1.tmp" "$cTmp1"
 
     # ADJUST?
-    assertEquals "$LINENO tcic-19" "/tmp/$USER/$cName" "$Tmp"
+    assertEquals "$LINENO init" "/tmp/$USER/$cName" "$Tmp"
 
     for tProg in logger pod2text pod2usage pod2html pod2man pod2markdown tidy awk tr; do
         which $tProg &>/dev/null
-        assertTrue "$LINENO tcic-20 missing: $tProg" "[ $? -eq 0 ]"
+        assertTrue "$LINENO missing: $tProg" "[ $? -eq 0 ]"
     done
     return
 
@@ -269,30 +269,30 @@ testComLog_MultiplePermutations()
                         fComUDebug "tResult=$tResult"
 
                         if [ $gpVerbose -eq 0 ] && echo $tLevel | grep -Eq 'notice|info'; then
-                            assertNull "$LINENO tcl1-$tTestMsg not notice,info" "$tResult"
+                            assertNull "$LINENO $tTestMsg not notice,info" "$tResult"
                             continue
                         fi
                         if [ $gpVerbose -eq 1 ] && echo $tLevel | grep -Eq 'info'; then
-                            assertNull "$LINENO tcl1-$tTestMsg not info" "$tResult"
+                            assertNull "$LINENO $tTestMsg not info" "$tResult"
                             continue
                         fi
                         if [ $gpDebug -eq 0 ] && [ "${tLevel%%-*}" = "debug" ]; then
-                            assertNull "$LINENO tcl2-$tTestMsg not debug" "$tResult"
+                            assertNull "$LINENO $tTestMsg not debug" "$tResult"
                             continue
                         fi
                         if [ $gpDebug -lt 2 ] && [ "$tLevel" = "debug-2" ]; then
-                            assertNull "$LINENO tcl3-$tTestMsg not debug-2" "$tResult"
+                            assertNull "$LINENO $tTestMsg not debug-2" "$tResult"
                             continue
                         fi
                         if [ $gpDebug -lt 3 ] && [ "$tLevel" = "debug-3" ]; then
-                            assertNull "$LINENO tcl4-$tTestMsg not debug-3" "$tResult"
+                            assertNull "$LINENO $tTestMsg not debug-3" "$tResult"
                             continue
                         fi
                         assertContains "$LINENO $tResult" "$tResult" "$cName"
-                        assertContains "$LINENO tcl6-$tTestMsg.level" "$tResult" "$tLevel:"
-                        assertContains "$LINENO tcl7-$tTestMsg.msg" "$tResult" "$tMsg"
-                        assertContains "$LINENO tcl8-$tTestMsg.line" "$tResult" '['$tLine']'
-                        assertContains "$LINENO tcl9-$tTestMsg.$tLevel.err" "$tResult" '('$tErr')'
+                        assertContains "$LINENO $tTestMsg.level" "$tResult" "$tLevel:"
+                        assertContains "$LINENO $tTestMsg.msg" "$tResult" "$tMsg"
+                        assertContains "$LINENO $tTestMsg.line" "$tResult" '['$tLine']'
+                        assertContains "$LINENO $tTestMsg.$tLevel.err" "$tResult" '('$tErr')'
                     done
                 done
             done
@@ -350,11 +350,11 @@ testComSysLog()
                 tResult=$($tLog -p $tLevel -m "$tMsg" 2>&1)
             fi
             fComUDebug "tResult=$tResult"
-            assertContains "$LINENO tcl11-$tTestMsg" "$tResult" "$tLevel:"
+            assertContains "$LINENO $tTestMsg" "$tResult" "$tLevel:"
             tResult=$(tail -n1 $tSyslog)
             fComUDebug "syslog tResult=$tResult"
-            assertContains "$LINENO tcl12-$tTestMsg" "$tResult" "$tLevel:"
-            assertContains "$LINENO tcl13-$tTestMsg" "$tResult" "$tMsg"
+            assertContains "$LINENO $tTestMsg" "$tResult" "$tLevel:"
+            assertContains "$LINENO $tTestMsg" "$tResult" "$tMsg"
         done
     done
     echo 1>&2
@@ -402,13 +402,13 @@ testComErrorLog()
                 tResult=$($tLog -m "$tMsg" -l $tLine 2>&1)
             fi
             fComUDebug "tResult=$tResult"
-            assertContains "$LINENO tcel-$tTestMsg.name" "$tResult" "$cName"
-            assertContains "$LINENO tcel-$tTestMsg.crit" "$tResult" "crit:"
-            assertContains "$LINENO tcel-$tTestMsg.msg" "$tResult" "$tMsg"
-            assertContains "$LINENO tcel-$tTestMsg.line" "$tResult" '['$tLine']'
+            assertContains "$LINENO $tTestMsg.name" "$tResult" "$cName"
+            assertContains "$LINENO $tTestMsg.crit" "$tResult" "crit:"
+            assertContains "$LINENO $tTestMsg.msg" "$tResult" "$tMsg"
+            assertContains "$LINENO $tTestMsg.line" "$tResult" '['$tLine']'
             # shellcheck disable=SC2026
-            assertContains "$LINENO tcel-$tTestMsg.err" "$tResult" '('1')'
-            assertContains "$LINENO tcel-$tTestMsg.usage" "$tResult" "Usage:"
+            assertContains "$LINENO $tTestMsg.err" "$tResult" '('1')'
+            assertContains "$LINENO $tTestMsg.usage" "$tResult" "Usage:"
         done
     done
     echo 1>&2
@@ -432,17 +432,17 @@ testComCleanUp()
     gpDebug=0
     local tResult
 
-    assertEquals "$LINENO tccu-1" "/tmp/$USER/$cName" "$Tmp"
-    assertTrue "$LINENO tccu-2" "[ -d $Tmp ]"
+    assertEquals "$LINENO clean" "/tmp/$USER/$cName" "$Tmp"
+    assertTrue "$LINENO clean" "[ -d $Tmp ]"
 
-    assertEquals "$LINENO tccu-3" "$Tmp/file-$cPID" "$cTmpF"
+    assertEquals "$LINENO clean" "$Tmp/file-$cPID" "$cTmpF"
 
-    assertEquals "$LINENO tccu-4" "${cTmpF}-1.tmp" "$cTmp1"
+    assertEquals "$LINENO clean" "${cTmpF}-1.tmp" "$cTmp1"
     touch $cTmp1
-    assertTrue "$LINENO tccu-5" "[ -f $cTmp1 ]"
+    assertTrue "$LINENO clean" "[ -f $cTmp1 ]"
 
     tResult=$(fComCleanUp 2>&1)
-    assertFalse "$LINENO tccu-6" "[ -f $cTmp1 ]"
+    assertFalse "$LINENO clea" "[ -f $cTmp1 ]"
     return
 
     cat <<EOF >/dev/null
@@ -466,59 +466,59 @@ testComUsage()
     #-----
     tResult=$(fComUsage -s short -f $cBin/$cName 2>&1)
     fComUDebug "tResult=$tResult"
-    assertContains "$LINENO tcu-short" "$tResult" "NAME"
+    assertContains "$LINENO usage" "$tResult" "NAME"
 
     #-----
     tResult=$(fComUsage -s foo -f $cBin/$cName 2>&1)
     fComUDebug "tResult=$tResult"
-    assertContains "$LINENO tcu-s-foo.1" "$tResult" "DESCRIPTION"
-    assertContains "$LINENO tcu-s-foo.2" "$tResult" "HISTORY"
+    assertContains "$LINENO usage" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO usage" "$tResult" "HISTORY"
 
     #-----
     tResult=$(fComUsage -f $cBin/$cName -s 2>&1)
     fComUDebug "tResult=$tResult"
-    assertContains "$LINENO tcu-s-null.1" "$tResult" "crit: Internal: fComUsage: Value required"
+    assertContains "$LINENO usage" "$tResult" "crit: Internal: fComUsage: Value required"
 
     #-----
     tResult=$(fComUsage -s long -f $cBin/$cName 2>&1)
-    assertContains "$LINENO tcu-long.1" "$tResult" "DESCRIPTION"
-    assertContains "$LINENO tcu-long.2" "$tResult" "HISTORY"
+    assertContains "$LINENO usage" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO usage" "$tResult" "HISTORY"
 
     #-----
     tResult=$(fComUsage -s man -f $cBin/$cName 2>&1)
-    assertContains "$LINENO tcu-man.1" "$tResult" '.IX Header "DESCRIPTION"'
-    assertContains "$LINENO tcu-man.2" "$tResult" '.IX Header "HISTORY"'
+    assertContains "$LINENO usage" "$tResult" '.IX Header "DESCRIPTION"'
+    assertContains "$LINENO usage" "$tResult" '.IX Header "HISTORY"'
 
     #-----
     tResult=$(fComUsage -s html -f $cBin/$cName -t "$cName Usage" 2>&1)
-    assertContains "$LINENO tcu-html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
-    assertContains "$LINENO tcu-html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
-    assertContains "$LINENO tcu-html.3" "$tResult" "<title>$cName Usage</title>"
+    assertContains "$LINENO usage" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+    assertContains "$LINENO usage" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+    assertContains "$LINENO usage" "$tResult" "<title>$cName Usage</title>"
 
     #-----
     tResult=$(fComUsage -s md -f $cBin/$cName 2>&1)
-    assertContains "$LINENO tcu-md.1" "$tResult" '# DESCRIPTION'
-    assertContains "$LINENO tcu-md.2" "$tResult" '# HISTORY'
+    assertContains "$LINENO usage" "$tResult" '# DESCRIPTION'
+    assertContains "$LINENO usage" "$tResult" '# HISTORY'
 
     #-----
     tResult=$(fComUsage -i -s long -f $cBin/$cName -f $cBin/bash-com.inc 2>&1)
     fComUDebug "tResult=$tResult"
-    assertContains "$LINENO tcu-internal.1" "$tResult" 'Template Use'
-    assertContains "$LINENO tcu-internal.2" "$tResult" 'fComSetGlobals'
+    assertContains "$LINENO internal" "$tResult" 'Template Use'
+    assertContains "$LINENO internal" "$tResult" 'fComSetGlobals'
 
     #-----
     tResult=$(fComUsage -i -s html -t "Internal Doc" -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test 2>&1)
     fComUDebug "tResult=$tResult"
-    assertContains "$LINENO tcu-int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
-    assertContains "$LINENO tcu-int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
-    assertContains "$LINENO tcu-int-html.3" "$tResult" '<title>Internal Doc</title>'
-    assertContains "$LINENO tcu-int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
+    assertContains "$LINENO int-html" "$tResult" '<a href="#Template-Use">Template Use</a>'
+    assertContains "$LINENO int-html" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
+    assertContains "$LINENO int-html" "$tResult" '<title>Internal Doc</title>'
+    assertContains "$LINENO int-html" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
 
     #-----
     tResult=$(fComUsage -i -s md -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test 2>&1)
-    assertContains "$LINENO tcu-int-md.1" "$tResult" '## Template Use'
-    assertContains "$LINENO tcu-int-md.2" "$tResult" '### fComSetGlobals'
-    assertContains "$LINENO tcu-int-md.3" "$tResult" '### testComUsage'
+    assertContains "$LINENO int-md" "$tResult" '## Template Use'
+    assertContains "$LINENO int-md" "$tResult" '### fComSetGlobals'
+    assertContains "$LINENO int-md" "$tResult" '### testComUsage'
 
     #-----
     tResult=$(fComUsage -a -s long -f $cBin/$cName -f $cBin/bash-com.inc 2>&1)
@@ -543,10 +543,10 @@ testComFunctions()
     local tResult
 
     tResult=$(fComCheckDeps 2>&1)
-    assertTrue "$LINENO tcf-fComCheckDep tResult=$tResult" "[ $? -eq 0 ]"
+    assertTrue "$LINENO fComCheckDep tResult=$tResult" "[ $? -eq 0 ]"
 
     tResult=$(fComSetGlobals 2>&1)
-    assertTrue "$LINENO tcf-fComSetGlobals tResult=$tResult" "[ $? -eq 0 ]"
+    assertTrue "$LINENO fComSetGlobals tResult=$tResult" "[ $? -eq 0 ]"
     return
 
     cat <<EOF >/dev/null
