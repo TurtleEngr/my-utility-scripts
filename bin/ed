@@ -45,7 +45,7 @@ case $tHost in
         tArchive=1
         ;;
     mxtrance)
-        tDefLog=~/tmp/m.tmp
+        tDefLog=~/tmp/m.org
         tEdit=emacs
         tBG=1
         tArchive=1
