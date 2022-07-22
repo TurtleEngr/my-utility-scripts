@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.6 $ $Date: 2022/05/26 00:03:35 $ GMT
+# $Revision: 1.8 $ $Date: 2022/06/10 17:45:20 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -52,22 +52,22 @@ fUsage()
 
     case $pStyle in
         short | usage | man | long | text | md)
-            fComUsage -f $cCurDir/$cName -s $pStyle
+            fComUsage -f $cBin/$cName -s $pStyle | more
             ;;
         html)
-            fComUsage -f $cCurDir/$cName -s $pStyle -t "$cName Usage"
+            fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
             ;;
         int)
-            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long | more
             ;;
         int-html)
-            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
             ;;
         int-md)
-            fComUsage -i -f $cCurDir/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+            fComUsage -i -f $cBinr/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
             ;;
         *)
-            fComUsage -f $cCurDir/$cName -s short
+            fComUsage -f $cBin/$cName -s short | more
             ;;
     esac
     exit 1
@@ -266,7 +266,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.6 $ $Date: 2022/05/26 00:03:35 $ GMT 
+$Revision: 1.8 $ $Date: 2022/06/10 17:45:20 $ GMT 
 
 =cut
 EOF
@@ -698,7 +698,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.6 $'
+cVer='$Revision: 1.8 $'
 fSetGlobals
 
 # -------------------

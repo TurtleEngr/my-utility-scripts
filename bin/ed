@@ -5,6 +5,8 @@
 #	ed -l
 #	ed -d
 
+# Use: ~/bin/journal2org.sh to convert *.tmp date format to org format
+
 cMyLogs=/home/bruce/bc/tmp/ver/doc/mylogs
 tBG=0
 tArchive=0
@@ -37,7 +39,7 @@ case $tHost in
         tArchive=1
         ;;
     plasma)
-        tDefLog=~/tmp/p.tmp
+        tDefLog=~/tmp/p.org
         tEdit=emacs
         tBG=1
         tArchive=1
@@ -57,7 +59,7 @@ case $tHost in
         tBG=1
         ;;
     *)
-        tDefLog=~/tmp/t.tmp
+        tDefLog=~/tmp/t.org
         ;;
 esac
 
@@ -118,12 +120,12 @@ if [ $tLogIt -ne 0 ]; then
         fi
     fi
     echo >>$tFirstFile
-    echo '# ---------------------------' >>$tFirstFile
+    echo '  ---------------------------' >>$tFirstFile
     if [ "$(date +'%Z')" = "UTC" ]; then
-        date --date='now - 8 hours' +'# %F %R:%S PST %a' >>$tFirstFile
-        date +'# %F %R:%S %Z %a' >>$tFirstFile
+        date --date='now - 8 hours' +'* %F %R:%S PST %a' >>$tFirstFile
+        date +'  %F %R:%S %Z %a' >>$tFirstFile
     else
-        date +'# %F %R:%S %Z %a' >>$tFirstFile
+        date +'* %F %R:%S %Z %a' >>$tFirstFile
     fi
     echo >>$tFirstFile
 fi

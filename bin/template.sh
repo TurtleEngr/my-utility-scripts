@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.62 $ $Date: 2022/05/29 18:36:24 $ GMT
+# $Revision: 1.63 $ $Date: 2022/06/10 17:45:20 $ GMT
 
 export gpHostName gpTag
 
@@ -17,13 +17,13 @@ fUsage()
 
     case $pStyle in
         short | usage | man | long | text | md)
-            fComUsage -f $cBin/$cName -s $pStyle
+            fComUsage -f $cBin/$cName -s $pStyle | more
             ;;
         html)
             fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
             ;;
         int)
-            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long | more
             ;;
         int-html)
             fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
@@ -32,7 +32,7 @@ fUsage()
             fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
             ;;
         *)
-            fComUsage -f $cBin/$cName -s short
+            fComUsage -f $cBin/$cName -s short | more
             ;;
     esac
     fCleanUp
@@ -277,7 +277,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.62 $ $Date: 2022/05/29 18:36:24 $ GMT 
+$Revision: 1.63 $ $Date: 2022/06/10 17:45:20 $ GMT 
 
 =cut
 EOF
@@ -564,7 +564,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.62 $'
+cVer='$Revision: 1.63 $'
 fSetGlobals
 
 # -------------------
