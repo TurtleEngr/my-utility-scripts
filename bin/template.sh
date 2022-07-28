@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.63 $ $Date: 2022/06/10 17:45:20 $ GMT
+# $Revision: 1.64 $ $Date: 2022/07/28 18:26:27 $ GMT
 
 export gpHostName gpTag
 
@@ -116,6 +116,8 @@ Run the unit test functions in this script.
 "-T all" will run all of the functions that begin with "test".
 Otherwise "pTest" should match the test function names separated with
 spaces (between quotes).
+
+"-T list" will list all of the test functions.
 
 "-T com" will run all the tests for bash-com.inc
 
@@ -277,7 +279,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.63 $ $Date: 2022/06/10 17:45:20 $ GMT 
+$Revision: 1.64 $ $Date: 2022/07/28 18:26:27 $ GMT 
 
 =cut
 EOF
@@ -496,6 +498,11 @@ EOF
 # This should be the last defined function
 fRunTests()
 {
+    if [ "$gpTest" = "list" ]; then
+        grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
+        grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
+        exit $?
+    fi
     if [ "$gpTest" = "all" ]; then
         gpTest=""
         # shellcheck disable=SC1091
@@ -564,7 +571,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.63 $'
+cVer='$Revision: 1.64 $'
 fSetGlobals
 
 # -------------------
