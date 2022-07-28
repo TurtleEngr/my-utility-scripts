@@ -1,0 +1,1009 @@
+#!/bin/bash
+# $Source: /repo/local.cvs/per/bruce/bin/mksymlink,v $
+# $Revision: 1.4 $ $Date: 2022/07/28 18:26:27 $ GMT
+
+export gpCheck gpForce gLinkFile gpRestore gpSave
+
+# ========================================
+# Script Functions
+
+# --------------------------------
+fUsage()
+{
+    # Quick help, run this:
+    # mksymlink -h | less
+
+    local pStyle="$1"
+
+    case $pStyle in
+        short | usage | man | long | text | md)
+            fComUsage -f $cBin/$cName -s $pStyle
+            ;;
+        html)
+            fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
+            ;;
+        int)
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
+            ;;
+        int-html)
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+            ;;
+        int-md)
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+            ;;
+        *)
+            fComUsage -f $cBin/$cName -s short
+            ;;
+    esac
+    fCleanUp
+    exit 1
+
+    # POD Syntax: https://perldoc.perl.org/perlpod
+    # pod2man wants the sections defined in this order.
+    # Empty sections can be commented out with "=for comment". For example:
+    # =for comment =head1 ERRORS
+    cat <<\EOF >/dev/null
+=pod
+
+=for text ========================================
+
+=for html <hr/>
+
+=head1 NAME mksymlink
+
+Save and restore symlinks to/from .symlink.$HOSTNAME definition files.
+
+=head1 SYNOPSIS
+
+	mksymlink [-s] [-r] [-c] [-f]
+		  [-h] [-H pStyle] [-v] [-x] [-T pTest]
+
+=head1 DESCRIPTION
+
+CVS does not save symlinks. git saves symlinks, but they may not work.
+This tool will save symlink definitions, in the current directory,
+and save them in host-specific files named .symlink.$HOSTNAME (-s).
+
+Then the tool can be used to restore (-r) or check (-c) the symlinks
+in the current directory against the .symlink.$HOSTNAME file. If you
+are on a different host, then copy from an existing .symlink.* file
+and use the check (-c) option to see if it will work, and adjust as
+needed.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-s>
+
+Save symlinks to .symlink.$HOSTNAME
+
+Convert $HOME/ in links to '~/'.
+
+Only file symlinks are saved. Directory symlinks are ignored (notice output).
+
+Only current dir symlinks are saved.
+
+Symlink pointing to missing files will not be saved (warning output)
+
+Overwrites the contents of .symlink.$HOSTNAME, so you should do -c and
+-r first to not loose links. Also version the .symlink.$HOSTNAME files
+before updating them.
+
+=item B<-r>
+
+Restore symlinks defined in .symlink.$HOSTNAME
+
+Skip the ones were the destination file does not exist.
+
+Skip symlinks that are already defined, unless -f option is used.
+
+Error if .symlink.$HOSTNAME is missing.
+
+=item B<-c>
+
+Check simlinks.
+
+Warning if an existing symlink does not point to an existing file (or
+directory).
+
+Warning if links in .symlink.$HOSTNAME are not defined in current dir.
+
+Warning if files are not found for the links in .symlink.$HOSTNAME.
+
+Error if .symlink.$HOSTNAME is missing.
+
+=item B<-h>
+
+Output this "long" usage help. See "-H long"
+
+=item B<-H pStyle>
+
+pStyle is used to select the type of help and how it is formatted.
+
+Styles:
+
+	short|usage - Output short usage help as text.
+	long|text   - Output long usage help as text.
+	man 	    - Output long usage help as a man page.
+	html 	    - Output long usage help as html.
+	md 	    - Output long usage help as markdown.
+	int 	    - Also output internal documentation as text.
+	int-html    - Also output internal documentation as html.
+	int-md 	    - Also output internal documentation as markdown.
+
+=item B<-v>
+
+Verbose output. Default is is only output (or log) messages with
+level "warning" and higher.
+
+-v - output "notice" and higher.
+
+-vv - output "info" and higher.
+
+=item B<-x>
+
+Set the gpDebug level. Add 1 for each -x.
+Or you can set gpDebug before running the script.
+
+Only show what would be done, when using the other options.
+
+See: fLog and fLog2 (Internal documentation)
+
+=item B<-T pTest>
+
+Run the unit test functions in this script.
+
+"-T all" will run all of the functions that begin with "test".
+Otherwise "pTest" should match the test function names separated with
+spaces (between quotes).
+
+"-T list" will list all of the test functions.
+
+"-T com" will run all the tests for bash-com.inc
+
+For more details about shunit2 (or shunit2.1), see
+shunit2/shunit2-manual.html
+L<Source|https://github.com/kward/shunit2>
+
+See shunit2, shunit2.1
+
+Also for more help, use the "-H int" option.
+
+=back
+
+=head2 Globals
+
+These are globals that may affect how the script runs. Just about all
+of these globals that begin with "gp" can be set and exported before
+the script is run. That way you can set your own defaults, by putting
+them in your ~/.bashrc or ~/.bash_profile files.
+
+The the "common" CLI flags will override the initial variable settings.
+
+=over 4
+
+=item B<Tmp>
+
+This is the top directory where tmp file will be put.
+
+Default: /tmp/$USER/mksymlink/
+
+if gpDebug is 0, temp files will usually include the PID.
+
+=item B<gpVerbose>
+
+If set to 0, only log message at "warning" level and above will be output.
+
+If set to 1, all non-debug messages will be output.
+
+See -v, fLog
+
+Default: 0
+
+=item B<gpDebug>
+
+If set to 0, all "debug" and "debug-N" level messages will be skipped.
+
+If not 0, all "debug" level messages will be output.
+
+Or if "debug-N" level is used, then if gpDebug is <= N, then the
+log message will be output, otherwise it is skipped.
+
+See -x
+
+=back
+
+=head1 RETURN VALUE
+
+0 if OK
+
+!0 if Errors
+
+=head1 ERRORS
+
+Fatal Error:
+
+Warning:
+
+Many error messages may describe where the error is located, with the
+following log message format:
+
+ Program: PID NNNN: Message [LINE](ErrNo)
+
+=head1 EXAMPLES
+
+=head1 ENVIRONMENT
+
+See Globals section for details.
+
+HOME, HOSTNAME, gpVerbose, gpDebug
+
+=for comment =head1 FILES
+
+=head1 SEE ALSO
+
+shunit2.1
+bash-com.inc
+bash-com.test
+
+=for comment =head1 NOTES
+
+=for comment =head1 CAVEATS
+=for comment [Things to take special care with; sometimes called WARNINGS.]
+=for comment =head1 DIAGNOSTICS
+=for comment To verify the script is internally OK, run: mksymlink -T all
+=for comment =head1 BUGS
+=for comment [Things that are broken or just don't work quite right.]
+=for comment =head1 RESTRICTIONS
+=for comment [Bugs you don't plan to fix :-)]
+=for comment =head1 AUTHOR
+
+=head1 HISTORY
+
+GPLv3 (c) Copyright 2022
+
+$Revision: 1.4 $ $Date: 2022/07/28 18:26:27 $ GMT 
+
+=cut
+EOF
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head1 mksymlink Internal Documentation
+
+=internal-head3 fUsage pStyle
+
+This function selects the type of help output. See -h and -H options.
+
+=internal-head2 Script Global Variables
+
+=internal-cut
+EOF
+} # fUsage
+
+# --------------------------------
+fCleanUp()
+{
+    fComCleanUp
+    exit
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head2 Script Functions
+
+=internal-head3 fCleanUp
+
+Calls fComCleanUp.
+
+=internal-cut
+EOF
+} # fCleanUp
+
+# -------------------
+fSetGlobals()
+{
+    fComSetGlobals
+    gpLog=0
+    gpVerbose=1
+
+    gpSave=0
+    gpRestore=0
+    gpCheck=0
+    gpForce=0
+    gLinkFile=.symlink.$HOSTNAME
+
+    # Define the Required and the Optional progs, space separated
+    fComCheckDeps "awk" "pod2man"
+    return
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fSetGlobals
+
+Calls fComSetGlobals to set globals used by bash-com.inc.
+
+Set initial values for all of the other globals use by this
+script. The ones that begin with "gp" can usually be overridden by
+setting them before the script is run.
+
+=internal-cut
+EOF
+} # fSetGlobals
+
+# -------------------
+fValidate()
+{
+    if [[ gpSave+gpRestore+gpCheck -ne 1 ]]; then
+        fError "One of -s, -r, or -c needs to be used." $LINENO
+    fi
+    return
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fValidate
+
+=internal-cut
+EOF
+} # fValidate
+
+fSymlinkExists()
+{
+    if [ ! -f .symlink.$HOSTNAME ]; then
+        fLog2 -p warn -m ".symlink.$HOSTNAME is missing" -l $LINENO
+	exit 1
+    fi
+    return 0
+} # fSymlinkExists
+
+fCheckValid()
+{
+	if [ "$tSc" = "#" ]; then
+	    return 1
+	fi
+	if [[ -z "$tSrc" || -z "$tDst" || -n "$tOther" ]]; then
+	    fLog2 -p warn -m "Problem in .symlink.$HOSTNAME, expected 2 args" -l "$LINENO:$tLine"
+	    return 1
+	fi
+	if [[ -f $tDst || -d $tDst ]]; then
+	    fLog2 -p warn -m "$tDst file or dir already exists" -l "$LINENO:$tLine"
+	    return 1
+	fi
+	if [ ! -f $tSrc ]; then
+	    fLog2 -p warn -m "$tSrc not found" -l "$LINENO:$tLine"
+	    return 1
+	fi
+	return 0
+} # fCheckValid
+
+# -------------------
+fSave()
+{
+    local tSrc
+    local tDst
+    local tOther
+
+    if [[ -z "$(find * -prune -type l)" ]]; then
+        fLog2 -p notice -m "There are no symlinks in this dir." -l $LINENO
+    fi
+
+    if [ -f $gLinkFile ]; then
+        fLog2 -p warn -m "$gLinkFile exists" -l $LINENO
+	if [ $gpForce -eq 0 ]; then
+            echo -n "Overwrite? (y/n) "
+            read
+	    if [ "$REPLY" != "y" ]; then
+                fLog2 -p notice -m "skipping" -l $LINENO
+	        exit 1
+	    fi
+	fi
+    fi
+    rm $gLinkFile >/dev/null 2>&1
+
+    'ls' -lF | grep ' -> ' | awk '{print $11,$9}' | while read -r tSrc tDst tOther; do
+        ##echo "Processing: $tSrc $tDst $tOther"
+	if [ -n "$tOther" ]; then
+	    fError2 -i -m "Problem in .symlink.$HOSTNAME with line: $tSrc $tDst $tOther" -l $LINENO
+	fi
+        if [ "${tSrc%*/}" != "$tSrc" ]; then
+	    fLog2 -p warn -m "Dir $tDst symlink will not be saved" -l $LINENO
+	    continue
+	fi
+        if [ ! -f $tDst ]; then
+	    fLog2 -p warn -m "$tDst does not exist, skipping" -l $LINENO
+	    continue
+	fi
+	echo $tSrc $tDst >>$gLinkFile
+    done
+    return
+} # fSave
+
+# -------------------
+fRestore()
+{
+    local tSrc
+    local tDst
+    local tOther
+    local tLine=0
+
+    fSymlinkExists
+
+    cat .symlink.$HOSTNAME | while read -r tSrc tDst tOther; do
+        let ++tLine
+	if ! fCheckValid; then
+	    continue
+	fi
+	if [[ -L $tDst && $gpForce -eq 0 ]]; then
+	    fLog2 -p info -m "$tDst link already exists" -l "$LINENO:$tLine"
+	    continue
+	fi
+
+	ln -sf $tSrc $tDst
+	if [ ! -L $tDst ]; then
+	    fError2 -m "Problem creating $tDst link" -l "$LINENO:$tLine"
+	fi
+    done
+    return 0
+} # fRestore
+
+# -------------------
+fCheck()
+{
+    local tSrc
+    local tDst
+    local tOther
+    local tLine=0
+
+    fSymlinkExists
+
+    cat .symlink.$HOSTNAME | while read -r tSrc tDst tOther; do
+        let ++tLine
+	if ! fCheckValid; then
+	    continue
+	fi
+	if [[ ! -L $tDst ]]; then
+	    fLog2 -p warn -m "$tDst link not found" -l "$LINENO:$tLine"
+	    continue
+	fi
+    done
+    return 0
+} # fCheck
+
+# ========================================
+# Tests
+
+# --------------------------------
+oneTimeSetUp()
+{
+    return 0
+} # oneTimeSetUp()
+
+# --------------------------------
+oneTimeTearDown()
+{
+    return 0
+} # oneTearDown()
+
+# --------------------------------
+setUp()
+{
+    gpVerbose=2
+    gpForce=0
+
+    # Create valid symlinks.
+    # Invalid symlinks or missinging files will be created in individual tests
+
+    mkdir -p $Tmp/test/dir1 $Tmp/test/dir2 >/dev/null 2>&1
+    
+    cd $Tmp/test >/dev/null 2>&1
+    touch file1 file2 dir1/file3 dir1/file4
+    ln -s dir1/file3 .
+    ln -s dir1/file4 file4sym
+    ln -s dir2 dir2-sym
+
+    cd dir1 >/dev/null 2>&1
+    ln -s $Tmp/test/file2 .
+    ln -s ../file1 .
+
+    cd $Tmp/test >/dev/null 2>&1
+    ##lstree $Tmp
+    return 0
+
+    cat <<EOF
+$Tmp
+|test/
+|   |dir1/
+|   |   |file1 -> ../file1
+|   |   |file2 -> /tmp/bruce/mksymlink/test/file2
+|   |   |file3
+|   |   |file4
+|   |dir2/
+|   |dir2-sym -> dir2/
+|   |file1
+|   |file2
+|   |file3 -> dir1/file3
+|   |file4sym -> dir1/file4
+~/bin
+EOF
+} # setUp()
+
+# --------------------------------
+tearDown()
+{
+    if [ $gpDebug -eq 0 ]; then
+        'rm' -f ${cTmpF}*.tmp 2>/dev/null
+	find $Tmp -type l -exec rm {} \;  2>/dev/null
+        'rm' -rf $Tmp 2>/dev/null
+    fi
+    return 0
+} # tearDown()
+
+# --------------------------------
+testUsage()
+{
+    local tResult
+
+    #-----
+    tResult=$(fSetGlobals 2>&1)
+    assertTrue "$LINENO fSetGlobals" "[ $? -eq 0 ]"
+
+    #-----
+    tResult=$(fUsage short 2>&1)
+    assertContains "$LINENO short" "$tResult" "NAME mksymlink"
+
+    #-----
+    tResult=$(fUsage foo 2>&1)
+    assertContains "$LINENO foo.1" "$tResult" "NAME mksymlink"
+
+    #-----
+    tResult=$(fUsage text 2>&1)
+    assertContains "$LINENO long.1" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO long.2" "$tResult" "HISTORY"
+
+    #-----
+    tResult=$(fUsage man 2>&1)
+    assertContains "$LINENO man.1" "$tResult" '.IX Header "DESCRIPTION"'
+    assertContains "$LINENO man.2" "$tResult" '.IX Header "HISTORY"'
+
+    #-----
+    tResult=$(fUsage html 2>&1)
+    assertContains "$LINENO html.1" "$tResult" '<li><a href="#DESCRIPTION">DESCRIPTION</a></li>'
+    assertContains "$LINENO html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+    assertContains "$LINENO html.3" "$tResult" "<title>$cName Usage</title>"
+
+    #-----
+    tResult=$(fUsage md 2>&1)
+    assertContains "$LINENO md.1" "$tResult" '# DESCRIPTION'
+    assertContains "$LINENO md.2" "$tResult" '# HISTORY'
+
+    #-----
+    tResult=$(fUsage int 2>&1)
+    assertContains "$LINENO internal.1" "$tResult" 'Template Use'
+    assertContains "$LINENO internal.2" "$tResult" 'fComSetGlobals'
+
+    #-----
+    tResult=$(fUsage int-html 2>&1)
+    assertContains "$LINENO int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
+    assertContains "$LINENO int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
+    assertContains "$LINENO int-html.3" "$tResult" 'Internal Doc</title>'
+    assertContains "$LINENO int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
+
+    #-----
+    tResult=$(fUsage int-md 2>&1)
+    assertContains "$LINENO int-md.1" "$tResult" '## Template Use'
+    assertContains "$LINENO int-md.2" "$tResult" '### fComSetGlobals'
+    assertContains "$LINENO int-md.3" "$tResult" '### testComUsage'
+
+    #-----
+    # When calling cmd, unset gpTest to prevent infinite loop
+    gpTest=""
+    tResult=$($cBin/mksymlink 2>&1)
+    assertContains "$LINENO cmd-call $tResult" "$tResult" "crit: Missing options."
+    assertContains "$LINENO cmd-call $tResult" "$tResult" "Usage:"
+    assertContains "$LINENO cmd-call $tResult" "$tResult" "mksymlink ["
+
+    return 0
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testUsage
+
+Test fUsage. Verify the different output styles work. See also testComUsage
+in bash-com.test.
+
+=internal-cut
+EOF
+} # testUsage
+
+# --------------------------------
+testSavePos()
+{
+    local tResult
+
+    # ----------
+    tResult=$(fSave 2>&1)
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertContains "$LINENO warn dir" "$tResult" "warn: Dir dir2-sym symlink will not be saved"
+
+    tResult=$(cat .symlink.$HOSTNAME 2>&1)
+    assertContains "$LINENO file3" "$tResult" "dir1/file3 file3"
+    assertContains "$LINENO file4" "$tResult" "dir1/file4 file4sym"
+
+    # ----------
+    cd $Tmp/test/dir1
+    tResult=$(fSave 2>&1)
+    assertTrue "$LINENO file exists $(ls -al) $tResult" "[ -f .symlink.$HOSTNAME ]"
+
+    tResult=$(cat .symlink.$HOSTNAME 2>&1)
+    assertContains "$LINENO file1" "$tResult" "../file1 file1"
+    assertContains "$LINENO file2" "$tResult" "$Tmp/test/file2 file2"
+
+##    cat $Tmp/test/dir1/.symlink.$HOSTNAME
+##    lstree
+    return 0
+ } # testSavePos
+
+# --------------------------------
+testSaveNeg()
+{
+    local tResult
+
+    # ----------
+    cd $Tmp 2>&1
+    tResult=$(fSave 2>&1)
+    assertFalse "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertContains "$LINENO no symlinks" "$tResult" "notice: There are no symlinks in this dir"
+
+    # ----------
+    cd $Tmp/test
+    tResult=$(fSave 2>&1)
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+
+    gpForce=1
+    tResult=$(fSave 2>&1)
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertContains "$LINENO warn exists" "$tResult" "warn: .symlink.$HOSTNAME exists"
+
+    gpForce=0
+    tResult=$(fSave 2>&1 < <(echo -e "n\n"))
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertContains "$LINENO warn exists" "$tResult" "warn: .symlink.$HOSTNAME exists"
+    assertContains "$LINENO overwrite" "$tResult" "Overwrite?"
+    assertContains "$LINENO overwrite" "$tResult" "skipping"
+
+    # ----------
+    gpForce=1
+    ln -s bar foo
+    tResult=$(fSave 2>&1)
+    assertContains "$LINENO warn exists" "$tResult" "warn: .symlink.$HOSTNAME exists"
+    assertContains "$LINENO skip" "$tResult" "warn: foo does not exist"
+
+    tResult=$(cat .symlink.$HOSTNAME)
+    assertContains "$LINENO file3" "$tResult" "dir1/file3 file3"
+    assertContains "$LINENO file4" "$tResult" "dir1/file4 file4sym"
+
+##   cat $Tmp/test/.symlink.$HOSTNAME
+##    lstree
+    return 0
+ } # testSaveNeg
+
+# --------------------------------
+testRestorePos()
+{
+    local tResult
+
+    # ----------
+    tResult=$(fRestore 2>&1)
+    assertFalse "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.$HOSTNAME is missing"
+
+    # ----------
+    # Setup
+    fSave 2>/dev/null
+    find * -prune -type l -exec rm {} \;
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+
+    # ----------
+    tResult=$(fRestore 2>&1)
+    assertTrue "$LINENO file3" "[ -L file3 ]"
+    assertTrue "$LINENO file4" "[ -L file4sym ]"
+    ##ls -la
+
+    # ----------
+    gpVerbose=2
+    gpForce=0
+    tResult=$(fRestore 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+    assertContains "$LINENO $tResult" "$tResult" "warn: file4sym file or dir already exists"
+
+    return 0
+} # testRestorePos
+
+# --------------------------------
+testRestoreNeg()
+{
+    local tResult
+
+    # ----------
+    # Setup
+    fSave 2>/dev/null
+    find * -prune -type l -exec rm {} \;
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+
+    # ----------
+    echo "foo" >>.symlink.$HOSTNAME 
+    echo "foo bar test" >>.symlink.$HOSTNAME 
+    tResult=$(fRestore 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: Problem in .symlink.$HOSTNAME, expected 2 args"
+    assertContains "$LINENO $tResult" "$tResult" ":3]"
+    assertContains "$LINENO $tResult" "$tResult" ":4]"
+
+    # ----------
+    rm file3
+    touch file3
+    tResult=$(fRestore 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+
+    # ----------
+    rm file3
+    mkdir file3
+    tResult=$(fRestore 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+
+    return 0
+} # testRestoreNeg
+
+# --------------------------------
+testCheck()
+{
+    local tResult
+
+    # ----------
+    # Setup
+    fSave 2>/dev/null
+    echo "foo" >>.symlink.$HOSTNAME 
+    echo "foo bar test" >>.symlink.$HOSTNAME 
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+
+    # ----------
+    tResult=$(fCheck 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: Problem in .symlink.$HOSTNAME, expected 2 args"
+    assertContains "$LINENO $tResult" "$tResult" ":3]"
+    assertContains "$LINENO $tResult" "$tResult" ":4]"
+
+    # ----------
+    rm file3
+    touch file3
+    tResult=$(fCheck 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+
+    # ----------
+    rm file3
+    mkdir file3
+    tResult=$(fCheck 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+    
+    return 0
+} # testCheck
+
+# --------------------------------
+testCLISave()
+{
+    local tResult
+
+    gpTest=""
+
+    tResult=$($cBin/mksymlink -s 2>&1)
+    assertTrue "$LINENO file exists" "[ -f .symlink.$HOSTNAME ]"
+    assertContains "$LINENO $tResult" "$tResult" "warn: Dir dir2-sym symlink will not be saved"
+    ##assertContains "$LINENO $tResult" "$tResult" "xxx"
+
+    tResult=$($cBin/mksymlink -s 2>&1 < <(echo -e "n\n"))
+    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance exists"
+    assertContains "$LINENO $tResult" "$tResult" "Overwrite? (y/n)"
+    assertContains "$LINENO $tResult" "$tResult" "mksymlink notice: skipping"
+
+    tResult=$($cBin/mksymlink -s 2>&1 < <(echo -e "y\n"))
+    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance exists"
+    assertContains "$LINENO $tResult" "$tResult" "Overwrite? (y/n)"
+    assertContains "$LINENO $tResult" "$tResult" "mksymlink warn: Dir dir2-sym symlink will not be saved"
+
+    tResult=$($cBin/mksymlink -s -f 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance exists"
+    assertNotContains "$LINENO $tResult" "$tResult" "Overwrite? (y/n)"
+    assertContains "$LINENO $tResult" "$tResult" "mksymlink warn: Dir dir2-sym symlink will not be saved"
+
+    return 0
+} # testCLISave
+
+# --------------------------------
+testCLIRestore()
+{
+    local tResult
+
+    gpTest=""
+    fSave
+
+    tResult=$($cBin/mksymlink -r 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+    assertContains "$LINENO $tResult" "$tResult" "warn: file4sym file or dir already exists"
+    ##assertContains "$LINENO $tResult" "$tResult" "xxx"
+
+    tResult=$($cBin/mksymlink -r -f 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+    assertContains "$LINENO $tResult" "$tResult" "warn: file4sym file or dir already exists"
+
+    return 0
+} # testCLIRestore
+
+# --------------------------------
+testCLICheck()
+{
+    local tResult
+
+    gpTest=""
+
+    tResult=$($cBin/mksymlink -c 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance is missing"
+    ##assertContains "$LINENO $tResult $(ls -al)" "$tResult" "xxx"
+
+    fSave >/dev/null 2>&1
+    find * -prune -type l -exec rm {} \;
+    fRestore >/dev/null 2>&1
+    
+    tResult=$($cBin/mksymlink -c 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
+    assertContains "$LINENO $tResult" "$tResult" "warn: file4sym file or dir already exists"
+
+    return 0
+} # testCLICheck
+
+# ---------------------------------------------------------
+# This should be the last defined function
+fRunTests()
+{
+    gpUnitDebug=${gpUnitDebug:-0}
+    if [ "$gpTest" = "list" ]; then
+        grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
+        grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
+        exit $?
+    fi
+    if [ "$gpTest" = "all" ]; then
+        gpTest=""
+        # shellcheck disable=SC1091
+        . /usr/local/bin/shunit2.1
+        exit $?
+    fi
+    if [ "$gpTest" = "com" ]; then
+        gpTest=""
+        $cBin/bash-com.test
+        exit $?
+    fi
+    # shellcheck disable=SC1091
+    . /usr/local/bin/shunit2.1 -- $gpTest
+    exit $?
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fRunTests
+
+Run unit tests for this script.
+
+=internal-cut
+EOF
+} # fRunTests
+
+# ========================================
+# Main
+
+# -------------------
+# Include common bash functions at $cBin/bash-com.inc But first we
+# need to set cBin
+
+# -------------------
+# Set current directory location in PWD and cCurDir, because with cron
+# jobs PWD is not set.
+if [ -z "$PWD" ]; then
+    PWD=$(pwd)
+fi
+export cCurDir=$PWD
+
+# -------------------
+# Define cBin, location of common scripts (pick one)
+export cBin
+tBin=home
+case $tBin in
+    current)
+        cBin=$PWD
+        ;;
+    home) cBin=~/bin ;;
+    local) cBin=/usr/local/bin ;;
+    system) cBin=/usr/bin ;;
+    this)
+        cBin=${0%/*}
+        if [ "$cBin" = "." ]; then
+            cBin=$PWD
+        fi
+        cd $cBin
+        cBin=$PWD
+        cd $cCurDir
+        ;;
+esac
+
+. $cBin/bash-com.inc
+
+# -------------------
+# Configuration Section
+
+# shellcheck disable=SC2016
+cVer='$Revision: 1.4 $'
+fSetGlobals
+
+# -------------------
+# Get Args Section
+if [ $# -eq 0 ]; then
+    fError2 -m "Missing options." -l $LINENO
+fi
+while getopts :srcfhH:T:vx tArg; do
+    case $tArg in
+        # Script arguments
+        s) gpSave=1 ;;
+        r) gpRestore=1 ;;
+        c) gpCheck=1 ;;
+        f) gpForce=1 ;;
+        # Common arguments
+        h) fUsage long | more
+	    exit 1
+	    ;;
+        H) fUsage "$OPTARG"
+	    exit 1
+	    ;;
+        v) let ++gpVerbose ;;
+        x) let ++gpDebug ;;
+        T) gpTest="$OPTARG" ;;
+        # Problem arguments
+        :) fError "Value required for option: -$OPTARG" $LINENO ;;
+        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+    esac
+done
+shift $((OPTIND - 1))
+if [ $# -ne 0 ]; then
+    fError "Unknown option: $*" $LINENO
+fi
+
+# -------------------
+if [ -n "$gpTest" ]; then
+    fRunTests
+fi
+
+# -------------------
+# Validate Args Section
+
+fValidate
+
+# -------------------
+# Read-only section
+
+if [ $gpCheck -eq 1 ] ;then
+    fCheck
+fi
+
+# -------------------
+# Write section
+
+if [ $gpSave -eq 1 ] ;then
+    fSave
+fi
+
+if [ $gpRestore -eq 1 ] ;then
+    fRestore
+fi
+
+# -------------------
+# CleanUp Section
+fCleanUp
