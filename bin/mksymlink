@@ -1,6 +1,5 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/mksymlink,v $
-# $Revision: 1.4 $ $Date: 2022/07/28 18:26:27 $ GMT
 
 export gpCheck gpForce gLinkFile gpRestore gpSave
 
@@ -262,8 +261,6 @@ bash-com.test
 =head1 HISTORY
 
 GPLv3 (c) Copyright 2022
-
-$Revision: 1.4 $ $Date: 2022/07/28 18:26:27 $ GMT 
 
 =cut
 EOF
@@ -941,7 +938,6 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.4 $'
 fSetGlobals
 
 # -------------------
