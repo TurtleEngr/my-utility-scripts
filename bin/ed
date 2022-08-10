@@ -120,12 +120,12 @@ if [ $tLogIt -ne 0 ]; then
         fi
     fi
     echo >>$tFirstFile
-    echo '  ---------------------------' >>$tFirstFile
+    echo '   ---------------------------' >>$tFirstFile
     if [ "$(date +'%Z')" = "UTC" ]; then
-        date --date='now - 8 hours' +'* %F %R:%S PST %a' >>$tFirstFile
+        date --date='now - 8 hours' +'** %F %R:%S PST %a' >>$tFirstFile
         date +'  %F %R:%S %Z %a' >>$tFirstFile
     else
-        date +'* %F %R:%S %Z %a' >>$tFirstFile
+        date +'** %F %R:%S %Z %a' >>$tFirstFile
     fi
     echo >>$tFirstFile
 fi
