@@ -247,12 +247,17 @@ bash-com.inc
 bash-com.test
 
 =for comment =head1 NOTES
-
 =for comment =head1 CAVEATS
 =for comment [Things to take special care with; sometimes called WARNINGS.]
-=for comment =head1 DIAGNOSTICS
-=for comment To verify the script is internally OK, run: mksymlink -T all
-=for comment =head1 BUGS
+
+=head1 DIAGNOSTICS
+
+To verify the script is internally OK, run: mksymlink -T all
+
+=head1 BUGS
+
+Dir symlinks are not saved. (why not?)
+
 =for comment [Things that are broken or just don't work quite right.]
 =for comment =head1 RESTRICTIONS
 =for comment [Bugs you don't plan to fix :-)]
