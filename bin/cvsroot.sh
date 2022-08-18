@@ -17,10 +17,10 @@ Description:
 	you can set your CVSROOT to a one of the local directories.
 
 cvsroot.rc files that will be used, if found:
-	$tRCFileList
+	$cRCFileList
 
 Local CVS directories that will be checked for CVSROOT:
-	$tCVSDirList
+	$cCVSDirList
 
 Environment Variables:
 	LOGNAME
@@ -38,16 +38,26 @@ Format of cvsroot.rc files:
 
 Example cvsroot.rc:
 	/cvs
-	:ext:\$CVSUser@redwood.sfo.sychron.net:/data/cvs/redwood.cvs
-	:ext:\$CVSUser@redwood.sfo.sychron.net:/data/cvs/tool.cvs
+	:ext:\$LOGNAME@redwood.sfo.sychron.net:/data/cvs/redwood.cvs
+	:ext:\$LOGNAME@redwood.sfo.sychron.net:/data/cvs/tool.cvs
 
 Defects
-	The script only works well with bash or ksh.
+	The script only works well with bash.
+
+TBD
+        * Create CVSUser place holder in .cvsroo.rc. Replace it with the
+          CVSUser value.
+        * Use LOGNAME and/or USER to set CVSUser
+        * Can the ":ext:" path work if the user is omitted?
+        * Clean the script
 EOF
     exit 1
 }
 
 # ==============================
+cRCFileList="$HOME/.cvsroot.rc /usr/local/etc/cvsroot.rc /etc/cvsroot.rc cvsroot.rc"
+cCVSDirList="/cvs /cvs/* /repo/*.cvs /data/cvs/* /data/*.cvs /home/cvs/* /home/*.cvs"
+
 export gErr=0
 if [ ! -f $HOME/.cvsroot.rc -a ! -f /usr/local/etc/cvsroot.rc ]; then
     echo Error: Could not fined $HOME/.cvsroot or /usr/local/etc/cvsroot.rc
@@ -57,9 +67,6 @@ if [ $gErr -ne 0 -o ".$1" = '.-h' ]; then
     fUsage
 fi
 
-tRCFileList="$HOME/.cvsroot.rc /usr/local/etc/cvsroot.rc /etc/cvsroot.rc cvsroot.rc"
-tCVSDirList="/cvs /cvs/* /repo/*.cvs /data/cvs/* /data/*.cvs /home/cvs/* /home/*.cvs"
-export CVSUser=${CVSUser:-$LOGNAME}
 if [ -x /bin/nawk ]; then
     export awk=nawk
 else
@@ -68,7 +75,7 @@ fi
 
 tFile1=/tmp/cvsroot.1.$$
 tFile2=/tmp/cvsroot.2.$$
-cat $tRCFileList 2>/dev/null | $awk '
+cat $cRCFileList 2>/dev/null | $awk '
 	NF == 0 { next }
 	$1 == "#" { next }
 	{ print $0 }
@@ -78,7 +85,7 @@ cat $tRCFileList 2>/dev/null | $awk '
 	}
 ' 2>/dev/null >$tFile1
 
-for i in $tCVSDirList $(cat $tFile1 2>/dev/null); do
+for i in $cCVSDirList $(cat $tFile1 2>/dev/null); do
     if [ "${i#:}" != "$i" ]; then
         echo ${i%/} >>$tFile2
         continue
@@ -88,19 +95,21 @@ for i in $tCVSDirList $(cat $tFile1 2>/dev/null); do
     fi
     echo ${i%/} >>$tFile2
 done
-cat $tFile2 >$tFile1
+sort -fu $tFile2 >$tFile1
 
-for i in CVS/Root ../CVS/Root */CVS/Root /CVS; do
-    for j in $(cat $i 2>/dev/null); do
-        echo ${j%/} >>$tFile1
-    done
+for i in $(cat CVS/Root ../CVS/Root */CVS/Root /CVS/Root 2>/dev/null); do
+    if [ "${i#:}" != "$i" ]; then
+        echo ${i%/} >>$tFile1
+        continue
+    fi
+    if [ ! -d $i/CVSROOT ]; then
+        continue
+    fi
+    echo ${i%/} >>$tFile1
 done
 echo $CVSROOT >>$tFile1
 
-'rm' -f $tFile2
-for i in $(sort -fu $tFile1); do
-    echo ${i%/} >>$tFile2
-done
+sort -fu $tFile1 >$tFile2
 
 cat <<ENDHERE
 Current Settings:
@@ -122,17 +131,22 @@ done
 echo ""
 
 if [ $tSelect != "EXIT" ]; then
-    unset CVSROOT CVS_RSH RSYNC_RSH RSYNC_OPT
+    # unset CVSROOT CVS_RSH RSYNC_RSH RSYNC_OPT
+    unset CVSROOT
     export CVSROOT=$tSelect
-    echo CVSROOT=$CVSROOT
-    export CVS_RSH=${CVS_RSH:-ssh}
-    echo CVS_RSH=$CVS_RSH
+
     export CVSUMASK=${CVSUMASK:-0007}
-    echo CVSUMASK=$CVSUMASK
-    export RSYNC_RSH=${RSYNC_RSH:-ssh}
-    echo RSYNC_RSH=$RSYNC_RSH
+    export CVSUser=${CVSUser:-$LOGNAME}
+    export CVS_RSH=${CVS_RSH:-ssh}
     export RSYNC_OPT=${RSYNC_OPT:-"-aCHz"}
+    export RSYNC_RSH=${RSYNC_RSH:-ssh}
+
+    echo CVSROOT=$CVSROOT
+    echo CVSUMASK=$CVSUMASK
+    echo CVSUser=$CVSUser
+    echo CVS_RSH=$CVS_RSH
     echo RSYNC_OPT=$RSYNC_OPT
+    echo RSYNC_RSH=$RSYNC_RSH
 fi
 
 'rm' -f $tFile1 $tFile2 2>/dev/null
