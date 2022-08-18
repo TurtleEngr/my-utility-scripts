@@ -21,6 +21,6 @@ push upload :
 
 release :
 	git co main
-	git merge --no-ff develop
+	git merge develop
 	git push origin main
 	git co develop
