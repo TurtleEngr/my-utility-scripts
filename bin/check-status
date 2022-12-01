@@ -1,5 +1,209 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/check-status,v 1.7 2021/10/26 19:26:09 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/check-status,v 1.12 2022/10/17 23:38:38 bruce Exp $
+
+# ========================================
+# Functions
+
+# --------------------
+fUsage()
+{
+    cat <<EOF
+This Help
+	check-status -h
+
+Unit Test
+	check-status -t
+	check-status -t -- testName [testName...]
+
+cgi-bin Usage
+	export QUERY_STRING='cmd=[12]&ip=[N.N.N.N]&port=[NNN]&file=[N]'
+	check-status
+
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1&ip=N.N.N.N&port=N
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=2&file=N
+
+	Example cgi-bin
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.7&port=22
+	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.96&port=2049
+
+CLI Usage for ip/port check:
+	check-status 1 ip port
+
+CLI Usage for file check:
+	check-status 2 N
+
+	N=1, return: head -n 1 /var/local/check-mail.tmp
+	N=2, return: grep "Subject: " /var/local/rsnapshot-monitor.tmp | head -n 1
+
+Output 1 "ip":
+	If IP PORT connected, output "OK"
+	if not connected or timed out: "Fail"
+	
+Output 2 "file":
+       if invalid FILE, output "Invalid file"
+       if FILE, output "head -n 1 FILE"
+EOF
+    exit 1
+} # fUsage
+
+# --------------------
+fValidInput()
+{
+    local pCmd=$1
+    local pIP=$2
+    local pPort=$3
+    local pFile=$4
+    local tCount=0
+    local tErr=0
+    local tResult=""
+
+    tCount=$(echo "pCmd pIP pPort pFile" | wc -w)
+    tCount=$tCount
+    if [ "$tCount" != "4" ]; then
+        tErr=2
+        gResult="Error: problem parsing args, internal error ($tErr)"
+    fi
+    if [ "$pCmd" = "1" ] && ([ "$pIP" = "ip" ] || [ "$pPort" = "port" ]); then
+        tErr=3
+        gResult="Error: problem parsing args ($tErr)"
+    fi
+    if [ "$pCmd" = "2" ] && [ "$pFile" = "file" ]; then
+        tErr=4
+        gResult="Error: problem parsing args ($tErr)"
+    fi
+
+    if [ $tErr -ne 0 ]; then
+        fOutput $pCmd "$pIP" "$pPort" "$pFile" "$gResult"
+        exit $tErr
+    fi
+} # fValidInput
+
+# --------------------
+fValidate()
+{
+    # Clean the inputs. Only digits are allowed.
+    echo "$1" | tr -cd '.[:digit:]'
+} # fValidate
+
+# --------------------
+fParseArgs()
+{
+    local pCmd="$1"
+    local pIP="$2"
+    local pPort="$3"
+    local pFile="$4"
+
+    pCmd=$(fValidate "$pCmd")
+    pIP=$(fValidate "$pIP")
+    pPort=$(fValidate "$pPort")
+    pFile=$(fValidate "$pFile")
+    echo "${pCmd:-cmd}" "${pIP:-ip}" "${pPort:-port}" "${pFile:-file}"
+} # fParseArgs
+
+# --------------------
+fParseQuery()
+{
+    # Use a secure method to parse QUERY_STRING
+    # https://stackoverflow.com/questions/3919755/how-to-parse-query-string-from-a-bash-cgi-script
+    # Example: QUERY_STRING='ip=8.8.8.8&port=53'
+
+    local pQS="$1"
+
+    local tQS
+    local tNameVal
+    local tName
+    local tVal
+    local tCmd=""
+    local tIP=""
+    local tPort=""
+    local tFile=""
+
+    # Remove disallowed characters
+    tQS=$(echo "$pQS" | tr -cd '[:alnum:].&=')
+
+    while [ "$tQS" != "" ]; do
+        tNameVal="${tQS%%&*}"
+        tQS="${tQS#$tNameVal}"
+        tQS="${tQS#&}"
+        tName="${tNameVal%%=*}"
+        tVal="${tNameVal#$name}"
+        tVal="${tNameVal#=}"
+        if [ "$tName" = "cmd" ]; then
+            tCmd=$tVal
+        fi
+        if [ "$tName" = "ip" ]; then
+            tIP=$tVal
+        fi
+        if [ "$tName" = "port" ]; then
+            tPort=$tVal
+        fi
+        if [ "$tName" = "file" ]; then
+            tFile=$tVal
+        fi
+    done
+    fParseArgs "${tCmd:-cmd}" "${tIP:-ip}" "${tPort:-port}" "${tFile:-file}"
+} # fParseQuery
+
+# --------------------
+fGetStatus()
+{
+    local pCmd="$1"
+    local pIP="$2"
+    local pPort="$3"
+    local pFile="$4"
+
+    local tResult="Fail"
+
+    case $pCmd in
+        1)
+            timeout 5s nc -zvw10 $pIP $pPort &>/dev/null
+            if [ $? -eq 0 ]; then
+                tResult="OK"
+            fi
+            ;;
+        2)
+            case $pFile in
+                1)
+                    if [ -r $cFile1 ]; then
+                        tResult=$(head -n 1 $cFile1)
+                    fi
+                    ;;
+                2)
+                    if [ -r $cFile2 ]; then
+                        tResult=$(grep 'Subject: ' $cFile2 | head -n 1)
+                    fi
+                    ;;
+            esac
+            ;;
+    esac
+    echo $tResult
+} # fGetStatus
+
+# --------------------
+fOutput()
+{
+    local pCmd="$1"
+    local pIP="$2"
+    local pPort="$3"
+    local pFile="$4"
+    local pResult="$5"
+
+    cat <<EOF
+Content-type: text/html
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>check-status</title>
+</head>
+<body>
+<pre>
+Check-Status: $pCmd $pIP $pPort $pFile
+$pResult
+</pre>
+</body>
+</html>
+EOF
+} # fOutput
 
 # ========================================
 # Unit Tests
@@ -13,7 +217,7 @@ testValidate()
     assertNull "tv-4" "$(fValidate foobar 1.22.33)"
     assertNull "tv-5" "$(fValidate foobar)"
     assertNull "tv-6" "$(fValidate foobar 234)"
-}
+} # testValidate
 
 # --------------------
 testParseArgs()
@@ -58,7 +262,7 @@ testParseArgs()
     # -----
     read -t 1 -r tCmd tIP tPort tFile < <(fParseArgs 1 foo)
     assertEquals "line=$LINENO" "1 ip port file" "$tCmd $tIP $tPort $tFile"
-}
+} # testParseArgs
 
 # --------------------
 testParseQuery()
@@ -113,15 +317,15 @@ testParseQuery()
     tQS='cmd=2&file=1'
     read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
     assertEquals "line=$LINENO" "2 ip port 1" "$tCmd $tIP $tPort $tFile"
-}
+} # testParseQuery
 
 # --------------------
 testGetStatus()
 {
     local tMsg
 
-    assertEquals "line=$LINENO" "OK" "$(fGetStatus 1 192.168.1.5 443 file)"
-    assertEquals "line=$LINENO" "Fail" "$(fGetStatus 1 192.168.1.5 444 file)"
+    assertEquals "line=$LINENO" "OK" "$(fGetStatus 1 107.220.116.250 443 file)"
+    assertEquals "line=$LINENO" "Fail" "$(fGetStatus 1 107.220.116.250 444 file)"
     assertEquals "line=$LINENO" "Fail" "$(fGetStatus 1 192.168.1.1 20 file)"
 
     assertEquals "line=$LINENO" "Fail" "$(fGetStatus cmd ip port file)"
@@ -150,7 +354,7 @@ testGetStatus()
     tMsg='Subject: asimov backup OK'
     echo "$tMsg" >$cFile2
     assertEquals "line=$LINENO" "$tMsg" "$(fGetStatus 2 ip port 2)"
-}
+} # testGetStatus
 
 # --------------------
 testOutput()
@@ -158,20 +362,20 @@ testOutput()
     local tResult
 
     # -----
-    tResult=$(fOutput 1 192.168.1.5 443 file OK)
-    assertContains "line=$LINENO" "$tResult" 'Check-Status: 1 192.168.1.5 443 file'
+    tResult=$(fOutput 1 107.220.116.250 443 file OK)
+    assertContains "line=$LINENO" "$tResult" 'Check-Status: 1 107.220.116.250 443 file'
     assertContains "line=$LINENO" "$tResult" "OK"
 
     # -----
-    tResult=$(fOutput 1 192.168.1.5 444 file Fail)
-    assertContains "line=$LINENO" "$tResult" 'Check-Status: 1 192.168.1.5 444 file'
+    tResult=$(fOutput 1 107.220.116.250 444 file Fail)
+    assertContains "line=$LINENO" "$tResult" 'Check-Status: 1 107.220.116.250 444 file'
     assertContains "line=$LINENO" "$tResult" "Fail"
 
     # -----
     tResult=$(fOutput 2 ip port 1 OK)
     assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 2 ip port 1'
     assertContains "line=$LINENO" "$tResult" "OK"
-}
+} # testOutput
 
 # --------------------
 testIntegrate1()
@@ -184,11 +388,11 @@ testIntegrate1()
     local tQS=""
 
     # -----
-    tQS='cmd=1&ip=192.168.1.5&port=22'
+    tQS='cmd=1&ip=107.220.116.250&port=22'
     read -t 1 -r tCmd tIP tPort tFile < <(fParseQuery "$tQS")
     tResult=$(fGetStatus $tCmd $tIP $tPort $tFile)
     tTestResult=$(fOutput $tCmd $tIP $tPort $tFile $tResult)
-    assertContains "line=$LINENO $tTestResult" 'Check-Status: 1 192.168.1.5 22 file'
+    assertContains "line=$LINENO $tTestResult" 'Check-Status: 1 107.220.116.250 22 file'
     assertContains "line=$LINENO" "$tTestResult" "OK"
 
     # -----
@@ -230,7 +434,7 @@ testIntegrate1()
     tTestResult=$(fOutput $tCmd $tIP $tPort $tFile "$tResult")
     assertContains "line=$LINENO $tTestResult" 'Check-Status: 2 ip port 2'
     assertContains "line=$LINENO $tTestResult" "$tTestResult" "$tMsg"
-}
+} # testIntegrate1
 
 # --------------------
 testIntegrate2()
@@ -240,13 +444,13 @@ testIntegrate2()
     export QUERY_STRING=""
 
     # -----
-    tResult=$(./check-status 1 192.168.1.5 80 foo)
-    assertContains "line=$LINENO $tResult" 'Check-Status: 1 192.168.1.5 80 file'
+    tResult=$(./check-status 1 107.220.116.250 80 foo)
+    assertContains "line=$LINENO $tResult" 'Check-Status: 1 107.220.116.250 80 file'
     assertContains "line=$LINENO $tResult" "$tResult" "OK"
 
     # -----
-    tResult=$(./check-status 1 192.168.1.5 444 foo)
-    assertContains "line=$LINENO $tResult" 'Check-Status: 1 192.168.1.5 444 file'
+    tResult=$(./check-status 1 107.220.116.250 444 foo)
+    assertContains "line=$LINENO $tResult" 'Check-Status: 1 107.220.116.250 444 file'
     assertContains "line=$LINENO" "$tResult" "Fail"
 
     # -----
@@ -278,15 +482,15 @@ testIntegrate2()
     assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
 
     # -----
-    QUERY_STRING='cmd=1&ip=192.168.1.5&port=80'
+    QUERY_STRING='cmd=1&ip=107.220.116.250&port=80'
     tResult=$(./check-status)
-    assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 1 192.168.1.5 80 file'
+    assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 1 107.220.116.250 80 file'
     assertContains "line=$LINENO $tResult" "$tResult" "OK"
 
     # -----
-    QUERY_STRING='cmd=1&ip=192.168.1.5&port=444'
+    QUERY_STRING='cmd=1&ip=107.220.116.250&port=444'
     tResult=$(./check-status)
-    assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 1 192.168.1.5 444 file'
+    assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 1 107.220.116.250 444 file'
     assertContains "line=$LINENO" "$tResult" "Fail"
 
     # -----
@@ -344,211 +548,7 @@ testIntegrate2()
     tResult=$(./check-status)
     assertContains "line=$LINENO $tResult" "$tResult" 'Check-Status: 2 ip port 2'
     assertContains "line=$LINENO $tResult" "$tResult" "$tMsg"
-}
-
-# ========================================
-# Functions
-
-# --------------------
-fUsage()
-{
-    cat <<EOF
-This Help
-	check-status -h
-
-Unit Test
-	check-status -t
-	check-status -t -- testName [testName...]
-
-cgi-bin Usage
-	export QUERY_STRING='cmd=[12]&ip=[N.N.N.N]&port=[NNN]&file=[N]'
-	check-status
-
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1&ip=N.N.N.N&port=N
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=2&file=N
-
-	Example cgi-bin
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.7&port=22
-	https://moria.whyayh.com/cgi-bin/checkstatus?cmd=1ip=192.168.1.96&port=2049
-
-CLI Usage for ip/port check:
-	check-status 1 ip port
-
-CLI Usage for file check:
-	check-status 2 N
-
-	N=1, return: head -n 1 /var/tmp/check-mail.tmp
-	N=2, return: grep "Subject: " /var/tmp/rsnapshot-monitor.tmp | head -n 1
-
-Output 1 "ip":
-	If IP PORT connected, output "OK"
-	if not connected or timed out: "Fail"
-	
-Output 2 "file":
-       if invalid FILE, output "Invalid file"
-       if FILE, output "head -n 1 FILE"
-EOF
-    exit 1
-}
-
-# --------------------
-fValidInput()
-{
-    local pCmd=$1
-    local pIP=$2
-    local pPort=$3
-    local pFile=$4
-    local tCount=0
-    local tErr=0
-    local tResult=""
-
-    tCount=$(echo "pCmd pIP pPort pFile" | wc -w)
-    tCount=$tCount
-    if [ "$tCount" != "4" ]; then
-        tErr=2
-        gResult="Error: problem parsing args, internal error ($tErr)"
-    fi
-    if [ "$pCmd" = "1" ] && ([ "$pIP" = "ip" ] || [ "$pPort" = "port" ]); then
-        tErr=3
-        gResult="Error: problem parsing args ($tErr)"
-    fi
-    if [ "$pCmd" = "2" ] && [ "$pFile" = "file" ]; then
-        tErr=4
-        gResult="Error: problem parsing args ($tErr)"
-    fi
-
-    if [ $tErr -ne 0 ]; then
-        fOutput $pCmd "$pIP" "$pPort" "$pFile" "$gResult"
-        exit $tErr
-    fi
-}
-
-# --------------------
-fValidate()
-{
-    # Clean the inputs. Only digits are allowed.
-    echo "$1" | tr -cd '.[:digit:]'
-}
-
-# --------------------
-fParseArgs()
-{
-    local pCmd="$1"
-    local pIP="$2"
-    local pPort="$3"
-    local pFile="$4"
-
-    pCmd=$(fValidate "$pCmd")
-    pIP=$(fValidate "$pIP")
-    pPort=$(fValidate "$pPort")
-    pFile=$(fValidate "$pFile")
-    echo "${pCmd:-cmd}" "${pIP:-ip}" "${pPort:-port}" "${pFile:-file}"
-}
-
-# --------------------
-fParseQuery()
-{
-    # Use a secure method to parse QUERY_STRING
-    # https://stackoverflow.com/questions/3919755/how-to-parse-query-string-from-a-bash-cgi-script
-    # Example: QUERY_STRING='ip=8.8.8.8&port=53'
-
-    local pQS="$1"
-
-    local tQS
-    local tNameVal
-    local tName
-    local tVal
-    local tCmd=""
-    local tIP=""
-    local tPort=""
-    local tFile=""
-
-    # Remove disallowed characters
-    tQS=$(echo "$pQS" | tr -cd '[:alnum:].&=')
-
-    while [ "$tQS" != "" ]; do
-        tNameVal="${tQS%%&*}"
-        tQS="${tQS#$tNameVal}"
-        tQS="${tQS#&}"
-        tName="${tNameVal%%=*}"
-        tVal="${tNameVal#$name}"
-        tVal="${tNameVal#=}"
-        if [ "$tName" = "cmd" ]; then
-            tCmd=$tVal
-        fi
-        if [ "$tName" = "ip" ]; then
-            tIP=$tVal
-        fi
-        if [ "$tName" = "port" ]; then
-            tPort=$tVal
-        fi
-        if [ "$tName" = "file" ]; then
-            tFile=$tVal
-        fi
-    done
-    fParseArgs "${tCmd:-cmd}" "${tIP:-ip}" "${tPort:-port}" "${tFile:-file}"
-}
-
-# --------------------
-fGetStatus()
-{
-    local pCmd="$1"
-    local pIP="$2"
-    local pPort="$3"
-    local pFile="$4"
-
-    local tResult="Fail"
-
-    case $pCmd in
-        1)
-            timeout 5s nc -zvw10 $pIP $pPort &>/dev/null
-            if [ $? -eq 0 ]; then
-                tResult="OK"
-            fi
-            ;;
-        2)
-            case $pFile in
-                1)
-                    if [ -r $cFile1 ]; then
-                        tResult=$(head -n 1 $cFile1)
-                    fi
-                    ;;
-                2)
-                    if [ -r $cFile2 ]; then
-                        tResult=$(grep 'Subject: ' $cFile2 | head -n 1)
-                    fi
-                    ;;
-            esac
-            ;;
-    esac
-    echo $tResult
-}
-
-# --------------------
-fOutput()
-{
-    local pCmd="$1"
-    local pIP="$2"
-    local pPort="$3"
-    local pFile="$4"
-    local pResult="$5"
-
-    cat <<EOF
-Content-type: text/html
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>check-status</title>
-</head>
-<body>
-<pre>
-Check-Status: $pCmd $pIP $pPort $pFile
-$pResult
-</pre>
-</body>
-</html>
-EOF
-}
+} # testIntegrate2
 
 # ========================================
 # Main
@@ -571,7 +571,7 @@ fi
 if [ ".$1" = ".-t" ]; then
     shift
     if [ "$HOSTNAME" = "$cHost" ]; then
-        fError "Error: Do not run unit tests on $cHost"
+        echo "Error: Do not run unit tests on $cHost"
         exit 1
     fi
     . /usr/local/bin/shunit2.1

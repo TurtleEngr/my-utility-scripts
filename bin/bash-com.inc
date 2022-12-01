@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.11 $ $Date: 2022/05/29 18:36:23 $ GMT
+# $Revision: 1.12 $ $Date: 2022/09/22 08:51:25 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -95,7 +95,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.11 $'
+	cVer='$Revision: 1.12 $'
 
 =internal-head3 Documentation Format
 
@@ -170,7 +170,7 @@ fComSetGlobals()
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.11 $'
+    #cVer='$Revision: 1.12 $'
 
     if [ "$cVer" != "${cVer#*' '}" ]; then
         cVer=${cVer#*' '}
@@ -183,7 +183,7 @@ fComSetGlobals()
     if [ ! -d $Tmp ]; then
         mkdir -p $Tmp 2>/dev/null
         if [ ! -d $Tmp ]; then
-            fError "Could not find directory $Tmp (\$Tmp)." $LINENO
+            fError2 -m "Could not find directory $Tmp (\$Tmp)." -l $LINENO
         fi
     fi
 

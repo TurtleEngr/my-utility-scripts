@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.9 2021/10/26 19:26:11 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.11 2022/10/17 23:38:38 bruce Exp $
 # Put this in /usr/local/sbin/rsnapshot-monitor
 # Run this with cron.d/monitor
 # See also rc.local, check-mail
@@ -226,7 +226,7 @@ export gpDebug=0
 export gErrMsg=""
 export gOKMsg=""
 export gErr=0
-export gLocalTmp=/var/tmp/rc.local.tmp
+export gLocalTmp=/var/local/rc.local.tmp
 export USER=$LOGNAME
 
 logger -t rsnapshot-monitor -p user.notice "BEGIN"
