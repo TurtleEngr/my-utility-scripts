@@ -7,7 +7,7 @@ function fUsage()
         pod2usage $0
         exit 1
     elif [ /usr/bin/pod2text ]; then
-        pod2text $0
+        pod2text $0 | more
         exit 1
     fi
     cat <<EOF >/dev/null

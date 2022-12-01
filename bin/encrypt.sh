@@ -7,7 +7,7 @@ export pFileList="$*"
 tNameList=""
 tKeyList=""
 PS3="Select a name (Enter to redisplay): "
-select tName in CONTINUE LIST OTHER ABORT CLEAR $(gpg --list-public-keys --with-colons | grep '^pub:' | awk -F: '{print $10,$5}' | tr [:upper:] [:lower:] | sed 's/@/_at_/' | tr -s -c '[:alnum:]\n' _ | sed 's/_$//' | egrep 'equifax_com|trustedid_com' | sort) CONTINUE LIST OTHER ABORT CLEAR; do
+select tName in CONTINUE LIST OTHER ABORT CLEAR $(gpg --list-public-keys --with-colons | awk -F: '{print $10,$5}' | tr [:upper:] [:lower:] | sed 's/@/_at_/' | tr -s -c '[:alnum:]\n' _ | sed 's/_$//' | grep '_at_' | sort) CONTINUE LIST OTHER ABORT CLEAR; do
     case $tName in
         '')
             echo "Invalid choice"

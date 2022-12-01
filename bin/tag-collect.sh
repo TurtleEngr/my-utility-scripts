@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.8 $ $Date: 2022/06/10 17:45:20 $ GMT
+# $Revision: 1.10 $ $Date: 2022/09/14 18:28:21 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -64,7 +64,7 @@ fUsage()
             fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
             ;;
         int-md)
-            fComUsage -i -f $cBinr/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
+            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
             ;;
         *)
             fComUsage -f $cBin/$cName -s short | more
@@ -89,7 +89,8 @@ Output file contents based on the desired "tags"
 
 =head1 SYNOPSIS
 
-	tag-collect.sh -t pTag ... [-h] [-H pStyle] [-T pTest] pFiles...
+	tag-collect.sh -t pTag [-h] [-H pStyle] [-T pTest]
+                       pFiles... >OutputFile
 
 =head1 DESCRIPTION
 
@@ -99,7 +100,7 @@ EOF.
 
 Duplicate text in the tag sections will be removed from the output.
 
-See the EXAMPLE section for the example use of tags in files.
+See the EXAMPLE section for the example of tags in files.
 
 =head1 OPTIONS
 
@@ -109,7 +110,10 @@ See the EXAMPLE section for the example use of tags in files.
 
 Look for {pTag} in the list of Files.
 
-More than one -t option can be used to select any number of tags.
+More than one -t option can be used to select any number of
+tags. There is an implied "or" for multiple -t tags. If you want an
+"and", then you will need to repeat tag-collect.sh on the OutputFile
+for the tags you also want for the items.
 
 =item B<-h>
 
@@ -266,7 +270,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.8 $ $Date: 2022/06/10 17:45:20 $ GMT 
+$Revision: 1.10 $ $Date: 2022/09/14 18:28:21 $ GMT 
 
 =cut
 EOF
@@ -498,7 +502,8 @@ testUsage()
 
     #-----
     tResult=$(./tag-collect.sh 2>&1)
-    assertContains "$LINENO tu-cmd-call" "$tResult" "NAME tag-collect.sh"
+    assertContains "$LINENO tu-cmd-call" "$tResult" "Usage:"
+    assertContains "$LINENO tu-cmd-call" "$tResult" "tag-collect.sh"
 
     return 0
 
@@ -698,7 +703,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.8 $'
+cVer='$Revision: 1.10 $'
 fSetGlobals
 
 # -------------------

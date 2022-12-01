@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.64 $ $Date: 2022/07/28 18:26:27 $ GMT
+# $Revision: 1.67 $ $Date: 2022/09/22 08:51:25 $ GMT
 
 export gpHostName gpTag
 
@@ -56,7 +56,7 @@ SHORT-DESCRIPTION
 
 =head1 SYNOPSIS
 
-	SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
+        SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 =head1 DESCRIPTION
 
@@ -80,14 +80,14 @@ pStyle is used to select the type of help and how it is formatted.
 
 Styles:
 
-	short|usage - Output short usage help as text.
-	long|text   - Output long usage help as text.
-	man 	    - Output long usage help as a man page.
-	html 	    - Output long usage help as html.
-	md 	    - Output long usage help as markdown.
-	int 	    - Also output internal documentation as text.
-	int-html    - Also output internal documentation as html.
-	int-md 	    - Also output internal documentation as markdown.
+    short|usage - Output short usage help as text.
+    long|text   - Output long usage help as text.
+    man         - Output long usage help as a man page.
+    html        - Output long usage help as html.
+    md          - Output long usage help as markdown.
+    int         - Also output internal documentation as text.
+    int-html    - Also output internal documentation as html.
+    int-md      - Also output internal documentation as markdown.
 
 =item B<-l>
 
@@ -279,7 +279,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.64 $ $Date: 2022/07/28 18:26:27 $ GMT 
+$Revision: 1.67 $ $Date: 2022/09/22 08:51:25 $ GMT 
 
 =cut
 EOF
@@ -349,7 +349,7 @@ EOF
 fValidateHostName()
 {
     if [ -z $gpHostName ]; then
-        fError "The -n or -c option is required." $LINENO
+        fError2 -m "The -n or -c option is required." -l $LINENO
     fi
     return
 
@@ -370,26 +370,29 @@ EOF
 # --------------------------------
 oneTimeSetUp()
 {
+    # When calling $cName, unset gpTest to prevent infinite loop
+    gpTest=''
+    
     return 0
-} # oneTimeSetUp()
+} # oneTimeSetUp
 
 # --------------------------------
 oneTimeTearDown()
 {
     return 0
-} # oneTearDown()
+} # oneTearDown
 
 # --------------------------------
 setUp()
 {
     return 0
-} # setUp()
+} # setUp
 
 # --------------------------------
 tearDown()
 {
     return 0
-} # tearDown()
+} # tearDown
 
 # --------------------------------
 testUsage()
@@ -444,9 +447,7 @@ testUsage()
     assertContains "$LINENO int-md.3" "$tResult" '### testComUsage'
 
     #-----
-    # When calling cmd, unset gpTest to prevent infinite loop
-    gpTest=""
-    tResult=$($cBin/template.sh 2>&1)
+    tResult=$($cBin/SCRIPTNAME 2>&1)
     assertContains "$LINENO cmd-call" "$tResult" "Usage:"
     assertContains "$LINENO cmd-call" "$tResult" "SCRIPTNAME"
 
@@ -571,7 +572,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.64 $'
+cVer='$Revision: 1.67 $'
 fSetGlobals
 
 # -------------------
@@ -587,18 +588,18 @@ while getopts :cn:t:hH:lT:vx tArg; do
         t) gpTag="$OPTARG" ;;
         # Common arguments
         h) fUsage long
-	    exit 1
-	    ;;
+            exit 1
+            ;;
         H) fUsage "$OPTARG"
-	    exit 1
-	    ;;
+            exit 1
+            ;;
         l) gpLog=1 ;;
         v) let ++gpVerbose ;;
         x) let ++gpDebug ;;
         T) gpTest="$OPTARG" ;;
         # Problem arguments
-        :) fError "Value required for option: -$OPTARG" $LINENO ;;
-        \?) fError "Unknown option: $OPTARG" $LINENO ;;
+        :) fError -m "Value required for option: -$OPTARG" -l $LINENO ;;
+        \?) fError -m "Unknown option: $OPTARG" -l $LINENO ;;
     esac
 done
 shift $((OPTIND - 1))
@@ -628,16 +629,16 @@ fValidateHostName
 # Read-only section
 
 cat <<EOF >$cTmp1
-	\$1 == "$gpTag" {
-		if (\$2 ~ /$gpHostName/) {
-			\$1 = ""
-			\$2 = ""
-			sub(/^  /,"",\$0)
-			echo \$0
-		 }
-		 next
-	}
-	{ echo \$0}
+        \$1 == "$gpTag" {
+                if (\$2 ~ /$gpHostName/) {
+                        \$1 = ""
+                        \$2 = ""
+                        sub(/^  /,"",\$0)
+                        echo \$0
+                 }
+                 next
+        }
+        { echo \$0}
 EOF
 timeout 5 awk -f $cTmp1 >$cTmp2
 
