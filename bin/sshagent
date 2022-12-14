@@ -1,48 +1,27 @@
 #!/bin/bash
-# $Id: sshagent,v 1.60 2022/05/17 23:25:49 bruce Exp $
+# $Id: sshagent,v 1.62 2022/12/14 05:24:24 bruce Exp $
 
-# Note: Because this script is usually sourced, exits and functions
-# are not used.  So that is why the "if" logic is so messy, with
-# "flags", to control the logic.
+# Var prefix key
+#    gVar  - global var
+#    cgVar - global constant
+#    cpVar - global parameter. Usually with an CLI option
+#    pVar  - a function parameter (local)
+#    tVar  - a local variable
 
-# Get options
-gErr=0
-pAdd=""
-pDebug=0
-pHelp=0
-pKill=0
-pScript=0
-while getopts :'hksx' tArg; do
-    case $tArg in
-        a) pAdd=1 ;;
-        h) pHelp=1 ;;
-        k)
-            pKill=1
-            pScript=1
-            ;;
-        s) pScript=1 ;;
-        x) pDebug=1 ;;
-        ?)
-            gErr=2
-            echo "Error: Unknown option: -$OPTARG [$gErr]"
-            ;;
-        *)
-            gErr=3
-            echo "Error: Unknown option: $tArg [$gErr]"
-            ;;
-    esac
-done
-let OPTIND=OPTIND-1
-shift $OPTIND
-pParm=""
-if [ $# -ne 0 ]; then
-    pParm="$*"
-fi
+# --------------------
+fUsage()
+{
+    local pStyle=$1
 
-if [ $pHelp -ne 0 -o $gErr -ne 0 ]; then
-    if [ $pHelp -ne 0 ]; then
-        pod2text $0
-        cat <<'EOF' >/dev/null
+    gErr=1
+    if [ "$pStyle" = "short" ]; then
+        pod2usage $cgScriptName
+        return
+    fi
+    pod2text $cgScriptName | less
+    return
+
+    cat <<'EOF' >/dev/null
 =pod
 
 =head1 NAME
@@ -51,35 +30,41 @@ sshagent - setup the ssh agent process
 
 =head1 SYNOPSIS
 
- . sshagent [-h] [-s] [-k] [key ...]
+    . sshagent [-h] [-s] [-k] [key ...]
+
+    cgAgentOwner - user name. Default: $USER
 
 =head1 DESCRIPTION
 
-sshagent is a wrapper for ssh-agent and ssh-add.  It only starts an
-agent process if one isn't already running.  It also saves the PID
-env. var. values for scripts.  Typically sshagent is put in a users
-profile file.  Notice that the script is "sourced" (.) so that the
-env. var. are defined in the current shell.
+Using ssh-agent is a lot more secure than using a passwordless ssh
+key. If you use passwordless keys, you are following a very bad
+pattern, which could lead to large security issues.
 
-For the best use of ssh-agent, put your public keys in the
-~/.ssh/authorized_keys file on all the systems that you have login
-access to.
+This sshagent script is a wrapper for ssh-agent and ssh-add to make it
+easier to setup and use a ssh-agent. It only starts an agent process
+if one isn't already running, and it saves the PID env. var. values
+for use by scripts.
 
-If an agent is found, then the env. var. are set, and the keys are
-listed (after adding any keys specified on the command line).  If an
-agent is not found, all other agents are killed, and a new agent is
-initialized, the keys are added, and the env. var. are set.
+See the EXAMPLES section for how to use this script.
 
-If -s is used and an agent isn't running, then unset SSH_AGENT_PID,
-and exit (don't try to start an agent).  This is commonly used in cron
-job scripts.
+If an agent is found, then the env. var. are set, the keys are added,
+then listed.  If an agent is not found, all other agents are killed,
+and a new agent is initialized, the keys are added, and the
+env. var. are set.
 
-If cgAgentOwner env. is set, then that will be used instead of
-$LOGNAME, to find the sshagent.env file.  This is useful for scripts
-that are run by other users, who have read access to the user's home
-dir (usually only the "root" user).
-$cHomeDir/$cgAgentOwner/.ssh/.sshagent.env file.  (The script just
-"sources" the file.)
+If -s is used (no keys) and an agent is running, then env. vars. are
+set to use the agent. If an agent is not running, then the agent
+related env. vars. are unset. -s is commonly used in cron job scripts.
+
+If -k is used (no keys), then all ssh-agent will be killed.
+
+If cgAgentOwner env. is set, then that will be used instead of $USER,
+to find the sshagent.env file.  This is only useful for scripts that
+are run with the "root" user. This is only useful with the -s option,
+after agent is started as a regular user.
+
+If any Errors messages are output, that means he script has done
+nothing. Correct the error and try again.
 
 =head1 OPTIONS
 
@@ -87,64 +72,126 @@ $cHomeDir/$cgAgentOwner/.ssh/.sshagent.env file.  (The script just
 
 =item B<-h>
 
-This help.
+Output full help.
 
 =item B<-s>
 
-Only set env. var. (don't run a new agent).
+Set env. var. to use an already running agent, and list the keys.
 
 =item B<-k>
 
-Kill all agents owned by you.
+Kill all agents owned by the current $USER. I.e. cgAgentOwner will not
+be used.
 
-=item B<key...>
+=item B<-l>
 
-A list of key file names.
+List the keys on a running ssh agent.
+
+=item B<key ...>
+
+Start a new ssh-agent if one is not running. Add one or more keys to
+the agent.
+
+If a key is not found, the script will try prepending the key with
+"$HOME/.ssh/". If that is not found, the script will stop with an
+error.
 
 =back
 
-=head1 RETURN VALUE
+=for comment =head1 RETURN VALUE
 
 =head1 ERRORS
 
+=head2 Env and option Errors
+
+    Error: sshagent is not 'sourced' [LINENO]
+    Error: No options were found [LINENO]"
+    Error: Unknown option: OPTARG [LINENO]
+    Error: Missing USER env. var. [LINENO]
+    Error: Missing HOME env. var. [LINENO]
+    Error: Missing program: PROG [LINENO]
+
+=head2 Directory Errors
+
+    Error: HOME dir is not writable [LINENO]
+
+This could be caused by cgAgentOwner being set to an unknown user.
+
+    Error: $cgEnvDir is not writable or is missing [LINENO]
+
+This could be caused by cgAgentOwner being set to a user that has no
+~/.ssh/ dir.
+
+    Error: with chown [LINENO]"
+    Error: with chmod [LINENO]"
+
+The attempt to change the owner and permissions on the cgEnvDir
+failed. The dir and files should ONLY have "user" read/write
+permissions.
+
+    Error: Not found: KEY [LINENO]"
+
+A KEY was not found, even after prepending with "$HOME/.ssh/"
+
+=head2 -s Errors
+
+    Error: agent is not running [LINENO]"
+    Error: not found: $cgEnvFile [LINENO]"
+
+=head2 Key add errors or warnings
+
+    Error: cgAgentOwner override cannot be used to add keys [LINENO]
+    Warning: KEY has no password!!! [LINENO]"
+
 =head1 EXAMPLES
 
-In a profile script:
+The first time you login to your computer, run this to authenticate
+your ssh keys for the agent. Do not put this in your profile. You only
+need to do this after a computer is first started or rebooted.
 
  	. sshagent ~/.ssh/id.home ~/.ssh/id.work
 
+You ran sshagent to create an agent, but you forgot to "source" the
+script so that the SSH_* env. are not set.  Just repeat the command,
+with a ". " at the front.
+
+You can run sshagent any time to add more keys.
+
+In a profile script add this line. That way when you start a new
+terminal it will use any keys from the agent. This can also be
+put in a script if it needs the keys saved on the agent.
+
+    . sshagent -s
+
 In a script run by the 'root' user:
 
- 	export $cgAgentOwner=george
- 	. sshagent -s
-
-You ran sshagent manually to create an agent, but you forgot to
-"source" the script so that the SSH_* env. are set.  Fix this by just
-running sshagent again: . sshagent
+    export $cgAgentOwner=george
+    . sshagent -s
 
 Add another key to a running agent:
 
- 	sshagent ~/.ssh/id_foo_dsa
+    sshagent ~/.ssh/id_foo_dsa
 
 List agent and added keys:
 
- 	sshagent
+    sshagent -l
 
-Kill all agents:
+Kill all your agents. This would be a good practice if you don't want
+your keys "active" on the computer.
 
- 	sshagent -k
+    sshagent -k
 
 =head1 ENVIRONMENT
 
- $cgAgentOwner - user name.  Set to $LOGNAME if empty.
-
- $SSH_AUTH_SOCK - set by sshagent
- $SSH_AGENT_PID - set by sshagent
+    cgAgentOwner - user name. Default: $USER
+    SSH_AGENT_PID - set by ssh-agent
+    SSH_AUTH_SOCK - set by ssh-agent
+    HOME - set by OS. The usual default: /home/$USER
+    USER - set by OS
 
 =head1 FILES
 
- $cHomeDir/$LOGNAME/.ssh/.sshagent.env
- $cHomeDir/$cgAgentOwner/.ssh/.sshagent.env
+    /home/$cgAgentOwner/.ssh/.sshagent.env
 
 =head1 SEE ALSO
 
@@ -152,89 +199,327 @@ Kill all agents:
 
 =head1 NOTES
 
-Because this script is usually sourced, exits and functions are not
-used.  So that is why the "if" logic in this script is so messy with
-the pExit flag.
+DO NOT use passwordless keys for ssh or gpg!  The ONLY exception might
+be for a production server that might be rebooted, and no one would be
+around to authenticate the keys. If you do use passwordless keys, then
+make sure the keys are ONLY used on production, the permissions
+prevent copying the keys, and the keys are "managed". I.e. the keys
+are not in any non-production user account, and they are regularly
+rotated.
 
 =head1 CAVEATS
 
-=head1 DIAGNOSTICS
+When ssh-agent is active it will send each of the keys to a ssh
+command, until one works. This could cause problems. For example what
+if you have a rate limit of only 3 login attempts over a one minute
+period.  If the "correct" key is not one of the first 3 on the agent,
+then ssh will always fail.
 
-=head1 BUGS
+The weird coding style of using functions, gErr, and returns is done to
+avoid using "exit," which would exit the active process (terminal).
+
+=for comment =head1 DIAGNOSTICS
+
+=for comment =head1 BUGS
 
 =head1 RESTRICTIONS
 
 sshagent only works well with bash.
 
-=head1 AUTHOR
+=for comment =head1 AUTHOR
 
 =head1 HISTORY
 
-(c) Copyright 2009 by TrustedID
-
-$Revision: 1.60 $ GMT 
+$Revision: 1.62 $
 
 =cut
 
 EOF
-    fi
-else
+} # fUsage
 
-    # ------------------------------------------
-    export cHomeDir=${HOME%/*}
-    export cgAgentOwner=${cgAgentOwner:-$USER}
-    export cgEnvDir=$cHomeDir/$cgAgentOwner/.ssh
-    export cgEnvFile=$cgEnvDir/.sshagent.env
+# --------------------
+fConfig()
+{
+    declare -xg cgScriptName=$(which sshagent)
+    declare -xg cgAgentOwner=${cgAgentOwner:-$USER}
+    declare -xg cgHomeDir=${HOME%/*}
+    declare -xg cgEnvDir=$cgHomeDir/$cgAgentOwner/.ssh
+    declare -xg cgEnvFile=$cgEnvDir/.sshagent.env
+    declare -xg cgProgList='ssh-agent ssh-add pod2text pod2usage'
+    declare -xg gErr=0
+    return
+} # fConfig
 
-    # Create cgEnvDir if it doesn't exist
-    if [ ! -d $cgEnvdir ]; then
-        mkdir -p $cgEnvDir
+# --------------------
+fGetOpts()
+{
+    if [ $gErr -ne 0 ]; then
+        return
     fi
+    local tArg
+    
+    declare -xg gAction=""
+    declare -xg gpParm=""
+    while getopts :'hks' tArg; do
+        case $tArg in
+            h) fUsage long
+               return
+            ;;
+            k) gAction='kill' ;;
+            s) gAction='script' ;;
+            ?) echo "Error: Unknown option: -$OPTARG [$gErr]"
+               fUsage short
+               return
+            ;;
+            *) echo "Error: Unknown option: $tArg [$gErr]"
+               fUsage short
+               return
+            ;;
+        esac
+    done
+    let OPTIND=OPTIND-1
+    shift $OPTIND
+    if [ $# -ne 0 ]; then
+        gpParm="$*"
+        gAction='add'
+    fi
+    return
+} # fGetOpts
+
+# --------------------
+fValidate()
+{
+    if [ $gErr -ne 0 ]; then
+        return
+    fi
+    local tParm=""
+    local tParmList=""
+    local tProg
+
+    if [ -z "$USER" ]; then
+        gErr=$LINENO
+        echo "Error: Missing USER env. var. [$gErr]"
+        fUsage short
+        return
+    fi
+    
+    if [ -z "$HOME" ]; then
+        gErr=$LINENO
+        echo "Error: Missing HOME env. var. [$gErr]"
+        fUsage short
+        return
+    fi
+    
+    if [ ! -w $HOME ]; then
+        gErr=$LINENO
+        echo "Error: $HOME dir is not writable [$gErr]"
+        fUsage short
+        return
+    fi
+    
+    if [ ! -w $cgEnvDir ]; then
+        gErr=$LINENO
+        echo "Error: $cgEnvDir is not writable or is missing [$gErr]"
+        fUsage short
+        return
+    fi
+
+    if [ -z "$gAction" ]; then
+        gErr=$LINENO
+        echo "Error: No options were found [$gErr]"
+        fUsage short
+        return
+    fi
+
+    for tProg in $cgProgList; do
+        if ! which $tProg >/dev/null 2>&1; then
+            gErr=$LINENO
+            echo "Error: Missing program: $tProg [$gErr]"
+            fUsage short
+            return
+        fi
+    done
+
+    if [[ ${BASH_SOURCE[0]} = $0 ]]; then
+        gErr=$LINENO
+        echo "Error: $cgScriptName is not 'sourced' [$gErr]"
+        fUsage short
+        return
+    fi
+
     # Keep the permissions low
-    chown -R $cgAgentOwner $cgEnvDir
-    chmod u=rwx,go= $cgEnvDir
-    chmod -R go= $cgEnvDir
+    if ! chown -R $cgAgentOwner $cgEnvDir; then
+        gErr=$LINENO
+        echo "Error: with chown [$gErr]"
+        fUsage short
+        return
+    fi
 
-    # Kill all agents.
-    if [ $pKill -ne 0 ]; then
-        # Setup so that all agents will be killed and none started
-        echo "Killing all of your ssh-agents"
-        killall ssh-agent 2>/dev/null
-        rm -f $cgEnvFile 2>/dev/null
+    find $cgEnvDir -type d -exec chmod u=rwx,go= {} \;;
+    if [ $? -ne 0 ]; then
+        gErr=$LINENO
+        echo "Error: with chmod [$gErr]"
+        fUsage short
+        return
+    fi
+    
+    find $cgEnvDir -type f -exec chmod u=rw,go= {} \;;
+    if [ $? -ne 0 ]; then
+        gErr=$LINENO
+        echo "Error: with chmod [$gErr]"
+        fUsage short
+        return
+    fi
+
+    for tParm in $gpParm; do
+        if [ ! -r $tParm ]; then
+            if [ -r ~/.ssh/$tParm ]; then
+                tParm=~/.ssh/$tParm
+            else
+                gErr=$LINENO
+                echo "Error: Not found: $tParm [$gErr]"
+                return
+            fi
+        fi
+        ssh-keygen -y -f $tParm -P 'xxx' >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            echo "Warning: $tParm has no password!!! [$LINENO]"
+        fi
+        tParmList="$tParmList $tParm"
+    done
+    gpParm=$tParmList
+
+    return
+} # fValidate
+
+# --------------------
+fSARunning()
+{
+    if [ $gErr -ne 0 ]; then
+        return
     fi
 
     # Check to see if an agent is running
-    tSARunning=0
-    if [ -f $cgEnvFile ]; then
-        chmod u+rwx,go= $cgEnvFile
+    declare -xg gSARunning=0
+
+    if [ -x $cgEnvFile ]; then
         . $cgEnvFile >/dev/null
-        ps -ef | egrep "($cgAgentOwner|$(id -u $cgAgentOwner))" | grep -v grep | grep $SSH_AGENT_PID >/dev/null 2>&1
+        pgrep -u $cgAgentOwner ssh-agent | grep -q $SSH_AGENT_PID >/dev/null 2>&1
         if [ $? -eq 0 ]; then
-            tSARunning=1
-            ssh-add -l
-            if [ -n "$pParm" ]; then
-                ssh-add $pParm
-            fi
-            ssh-add -l
-        fi
-    fi
-    if [ $tSARunning -eq 0 ]; then
-        unset SSH_AUTH_SOCK SSH_AGENT_PID
-        if [ $pScript -eq 0 ]; then
-            killall ssh-agent 2>/dev/null
-            rm -f $cgEnvFile 2>/dev/null
+            gSARunning=1
         fi
     fi
 
-    if [ $pScript -eq 0 -a $tSARunning -eq 0 ]; then
-        echo Starting a new ssh-agent:
+    if [ $gSARunning -eq 0 ]; then
+        unset SSH_AUTH_SOCK SSH_AGENT_PID
+        killall -u $cgAgentOwner ssh-agent 2>/dev/null
+        rm -f $cgEnvFile 2>/dev/null
+    fi
+
+    return
+} # fSARunning
+
+# --------------------
+fKill()
+{
+    if [ $gErr -ne 0 ]; then
+        return
+    fi
+
+    # Kill all agents owned by $cgAgentOwner
+    echo "Notice: Killing all of your ssh-agents"
+    killall -u $cgAgentOwner ssh-agent 2>/dev/null
+    rm -f $cgEnvFile 2>/dev/null
+
+    return
+} # fKill
+
+# --------------------
+fScript()
+{
+    if [ $gErr -ne 0 ]; then
+        return
+    fi
+    
+    if [ $gSARunning -eq 0 ]; then
+        gErr=$LINENO
+        echo "Error: agent is not running [$gErr]"
+        fUsage short
+        return
+    fi
+
+    if [ ! -x $cgEnvFile ]; then
+        gErr=$LINENO
+        echo "Error: not found: $cgEnvFile [$gErr]"
+        fUsage short
+        return
+    fi
+
+    . $cgEnvFile >/dev/null
+    ssh-add -l
+    
+    return    
+} # fScript
+
+fAdd()
+{
+    if [ $gErr -ne 0 ]; then
+        return
+    fi
+
+    if [ "$cgAgentOwner" != "$USER" ]; then
+        gErr=$LINENO
+        echo "Error: cgAgentOwner override cannot be used to add keys [$gErr]"
+        fUsage short
+        return
+    fi
+
+    if [ $gSARunning -eq 0 ]; then
+        echo "Notice: Starting a new ssh-agent"
         ssh-agent >$cgEnvFile
         chmod u+rwx,go= $cgEnvFile
         . $cgEnvFile >/dev/null
-        echo ssh-add $pParm
-        ssh-add $pParm
+        gSARunning=1
+    fi
+    
+    ssh-add $gpParm
+    ssh-add -l
+    return
+} # fAdd
+
+# --------------------
+fAction()
+{
+    if [ $gErr -ne 0 ]; then
+        return
     fi
 
-    unset tSARunning pScript pParm cgEnvDir cgEnvFile
+    case $gAction in
+        kill)
+            fKill
+        ;;
+        script)
+            fScript
+        ;;
+        add)
+            fAdd
+        ;;
+    esac
+    return
+} # fAction
 
-fi
+# ========================================
+# Main
+
+fConfig
+
+# shellcheck disable=SC2048
+fGetOpts $*
+
+fValidate
+fSARunning
+
+fAction
+
+unset cgEnvDir cgEnvFile cgHomeDir gAction gErr gSARunning gpParm cgScriptName
+unset -f fConfig fGetOpts fValidate fSARunning fAction
