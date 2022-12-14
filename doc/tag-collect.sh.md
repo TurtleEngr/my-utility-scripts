@@ -1,0 +1,168 @@
+<div>
+    <hr/>
+</div>
+
+# NAME tag-collect.sh
+
+Output file contents based on the desired "tags"
+
+# SYNOPSIS
+
+        tag-collect.sh -t pTag [-h] [-H pStyle] [-T pTest]
+                       pFiles... >OutputFile
+
+# DESCRIPTION
+
+pTags will be looked for in the list of pFiles. When found the tag line
+and all lines after it will be listed, until another tag is found or
+EOF.
+
+Duplicate text in the tag sections will be removed from the output.
+
+See the EXAMPLE section for the example of tags in files.
+
+# OPTIONS
+
+- **-t tag**
+
+    Look for {pTag} in the list of Files.
+
+    More than one -t option can be used to select any number of
+    tags. There is an implied "or" for multiple -t tags. If you want an
+    "and", then you will need to repeat tag-collect.sh on the OutputFile
+    for the tags you also want for the items.
+
+- **-h**
+
+    Output this "long" usage help. See "-H long"
+
+- **-H pStyle**
+
+    pStyle is used to select the type of help and how it is formatted.
+
+    Styles:
+
+            short|usage - Output short usage help as text.
+            long|text   - Output long usage help as text.
+            man         - Output long usage help as a man page.
+            html        - Output long usage help as html.
+            md          - Output long usage help as markdown.
+            int         - Also output internal documentation as text.
+            int-html    - Also output internal documentation as html.
+            int-md      - Also output internal documentation as markdown.
+
+- **-T pTest**
+
+    Run the unit test functions in this script.
+
+    "-T all" will run all of the functions that begin with "test".
+    Otherwise "pTest" should match the test function names separated with
+    spaces (between quotes).
+
+    "-T com" will run all the tests for bash-com.inc
+
+    For more details about shunit2 (or shunit2.1), see
+    shunit2/shunit2-manual.html
+    [Source](https://github.com/kward/shunit2)
+
+    See shunit2, shunit2.1
+
+    Also for more help, use the "-H int" option.
+
+# ERRORS
+
+Fatal Errors:
+
+\* Missing -t option.
+
+\* A pFile does not exist
+
+# EXAMPLES
+
+## Example File: file1.txt
+
+    This text is ignored.
+    {tag1}
+    Testing 123
+    {tag2}
+    Testing 456
+       
+
+## Example File: file2.txt
+
+    This text is ignored.
+    {tag5}
+    Test-5
+    {tag3} {tag1}
+    Testing 789
+    {tag1}
+    Testing 123
+    {tag3}
+    Testing 123
+    {tag4}
+    Testing 1010
+    {tagend}
+    extra text
+    
+
+## Example command runs
+
+    $ tag-collect-sh -t tag1 file[12].txt
+    {tag1}
+    Testing 123
+    {tag3} {tag1}
+    Testing 789
+
+    $ tag-collect-sh -t tag1 -t tag3  file[12].txt
+    {tag1}
+    Testing 123
+    {tag3} {tag1}
+    Testing 789
+
+Notice how the only one {tag1} text section is output, even though it
+is in different files. Duplicate section text is not output (the tags
+are ignored when looking for duplicates). Also the {tag3} {tag1} could
+have been output twice, but only one copy is output.
+
+# SEE ALSO
+
+shunit2.1
+bash-com.inc
+bash-com.test
+
+# NOTES
+
+## How to use this script effectively?
+
+\* Define a common tag that will be on all items.
+
+\* Put more than one tag on the different item parts in a text file.
+
+\* Since a new tag will end a tag block, be sure to have some tag after
+the last tag, or the last tag will take all text until the end of the
+file.
+
+\* Ideally the tags should be on a line of their own, no other text.
+
+\* Note: Anything between {} on a line, will be concidered a tag, so
+don't use {} in the "item" text.
+
+### To sift through the tags
+
+\* Start with the the most general categories. Include all files, but
+select with only one tag, and put those items into separate files.
+
+\* For each of the top category files, use other sub tags to create the
+sub-category files.
+
+\* There will likely be duplicate items, so to remove them, use the
+common tag to select the items, putting the list of category and
+sub-category files in the desired order on the command line. Duplicate
+items will removed, and only the first item found will be in the final
+output.
+
+# HISTORY
+
+GPLv3 (c) Copyright 2022
+
+$Revision: 1.10 $ $Date: 2022/09/14 18:28:21 $ GMT 

@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "STDIN 1"
-.TH STDIN 1 "2022-05-16" "perl v5.26.1" "User Contributed Perl Documentation"
+.TH STDIN 1 "2022-12-14" "perl v5.26.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -160,14 +160,14 @@ pStyle is used to select the type of help and how it is formatted.
 Styles:
 .Sp
 .Vb 8
-\&        short|usage \- Output short usage help as text.
-\&        long|text   \- Output long usage help as text.
-\&        man         \- Output long usage help as a man page.
-\&        html        \- Output long usage help as html.
-\&        md          \- Output long usage help as markdown.
-\&        int         \- Also output internal documentation as text.
-\&        int\-html    \- Also output internal documentation as html.
-\&        int\-md      \- Also output internal documentation as markdown.
+\&    short|usage \- Output short usage help as text.
+\&    long|text   \- Output long usage help as text.
+\&    man         \- Output long usage help as a man page.
+\&    html        \- Output long usage help as html.
+\&    md          \- Output long usage help as markdown.
+\&    int         \- Also output internal documentation as text.
+\&    int\-html    \- Also output internal documentation as html.
+\&    int\-md      \- Also output internal documentation as markdown.
 .Ve
 .IP "\fB\-l\fR" 4
 .IX Item "-l"
@@ -192,13 +192,17 @@ Run the unit test functions in this script.
 .Sp
 \&\*(L"\-T all\*(R" will run all of the functions that begin with \*(L"test\*(R".
 Otherwise \*(L"pTest\*(R" should match the test function names separated with
-commas. \*(L"\-T com\*(R" will run all the tests for bash\-com.inc
+spaces (between quotes).
+.Sp
+\&\*(L"\-T list\*(R" will list all of the test functions.
+.Sp
+\&\*(L"\-T com\*(R" will run all the tests for bash\-com.inc
 .Sp
 For more details about shunit2 (or shunit2.1), see
 shunit2/shunit2\-manual.html
 Source <https://github.com/kward/shunit2>
 .Sp
-See shunit2, shunit2.1, and global: gpUnitDebug
+See shunit2, shunit2.1
 .Sp
 Also for more help, use the \*(L"\-H int\*(R" option.
 .SS "Globals"
@@ -286,12 +290,6 @@ Or if \*(L"debug-N\*(R" level is used, then if gpDebug is <= N, then the
 log message will be output, otherwise it is skipped.
 .Sp
 See \-x
-.IP "\fBgpUnitDebug\fR" 4
-.IX Item "gpUnitDebug"
-If set to non-zero, then the fUDebug function calls will output
-the messages when in test functions.
-.Sp
-See \-T, fUDebug
 .SH "RETURN VALUE"
 .IX Header "RETURN VALUE"
 [What the program or function returns if successful.]
@@ -313,10 +311,12 @@ following log message format:
 .IX Header "ENVIRONMENT"
 See Globals section for details.
 .PP
-\&\s-1HOME,USER,\s0 Tmp, gpLog, gpFacility, gpVerbose, gpDebug, gpUnitDebug
+\&\s-1HOME,USER,\s0 Tmp, gpLog, gpFacility, gpVerbose, gpDebug
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-shunit2
+shunit2.1
+bash\-com.inc
+bash\-com.test
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 [Things to take special care with; sometimes called \s-1WARNINGS.\s0]
@@ -336,4 +336,4 @@ To verify the script is internally \s-1OK,\s0 run: \s-1SCRIPTNAME\s0 \-T all
 .IX Header "HISTORY"
 GPLv3 (c) Copyright 2021 by \s-1COMPANY\s0
 .PP
-\&\f(CW$Revision: 1.4 $ \f(CW$Date: 2022/05/16 21:09:12 $ \s-1GMT\s0
+\&\f(CW$Revision:\fR 1.67 $ \f(CW$Date:\fR 2022/09/22 08:51:25 $ \s-1GMT\s0
