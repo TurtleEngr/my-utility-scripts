@@ -192,4 +192,4 @@ sshagent only works well with bash.
 
 # HISTORY
 
-$Revision: 1.62 $
+$Revision: 1.5 $

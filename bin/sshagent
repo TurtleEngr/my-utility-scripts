@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.62 2022/12/14 05:24:24 bruce Exp $
+# $Id: sshagent,v 1.63 2022/12/14 06:50:16 bruce Exp $
 
 # Var prefix key
 #    gVar  - global var
@@ -77,15 +77,11 @@ Output full help.
 =item B<-s>
 
 Set env. var. to use an already running agent, and list the keys.
+If an agent is not running an Error message will be output.
 
 =item B<-k>
 
-Kill all agents owned by the current $USER. I.e. cgAgentOwner will not
-be used.
-
-=item B<-l>
-
-List the keys on a running ssh agent.
+Kill all agents owned by the current cgAgentOwner, i.e. $USER.
 
 =item B<key ...>
 
@@ -195,7 +191,7 @@ your keys "active" on the computer.
 
 =head1 SEE ALSO
 
- ssh-agent, ssh-add
+    ssh-agent, ssh-add
 
 =head1 NOTES
 
@@ -230,7 +226,7 @@ sshagent only works well with bash.
 
 =head1 HISTORY
 
-$Revision: 1.62 $
+$Revision: 1.63 $
 
 =cut
 
