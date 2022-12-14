@@ -14,13 +14,13 @@ DESCRIPTION
 
     *   Outline headings begin with leading a '*'
 
-    *   The first outline level will be formated according to the -weight
+    *   The first outline level will be formatted according to the -weight
         and -style options
 
     *   The number of "TABs" define the outline level.
 
     *   After the first level, the levels will be ordered lists with upper
-        case letters, numbers, lower case letters, numberss, then repeat.
+        case letters, numbers, lower case letters, numbers, then repeat.
 
     *   Lines that don't begin with an '*' are included as plain paragraphs
         at the current level.
@@ -52,11 +52,11 @@ OPTIONS
         This help.
 
 EXAMPLES
-        ./txt2html.pl <outline.txt | \
+        outline2html.pl <outline.txt | \
             tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no >outline.html
 
-        ./txt2html.pl -t outline.txt | \
+        outline2html.pl -t outline.txt | \
             tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no >outline-long.html
 
-    $Revision: 1.1 $
+    $Revision: 1.3 $
 

@@ -2,23 +2,38 @@
     <hr/>
 </div>
 
-# NAME SCRIPTNAME
+# NAME cvs-collapse.sh
 
-SHORT-DESCRIPTION
+Save diskspace. Remove files that have been versioned.
 
 # SYNOPSIS
 
-        SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
+    cvs-collapse.sh -c [-n] [-u] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 # DESCRIPTION
 
-Describe the script.
+This only works for DIRs that are versioned with CVS.  And only the
+files that are versioned will be removed.  Files the are not versioned
+will be listed. Use "cvs update" to get the files back.
+
+COLLAPSED-README.txt file will be put in the directory where this
+command is run. It will have a datestamp and list the files removed.
 
 # OPTIONS
 
-- **-o Name=Value**
+- **-c**
 
-    \[This is a placeholder for user options.\]
+    This option is signal to the script that you know how it is run and
+    what it will do.
+
+- **-n**
+
+    If set, then nothing will be done. The planned deletes will be listed.
+    This is the same as -x
+
+- **-u**
+
+    Don't run "cvs update". However "cvs ci" will still be run.
 
 - **-h**
 
@@ -57,6 +72,8 @@ Describe the script.
     Set the gpDebug level. Add 1 for each -x.
     Or you can set gpDebug before running the script.
 
+    If set, then nothing will be done. The planned deletes will be listed.
+
     See: fLog and fLog2 (Internal documentation)
 
 - **-T pTest**
@@ -92,7 +109,7 @@ The the "common" CLI flags will override the initial variable settings.
 
     This is the top directory where tmp file will be put.
 
-    Default: /tmp/$USER/SCRIPTNAME/
+    Default: /tmp/$USER/cvs-collapse/
 
     if gpDebug is 0, temp files will usually include the PID.
 
@@ -195,13 +212,23 @@ shunit2.1
 bash-com.inc
 bash-com.test
 
+# NOTES
+
+Tests:
+
+    all
+    testUsage
+    testValidate
+    testUpdate
+    testCheckIn
+
 # CAVEATS
 
 \[Things to take special care with; sometimes called WARNINGS.\]
 
 # DIAGNOSTICS
 
-To verify the script is internally OK, run: SCRIPTNAME -T all
+To verify the script is internally OK, run: cvs-collapse.sh -T all
 
 # BUGS
 
@@ -219,4 +246,4 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.67 $ $Date: 2022/09/22 08:51:25 $ GMT 
+$Revision: 1.7 $ $Date: 2022/10/04 19:58:49 $ GMT 

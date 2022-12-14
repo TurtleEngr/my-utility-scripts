@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>template.sh</title>
+<title>mksymlink</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:root@localhost" />
 </head>
@@ -12,7 +12,7 @@
 
 
 <ul id="index">
-  <li><a href="#NAME-SCRIPTNAME">NAME SCRIPTNAME</a></li>
+  <li><a href="#NAME-mksymlink">NAME mksymlink</a></li>
   <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
   <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
   <li><a href="#OPTIONS">OPTIONS</a>
@@ -25,36 +25,72 @@
   <li><a href="#EXAMPLES">EXAMPLES</a></li>
   <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
   <li><a href="#SEE-ALSO">SEE ALSO</a></li>
-  <li><a href="#CAVEATS">CAVEATS</a></li>
   <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
   <li><a href="#BUGS">BUGS</a></li>
-  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
-  <li><a href="#AUTHOR">AUTHOR</a></li>
   <li><a href="#HISTORY">HISTORY</a></li>
 </ul>
 
 <hr/>
 
-<h1 id="NAME-SCRIPTNAME">NAME SCRIPTNAME</h1>
+<h1 id="NAME-mksymlink">NAME mksymlink</h1>
 
-<p>SHORT-DESCRIPTION</p>
+<p>Save and restore symlinks to/from .symlink.$HOSTNAME definition files.</p>
 
 <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
-<pre><code>        SCRIPTNAME [-o &quot;Name=Value&quot;] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]</code></pre>
+<pre><code>        mksymlink [-s] [-r] [-c] [-f]
+                  [-h] [-H pStyle] [-v] [-x] [-T pTest]</code></pre>
 
 <h1 id="DESCRIPTION">DESCRIPTION</h1>
 
-<p>Describe the script.</p>
+<p>CVS does not save symlinks. git saves symlinks, but they may not work. This tool will save symlink definitions, in the current directory, and save them in host-specific files named .symlink.$HOSTNAME (-s).</p>
+
+<p>Then the tool can be used to restore (-r) or check (-c) the symlinks in the current directory against the .symlink.$HOSTNAME file. If you are on a different host, then copy from an existing .symlink.* file and use the check (-c) option to see if it will work, and adjust as needed.</p>
 
 <h1 id="OPTIONS">OPTIONS</h1>
 
 <dl>
 
-<dt id="o-Name-Value"><b>-o Name=Value</b></dt>
+<dt id="s"><b>-s</b></dt>
 <dd>
 
-<p>[This is a placeholder for user options.]</p>
+<p>Save symlinks to .symlink.$HOSTNAME</p>
+
+<p>Convert $HOME/ in links to &#39;~/&#39;.</p>
+
+<p>Only file symlinks are saved. Directory symlinks are ignored (notice output).</p>
+
+<p>Only current dir symlinks are saved.</p>
+
+<p>Symlink pointing to missing files will not be saved (warning output)</p>
+
+<p>Overwrites the contents of .symlink.$HOSTNAME, so you should do -c and -r first to not loose links. Also version the .symlink.$HOSTNAME files before updating them.</p>
+
+</dd>
+<dt id="r"><b>-r</b></dt>
+<dd>
+
+<p>Restore symlinks defined in .symlink.$HOSTNAME</p>
+
+<p>Skip the ones were the destination file does not exist.</p>
+
+<p>Skip symlinks that are already defined, unless -f option is used.</p>
+
+<p>Error if .symlink.$HOSTNAME is missing.</p>
+
+</dd>
+<dt id="c"><b>-c</b></dt>
+<dd>
+
+<p>Check simlinks.</p>
+
+<p>Warning if an existing symlink does not point to an existing file (or directory).</p>
+
+<p>Warning if links in .symlink.$HOSTNAME are not defined in current dir.</p>
+
+<p>Warning if files are not found for the links in .symlink.$HOSTNAME.</p>
+
+<p>Error if .symlink.$HOSTNAME is missing.</p>
 
 </dd>
 <dt id="h"><b>-h</b></dt>
@@ -70,20 +106,14 @@
 
 <p>Styles:</p>
 
-<pre><code>    short|usage - Output short usage help as text.
-    long|text   - Output long usage help as text.
-    man         - Output long usage help as a man page.
-    html        - Output long usage help as html.
-    md          - Output long usage help as markdown.
-    int         - Also output internal documentation as text.
-    int-html    - Also output internal documentation as html.
-    int-md      - Also output internal documentation as markdown.</code></pre>
-
-</dd>
-<dt id="l"><b>-l</b></dt>
-<dd>
-
-<p>Send log messages to syslog. Default is to just send output to stderr.</p>
+<pre><code>        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+        int         - Also output internal documentation as text.
+        int-html    - Also output internal documentation as html.
+        int-md      - Also output internal documentation as markdown.</code></pre>
 
 </dd>
 <dt id="v"><b>-v</b></dt>
@@ -100,6 +130,8 @@
 <dd>
 
 <p>Set the gpDebug level. Add 1 for each -x. Or you can set gpDebug before running the script.</p>
+
+<p>Only show what would be done, when using the other options.</p>
 
 <p>See: fLog and fLog2 (Internal documentation)</p>
 
@@ -137,60 +169,9 @@
 
 <p>This is the top directory where tmp file will be put.</p>
 
-<p>Default: /tmp/$USER/SCRIPTNAME/</p>
+<p>Default: /tmp/$USER/mksymlink/</p>
 
 <p>if gpDebug is 0, temp files will usually include the PID.</p>
-
-</dd>
-<dt id="gpLog"><b>gpLog</b></dt>
-<dd>
-
-<p>If set to 0, log messages will only be sent to stderr.</p>
-
-<p>If set to 1, log messages will be sent to stderr and syslog.</p>
-
-<p>See -l, fLog and fErr for details</p>
-
-<p>Default: 0</p>
-
-</dd>
-<dt id="gpFacility"><b>gpFacility</b></dt>
-<dd>
-
-<p>Log messages sent to syslog will be sent to the &quot;facility&quot; specified by by gpFacility.</p>
-
-<p>&quot;user&quot; log messages will be sent to /var/log/user.log, or /var/log/syslog, or /var/log/messages.log</p>
-
-<p>See: fLog</p>
-
-<p>Default: user</p>
-
-<p>Allowed facility names:</p>
-
-<pre><code> local0 through local7 - local system facilities
- user - misc scripts, generic user-level messages
- auth - security/authorization messages
- authpriv - security/authorization messages (private)
- cron - clock daemon (cron and at)
- daemon - system daemons without separate facility value
- ftp - ftp daemon
- kern - kernel  messages  (these  can&#39;t be generated from user processes)
- lpr - line printer subsystem
- mail - mail subsystem
- news - USENET news subsystem
- syslog - messages generated internally by syslogd(8)
- uucp - UUCP subsystem</code></pre>
-
-<p>These are some suggested uses for the localN facilities:</p>
-
-<pre><code> local0 - system or application configuration
- local1 - application processes
- local2 - web site errors
- local3 - web site access
- local4 - backend processes
- local5 - publishing
- local6 - available
- local7 - available</code></pre>
 
 </dd>
 <dt id="gpVerbose"><b>gpVerbose</b></dt>
@@ -221,7 +202,9 @@
 
 <h1 id="RETURN-VALUE">RETURN VALUE</h1>
 
-<p>[What the program or function returns if successful.]</p>
+<p>0 if OK</p>
+
+<p>!0 if Errors</p>
 
 <h1 id="ERRORS">ERRORS</h1>
 
@@ -239,37 +222,23 @@
 
 <p>See Globals section for details.</p>
 
-<p>HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug</p>
+<p>HOME, HOSTNAME, gpVerbose, gpDebug</p>
 
 <h1 id="SEE-ALSO">SEE ALSO</h1>
 
 <p>shunit2.1 bash-com.inc bash-com.test</p>
 
-<h1 id="CAVEATS">CAVEATS</h1>
-
-<p>[Things to take special care with; sometimes called WARNINGS.]</p>
-
 <h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
 
-<p>To verify the script is internally OK, run: SCRIPTNAME -T all</p>
+<p>To verify the script is internally OK, run: mksymlink -T all</p>
 
 <h1 id="BUGS">BUGS</h1>
 
-<p>[Things that are broken or just don&#39;t work quite right.]</p>
-
-<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
-
-<p>[Bugs you don&#39;t plan to fix :-)]</p>
-
-<h1 id="AUTHOR">AUTHOR</h1>
-
-<p>NAME</p>
+<p>Dir symlinks are not saved. (why not?)</p>
 
 <h1 id="HISTORY">HISTORY</h1>
 
-<p>GPLv3 (c) Copyright 2021 by COMPANY</p>
-
-<p>$Revision: 1.67 $ $Date: 2022/09/22 08:51:25 $ GMT</p>
+<p>GPLv3 (c) Copyright 2022</p>
 
 
 </body>

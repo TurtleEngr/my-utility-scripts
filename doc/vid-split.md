@@ -37,7 +37,7 @@ option.
 - **-s Size**
 
     Define the maximum size in MegaBytes for each split file. Range limit:
-    10 to 2000.  The files will not be valid video (or audio) files; they
+    10 to 1900.  The files will not be valid video (or audio) files; they
     will need to be concatinated together in the order they were split.
 
     Output file pattern for -s 200
@@ -198,4 +198,4 @@ with no -x option.
 
 # HISTORY
 
-$Revision: 1.4 $
+$Revision: 1.9 $
