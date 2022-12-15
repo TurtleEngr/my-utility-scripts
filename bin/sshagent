@@ -1,10 +1,10 @@
 #!/bin/bash
-# $Id: sshagent,v 1.63 2022/12/14 06:50:16 bruce Exp $
+# $Id: sshagent,v 1.66 2022/12/14 23:59:20 bruce Exp $
 
 # Var prefix key
 #    gVar  - global var
 #    cgVar - global constant
-#    cpVar - global parameter. Usually with an CLI option
+#    cpVar - global parameter. Usually with a CLI option
 #    pVar  - a function parameter (local)
 #    tVar  - a local variable
 
@@ -63,7 +63,7 @@ to find the sshagent.env file.  This is only useful for scripts that
 are run with the "root" user. This is only useful with the -s option,
 after agent is started as a regular user.
 
-If any Errors messages are output, that means he script has done
+If any Errors messages are output, that means the script has done
 nothing. Correct the error and try again.
 
 =head1 OPTIONS
@@ -203,6 +203,14 @@ prevent copying the keys, and the keys are "managed". I.e. the keys
 are not in any non-production user account, and they are regularly
 rotated.
 
+You output this help text in different format, if you have these
+other pod programs. For example: 
+
+    pod2html --title="sshagent" sshagent >sshagent.html
+    pod2markdown sshagent >sshagent.md
+    pod2man sshagent >sshagent.man
+    pod2pdf --margins=36 --outlines sshagent >sshagent.pdf
+
 =head1 CAVEATS
 
 When ssh-agent is active it will send each of the keys to a ssh
@@ -226,7 +234,7 @@ sshagent only works well with bash.
 
 =head1 HISTORY
 
-$Revision: 1.63 $
+$Revision: 1.66 $
 
 =cut
 
@@ -359,7 +367,7 @@ fValidate()
         return
     fi
     
-    find $cgEnvDir -type f -exec chmod u=rw,go= {} \;;
+    find $cgEnvDir -type f -exec chmod u+rw,go= {} \;;
     if [ $? -ne 0 ]; then
         gErr=$LINENO
         echo "Error: with chmod [$gErr]"

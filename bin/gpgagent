@@ -180,7 +180,7 @@ gpgagent only works well with bash.
 
 (c) Copyright 2009 by TrustedID
 
-$Revision: 1.3 $ GMT 
+$Revision: 1.4 $ GMT 
 
 =cut
 EOF
@@ -237,13 +237,18 @@ else
 
     if [ $pAdd -eq 0 -a $pExit -eq 0 ]; then
         export tYear=31536000
-        export tMonth=2678400
+        export tMonth=2628000
+        export tWeek=604800
+        export tDay=86400
+        export tHour=3600
+        export tTtl=$tWeek
+        export tTtlMax=$tMonth
 
         gpg-agent --daemon --enable-ssh-support \
-            --default-cache-ttl=$tYear \
-            --default-cache-ttl-ssh=$tYear \
-            --max-cache-ttl=$tYear \
-            --max-cache-ttl-ssh=$tYear \
+            --default-cache-ttl=$tTtl \
+            --default-cache-ttl-ssh=$tTtl \
+            --max-cache-ttl=$tTtlMax \
+            --max-cache-ttl-ssh=$tTtlMax \
             --write-env-file=$cgEnvFile
         if [ ! -r $cgEnvFile ]; then
             echo "Error: Can not read file $cgEnvFile [6]"

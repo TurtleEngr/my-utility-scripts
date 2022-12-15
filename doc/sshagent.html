@@ -60,7 +60,7 @@
 
 <p>If cgAgentOwner env. is set, then that will be used instead of $USER, to find the sshagent.env file. This is only useful for scripts that are run with the &quot;root&quot; user. This is only useful with the -s option, after agent is started as a regular user.</p>
 
-<p>If any Errors messages are output, that means he script has done nothing. Correct the error and try again.</p>
+<p>If any Errors messages are output, that means the script has done nothing. Correct the error and try again.</p>
 
 <h1 id="OPTIONS">OPTIONS</h1>
 
@@ -75,19 +75,13 @@
 <dt id="s"><b>-s</b></dt>
 <dd>
 
-<p>Set env. var. to use an already running agent, and list the keys.</p>
+<p>Set env. var. to use an already running agent, and list the keys. If an agent is not running an Error message will be output.</p>
 
 </dd>
 <dt id="k"><b>-k</b></dt>
 <dd>
 
-<p>Kill all agents owned by the current $USER. I.e. cgAgentOwner will not be used.</p>
-
-</dd>
-<dt id="l"><b>-l</b></dt>
-<dd>
-
-<p>List the keys on a running ssh agent.</p>
+<p>Kill all agents owned by the current cgAgentOwner, i.e. $USER.</p>
 
 </dd>
 <dt id="key"><b>key ...</b></dt>
@@ -185,11 +179,18 @@
 
 <h1 id="SEE-ALSO">SEE ALSO</h1>
 
-<pre><code> ssh-agent, ssh-add</code></pre>
+<pre><code>    ssh-agent, ssh-add</code></pre>
 
 <h1 id="NOTES">NOTES</h1>
 
 <p>DO NOT use passwordless keys for ssh or gpg! The ONLY exception might be for a production server that might be rebooted, and no one would be around to authenticate the keys. If you do use passwordless keys, then make sure the keys are ONLY used on production, the permissions prevent copying the keys, and the keys are &quot;managed&quot;. I.e. the keys are not in any non-production user account, and they are regularly rotated.</p>
+
+<p>You output this help text in different format, if you have these other pod programs. For example:</p>
+
+<pre><code>    pod2html --title=&quot;sshagent&quot; sshagent &gt;sshagent.html
+    pod2markdown sshagent &gt;sshagent.md
+    pod2man sshagent &gt;sshagent.man
+    pod2pdf --margins=36 --outlines sshagent &gt;sshagent.pdf</code></pre>
 
 <h1 id="CAVEATS">CAVEATS</h1>
 
@@ -203,7 +204,7 @@
 
 <h1 id="HISTORY">HISTORY</h1>
 
-<p>$Revision: 1.5 $</p>
+<p>$Revision: 1.6 $</p>
 
 
 </body>

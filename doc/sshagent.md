@@ -37,7 +37,7 @@ to find the sshagent.env file.  This is only useful for scripts that
 are run with the "root" user. This is only useful with the -s option,
 after agent is started as a regular user.
 
-If any Errors messages are output, that means he script has done
+If any Errors messages are output, that means the script has done
 nothing. Correct the error and try again.
 
 # OPTIONS
@@ -49,15 +49,11 @@ nothing. Correct the error and try again.
 - **-s**
 
     Set env. var. to use an already running agent, and list the keys.
+    If an agent is not running an Error message will be output.
 
 - **-k**
 
-    Kill all agents owned by the current $USER. I.e. cgAgentOwner will not
-    be used.
-
-- **-l**
-
-    List the keys on a running ssh agent.
+    Kill all agents owned by the current cgAgentOwner, i.e. $USER.
 
 - **key ...**
 
@@ -175,6 +171,14 @@ prevent copying the keys, and the keys are "managed". I.e. the keys
 are not in any non-production user account, and they are regularly
 rotated.
 
+You output this help text in different format, if you have these
+other pod programs. For example: 
+
+    pod2html --title="sshagent" sshagent >sshagent.html
+    pod2markdown sshagent >sshagent.md
+    pod2man sshagent >sshagent.man
+    pod2pdf --margins=36 --outlines sshagent >sshagent.pdf
+
 # CAVEATS
 
 When ssh-agent is active it will send each of the keys to a ssh
@@ -192,4 +196,4 @@ sshagent only works well with bash.
 
 # HISTORY
 
-$Revision: 1.5 $
+$Revision: 1.6 $
