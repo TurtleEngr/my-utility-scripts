@@ -60,4 +60,4 @@ paragraphs at the current level.
     outline2html.pl -t outline.txt | \
         tidy -q -i -w 78 -asxhtml --tidy-mark no --vertical-space no >outline-long.html
 
-$Revision: 1.2 $
+$Revision: 1.3 $

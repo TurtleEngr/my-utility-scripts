@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "STDIN 1"
-.TH STDIN 1 "2022-12-14" "perl v5.26.1" "User Contributed Perl Documentation"
+.TH STDIN 1 "2022-12-15" "perl v5.26.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -336,4 +336,4 @@ To verify the script is internally \s-1OK,\s0 run: \s-1SCRIPTNAME\s0 \-T all
 .IX Header "HISTORY"
 GPLv3 (c) Copyright 2021 by \s-1COMPANY\s0
 .PP
-\&\f(CW$Revision: 1.5 $ \f(CW$Date: 2022/12/14 06:50:17 $ \s-1GMT\s0
+\&\f(CW$Revision: 1.6 $ \f(CW$Date: 2022/12/15 00:01:18 $ \s-1GMT\s0
