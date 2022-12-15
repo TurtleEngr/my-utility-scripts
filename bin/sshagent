@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.66 2022/12/14 23:59:20 bruce Exp $
+# $Id: sshagent,v 1.67 2022/12/15 02:13:11 bruce Exp $
 
 # Var prefix key
 #    gVar  - global var
@@ -234,7 +234,7 @@ sshagent only works well with bash.
 
 =head1 HISTORY
 
-$Revision: 1.66 $
+$Revision: 1.67 $
 
 =cut
 
@@ -246,7 +246,8 @@ fConfig()
 {
     declare -xg cgScriptName=$(which sshagent)
     declare -xg cgAgentOwner=${cgAgentOwner:-$USER}
-    declare -xg cgHomeDir=${HOME%/*}
+#   declare -xg cgHomeDir=${HOME%/*} # fails if home is /root
+    declare -xg cgHomeDir='/home'
     declare -xg cgEnvDir=$cgHomeDir/$cgAgentOwner/.ssh
     declare -xg cgEnvFile=$cgEnvDir/.sshagent.env
     declare -xg cgProgList='ssh-agent ssh-add pod2text pod2usage'
