@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.67 2022/12/15 02:13:11 bruce Exp $
+# $Id: sshagent,v 1.69 2022/12/16 02:58:05 bruce Exp $
 
 # Var prefix key
 #    gVar  - global var
@@ -62,6 +62,9 @@ If cgAgentOwner env. is set, then that will be used instead of $USER,
 to find the sshagent.env file.  This is only useful for scripts that
 are run with the "root" user. This is only useful with the -s option,
 after agent is started as a regular user.
+
+If root user and cgAgentOwner is not set, cgAgentOwner will be set
+to SUDO_USER if SUDO_USER is defined.
 
 If any Errors messages are output, that means the script has done
 nothing. Correct the error and try again.
@@ -203,8 +206,8 @@ prevent copying the keys, and the keys are "managed". I.e. the keys
 are not in any non-production user account, and they are regularly
 rotated.
 
-You output this help text in different format, if you have these
-other pod programs. For example: 
+You can output this help text in different format, if you have these
+other pod programs. For example:
 
     pod2html --title="sshagent" sshagent >sshagent.html
     pod2markdown sshagent >sshagent.md
@@ -234,7 +237,7 @@ sshagent only works well with bash.
 
 =head1 HISTORY
 
-$Revision: 1.67 $
+$Revision: 1.69 $
 
 =cut
 
@@ -244,14 +247,28 @@ EOF
 # --------------------
 fConfig()
 {
+    declare -xg cgAgentOwner
+    declare -xg cgHomeDir
+    if [ "$USER" = "root" ]; then
+        if [ -z "$cgAgentOwner" -a -n "$SUDO_USER" ]; then
+            cgAgentOwner=$SUDO_USER
+        fi
+        # Hard coded. So this could fail if this is not the home dir
+        # for users. The could be fixed by looking up the user's home
+        # dir in /etc/passwd
+        cgHomeDir='/home'
+    else
+         # This fails if home is /root
+        cgHomeDir=${HOME%/*}
+    fi
+    cgAgentOwner=${cgAgentOwner:-$USER}
+
     declare -xg cgScriptName=$(which sshagent)
-    declare -xg cgAgentOwner=${cgAgentOwner:-$USER}
-#   declare -xg cgHomeDir=${HOME%/*} # fails if home is /root
-    declare -xg cgHomeDir='/home'
     declare -xg cgEnvDir=$cgHomeDir/$cgAgentOwner/.ssh
     declare -xg cgEnvFile=$cgEnvDir/.sshagent.env
     declare -xg cgProgList='ssh-agent ssh-add pod2text pod2usage'
     declare -xg gErr=0
+
     return
 } # fConfig
 

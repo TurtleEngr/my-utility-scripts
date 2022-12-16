@@ -60,6 +60,8 @@
 
 <p>If cgAgentOwner env. is set, then that will be used instead of $USER, to find the sshagent.env file. This is only useful for scripts that are run with the &quot;root&quot; user. This is only useful with the -s option, after agent is started as a regular user.</p>
 
+<p>If root user and cgAgentOwner is not set, cgAgentOwner will be set to SUDO_USER if SUDO_USER is defined.</p>
+
 <p>If any Errors messages are output, that means the script has done nothing. Correct the error and try again.</p>
 
 <h1 id="OPTIONS">OPTIONS</h1>
@@ -185,7 +187,7 @@
 
 <p>DO NOT use passwordless keys for ssh or gpg! The ONLY exception might be for a production server that might be rebooted, and no one would be around to authenticate the keys. If you do use passwordless keys, then make sure the keys are ONLY used on production, the permissions prevent copying the keys, and the keys are &quot;managed&quot;. I.e. the keys are not in any non-production user account, and they are regularly rotated.</p>
 
-<p>You output this help text in different format, if you have these other pod programs. For example:</p>
+<p>You can output this help text in different format, if you have these other pod programs. For example:</p>
 
 <pre><code>    pod2html --title=&quot;sshagent&quot; sshagent &gt;sshagent.html
     pod2markdown sshagent &gt;sshagent.md
@@ -204,7 +206,7 @@
 
 <h1 id="HISTORY">HISTORY</h1>
 
-<p>$Revision: 1.6 $</p>
+<p>$Revision: 1.7 $</p>
 
 
 </body>
