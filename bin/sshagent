@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.69 2022/12/16 02:58:05 bruce Exp $
+# $Id: sshagent,v 1.70 2022/12/16 03:04:48 bruce Exp $
 
 # Var prefix key
 #    gVar  - global var
@@ -237,7 +237,7 @@ sshagent only works well with bash.
 
 =head1 HISTORY
 
-$Revision: 1.69 $
+$Revision: 1.70 $
 
 =cut
 
@@ -252,6 +252,7 @@ fConfig()
     if [ "$USER" = "root" ]; then
         if [ -z "$cgAgentOwner" -a -n "$SUDO_USER" ]; then
             cgAgentOwner=$SUDO_USER
+            echo "Notice: cgAgentOwner=$SUDO_USER"
         fi
         # Hard coded. So this could fail if this is not the home dir
         # for users. The could be fixed by looking up the user's home
