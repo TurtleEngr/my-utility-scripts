@@ -123,5 +123,5 @@ BUGS
 RESTRICTIONS
 AUTHOR
 HISTORY
-    $Revision: 1.6 $ GMT
+    $Revision: 1.7 $ GMT
 

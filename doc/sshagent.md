@@ -37,6 +37,9 @@ to find the sshagent.env file.  This is only useful for scripts that
 are run with the "root" user. This is only useful with the -s option,
 after agent is started as a regular user.
 
+If root user and cgAgentOwner is not set, cgAgentOwner will be set
+to SUDO\_USER if SUDO\_USER is defined.
+
 If any Errors messages are output, that means the script has done
 nothing. Correct the error and try again.
 
@@ -171,8 +174,8 @@ prevent copying the keys, and the keys are "managed". I.e. the keys
 are not in any non-production user account, and they are regularly
 rotated.
 
-You output this help text in different format, if you have these
-other pod programs. For example: 
+You can output this help text in different format, if you have these
+other pod programs. For example:
 
     pod2html --title="sshagent" sshagent >sshagent.html
     pod2markdown sshagent >sshagent.md
@@ -196,4 +199,4 @@ sshagent only works well with bash.
 
 # HISTORY
 
-$Revision: 1.6 $
+$Revision: 1.7 $

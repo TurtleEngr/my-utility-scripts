@@ -66,4 +66,4 @@ Bruce Rafnel
 
 (c) Copyright 2001 by Bruce Rafnel
 
-$Revision: 1.6 $
+$Revision: 1.7 $
