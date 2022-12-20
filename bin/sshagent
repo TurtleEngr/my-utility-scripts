@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.75 2022/12/20 00:20:48 bruce Exp $
+# $Id: sshagent,v 1.76 2022/12/20 02:09:38 bruce Exp $
 set -u
 
 # Var prefix key
@@ -51,6 +51,9 @@ sshagent - setup the ssh agent process
     . sshagent [-h] [-s] [-k] [-x] [pKey ...]
 
     cgAgentOwner - user name. Default: $USER
+
+    For online help page, go to:
+    L<github|https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md>
 
 =head1 DESCRIPTION
 
@@ -282,7 +285,7 @@ other pod programs. For example:
 
 For TDD you can find the latest versions of sshagent and sshagent-test
 at:
-L<github TurtleEngr|https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin>
+L<github|https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin>
 
 =head1 CAVEATS
 
@@ -335,7 +338,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.75 $
+$Revision: 1.76 $
 
 =cut
 
