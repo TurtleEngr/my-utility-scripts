@@ -1,4 +1,4 @@
-SCRIPTNAME Internal Documentation
+mksymlink Internal Documentation
    fUsage pStyle
     This function selects the type of help output. See -h and -H options.
 
@@ -14,15 +14,10 @@ SCRIPTNAME Internal Documentation
     ones that begin with "gp" can usually be overridden by setting them
     before the script is run.
 
-   fValidateHostName
-    Exit if missing.
-
+   fValidate
    testUsage
     Test fUsage. Verify the different output styles work. See also
     testComUsage in bash-com.test.
-
-   testScriptFunctions
-    This is just a starting point for creating script functionality tests.
 
    fRunTests
     Run unit tests for this script.
@@ -100,7 +95,7 @@ bash-com.inc Internal Documentation
      cBin - directory where the script is executing from
      cVer - current version. For example, if using CVS:
             # shellcheck disable=SC2016
-            cVer='$Revision: 1.5 $'
+            cVer='$Revision: 1.1 $'
 
    Documentation Format
     POD is use to format the script's documentation. Sure MarkDown could
