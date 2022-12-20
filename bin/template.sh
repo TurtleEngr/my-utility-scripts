@@ -1,8 +1,9 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.67 $ $Date: 2022/09/22 08:51:25 $ GMT
+# $Revision: 1.72 $ $Date: 2022/12/20 00:31:17 $ GMT
 
 export gpHostName gpTag
+set -u
 
 # ========================================
 # Script Functions
@@ -11,7 +12,7 @@ export gpHostName gpTag
 fUsage()
 {
     # Quick help, run this:
-    # SCRIPTNAME -h | less
+    # SCRIPTNAME -h
 
     local pStyle="$1"
 
@@ -109,25 +110,25 @@ Or you can set gpDebug before running the script.
 
 See: fLog and fLog2 (Internal documentation)
 
-=item B<-T pTest>
+=item B<-T "pTest">
 
 Run the unit test functions in this script.
 
-"-T all" will run all of the functions that begin with "test".
-Otherwise "pTest" should match the test function names separated with
-spaces (between quotes).
+"B<-T all>" will run all of the functions that begin with "test".
 
-"-T list" will list all of the test functions.
+"B<-T list>" will list all of the test functions.
 
-"-T com" will run all the tests for bash-com.inc
+"B<-T com>" will run all the tests for bash-com.inc
+
+Otherwise, "B<pTest>" should match the test function names separated
+with spaces (between quotes).
+
+For more help, use the "-H int" option.
 
 For more details about shunit2 (or shunit2.1), see
-shunit2/shunit2-manual.html
-L<Source|https://github.com/kward/shunit2>
+shunit2/shunit2-manual.html L<Source|https://github.com/kward/shunit2>
 
-See shunit2, shunit2.1
-
-Also for more help, use the "-H int" option.
+shunit2.1 has a minor change that defaults to the no-color option.
 
 =back
 
@@ -243,7 +244,7 @@ following log message format:
 
 See Globals section for details.
 
-HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
+HOME, USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
 
 =for comment =head1 FILES
 
@@ -279,7 +280,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.67 $ $Date: 2022/09/22 08:51:25 $ GMT 
+$Revision: 1.72 $ $Date: 2022/12/20 00:31:17 $ GMT 
 
 =cut
 EOF
@@ -372,7 +373,7 @@ oneTimeSetUp()
 {
     # When calling $cName, unset gpTest to prevent infinite loop
     gpTest=''
-    
+
     return 0
 } # oneTimeSetUp
 
@@ -504,6 +505,9 @@ fRunTests()
         grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
         exit $?
     fi
+    SHUNIT_COLOR=auto
+    # SHUNIT_COLOR=always
+    # SHUNIT_COLOR=none
     if [ "$gpTest" = "all" ]; then
         gpTest=""
         # shellcheck disable=SC1091
@@ -572,7 +576,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.67 $'
+cVer='$Revision: 1.72 $'
 fSetGlobals
 
 # -------------------
@@ -587,22 +591,25 @@ while getopts :cn:t:hH:lT:vx tArg; do
         n) gpHostName="$OPTARG" ;;
         t) gpTag="$OPTARG" ;;
         # Common arguments
-        h) fUsage long
+        h)
+            fUsage long
             exit 1
             ;;
-        H) fUsage "$OPTARG"
+        H)
+            fUsage "$OPTARG"
             exit 1
             ;;
         l) gpLog=1 ;;
-        v) let ++gpVerbose ;;
-        x) let ++gpDebug ;;
+        v) ((++gpVerbose)) ;;
+        x) ((++gpDebug)) ;;
         T) gpTest="$OPTARG" ;;
         # Problem arguments
         :) fError -m "Value required for option: -$OPTARG" -l $LINENO ;;
         \?) fError -m "Unknown option: $OPTARG" -l $LINENO ;;
     esac
 done
-shift $((OPTIND - 1))
+((--OPTIND))
+shift $OPTIND
 if [ $# -ne 0 ]; then
     # File names are usually the only arguments not matched.
     # If nothing is expected, then change this to fError...

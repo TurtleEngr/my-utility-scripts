@@ -59,25 +59,25 @@ Describe the script.
 
     See: fLog and fLog2 (Internal documentation)
 
-- **-T pTest**
+- **-T "pTest"**
 
     Run the unit test functions in this script.
 
-    "-T all" will run all of the functions that begin with "test".
-    Otherwise "pTest" should match the test function names separated with
-    spaces (between quotes).
+    "**-T all**" will run all of the functions that begin with "test".
 
-    "-T list" will list all of the test functions.
+    "**-T list**" will list all of the test functions.
 
-    "-T com" will run all the tests for bash-com.inc
+    "**-T com**" will run all the tests for bash-com.inc
+
+    Otherwise, "**pTest**" should match the test function names separated
+    with spaces (between quotes).
+
+    For more help, use the "-H int" option.
 
     For more details about shunit2 (or shunit2.1), see
-    shunit2/shunit2-manual.html
-    [Source](https://github.com/kward/shunit2)
+    shunit2/shunit2-manual.html [Source](https://github.com/kward/shunit2)
 
-    See shunit2, shunit2.1
-
-    Also for more help, use the "-H int" option.
+    shunit2.1 has a minor change that defaults to the no-color option.
 
 ## Globals
 
@@ -187,7 +187,7 @@ following log message format:
 
 See Globals section for details.
 
-HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
+HOME, USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
 
 # SEE ALSO
 
@@ -219,4 +219,4 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.7 $ $Date: 2022/12/16 02:58:39 $ GMT 
+$Revision: 1.9 $ $Date: 2022/12/20 00:31:49 $ GMT 

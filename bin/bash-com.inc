@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.12 $ $Date: 2022/09/22 08:51:25 $ GMT
+# $Revision: 1.13 $ $Date: 2022/12/20 00:31:16 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -95,7 +95,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.12 $'
+	cVer='$Revision: 1.13 $'
 
 =internal-head3 Documentation Format
 
@@ -170,7 +170,7 @@ fComSetGlobals()
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.12 $'
+    #cVer='$Revision: 1.13 $'
 
     if [ "$cVer" != "${cVer#*' '}" ]; then
         cVer=${cVer#*' '}
@@ -371,7 +371,7 @@ fComUsage()
         short | usage)
             tProg=pod2usage
             if [ $pInt -ne 0 ]; then
-	        # This fails, don't know why
+                # This fails, don't know why
                 tProg='pod2text | head -n 24'
                 tProg=pod2text
             fi
@@ -418,13 +418,13 @@ fComUsage()
             # shellcheck disable=SC2002
             cat $pFileList | $tProg --title="$pTitle" | $tTidy
         else
-	    if [ "$pStyle" = "short" ]; then
-		# shellcheck disable=SC2002
-            	cat $tFileList | pod2text | head -n 20
-	    else
-		# shellcheck disable=SC2002
-            	cat $tFileList | $tProg
-	    fi
+            if [ "$pStyle" = "short" ]; then
+                # shellcheck disable=SC2002
+                cat $tFileList | pod2text | head -n 20
+            else
+                # shellcheck disable=SC2002
+                cat $tFileList | $tProg
+            fi
         fi
     else
         if [ "$pStyle" = "html" ]; then

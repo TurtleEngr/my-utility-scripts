@@ -35,12 +35,12 @@ export pPlain="s/|-- /|/g; s/    |/|   |/g"
 while getopts :hdL:CTcp tArg; do
     case $tArg in
         h) fUsage ;;
-	d) pDirOnly="-d" ;;
-	L) pLevel="-L $OPTARG" ;;
-	C) pCode="-I CVS|.git|.svn|*~|tmp|*.tmp" ;;
-	T) pTab="s/|//g; s/   /\t/g" ;;
-	c) pCompact="expand -t 4" ;;
-	p) pPlain=""
+        d) pDirOnly="-d" ;;
+        L) pLevel="-L $OPTARG" ;;
+        C) pCode="-I CVS|.git|.svn|*~|tmp|*.tmp" ;;
+        T) pTab="s/|//g; s/   /\t/g" ;;
+        c) pCompact="expand -t 4" ;;
+        p) pPlain="" ;;
     esac
 done
 shift $((OPTIND - 1))

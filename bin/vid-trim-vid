@@ -15,7 +15,7 @@ if no -s, then default: -s 00:00:00
 
 The extension for InFile and OutFile must be the same.
 EOF
-exit 1
+    exit 1
 }
 
 # ====================
@@ -29,13 +29,13 @@ gpStart="00:00:00"
 gpEnd=""
 while getopts i:o:s:e:h tArg; do
     case $tArg in
-        h) fUsage;;
-	i) gpIn="$OPTARG";;
-	o) gpOut="$OPTARG";;
-	s) gpStart="$OPTARG";;
-	e) gpEnd="$OPTARG";;
-        :) echo "Error: Value required for option: $OPTARG";;
-        \?) echo "Error: Unknown option: $OPTARG";;
+        h) fUsage ;;
+        i) gpIn="$OPTARG" ;;
+        o) gpOut="$OPTARG" ;;
+        s) gpStart="$OPTARG" ;;
+        e) gpEnd="$OPTARG" ;;
+        :) echo "Error: Value required for option: $OPTARG" ;;
+        \?) echo "Error: Unknown option: $OPTARG" ;;
     esac
 done
 if [ -z "$gpEnd" ]; then

@@ -4,7 +4,7 @@ for i in $*; do
     fold -s $i |
         sed 's/*$//g; s/$//g' \
             >/tmp/$LOGNAME/list.tmp
-    echo -n 
- >>/tmp/$LOGNAME/list.tmp
+    echo -n
+    >>/tmp/$LOGNAME/list.tmp
     cp /tmp/$LOGNAME/list.tmp /dev/lp1
 done
