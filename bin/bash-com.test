@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.test,v $
-# $Revision: 1.6 $ $Date: 2022/05/29 18:36:24 $ GMT
+# $Revision: 1.7 $ $Date: 2022/12/20 00:31:16 $ GMT
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -81,7 +81,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.6 $ $Date: 2022/05/29 18:36:24 $ GMT 
+$Revision: 1.7 $ $Date: 2022/12/20 00:31:16 $ GMT 
 
 =cut
 EOF
@@ -249,8 +249,8 @@ testComLog_MultiplePermutations()
 
     gpUnitDebug=0
     for gpLog in 0 1; do
-        for gpVerbose in 0 1 ; do
-# TBD: why does gpVerbose=2 fail?
+        for gpVerbose in 0 1; do
+            # TBD: why does gpVerbose=2 fail?
             for gpDebug in 0 1 2; do
                 for tLevel in alert crit err warning notice info debug debug-1 debug-3; do
                     for tLog in "fLog" "fLog2"; do

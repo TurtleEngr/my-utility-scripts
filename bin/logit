@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.8 2022/04/06 07:23:45 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.9 2022/12/20 00:31:16 bruce Exp $
 
 # --------------------
 fUsage()
@@ -11,7 +11,7 @@ fUsage()
 
     if [ -z "$pLong" ]; then
         pod2usage $0
-	exit 1
+        exit 1
     fi
     pod2text $0 | more
     exit 1
@@ -172,22 +172,22 @@ fLogIt()
     local tMsg
 
     case $gpLogTag in
-        start|begin)
-    	    gpLogText=${gpLogText#$gpLogTag}
-	    gpLogTag="start"
-	    gpLogText="$gpLogTag $gpLogText"
-	    ;;
-        stop|done|end|finish)
-	    gpLogText=${gpLogText#$gpLogTag}
-	    gpLogTag="stop"
-	    gpLogText="$gpLogTag $gpLogText"
-	    ;;
-	na)
-	    gpLogTag=""
-	    ;;
+        start | begin)
+            gpLogText=${gpLogText#$gpLogTag}
+            gpLogTag="start"
+            gpLogText="$gpLogTag $gpLogText"
+            ;;
+        stop | done | end | finish)
+            gpLogText=${gpLogText#$gpLogTag}
+            gpLogTag="stop"
+            gpLogText="$gpLogTag $gpLogText"
+            ;;
+        na)
+            gpLogTag=""
+            ;;
         *)
-	    gpLogTag=""
-	    ;;
+            gpLogTag=""
+            ;;
     esac
 
     # --------------------
@@ -211,16 +211,16 @@ fReport()
 {
     local tStartCount
     local tStopCount
-    
+
     if [ ! -f $gpLogFile ]; then
-	echo "Error: Not found: $gpLogFile"
+        echo "Error: Not found: $gpLogFile"
         exit 1
     fi
     tStartCount=$(grep ', start' $gpLogFile | wc -l)
     tStopCount=$(grep ', stop' $gpLogFile | wc -l)
     if [ $tStartCount -ne $tStopCount ]; then
         echo "Warning: StartCount=$tStartCount; StopCount=$tStopCount"
-	echo "Fix by manually adding (with -s) for missing starts or stops."
+        echo "Fix by manually adding (with -s) for missing starts or stops."
     fi
 
     # YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
@@ -309,27 +309,27 @@ export gpLogTag=na
 while getopts hd:s:mr tArg; do
     case $tArg in
         h)
-	    fUsage long
-	    ;;
+            fUsage long
+            ;;
         d)
-	    if [ ! -d $OPTARG ]; then
-	        echo "Error: Could not fine directory: -d $OPTARG"
-	    fi
-	    gpLogDir=$OPTARG
-	    gpLogFile=$gpLogDir/$gpLogFile
-	    ;;
+            if [ ! -d $OPTARG ]; then
+                echo "Error: Could not fine directory: -d $OPTARG"
+            fi
+            gpLogDir=$OPTARG
+            gpLogFile=$gpLogDir/$gpLogFile
+            ;;
         s)
-	    if ! date --date="$OPTARG" >/dev/null 2>&1; then
-	        echo "Error: Invalid date: -s $OPTARG"
-	    fi
-	    gpDate="$OPTARG"
-	    ;;
-	m)
-	    fMerge
-	    ;;
-	r)
-	    fReport
-	    ;;
+            if ! date --date="$OPTARG" >/dev/null 2>&1; then
+                echo "Error: Invalid date: -s $OPTARG"
+            fi
+            gpDate="$OPTARG"
+            ;;
+        m)
+            fMerge
+            ;;
+        r)
+            fReport
+            ;;
         :) echo "Error: Value required for option: $OPTARG" ;;
         \?) echo "Error: Unknown option: $OPTARG" ;;
     esac

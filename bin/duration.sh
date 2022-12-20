@@ -2,7 +2,7 @@
 
 # --------------------
 if [ $# -eq 0 ]; then
-   cat <<EOF
+    cat <<EOF
 Usage:
     duration.sh File.mp3 [File.mp4...] >duration.csv
 
@@ -19,12 +19,12 @@ fCalcSec()
     # Output: S
     local pFmt=$1
     local tH tM tS tF
-    
+
     tH=${pFmt%%:*}
-    
+
     tM=${pFmt#*:}
     tM=${tM%:*}
-    
+
     tS=${pFmt##*:}
     tS=${tS%.*}
 
@@ -42,7 +42,7 @@ fFmtTime()
     # Input: S
     # Output: DDd:HH:MM:SS
     local pSec=$1
-    
+
     echo $pSec | awk '
 function fTime(pSec) {
     tDay = int(pSec/60/60/24)

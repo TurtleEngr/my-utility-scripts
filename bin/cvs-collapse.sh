@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/cvs-collapse.sh,v $
-# $Revision: 1.7 $ $Date: 2022/10/04 19:58:49 $ GMT
+# $Revision: 1.8 $ $Date: 2022/12/20 00:31:16 $ GMT
 
 export gpNoUpdate
 export gpContinue
@@ -306,7 +306,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.7 $ $Date: 2022/10/04 19:58:49 $ GMT 
+$Revision: 1.8 $ $Date: 2022/12/20 00:31:16 $ GMT 
 
 =cut
 EOF
@@ -349,7 +349,7 @@ fSetGlobals()
 {
     fComSetGlobals
     gpVerbose=1
-    
+
     # Put your globals here
     gpNoUpdate=0
     gpContinue=0
@@ -401,8 +401,8 @@ fProcessDir()
 
     tFileList=$(
         cat $pEnt |
-        grep -v '^D' |
-        awk '{
+            grep -v '^D' |
+            awk '{
             sub(/^\//, "");
             gsub(/\/.*/, "");
             print $1
@@ -492,7 +492,7 @@ oneTimeSetUp()
 # -------------------
 oneTimeTearDown()
 {
-#    rm $Tmp/test-files.tgz
+    #    rm $Tmp/test-files.tgz
     cd $cCurDir >/dev/null 2>&1
     return 0
 } # oneTearDown
@@ -682,7 +682,7 @@ testNopOk()
     assertContains "$LINENO tno" "$tResult" "rm ./testDir1/file1-2"
     assertContains "$LINENO tno" "$tResult" "rm ./testDir2/file-2-2"
     assertContains "$LINENO tno" "$tResult" "rm ./testDir2/file2-3"
-#    assertContains "$LINENO tno $tResult" "$tResult" "Show result"
+    #    assertContains "$LINENO tno $tResult" "$tResult" "Show result"
 
     return 0
 } # testNopOk
@@ -711,8 +711,8 @@ testOk()
     assertContains "$LINENO tno" "$tResult" "COLLAPSED-README.txt"
     assertContains "$LINENO tno" "$tResult" "testDir1/file1-3"
     assertContains "$LINENO tno" "$tResult" "testDir2/file2-1"
-#    assertContains "$LINENO tno: $(cat COLLAPSED-README.txt)" "$tResult" "xxxxxxxxxx"
-#    assertContains "$LINENO tno: $tResult" "$tResult" "Show Result"
+    #    assertContains "$LINENO tno: $(cat COLLAPSED-README.txt)" "$tResult" "xxxxxxxxxx"
+    #    assertContains "$LINENO tno: $tResult" "$tResult" "Show Result"
 
     return 0
 } # testOk
@@ -794,7 +794,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.7 $'
+cVer='$Revision: 1.8 $'
 fSetGlobals
 
 # -------------------
@@ -804,23 +804,26 @@ if [ $# -eq 0 ]; then
 fi
 while getopts :cnuhH:lT:vx tArg; do
     case $tArg in
-           # Script arguments
-        c) gpContinue=1;;
-        u) gpNoUpdate=1;;
-           # Common arguments
-        h) fUsage long
-           exit 1
-        ;;
-        H) fUsage "$OPTARG"
-           exit 1
-        ;;
+        # Script arguments
+        c) gpContinue=1 ;;
+        u) gpNoUpdate=1 ;;
+            # Common arguments
+        h)
+            fUsage long
+            exit 1
+            ;;
+        H)
+            fUsage "$OPTARG"
+            exit 1
+            ;;
         l) gpLog=1 ;;
         v) let ++gpVerbose ;;
-        x|n) let ++gpDebug
-           let ++gpVerbose
-        ;;
+        x | n)
+            let ++gpDebug
+            let ++gpVerbose
+            ;;
         T) gpTest="$OPTARG" ;;
-           # Problem arguments
+            # Problem arguments
         :) fError2 -m "Value required for option: -$OPTARG" -l $LINENO ;;
         \?) fError2 -m "Unknown option: $OPTARG" -l $LINENO ;;
     esac

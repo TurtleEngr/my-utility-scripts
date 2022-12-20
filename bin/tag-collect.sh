@@ -1,12 +1,12 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.10 $ $Date: 2022/09/14 18:28:21 $ GMT
+# $Revision: 1.11 $ $Date: 2022/12/20 00:31:16 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
 # need to set cBin
 
-export  gpFileList gpTag
+export gpFileList gpTag
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -270,7 +270,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.10 $ $Date: 2022/09/14 18:28:21 $ GMT 
+$Revision: 1.11 $ $Date: 2022/12/20 00:31:16 $ GMT 
 
 =cut
 EOF
@@ -347,20 +347,20 @@ fValidate()
 
     for tFile in $gpFileList; do
         if [ ! -f $tFile ]; then
-    	    fLog2 -p warn -m "File not found: $tFile" -l $LINENO
-	    continue
-	fi
-	if ! grep -q '{.*}' $tFile; then
-    	    fLog2 -p warn  -m "No tags found in: $tFile" -l $LINENO
-	    continue
-	fi
-	tNewList="$tNewList $tFile"
+            fLog2 -p warn -m "File not found: $tFile" -l $LINENO
+            continue
+        fi
+        if ! grep -q '{.*}' $tFile; then
+            fLog2 -p warn -m "No tags found in: $tFile" -l $LINENO
+            continue
+        fi
+        tNewList="$tNewList $tFile"
     done
     if [ -z "$tNewList" ]; then
         fError2 -m "No files are left to process" -l $LINENO
     fi
     gpFileList="$tNewList"
-    
+
     if [ -z "$gpTag" ]; then
         fError2 -m "Missing -t option" -l $LINENO
     fi
@@ -388,43 +388,43 @@ fGetChunk()
 
     while read -r; do
         echo "$REPLY" | grep -q "{"
-	if [[ $? -ne 0 && -n "$tInTag" ]]; then
-	    echo "$REPLY" >>${cTmpF}-$tCount.tmp
-	    continue
-	else
-	    tInTag=""
-	fi
+        if [[ $? -ne 0 && -n "$tInTag" ]]; then
+            echo "$REPLY" >>${cTmpF}-$tCount.tmp
+            continue
+        else
+            tInTag=""
+        fi
         echo "$REPLY" | grep -q "{$pTag}"
-	if [ $? -eq 0 ]; then
-	    tInTag=yes
-	    let ++tCount
-	fi
-	if [ -n "$tInTag" ]; then
-	    echo "$REPLY" >>${cTmpF}-$tCount.tmp
-	fi
+        if [ $? -eq 0 ]; then
+            tInTag=yes
+            let ++tCount
+        fi
+        if [ -n "$tInTag" ]; then
+            echo "$REPLY" >>${cTmpF}-$tCount.tmp
+        fi
     done
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	fLog2 -m "No files were generated" -p warn -l $LINENO
-	echo
+        fLog2 -m "No files were generated" -p warn -l $LINENO
+        echo
         return
     fi
 
     for tFile in ${cTmpF}-*.tmp; do
         tHash=$(sed 's/{.*}//g' $tFile | md5sum)
-	grep -q ${tHash% *} $Tmp/unique.tmp >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-	    rm $tFile
-	    continue
-	fi
-	echo ${tHash% *} >>$Tmp/unique.tmp
+        grep -q ${tHash% *} $Tmp/unique.tmp >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            rm $tFile
+            continue
+        fi
+        echo ${tHash% *} >>$Tmp/unique.tmp
     done
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	fLog2 -m "No files were generated" -p warn -l $LINENO
-	echo
+        fLog2 -m "No files were generated" -p warn -l $LINENO
+        echo
         return
     fi
 
@@ -544,12 +544,12 @@ EOF
 testValidate()
 {
     local tResult
-    
+
     #-----
     gpFileList="foobar"
     tResult=$(fValidate 2>&1)
     assertContains "$LINENO tv-validate-fail $tResult" "$tResult" "File not found"
-    
+
     #-----
     gpTest=""
     tResult=$(./tag-collect.sh foobar 2>&1)
@@ -647,19 +647,19 @@ EOF
     gpTag=" "
     gpFileList=""
     gpTest=""
-    tResult=$(./tag-collect.sh  tag1 $Tmp/tag-file1.txt 2>&1)
+    tResult=$(./tag-collect.sh tag1 $Tmp/tag-file1.txt 2>&1)
     assertNotContains "$LINENO tgt-cmd-found-1" "$tResult" "Testing 123"
     assertNotContains "$LINENO tgt-cmd-not-1" "$tResult" "NOT"
     assertNotContains "$LINENO tgt-cmd-not-1" "$tResult" "Testing 456"
     assertContains "$LINENO tgt-cmd-not-1 crit" "$tResult" "crit"
 
-    tResult=$(./tag-collect.sh  -t tag1 $Tmp/tag-file1.txt 2>&1)
+    tResult=$(./tag-collect.sh -t tag1 $Tmp/tag-file1.txt 2>&1)
     assertContains "$LINENO tgt-cmd-found-2" "$tResult" "Testing 123"
     assertNotContains "$LINENO tgt-cmd-not-2" "$tResult" "NOT"
     assertNotContains "$LINENO tgt-cmd-not-2" "$tResult" "Testing 456"
     assertNotContains "$LINENO tgt-cmd-not-2 crit" "$tResult" "crit"
 
-    tResult=$(./tag-collect.sh  -t tag3 -t tag2 $Tmp/tag-file1.txt 2>&1)
+    tResult=$(./tag-collect.sh -t tag3 -t tag2 $Tmp/tag-file1.txt 2>&1)
     assertContains "$LINENO tgt-cmd-found-3" "$tResult" "Testing 456"
     assertContains "$LINENO tgt-cmd-found-4" "$tResult" "Testing 789"
 
@@ -703,7 +703,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.10 $'
+cVer='$Revision: 1.11 $'
 fSetGlobals
 
 # -------------------
@@ -714,11 +714,11 @@ fi
 while getopts :t:hH:T: tArg; do
     case $tArg in
         # Script arguments
-        t)  # Don't add dups
-	    if [ "${gpTag}" = "${gpTag## *$OPTARG}" ]; then
-	        gpTag="$gpTag $OPTARG"
-	    fi
-	;;
+        t) # Don't add dups
+            if [ "${gpTag}" = "${gpTag## *$OPTARG}" ]; then
+                gpTag="$gpTag $OPTARG"
+            fi
+            ;;
         # Common arguments
         h) fUsage long ;;
         H) fUsage "$OPTARG" ;;
