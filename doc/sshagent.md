@@ -8,6 +8,9 @@ sshagent - setup the ssh agent process
 
     cgAgentOwner - user name. Default: $USER
 
+    For online help page, go to:
+    L<github|https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md>
+
 # DESCRIPTION
 
 Using ssh-agent is a lot more secure than using a passwordless ssh
@@ -203,7 +206,7 @@ other pod programs. For example:
 
 For TDD you can find the latest versions of sshagent and sshagent-test
 at:
-[github TurtleEngr](https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin)
+[github](https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin)
 
 # CAVEATS
 
@@ -242,4 +245,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.11 $
+$Revision: 1.12 $
