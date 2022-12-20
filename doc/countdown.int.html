@@ -3,7 +3,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>template.sh Internal Doc</title>
+  <title>countdown Internal Doc</title>
   <meta http-equiv="content-type"
         content="text/html; charset=utf-8" />
   <link rev="made"
@@ -11,8 +11,25 @@
 </head>
 <body>
   <ul id="index">
+    <li><a href="#NAME">NAME</a></li>
+    <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+    <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+    <li><a href="#OPTIONS">OPTIONS</a></li>
+    <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
+    <li><a href="#ERRORS">ERRORS</a></li>
+    <li><a href="#EXAMPLES">EXAMPLES</a></li>
+    <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
+    <li><a href="#FILES">FILES</a></li>
+    <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+    <li><a href="#NOTES">NOTES</a></li>
+    <li><a href="#CAVEATS">CAVEATS</a></li>
+    <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
+    <li><a href="#BUGS">BUGS</a></li>
+    <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
+    <li><a href="#AUTHOR">AUTHOR</a></li>
+    <li><a href="#HISTORY">HISTORY</a></li>
     <li>
-      <a href="#SCRIPTNAME-Internal-Documentation">SCRIPTNAME Internal
+      <a href="#count-Internal-Documentation">count Internal
       Documentation</a>
       <ul>
         <li>
@@ -20,16 +37,42 @@
             <li><a href="#fUsage-pStyle">fUsage pStyle</a></li>
           </ul>
         </li>
-        <li><a href="#Script-Global-Variables">Script Global
-        Variables</a></li>
+        <li>
+          <a href="#Script-Global-Variables">Script Global Variables</a>
+          <ul>
+            <li><a href="#setUp">setUp</a></li>
+            <li><a href="#setUp1">setUp</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#Unit-Test-Functions">Unit Test Functions</a>
+          <ul>
+            <li><a href="#fUDebug-pMsg">fUDebug "pMsg"</a></li>
+            <li><a href="#testLockCounterFile">testLockCounterFile</a></li>
+          </ul>
+        </li>
         <li>
           <a href="#Script-Functions">Script Functions</a>
           <ul>
             <li><a href="#fCleanUp">fCleanUp</a></li>
             <li><a href="#fSetGlobals">fSetGlobals</a></li>
-            <li><a href="#fValidateHostName">fValidateHostName</a></li>
-            <li><a href="#testUsage">testUsage</a></li>
-            <li><a href="#testScriptFunctions">testScriptFunctions</a></li>
+            <li><a href="#fSetGlobals-pMin-pMax-pNum">fSetGlobals pMin pMax
+            pNum</a></li>
+            <li><a href="#fValidArgs-E-pEnd-m-pMin-s-pSec">fValidArgs E-pEnd
+            m-pMin s-pSec</a></li>
+            <li><a href="#fValidStartEnd-s-pStart-e-pEnd">fValidStartEnd
+            s-pStart e-pEnd</a></li>
+            <li><a href="#fValidDir-pFile">fValidDir pFile</a></li>
+            <li><a href="#fLockCounterFile-pLockDir-pFile">fLockCounterFile
+            pLockDir pFile</a></li>
+            <li><a href="#fGetCount-pEndTime">fGetCount pEndTime</a></li>
+            <li><a href="#fOutput-pSec-pFmt-pFile">fOutput pSec pFmt
+            pFile</a></li>
+            <li><a href=
+            "#fSetEndTime-S-pStart-E-pEnd-m-pMin-s-pSec">fSetEndTime S-pStart
+            E-pEnd m-pMin s-pSec</a></li>
+            <li><a href="#fRunCounter-pEndTime-pFile-pFmt-pInt">fRunCounter
+            pEndTime pFile pFmt pInt</a></li>
             <li><a href="#fRunTests">fRunTests</a></li>
           </ul>
         </li>
@@ -87,11 +130,31 @@
       <a href="#bash-com.test">bash-com.test</a>
       <ul>
         <li><a href="#bash-com.test-Usage">bash-com.test Usage</a></li>
+      </ul>
+    </li>
+    <li><a href="#NAME1">NAME</a></li>
+    <li><a href="#SYNOPSIS1">SYNOPSIS</a></li>
+    <li><a href="#DESCRIPTION1">DESCRIPTION</a></li>
+    <li><a href="#RETURN-VALUE1">RETURN VALUE</a></li>
+    <li><a href="#ERRORS1">ERRORS</a></li>
+    <li><a href="#EXAMPLES1">EXAMPLES</a></li>
+    <li><a href="#ENVIRONMENT1">ENVIRONMENT</a></li>
+    <li><a href="#FILES1">FILES</a></li>
+    <li><a href="#SEE-ALSO1">SEE ALSO</a></li>
+    <li><a href="#NOTES1">NOTES</a></li>
+    <li><a href="#CAVEATS1">CAVEATS</a></li>
+    <li><a href="#DIAGNOSTICS1">DIAGNOSTICS</a></li>
+    <li><a href="#BUGS1">BUGS</a></li>
+    <li><a href="#RESTRICTIONS1">RESTRICTIONS</a></li>
+    <li><a href="#AUTHOR1">AUTHOR</a></li>
+    <li>
+      <a href="#HISTORY1">HISTORY</a>
+      <ul>
         <li>
           <a href="#Test-bash-com.inc">Test bash-com.inc</a>
           <ul>
             <li><a href="#oneTimeSetuUp">oneTimeSetuUp</a></li>
-            <li><a href="#setUp">setUp</a></li>
+            <li><a href="#setUp2">setUp</a></li>
             <li><a href="#testInitialConfig">testInitialConfig</a></li>
             <li><a href="#testLog">testLog</a></li>
             <li><a href="#testSysLog">testSysLog</a></li>
@@ -105,12 +168,186 @@
       </ul>
     </li>
   </ul>
-  <h1 id="SCRIPTNAME-Internal-Documentation">SCRIPTNAME Internal
-  Documentation</h1>
+  <h1 id="NAME">NAME</h1>
+  <p>counter - manage a count up or count down timer for OBS</p>
+  <h1 id="SYNOPSIS">SYNOPSIS</h1>
+  <pre><code>        countdown [-m Min | -s Sec | -E Time [-S Time]] [-i Sec] [-F Format]
+                [-f File] [-h] [-H Style] [-l] [-v] [-x] [-T "TestList"]
+
+        Format: S|M|H
+        Style: usage, long, man, html, md, int, int-html, int-md
+ </code></pre>
+  <h1 id="DESCRIPTION">DESCRIPTION</h1>
+  <p>Use -m and -s to set the duration for the timer. Or use -E to set the
+  end time. -E time is assumed to be in the future, or a time greater than
+  -S.</p>
+  <p>Only one version of counter can write to File. So there is a check to
+  see if a counter is already running for the specified file. If yes, then
+  that counter process is killed, and the File will be used by the new
+  counter. This is done so that a counter can be run in the background.</p>
+  <h1 id="OPTIONS">OPTIONS</h1>
+  <dl>
+    <dt id="m-Min"><b>-m Min</b></dt>
+    <dd>
+      <p>Number of minutes. Default: 0</p>
+    </dd>
+    <dt id="s-Sec"><b>-s Sec</b></dt>
+    <dd>
+      <p>Number of seconds. Default: 60</p>
+    </dd>
+    <dt id="E-Time"><b>-E Time</b></dt>
+    <dd>
+      <p>Set the hour, minute time from now. The counter's duration will be
+      set to number of min:sec until that time. The hour HH must use 24 hour
+      time, or add AM/PM to the time. The Time can be any time that is a
+      valid input to the "date" command (i.e. the --date option).</p>
+      <p>Setting -E will override any -m and -s settings.</p>
+      <p>If there is no -S start time, then the counter will end at exactly
+      at the -E time.</p>
+      <p>See Example section.</p>
+    </dd>
+    <dt id="S-Time"><b>-S Time</b></dt>
+    <dd>
+      <p>The start time of the -E calculation can be defined. The default is
+      "now".</p>
+      <p>If -S is given, then the number of seconds between -S and -E
+      date/times will be use to set the -s option (-m will be 0). Then that
+      will be used to define an internal end time, and the counter will count
+      down to that time.</p>
+      <p>See Example section.</p>
+    </dd>
+    <dt id="i-Sec"><b>-i Sec</b></dt>
+    <dd>
+      <p>Interval in seconds. Default: 1</p>
+    </dd>
+    <dt id="F-Format"><b>-F Format</b></dt>
+    <dd>
+      <p>Format for the counter. Default: M</p>
+      <pre><code> S - SS
+ M - MM:SS
+ H - HH:MM:SS</code></pre>
+    </dd>
+    <dt id="f-File"><b>-f File</b></dt>
+    <dd>
+      <p>File location for the counter. Default: /tmp/counter.tmp</p>
+    </dd>
+    <dt id="h"><b>-h</b></dt>
+    <dd>
+      <p>Output this "long" usage help. See "-H long"</p>
+    </dd>
+    <dt id="H-Style"><b>-H Style</b></dt>
+    <dd>
+      <p>Style is used to select the type of help and how it is
+      formatted.</p>
+      <p>Styles:</p>
+      <pre><code>        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+        int         - Also output internal documentation as text.
+        int-html    - Also output internal documentation as html.
+        int-md      - Also output internal documentation as markdown.</code></pre>
+    </dd>
+    <dt id="l"><b>-l</b></dt>
+    <dd>
+      <p>Send log messages to syslog. Default is to just send output to
+      stderr.</p>
+    </dd>
+    <dt id="v"><b>-v</b></dt>
+    <dd>
+      <p>Verbose output. Default is is only output (or log) messages with
+      level "warning" and higher.</p>
+      <p>-v - output "notice" and higher.</p>
+      <p>-vv - output "info" and higher.</p>
+    </dd>
+    <dt id="x"><b>-x</b></dt>
+    <dd>
+      <p>Set the gpDebug level. Add 1 for each -x. Or you can set gpDebug
+      before running the script.</p>
+      <p>See: fLog and fLog2 (Internal documentation)</p>
+    </dd>
+    <dt id="T-TestList"><b>-T "TestList"</b></dt>
+    <dd>
+      <p>Run the unit test functions in this script.</p>
+      <p>If TestList is "all", then all of the functions that begin with
+      "test" will be run. Otherwise "Test" should match the test function
+      names separated with spaces.</p>
+      <p>If TestList is "com", then $cBin/bash-com.test will be run to test
+      the bash-com.inc functions.</p>
+      <p>For more details about shunit2 (or shunit2.1), see
+      shunit2/shunit2-manual.html <a href=
+      "https://github.com/kward/shunit2">Source</a></p>
+      <p>See shunit2, shunit2.1, bash-com.inc, and global: gpUnitDebug</p>
+      <p>Also for more help, use the "-H int" option.</p>
+    </dd>
+  </dl>
+  <h1 id="RETURN-VALUE">RETURN VALUE</h1>
+  <h1 id="ERRORS">ERRORS</h1>
+  <p>Fatal Error: Bad arguments.</p>
+  <p>Warnings: Another counter was running, it will be stopped.</p>
+  <h1 id="EXAMPLES">EXAMPLES</h1>
+  <p>To use countdown, point OBS text to read from the counter file
+  /tmp/counter.tmp or from the file specified with the -f option.</p>
+  <p>Countdown timer for 2min 13sec. File /tmp/counter.tmp will be use for
+  time remaining.</p>
+  <pre><code>        countdown -m 2 -s 13</code></pre>
+  <p>Start a counter in background for 15 min. The start a replacement
+  countdown time for 2 min, before the first one finishes. When the second
+  countdown starts, any running countdowns using file /tmp/counter.tmp will
+  die, before the other countdown starts.</p>
+  <pre><code>        countdown -m 15 -s 0 &amp;
+        sleep 60
+        countdown -m 2 -s 0 &amp;</code></pre>
+  <p>If you need to have two countdowns running at the same time, use two
+  different countdown files.</p>
+  <pre><code>        countdown -m 15 -s 0 -f /tmp/counter1.tmp &amp;
+        countdown -m 2  -s 0 -f /tmp/counter2.tmp &amp;</code></pre>
+  <p>Start countdown timer to end at 2pm.</p>
+  <pre><code>        countdown -E 2pm
+        countdown -E 14:00</code></pre>
+  <p>Note: if -S is not set, and the current time is past 2pm, then the end
+  time will be "tomorrow 2pm"</p>
+  <p>Start countdown timer to end at 11am on 2020-12-06.</p>
+  <pre><code>        countdown -E '2020-12-06 11am'</code></pre>
+  <p>Countdown timer. The duration is calculated between the two times
+  specified. To test what dates values are allowed, use the "date
+  --date='time'" command.</p>
+  <pre><code>        countdown -S '2020-12-06 11am - 7min - 62sec' -E '2020-12-06 11am'</code></pre>
+  <p>Get documentation in different formats:</p>
+  <pre><code>        countdown -H html &gt;countdown.html
+        countdown -H int-html &gt;countdown-internal.html</code></pre>
+  <h1 id="ENVIRONMENT">ENVIRONMENT</h1>
+  <h1 id="FILES">FILES</h1>
+  <pre><code> /tmp/counter.tmp</code></pre>
+  <h1 id="SEE-ALSO">SEE ALSO</h1>
+  <p>date</p>
+  <h1 id="NOTES">NOTES</h1>
+  <h1 id="CAVEATS">CAVEATS</h1>
+  <h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
+  <h1 id="BUGS">BUGS</h1>
+  <h1 id="RESTRICTIONS">RESTRICTIONS</h1>
+  <h1 id="AUTHOR">AUTHOR</h1>
+  <h1 id="HISTORY">HISTORY</h1>
+  <p>$Revision: 1.1 $ GMT</p>
+  <h1 id="count-Internal-Documentation">count Internal Documentation</h1>
   <h3 id="fUsage-pStyle">fUsage pStyle</h3>
   <p>This function selects the type of help output. See -h and -H
   options.</p>
   <h2 id="Script-Global-Variables">Script Global Variables</h2>
+  <h3 id="setUp">setUp</h3>
+  <p>This is run before each test function.</p>
+  <h3 id="setUp1">setUp</h3>
+  <p>This is run before each test function.</p>
+  <h2 id="Unit-Test-Functions">Unit Test Functions</h2>
+  <h3 id="fUDebug-pMsg">fUDebug "pMsg"</h3>
+  <p>If gpUnitDebug is not 0, then echo $pMsg.</p>
+  <p>If</p>
+  <h3 id="testLockCounterFile">testLockCounterFile</h3>
+  <p>Test getting lock dir. Multiple tests are in this function, because the
+  order matters for this tests.</p>
+  <p>gpVerbose is set in some places, so that the fLog messages will be
+  output.</p>
   <h2 id="Script-Functions">Script Functions</h2>
   <h3 id="fCleanUp">fCleanUp</h3>
   <p>Calls fComCleanUp.</p>
@@ -119,16 +356,26 @@
   <p>Set initial values for all of the other globals use by this script. The
   ones that begin with "gp" can usually be overridden by setting them before
   the script is run.</p>
-  <h3 id="fValidateHostName">fValidateHostName</h3>
-  <p>Exit if missing.</p>
-  <h3 id="testUsage">testUsage</h3>
-  <p>Test fUsage. Verify the different output styles work. See also
-  testComUsage in bash-com.test.</p>
-  <h3 id="testScriptFunctions">testScriptFunctions</h3>
-  <p>This is just a starting point for creating script functionality
-  tests.</p>
+  <h3 id="fSetGlobals-pMin-pMax-pNum">fSetGlobals pMin pMax pNum</h3>
+  <h3 id="fValidArgs-E-pEnd-m-pMin-s-pSec">fValidArgs E-pEnd m-pMin
+  s-pSec</h3>
+  <h3 id="fValidStartEnd-s-pStart-e-pEnd">fValidStartEnd s-pStart e-pEnd</h3>
+  <h3 id="fValidDir-pFile">fValidDir pFile</h3>
+  <h3 id="fLockCounterFile-pLockDir-pFile">fLockCounterFile pLockDir
+  pFile</h3>
+  <h3 id="fGetCount-pEndTime">fGetCount pEndTime</h3>
+  <p>The aguments are not validated, because it is expected they were
+  validated before this function is called.</p>
+  <h3 id="fOutput-pSec-pFmt-pFile">fOutput pSec pFmt pFile</h3>
+  <h3 id="fSetEndTime-S-pStart-E-pEnd-m-pMin-s-pSec">fSetEndTime S-pStart
+  E-pEnd m-pMin s-pSec</h3>
+  <h3 id="fRunCounter-pEndTime-pFile-pFmt-pInt">fRunCounter pEndTime pFile
+  pFmt pInt</h3>
   <h3 id="fRunTests">fRunTests</h3>
   <p>Run unit tests for this script.</p>
+  <p>Note: if the system is "busy" the test times could be off by one second.
+  Either wait for the system to not be busy, or implement a "mockDate"
+  function to make the times constent for the tests.</p>
   <hr />
   <h1 id="bash-com.inc-Internal-Documentation">bash-com.inc Internal
   Documentation</h1>
@@ -192,7 +439,7 @@
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.5 $'</code></pre>
+        cVer='$Revision: 1.1 $'</code></pre>
   <h3 id="Documentation-Format">Documentation Format</h3>
   <p>POD is use to format the script's documentation. Sure MarkDown could
   have been used, but it didn't exist 20 years ago. POD text can be output as
@@ -280,6 +527,30 @@
   https://stackoverflow.com/questions/9954794/execute-a-shell-function-with-timeout</p>
   <h1 id="bash-com.test">bash-com.test</h1>
   <h2 id="bash-com.test-Usage">bash-com.test Usage</h2>
+  <h1 id="NAME1">NAME</h1>
+  <p>bash-com.test - test the bash-com.inc functions</p>
+  <h1 id="SYNOPSIS1">SYNOPSIS</h1>
+  <pre><code>        bash-com.test [testName,testName,...]</code></pre>
+  <h1 id="DESCRIPTION1">DESCRIPTION</h1>
+  <p>shunit2.1 is used to run the unit tests. If no test function names are
+  listed, then all of the test functions will be run.</p>
+  <h1 id="RETURN-VALUE1">RETURN VALUE</h1>
+  <p>0 - if OK</p>
+  <h1 id="ERRORS1">ERRORS</h1>
+  <p>Look for the assert errors.</p>
+  <h1 id="EXAMPLES1">EXAMPLES</h1>
+  <h1 id="ENVIRONMENT1">ENVIRONMENT</h1>
+  <h1 id="FILES1">FILES</h1>
+  <h1 id="SEE-ALSO1">SEE ALSO</h1>
+  <p>shunit2.1</p>
+  <h1 id="NOTES1">NOTES</h1>
+  <h1 id="CAVEATS1">CAVEATS</h1>
+  <h1 id="DIAGNOSTICS1">DIAGNOSTICS</h1>
+  <h1 id="BUGS1">BUGS</h1>
+  <h1 id="RESTRICTIONS1">RESTRICTIONS</h1>
+  <h1 id="AUTHOR1">AUTHOR</h1>
+  <h1 id="HISTORY1">HISTORY</h1>
+  <p>$Revision: 1.1 $ $Date: 2022/12/20 01:57:33 $ GMT</p>
   <h2 id="Test-bash-com.inc">Test bash-com.inc</h2>
   <h3 id="oneTimeSetuUp">oneTimeSetuUp</h3>
   <p>Currently this records all of the script's expected initial global
@@ -288,7 +559,7 @@
   <p>Calls:</p>
   <pre><code> $cBin/bash-com.inc
  fComSetGlobals</code></pre>
-  <h3 id="setUp">setUp</h3>
+  <h3 id="setUp2">setUp</h3>
   <p>Before each test runs, this restores all of the script's initial global
   variable settings,</p>
   <h3 id="testInitialConfig">testInitialConfig</h3>

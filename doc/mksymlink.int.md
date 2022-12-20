@@ -1,4 +1,4 @@
-# SCRIPTNAME Internal Documentation
+# mksymlink Internal Documentation
 
 ### fUsage pStyle
 
@@ -20,18 +20,12 @@ Set initial values for all of the other globals use by this
 script. The ones that begin with "gp" can usually be overridden by
 setting them before the script is run.
 
-### fValidateHostName
-
-Exit if missing.
+### fValidate
 
 ### testUsage
 
 Test fUsage. Verify the different output styles work. See also testComUsage
 in bash-com.test.
-
-### testScriptFunctions
-
-This is just a starting point for creating script functionality tests.
 
 ### fRunTests
 
@@ -119,7 +113,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.5 $'
+           cVer='$Revision: 1.1 $'
 
 ### Documentation Format
 

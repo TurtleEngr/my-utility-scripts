@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.13 $ $Date: 2022/12/20 00:31:16 $ GMT
+# $Revision: 1.14 $ $Date: 2022/12/20 01:57:49 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -95,7 +95,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
 	# shellcheck disable=SC2016
-	cVer='$Revision: 1.13 $'
+	cVer='$Revision: 1.14 $'
 
 =internal-head3 Documentation Format
 
@@ -170,7 +170,7 @@ fComSetGlobals()
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.13 $'
+    #cVer='$Revision: 1.14 $'
 
     if [ "$cVer" != "${cVer#*' '}" ]; then
         cVer=${cVer#*' '}
@@ -293,7 +293,7 @@ EOF
 # --------------------------------
 fComInternalDoc()
 {
-    local pAll=$1
+    local pAll="$1"
 
     if [ ".$pAll" = ".-a" ]; then
         awk '
@@ -334,7 +334,7 @@ fComUsage()
     local pFileList=""
     local pStyle="long"
     local pInt=0
-    local pAll=""
+    local pAll="-n"
     local pTitle="$cName Usage"
 
     local tProg=""

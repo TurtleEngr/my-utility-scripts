@@ -3,7 +3,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>template.sh Internal Doc</title>
+  <title>mksymlink Internal Doc</title>
   <meta http-equiv="content-type"
         content="text/html; charset=utf-8" />
   <link rev="made"
@@ -12,7 +12,7 @@
 <body>
   <ul id="index">
     <li>
-      <a href="#SCRIPTNAME-Internal-Documentation">SCRIPTNAME Internal
+      <a href="#mksymlink-Internal-Documentation">mksymlink Internal
       Documentation</a>
       <ul>
         <li>
@@ -27,9 +27,8 @@
           <ul>
             <li><a href="#fCleanUp">fCleanUp</a></li>
             <li><a href="#fSetGlobals">fSetGlobals</a></li>
-            <li><a href="#fValidateHostName">fValidateHostName</a></li>
+            <li><a href="#fValidate">fValidate</a></li>
             <li><a href="#testUsage">testUsage</a></li>
-            <li><a href="#testScriptFunctions">testScriptFunctions</a></li>
             <li><a href="#fRunTests">fRunTests</a></li>
           </ul>
         </li>
@@ -105,7 +104,7 @@
       </ul>
     </li>
   </ul>
-  <h1 id="SCRIPTNAME-Internal-Documentation">SCRIPTNAME Internal
+  <h1 id="mksymlink-Internal-Documentation">mksymlink Internal
   Documentation</h1>
   <h3 id="fUsage-pStyle">fUsage pStyle</h3>
   <p>This function selects the type of help output. See -h and -H
@@ -119,14 +118,10 @@
   <p>Set initial values for all of the other globals use by this script. The
   ones that begin with "gp" can usually be overridden by setting them before
   the script is run.</p>
-  <h3 id="fValidateHostName">fValidateHostName</h3>
-  <p>Exit if missing.</p>
+  <h3 id="fValidate">fValidate</h3>
   <h3 id="testUsage">testUsage</h3>
   <p>Test fUsage. Verify the different output styles work. See also
   testComUsage in bash-com.test.</p>
-  <h3 id="testScriptFunctions">testScriptFunctions</h3>
-  <p>This is just a starting point for creating script functionality
-  tests.</p>
   <h3 id="fRunTests">fRunTests</h3>
   <p>Run unit tests for this script.</p>
   <hr />
@@ -192,7 +187,7 @@
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.5 $'</code></pre>
+        cVer='$Revision: 1.1 $'</code></pre>
   <h3 id="Documentation-Format">Documentation Format</h3>
   <p>POD is use to format the script's documentation. Sure MarkDown could
   have been used, but it didn't exist 20 years ago. POD text can be output as
