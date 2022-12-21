@@ -20,16 +20,9 @@
       <li><a href="#Globals">Globals</a></li>
     </ul>
   </li>
-  <li><a href="#RETURN-VALUE">RETURN VALUE</a></li>
-  <li><a href="#ERRORS">ERRORS</a></li>
-  <li><a href="#EXAMPLES">EXAMPLES</a></li>
   <li><a href="#ENVIRONMENT">ENVIRONMENT</a></li>
   <li><a href="#SEE-ALSO">SEE ALSO</a></li>
   <li><a href="#NOTES">NOTES</a></li>
-  <li><a href="#CAVEATS">CAVEATS</a></li>
-  <li><a href="#DIAGNOSTICS">DIAGNOSTICS</a></li>
-  <li><a href="#BUGS">BUGS</a></li>
-  <li><a href="#RESTRICTIONS">RESTRICTIONS</a></li>
   <li><a href="#AUTHOR">AUTHOR</a></li>
   <li><a href="#HISTORY">HISTORY</a></li>
 </ul>
@@ -42,13 +35,15 @@
 
 <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
-<pre><code>    cvs-collapse.sh -c [-n] [-u] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]</code></pre>
+<pre><code>    cvs-collapse.sh -c [-u] [-C] [-h] [-H pStyle] [-l] [-v] [-n] [-x] [-T pTest]</code></pre>
 
 <h1 id="DESCRIPTION">DESCRIPTION</h1>
 
 <p>This only works for DIRs that are versioned with CVS. And only the files that are versioned will be removed. Files the are not versioned will be listed. Use &quot;cvs update&quot; to get the files back.</p>
 
 <p>COLLAPSED-README.txt file will be put in the directory where this command is run. It will have a datestamp and list the files removed.</p>
+
+<p>If cvs-collapse.sh is run again in the same directory, then any files removed, will be appended to COLLAPSED-README.txt.</p>
 
 <h1 id="OPTIONS">OPTIONS</h1>
 
@@ -60,16 +55,16 @@
 <p>This option is signal to the script that you know how it is run and what it will do.</p>
 
 </dd>
-<dt id="n"><b>-n</b></dt>
-<dd>
-
-<p>If set, then nothing will be done. The planned deletes will be listed. This is the same as -x</p>
-
-</dd>
 <dt id="u"><b>-u</b></dt>
 <dd>
 
 <p>Don&#39;t run &quot;cvs update&quot;. However &quot;cvs ci&quot; will still be run.</p>
+
+</dd>
+<dt id="C"><b>-C</b></dt>
+<dd>
+
+<p>Remove all files in any &quot;cachefiles/&quot; dir found in current dir on down.</p>
 
 </dd>
 <dt id="h"><b>-h</b></dt>
@@ -109,6 +104,12 @@
 <p>-v - output &quot;notice&quot; and higher.</p>
 
 <p>-vv - output &quot;info&quot; and higher.</p>
+
+</dd>
+<dt id="n"><b>-n</b></dt>
+<dd>
+
+<p>See -x</p>
 
 </dd>
 <dt id="x"><b>-x</b></dt>
@@ -236,22 +237,6 @@
 </dd>
 </dl>
 
-<h1 id="RETURN-VALUE">RETURN VALUE</h1>
-
-<p>[What the program or function returns if successful.]</p>
-
-<h1 id="ERRORS">ERRORS</h1>
-
-<p>Fatal Error:</p>
-
-<p>Warning:</p>
-
-<p>Many error messages may describe where the error is located, with the following log message format:</p>
-
-<pre><code> Program: PID NNNN: Message [LINE](ErrNo)</code></pre>
-
-<h1 id="EXAMPLES">EXAMPLES</h1>
-
 <h1 id="ENVIRONMENT">ENVIRONMENT</h1>
 
 <p>See Globals section for details.</p>
@@ -260,43 +245,33 @@
 
 <h1 id="SEE-ALSO">SEE ALSO</h1>
 
-<p>shunit2.1 bash-com.inc bash-com.test</p>
+<pre><code>    shunit2.1,  bash-com.inc, bash-com.test</code></pre>
 
 <h1 id="NOTES">NOTES</h1>
 
 <p>Tests:</p>
 
-<pre><code>  all
-  testUsage
-  testValidate
-  testUpdate
-  testCheckIn</code></pre>
-
-<h1 id="CAVEATS">CAVEATS</h1>
-
-<p>[Things to take special care with; sometimes called WARNINGS.]</p>
-
-<h1 id="DIAGNOSTICS">DIAGNOSTICS</h1>
-
-<p>To verify the script is internally OK, run: cvs-collapse.sh -T all</p>
-
-<h1 id="BUGS">BUGS</h1>
-
-<p>[Things that are broken or just don&#39;t work quite right.]</p>
-
-<h1 id="RESTRICTIONS">RESTRICTIONS</h1>
-
-<p>[Bugs you don&#39;t plan to fix :-)]</p>
+<pre><code>    all - run all tests
+    list - list all tests
+    testUsage
+    testValidate
+    testUpdateFail
+    testUpdateOk
+    testCiError
+    testNopOk
+    testOk
+    testRmCacheOk
+    testRmCacheNop</code></pre>
 
 <h1 id="AUTHOR">AUTHOR</h1>
 
-<p>NAME</p>
+<p>TurtleEngr</p>
 
 <h1 id="HISTORY">HISTORY</h1>
 
-<p>GPLv3 (c) Copyright 2021 by COMPANY</p>
+<p>GPLv3 (c) Copyright 2022</p>
 
-<p>$Revision: 1.6 $ $Date: 2022/12/20 01:56:59 $ GMT</p>
+<p>$Revision: 1.7 $ $Date: 2022/12/21 02:36:06 $ GMT</p>
 
 
 </body>
