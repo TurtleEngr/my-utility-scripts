@@ -185,9 +185,9 @@ fPkgList()
 
     if which dpkg >/dev/null 2>&1; then
         fCmd PkgList 'dpkg -l'
-	# Fix these, so they list the pkg name, then the desc
-##        fCmd PkgInfo "dpkg -p \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
-##        fCmd PkgFiles "dpkg -L \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+        # Fix these, so they list the pkg name, then the desc
+        ##        fCmd PkgInfo "dpkg -p \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+        ##        fCmd PkgFiles "dpkg -L \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
     fi
 
     if [ -d /etc/zypp ]; then
@@ -204,32 +204,32 @@ fPkgList()
 # --------------------
 fPkgListVer()
 {
-#    if [ -d /etc/yum.repos.d ]; then
-#        fCmd PkgListVer 'rpm -qa | sort -i'
-#        for i in $(rpm -qa | sort -i); do
-#            fCmd PkgInfo "rpm -qi $i"
-#        done
-#        for i in $(rpm -qa | sort -i); do
-#            fCmd PkgFiles "rpm -ql $i"
-#        done
-#    fi
+    #    if [ -d /etc/yum.repos.d ]; then
+    #        fCmd PkgListVer 'rpm -qa | sort -i'
+    #        for i in $(rpm -qa | sort -i); do
+    #            fCmd PkgInfo "rpm -qi $i"
+    #        done
+    #        for i in $(rpm -qa | sort -i); do
+    #            fCmd PkgFiles "rpm -ql $i"
+    #        done
+    #    fi
 
     if which dpkg >/dev/null 2>&1; then
         fCmd PkgListVer "dpkg -l | awk '{print \$2,\$3}'"
-	# Fix these, so they list the pkg name, then the desc
-##        fCmd PkgInfo "dpkg -p \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
-##        fCmd PkgFiles "dpkg -L \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+        # Fix these, so they list the pkg name, then the desc
+        ##        fCmd PkgInfo "dpkg -p \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
+        ##        fCmd PkgFiles "dpkg -L \$(dpkg -l | grep \"^ii \" | awk '{print \$2}')"
     fi
 
-#    if [ -d /etc/zypp ]; then
-#        fCmd PkgListVer 'rpm -qa | sort -i'
-#        for i in $(rpm -qa | sort -i); do
-#            fCmd PkgInfo "rpm -qi $i"
-#        done
-#        for i in $(rpm -qa | sort -i); do
-#            fCmd PkgFiles "rpm -ql $i"
-#        done
-#    fi
+    #    if [ -d /etc/zypp ]; then
+    #        fCmd PkgListVer 'rpm -qa | sort -i'
+    #        for i in $(rpm -qa | sort -i); do
+    #            fCmd PkgInfo "rpm -qi $i"
+    #        done
+    #        for i in $(rpm -qa | sort -i); do
+    #            fCmd PkgFiles "rpm -ql $i"
+    #        done
+    #    fi
 } # fPkgListVer
 
 # --------------------
@@ -253,7 +253,7 @@ fLinuxCommon()
     if which hwinfo &>/dev/null; then
         fCmd hwinfo 'hwinfo --short'
     fi
-    
+
     fCmd Partition 'cat /proc/partitions' /proc/partitions
     fCmd Mount 'cat /proc/mounts' /proc/mounts
     fCmd DiskSize 'df -m'

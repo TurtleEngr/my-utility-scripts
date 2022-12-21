@@ -146,7 +146,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.32 $ $Date: 2022/12/15 04:22:14 $ GMT 
+$Revision: 1.33 $ $Date: 2022/12/20 00:31:17 $ GMT 
 
 =cut
 EOF
@@ -262,16 +262,16 @@ function fKLVer()
         20.04) tUse=kdenlive-20.04.0b-x86_64.appimage ;;
         20.12) tUse=kdenlive-20.12.3a-x86_64.appimage ;;
         21.04) tUse=kdenlive-21.04.3b-x86_64.appimage ;;
-	21.08) tUse=kdenlive-21.08.0a-x86_64.appimage ;;
-	21.11) tUse=kdenlive-21.11.70-9295653-x86_64.appimage ;;
-	21.12) tUse=kdenlive-21.12.2-x86_64.appimage ;;
-#	22.04) tUse=kdenlive-22.04.0-2-x86_64.AppImage ;;
-#	22.04) tUse=kdenlive-22.04.1-x86_x64.AppImage ;;
-	22.04) tUse=kdenlive-22.04.2-x86_x64.AppImage ;;
-#	22.04) tUse=kdenlive-22.04.3-x86_x64.AppImage ;;
+        21.08) tUse=kdenlive-21.08.0a-x86_64.appimage ;;
+        21.11) tUse=kdenlive-21.11.70-9295653-x86_64.appimage ;;
+        21.12) tUse=kdenlive-21.12.2-x86_64.appimage ;;
+            #	22.04) tUse=kdenlive-22.04.0-2-x86_64.AppImage ;;
+            #	22.04) tUse=kdenlive-22.04.1-x86_x64.AppImage ;;
+        22.04) tUse=kdenlive-22.04.2-x86_x64.AppImage ;;
+            #	22.04) tUse=kdenlive-22.04.3-x86_x64.AppImage ;;
         22.12) tUse=kdenlive-22.12.0-x86_64.AppImage ;;
         *)
-	    tUse=kdenlive
+            tUse=kdenlive
             fLog "No version available, using: kdenlive." $LINENO
             ;;
     esac

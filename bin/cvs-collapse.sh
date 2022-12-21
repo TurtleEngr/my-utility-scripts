@@ -1,9 +1,12 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/cvs-collapse.sh,v $
-# $Revision: 1.7 $ $Date: 2022/10/04 19:58:49 $ GMT
+# $Revision: 1.10 $ $Date: 2022/12/21 01:43:03 $ GMT
 
+set -u
+export cgCacheDir
 export gpNoUpdate
 export gpContinue
+export gpRmCache
 export gpCvs
 
 # ========================================
@@ -58,7 +61,7 @@ Save diskspace. Remove files that have been versioned.
 
 =head1 SYNOPSIS
 
-    cvs-collapse.sh -c [-n] [-u] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
+    cvs-collapse.sh -c [-u] [-C] [-h] [-H pStyle] [-l] [-v] [-n] [-x] [-T pTest]
 
 =head1 DESCRIPTION
 
@@ -69,6 +72,9 @@ will be listed. Use "cvs update" to get the files back.
 COLLAPSED-README.txt file will be put in the directory where this
 command is run. It will have a datestamp and list the files removed.
 
+If cvs-collapse.sh is run again in the same directory, then any files
+removed, will be appended to COLLAPSED-README.txt.
+
 =head1 OPTIONS
 
 =over 4
@@ -78,14 +84,13 @@ command is run. It will have a datestamp and list the files removed.
 This option is signal to the script that you know how it is run and
 what it will do.
 
-=item B<-n>
-
-If set, then nothing will be done. The planned deletes will be listed.
-This is the same as -x
-
 =item B<-u>
 
 Don't run "cvs update". However "cvs ci" will still be run.
+
+=item B<-C>
+
+Remove all files in any "cachefiles/" dir found in current dir on down.
 
 =item B<-h>
 
@@ -118,6 +123,10 @@ level "warning" and higher.
 -v - output "notice" and higher.
 
 -vv - output "info" and higher.
+
+=item B<-n>
+
+See -x
 
 =item B<-x>
 
@@ -241,22 +250,9 @@ See -x
 
 =back
 
-=head1 RETURN VALUE
-
-[What the program or function returns if successful.]
-
-=head1 ERRORS
-
-Fatal Error:
-
-Warning:
-
-Many error messages may describe where the error is located, with the
-following log message format:
-
- Program: PID NNNN: Message [LINE](ErrNo)
-
-=head1 EXAMPLES
+=for comment =head1 RETURN VALUE
+=for comment =head1 ERRORS
+=for comment =head1 EXAMPLES
 
 =head1 ENVIRONMENT
 
@@ -268,45 +264,38 @@ HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
 
 =head1 SEE ALSO
 
-shunit2.1
-bash-com.inc
-bash-com.test
+    shunit2.1,  bash-com.inc, bash-com.test
 
 =head1 NOTES
 
 Tests:
 
-  all
-  testUsage
-  testValidate
-  testUpdate
-  testCheckIn
+    all - run all tests
+    list - list all tests
+    testUsage
+    testValidate
+    testUpdateFail
+    testUpdateOk
+    testCiError
+    testNopOk
+    testOk
+    testRmCacheOk
+    testRmCacheNop
 
-=head1 CAVEATS
-
-[Things to take special care with; sometimes called WARNINGS.]
-
-=head1 DIAGNOSTICS
-
-To verify the script is internally OK, run: cvs-collapse.sh -T all
-
-=head1 BUGS
-
-[Things that are broken or just don't work quite right.]
-
-=head1 RESTRICTIONS
-
-[Bugs you don't plan to fix :-)]
+=for comment =head1 CAVEATS
+=for comment =head1 DIAGNOSTICS
+=for comment =head1 BUGS
+=for comment =head1 RESTRICTIONS
 
 =head1 AUTHOR
 
-NAME
+TurtleEngr
 
 =head1 HISTORY
 
-GPLv3 (c) Copyright 2021 by COMPANY
+GPLv3 (c) Copyright 2022
 
-$Revision: 1.7 $ $Date: 2022/10/04 19:58:49 $ GMT 
+$Revision: 1.10 $ $Date: 2022/12/21 01:43:03 $ GMT 
 
 =cut
 EOF
@@ -349,10 +338,12 @@ fSetGlobals()
 {
     fComSetGlobals
     gpVerbose=1
-    
+
     # Put your globals here
+    cgCacheDir="cachefiles"
     gpNoUpdate=0
     gpContinue=0
+    gpRmCache=0
     gpCvs=${gpCvs:-$(which cvs)}
 
     # Define the Required ($1) and the Optional ($2) progs, space separated
@@ -375,6 +366,58 @@ EOF
 } # fSetGlobals
 
 # --------------------------------
+fProcessFile()
+{
+    local pFile=$1
+
+    if [ ! -f $pFile ]; then
+        fLog2 -p notice -m "Already rm $pFile" -l $LINENO
+        if [ $gpDebug -eq 0 ]; then
+            echo "rm $pFile" >>COLLAPSED-README.txt
+        fi
+        return
+    fi
+
+    fLog2 -p notice -m "rm $pFile" -l $LINENO
+    if [ $gpDebug -ne 0 ]; then
+        return
+    fi
+
+    echo "rm $pFile" >>COLLAPSED-README.txt
+    rm $pFile
+
+    return
+} # fProcessFile
+
+# --------------------------------
+fProcessDir()
+{
+    local pEnt=$1
+    local tDir=${pEnt%/CVS/Entries}
+    local tFileList
+    local tFile
+
+    tFileList=$(
+        cat $pEnt |
+            grep -v '^D' |
+            awk '{
+            sub(/^\//, "");
+            gsub(/\/.*/, "");
+            print $1
+        }'
+    )
+    if [ -z "$tFileList" ]; then
+        return
+    fi
+
+    for tFile in $tFileList; do
+        fProcessFile $tDir/$tFile
+    done
+
+    return
+} # fProcessFiles
+
+# --------------------------------
 fProcessEntries()
 {
     local tEntList
@@ -389,51 +432,40 @@ fProcessEntries()
     for tEnt in $tEntList; do
         fProcessDir $tEnt
     done
+
+    return
 } # fProcessEntries
 
 # --------------------------------
-fProcessDir()
+fProcessCache()
 {
-    local pEnt=$1
-    local tDir=${pEnt%/CVS/Entries}
-    local tFileList
-    local tFile
+    local tDirList=''
+    local tDir=''
 
-    tFileList=$(
-        cat $pEnt |
-        grep -v '^D' |
-        awk '{
-            sub(/^\//, "");
-            gsub(/\/.*/, "");
-            print $1
-        }'
-    )
-    if [ -z "$tFileList" ]; then
+    if [ $gpRmCache -eq 0 ]; then
         return
     fi
 
-    for tFile in $tFileList; do
-        fProcessFile $tDir/$tFile
+    cd $cCurDir &>/dev/null
+    tDirList=$(find . -type d -name $cgCacheDir)
+    if [ -z "$tDirList" ]; then
+        return
+    fi
+
+    fLog2 -p notice -m "Removing files in $tDirList" -l $LINENO
+    if [ $gpDebug -eq 0 ]; then
+        echo "# Removed files in $tDirList" >>COLLAPSED-README.txt
+    fi
+    for tDir in $tDirList; do
+        if [ $gpDebug -ne 0 ]; then
+            fLog2 -p notice -m "Removing files: $(find $tDir -type f)" -l $LINENO
+            continue
+        fi
+        find $tDir -type f -exec rm {} \;
     done
-} # fProcessFiles
 
-# --------------------------------
-fProcessFile()
-{
-    local pFile=$1
-
-    if [ ! -f $pFile ]; then
-        echo $pDir/$pFile >>COLLAPSED-README.txt
-        return
-    fi
-    fLog2 -p notice -m "rm $pFile" -l $LINENO
-    if [ $gpDebug -ne 0 ]; then
-        return
-    fi
-
-    echo $pDir/$pFile >>COLLAPSED-README.txt
-    rm $pFile
-} # fProcessFile
+    return
+} # fProcessCache
 
 # ========================================
 # Tests
@@ -463,25 +495,39 @@ oneTimeSetUp()
     declare -gx CVSUMASK=0007
     declare -gx CVS_RSH=''
 
-    mkdir $cTestRoot >/dev/null 2>&1
-    mkdir $cTestWork >/dev/null 2>&1
-    mkdir $cTestWork/$cTestTop >/dev/null 2>&1
-    $gpCvs -d $CVSROOT init >/dev/null 2>&1
-    mkdir $cTestRoot/$cTestTop >/dev/null 2>&1
+    mkdir $cTestRoot &>/dev/null
+    mkdir $cTestWork &>/dev/null
+    mkdir $cTestWork/$cTestTop &>/dev/null
+    $gpCvs -d $CVSROOT init &>/dev/null
+    mkdir $cTestRoot/$cTestTop &>/dev/null
 
-    cd $cTestWork >/dev/null 2>&1
-    $gpCvs co $cTestTop >/dev/null 2>&1
-    cd $cTestTop >/dev/null 2>&1
-    mkdir testDir1 testDir2 >/dev/null 2>&1
-    $gpCvs add testDir1 testDir2 >/dev/null 2>&1
-    cd testDir1 >/dev/null 2>&1
+    cd $cTestWork &>/dev/null
+    $gpCvs co $cTestTop &>/dev/null
+    cd $cTestTop &>/dev/null
+    mkdir testDir1 testDir2 &>/dev/null
+    $gpCvs add testDir1 testDir2 &>/dev/null
+    cd testDir1 &>/dev/null
     touch file1-1 file1-2 file1-3
-    $gpCvs add file1-1 file1-2 >/dev/null 2>&1
-    cd ../testDir2 >/dev/null 2>&1
+    $gpCvs add file1-1 file1-2 &>/dev/null
+    cd ../testDir2 &>/dev/null
     touch file2-1 file-2-2 file2-3
-    $gpCvs add file-2-2 file2-3 >/dev/null 2>&1
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
-    $gpCvs ci -m Added >/dev/null 2>&1
+    $gpCvs add file-2-2 file2-3 &>/dev/null
+
+    mkdir -p cachefiles/1662402751352/audiothumbs
+    mkdir -p cachefiles/1662402751352/preview
+    mkdir -p cachefiles/1662402751352/videothumbs
+    mkdir -p cachefiles/titles
+    mkdir -p cachefiles/audiothumbs
+    mkdir -p cachefiles/preview
+    mkdir -p cachefiles/proxy
+    touch cachefiles/proxy/bar1.mkv
+    touch cachefiles/proxy/bar2.mkv
+    mkdir -p cachefiles/videothumbs
+    touch cachefiles/videothumbs/foo1.jpg
+    touch cachefiles/videothumbs/foo2.jpg
+
+    cd $cTestWork/$cTestTop &>/dev/null
+    $gpCvs ci -m Added &>/dev/null
 
     cd $Tmp
     tar -czf test-files.tgz TestRoot TestWork
@@ -492,8 +538,8 @@ oneTimeSetUp()
 # -------------------
 oneTimeTearDown()
 {
-#    rm $Tmp/test-files.tgz
-    cd $cCurDir >/dev/null 2>&1
+    #    rm $Tmp/test-files.tgz
+    cd $cCurDir &>/dev/null
     return 0
 } # oneTearDown
 
@@ -503,7 +549,7 @@ setUp()
     cd $Tmp
     tar -xzf test-files.tgz
 
-    cd $cCurDir >/dev/null 2>&1
+    cd $cCurDir &>/dev/null
     return 0
 } # setUp
 
@@ -513,7 +559,7 @@ tearDown()
     rm -rf $cTestRoot
     rm -rf $cTestWork
 
-    cd $cCurDir >/dev/null 2>&1
+    cd $cCurDir &>/dev/null
     return 0
 } # tearDown
 
@@ -601,7 +647,7 @@ testValidate()
     assertTrue "$LINENO tv" "[ $? -ne 0 ]"
     assertContains "$LINENO tv" "$tResult" 'You are not in a directory versioned with CVS'
 
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
+    cd $cTestWork/$cTestTop &>/dev/null
     tResult=$($cBin/$cName -nx 2>&1)
     assertContains "$LINENO tv" "$tResult" 'Missing the -c option'
 
@@ -613,7 +659,7 @@ testUpdateFail()
 {
     local tResult
 
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
+    cd $cTestWork/$cTestTop &>/dev/null
     echo "Change file" >>testDir1/file1-1
     chmod a-rw testDir1/file1-1
     tResult=$($cBin/$cName -cx 2>&1)
@@ -627,7 +673,7 @@ testUpdateOk()
 {
     local tResult
 
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
+    cd $cTestWork/$cTestTop &>/dev/null
     rm testDir1/file1-1
     tResult=$($cBin/$cName -cx 2>&1)
     assertContains "$LINENO tuo: $tResult" "$tResult" "cvs update: warning: \`testDir1/file1-1' was lost"
@@ -644,7 +690,7 @@ testCiError()
 {
     local tResult
 
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
+    cd $cTestWork/$cTestTop &>/dev/null
     echo "Change file" >>testDir1/file1-1
     chmod a-w $cTestRoot/$cTestTop/testDir1
     tResult=$($cBin/$cName -cx 2>&1)
@@ -653,8 +699,8 @@ testCiError()
     chmod ug-w $cTestRoot/$cTestTop/testDir1
     chmod ug+w $cTestRoot/$cTestTop/testDir1
 
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
-    $gpCvs add testDir1/file1-3 >/dev/null 2>&1
+    cd $cTestWork/$cTestTop &>/dev/null
+    $gpCvs add testDir1/file1-3 &>/dev/null
     gpCvs=fMockCvsCi
     tResult=$($cBin/$cName -cnx 2>&1)
     assertContains "$LINENO tce: $tResult" "$tResult" 'cvs ci did not version all files'
@@ -668,21 +714,21 @@ testNopOk()
 {
     local tResult
 
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
+    cd $cTestWork/$cTestTop &>/dev/null
     tResult=$($cBin/$cName -cvx 2>&1)
-    assertTrue "$LINENO tno:" "[ ! -f COLLAPSED-README.txt ]"
-    assertContains "$LINENO tno" "$tResult" "cvs update: Updating testDir1"
-    assertContains "$LINENO tno" "$tResult" "? testDir1/file1-3"
-    assertContains "$LINENO tno" "$tResult" "cvs update: Updating testDir2"
-    assertContains "$LINENO tno" "$tResult" "? testDir2/file2-1"
-    assertContains "$LINENO tno" "$tResult" "cvs commit: Examining ."
-    assertContains "$LINENO tno" "$tResult" "cvs commit: Examining testDir1"
-    assertContains "$LINENO tno" "$tResult" "cvs commit: Examining testDir2"
-    assertContains "$LINENO tno" "$tResult" "rm ./testDir1/file1-1"
-    assertContains "$LINENO tno" "$tResult" "rm ./testDir1/file1-2"
-    assertContains "$LINENO tno" "$tResult" "rm ./testDir2/file-2-2"
-    assertContains "$LINENO tno" "$tResult" "rm ./testDir2/file2-3"
-#    assertContains "$LINENO tno $tResult" "$tResult" "Show result"
+    assertTrue "$LINENO" "[ ! -f COLLAPSED-README.txt ]"
+    assertContains "$LINENO" "$tResult" "cvs update: Updating testDir1"
+    assertContains "$LINENO" "$tResult" "? testDir1/file1-3"
+    assertContains "$LINENO" "$tResult" "cvs update: Updating testDir2"
+    assertContains "$LINENO" "$tResult" "? testDir2/file2-1"
+    assertContains "$LINENO" "$tResult" "cvs commit: Examining ."
+    assertContains "$LINENO" "$tResult" "cvs commit: Examining testDir1"
+    assertContains "$LINENO" "$tResult" "cvs commit: Examining testDir2"
+    assertContains "$LINENO" "$tResult" "rm ./testDir1/file1-1"
+    assertContains "$LINENO" "$tResult" "rm ./testDir1/file1-2"
+    assertContains "$LINENO" "$tResult" "rm ./testDir2/file-2-2"
+    assertContains "$LINENO" "$tResult" "rm ./testDir2/file2-3"
+    ##assertContains "$LINENO $tResult" "$tResult" "Show result"
 
     return 0
 } # testNopOk
@@ -692,30 +738,70 @@ testOk()
 {
     local tResult
 
-    cd $cTestWork/$cTestTop >/dev/null 2>&1
+    cd $cTestWork/$cTestTop &>/dev/null
     tResult=$($cBin/$cName -cv 2>&1)
-    assertTrue "$LINENO tno" "[ -f COLLAPSED-README.txt ]"
-    assertContains "$LINENO tno" "$tResult" "cvs update: Updating ."
-    assertContains "$LINENO tno" "$tResult" "cvs update: Updating testDir1"
-    assertContains "$LINENO tno" "$tResult" "? testDir1/file1-3"
-    assertContains "$LINENO tno" "$tResult" "cvs update: Updating testDir2"
-    assertContains "$LINENO tno" "$tResult" "? testDir2/file2-1"
-    assertContains "$LINENO tno" "$tResult" "cvs commit: Examining ."
-    assertContains "$LINENO tno" "$tResult" "cvs commit: Examining testDir1"
-    assertContains "$LINENO tno" "$tResult" "cvs commit: Examining testDir2"
-    assertTrue "$LINENO tno" "[ ! -f testDir1/file1-1 ]"
-    assertTrue "$LINENO tno" "[ ! -f testDir1/file1-2 ]"
-    assertTrue "$LINENO tno" "[ ! -f testDir2/file-2-2 ]"
-    assertTrue "$LINENO tno" "[ ! -f testDir2/file2-3 ]"
-    assertContains "$LINENO tno" "$tResult" "Files not removed:"
-    assertContains "$LINENO tno" "$tResult" "COLLAPSED-README.txt"
-    assertContains "$LINENO tno" "$tResult" "testDir1/file1-3"
-    assertContains "$LINENO tno" "$tResult" "testDir2/file2-1"
-#    assertContains "$LINENO tno: $(cat COLLAPSED-README.txt)" "$tResult" "xxxxxxxxxx"
-#    assertContains "$LINENO tno: $tResult" "$tResult" "Show Result"
+    assertTrue "$LINENO" "[ -f COLLAPSED-README.txt ]"
+    assertContains "$LINENO" "$tResult" "cvs update: Updating ."
+    assertContains "$LINENO" "$tResult" "cvs update: Updating testDir1"
+    assertContains "$LINENO" "$tResult" "? testDir1/file1-3"
+    assertContains "$LINENO" "$tResult" "cvs update: Updating testDir2"
+    assertContains "$LINENO" "$tResult" "? testDir2/file2-1"
+    assertContains "$LINENO" "$tResult" "cvs commit: Examining ."
+    assertContains "$LINENO" "$tResult" "cvs commit: Examining testDir1"
+    assertContains "$LINENO" "$tResult" "cvs commit: Examining testDir2"
+
+    assertTrue "$LINENO" "[ ! -f testDir1/file1-1 ]"
+    assertTrue "$LINENO" "[ ! -f testDir1/file1-2 ]"
+    assertTrue "$LINENO" "[ -f testDir1/file1-3 ]"
+    assertTrue "$LINENO" "[ -f testDir2/file2-1 ]"
+    assertTrue "$LINENO" "[ ! -f testDir2/file-2-2 ]"
+    assertTrue "$LINENO" "[ ! -f testDir2/file2-3 ]"
+
+    assertContains "$LINENO" "$tResult" "Files not removed:"
+    assertContains "$LINENO" "$tResult" "COLLAPSED-README.txt"
+    assertContains "$LINENO" "$tResult" "testDir1/file1-3"
+    assertContains "$LINENO" "$tResult" "testDir2/file2-1"
+
+    ##assertContains "$LINENO $(cat COLLAPSED-README.txt)" "$tResult" "xxxxxxx"
+    ##assertContains "$LINENO $(find $PWD)" "$tResult" "xxxxxxxxxx"
+    ##assertContains "$LINENO: $tResult" "$tResult" "Show Result"
 
     return 0
 } # testOk
+
+# -------------------
+testRmCacheOk()
+{
+    local tResult
+
+    cd $cTestWork/$cTestTop &>/dev/null
+    tResult=$($cBin/$cName -cCv 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "Removing files in ./testDir2/cachefiles"
+    assertTrue "$LINENO" "[ -f COLLAPSED-README.txt ]"
+    assertTrue "$LINENO" "[ ! -f testDir2/cachefiles/videothumbs/foo2.jpg ]"
+    assertTrue "$LINENO" "[ ! -f testDir2/cachefiles/videothumbs/foo1.jpg ]"
+    assertTrue "$LINENO" "[ ! -f testDir2/cachefiles/proxy/bar1.mkv ]"
+    assertTrue "$LINENO" "[ ! -f testDir2/cachefiles/proxy/bar2.mkv ]"
+
+    return 0
+} # testRmCache
+
+# -------------------
+testRmCacheNop()
+{
+    local tResult
+
+    cd $cTestWork/$cTestTop &>/dev/null
+    tResult=$($cBin/$cName -cCvx 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "Removing files in ./testDir2/cachefiles"
+    assertTrue "$LINENO" "[ ! -f COLLAPSED-README.txt ]"
+    assertTrue "$LINENO" "[ -f testDir2/cachefiles/videothumbs/foo2.jpg ]"
+    assertTrue "$LINENO" "[ -f testDir2/cachefiles/videothumbs/foo1.jpg ]"
+    assertTrue "$LINENO" "[ -f testDir2/cachefiles/proxy/bar1.mkv ]"
+    assertTrue "$LINENO" "[ -f testDir2/cachefiles/proxy/bar2.mkv ]"
+
+    return 0
+} # testRmCacheNop
 
 # -------------------
 # This should be the last defined function
@@ -782,19 +868,20 @@ case $tBin in
         if [ "$cBin" = "." ]; then
             cBin=$PWD
         fi
-        cd $cBin
+        cd $cBin &>/dev/null
         cBin=$PWD
-        cd $cCurDir
+        cd $cCurDir &>/dev/null
         ;;
 esac
 
+cName=cvs-collapse.sh
 . $cBin/bash-com.inc
 
 # -------------------
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.7 $'
+cVer='$Revision: 1.10 $'
 fSetGlobals
 
 # -------------------
@@ -802,25 +889,29 @@ fSetGlobals
 if [ $# -eq 0 ]; then
     fError2 -m "Missing options." -l $LINENO
 fi
-while getopts :cnuhH:lT:vx tArg; do
+while getopts :cCnuhH:lT:vx tArg; do
     case $tArg in
-           # Script arguments
-        c) gpContinue=1;;
-        u) gpNoUpdate=1;;
-           # Common arguments
-        h) fUsage long
-           exit 1
-        ;;
-        H) fUsage "$OPTARG"
-           exit 1
-        ;;
+        # Script arguments
+        c) gpContinue=1 ;;
+        C) gpRmCache=1 ;;
+        u) gpNoUpdate=1 ;;
+            # Common arguments
+        h)
+            fUsage long
+            exit 1
+            ;;
+        H)
+            fUsage "$OPTARG"
+            exit 1
+            ;;
         l) gpLog=1 ;;
         v) let ++gpVerbose ;;
-        x|n) let ++gpDebug
-           let ++gpVerbose
-        ;;
+        x | n)
+            ((++gpDebug))
+            ((++gpVerbose))
+            ;;
         T) gpTest="$OPTARG" ;;
-           # Problem arguments
+            # Problem arguments
         :) fError2 -m "Value required for option: -$OPTARG" -l $LINENO ;;
         \?) fError2 -m "Unknown option: $OPTARG" -l $LINENO ;;
     esac
@@ -865,7 +956,7 @@ if ! $gpCvs ci -m Updated; then
     fError2 -m "Fix cvs ci errors." -l $LINENO
 fi
 
-if egrep -q '/0/dummy |/0/Initial' $(find * -name Entries); then
+if grep -Eq '/0/dummy |/0/Initial' $(find * -name Entries); then
     fError2 -m "cvs ci did not version all files." -l $LINENO
 fi
 
@@ -873,14 +964,16 @@ fi
 # Write section
 
 if [ $gpDebug -eq 0 ]; then
-    cat <<EOF >COLLAPSED-README.txt
-$(date)
-Ran: cvs-collapse.sh
-These versioned files can be restored with "cvs update".
+    cat <<EOF >>COLLAPSED-README.txt
+# ====================
+# $(date)
+# Ran: cvs-collapse.sh in $PWD
+# These versioned files can be restored with "cvs update".
 EOF
 fi
 
 # Remove all files found in Entries, that are not directories
+fProcessCache
 fProcessEntries
 
 # -------------------

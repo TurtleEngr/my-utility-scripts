@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.6 2022/03/26 22:07:47 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/obs-project,v 1.7 2022/12/20 00:31:16 bruce Exp $
 
 function fUsage()
 {
@@ -24,7 +24,7 @@ cConfigDir=$PWD/obs-config
 
 # --------------------
 # Validate
-if [[ $# -ne 0  && "x$1" = "x-c" ]]; then
+if [[ $# -ne 0 && "x$1" = "x-c" ]]; then
     mkdir $cConfigDir >/dev/null 2>&1
 fi
 if [ ! -d $cConfigDir ]; then

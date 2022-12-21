@@ -54,7 +54,7 @@ case $tHost in
         tDefLog=~/tmp/w.tmp
         ;;
     uucc-mac*)
-	tDefLog=~/tmp/u.tmp
+        tDefLog=~/tmp/u.tmp
         tEdit=emacs
         tBG=1
         ;;
@@ -112,7 +112,7 @@ if [ $tLogIt -ne 0 ]; then
                 cvs update
                 cp $tFirstFile .
                 cvs ci -m "Updated"
-		cp ${tFirstFile##*/} $tFirstFile
+                cp ${tFirstFile##*/} $tFirstFile
                 cd - 2>/dev/null
             else
                 echo "Not archived. Missing $cMyLogs"

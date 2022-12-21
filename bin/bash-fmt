@@ -56,8 +56,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # expand tabs, remove trailing whitespace, and try formatting
-expand <$cInFile | \
-    sed -E 's/[[:space:]]*$//' | \
+expand <$cInFile |
+    sed -E 's/[[:space:]]*$//' |
     'shfmt' -i 4 -ci -fn >$cOutFile 2>/dev/null
 if [ $? -ne 0 ]; then
     rm -f $cInFile $cOutFile >/dev/null 2>&1
