@@ -1,12 +1,12 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.11 $ $Date: 2022/12/20 00:31:16 $ GMT
+# $Revision: 1.12 $ $Date: 2023/01/04 19:31:46 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
 # need to set cBin
 
-export gpFileList gpTag
+export gpFileList gpTag gpSize
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -89,7 +89,7 @@ Output file contents based on the desired "tags"
 
 =head1 SYNOPSIS
 
-	tag-collect.sh -t pTag [-h] [-H pStyle] [-T pTest]
+	tag-collect.sh -t pTag [-s pSize] [-h] [-H pStyle] [-T pTest]
                        pFiles... >OutputFile
 
 =head1 DESCRIPTION
@@ -106,7 +106,7 @@ See the EXAMPLE section for the example of tags in files.
 
 =over 4
 
-=item B<-t tag>
+=item B<-t pTag>
 
 Look for {pTag} in the list of Files.
 
@@ -114,6 +114,10 @@ More than one -t option can be used to select any number of
 tags. There is an implied "or" for multiple -t tags. If you want an
 "and", then you will need to repeat tag-collect.sh on the OutputFile
 for the tags you also want for the items.
+
+=item B<-s pSize>
+
+Maximim number of lines after a tag. Default: 1000
 
 =item B<-h>
 
@@ -270,7 +274,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.11 $ $Date: 2022/12/20 00:31:16 $ GMT 
+$Revision: 1.12 $ $Date: 2023/01/04 19:31:46 $ GMT 
 
 =cut
 EOF
@@ -319,6 +323,7 @@ fSetGlobals()
     # Put your globals here
     gpFileList=""
     gpTag=""
+    gpSize=1000
 
     # Define the Required and the Optional progs, space separated
     fComCheckDeps "cat" "cat"
@@ -365,6 +370,14 @@ fValidate()
         fError2 -m "Missing -t option" -l $LINENO
     fi
 
+    echo "$gpSize" | grep -q '^[0-9][0-9]*$'
+    if [ $? -ne 0 ]; then
+        fError2 -m "Invalid pSize: $gpSize" -l $LINENO
+    fi
+    if [ $gpSize -le 1 ]; then
+        fError2 -m "Invalid pSize: $gpSize" -l $LINENO
+    fi
+
     return 0
 
     cat <<EOF >/dev/null
@@ -386,7 +399,7 @@ fGetChunk()
     local tCount=0
     local tFile
 
-    while read -r; do
+    grep -A $gpSize "{$pTag}" | while read -r; do
         echo "$REPLY" | grep -q "{"
         if [[ $? -ne 0 && -n "$tInTag" ]]; then
             echo "$REPLY" >>${cTmpF}-$tCount.tmp
@@ -703,7 +716,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.11 $'
+cVer='$Revision: 1.12 $'
 fSetGlobals
 
 # -------------------
@@ -711,7 +724,7 @@ fSetGlobals
 if [ $# -eq 0 ]; then
     fError2 -m "Missing options." -l $LINENO
 fi
-while getopts :t:hH:T: tArg; do
+while getopts :t:s:hH:T: tArg; do
     case $tArg in
         # Script arguments
         t) # Don't add dups
@@ -719,6 +732,7 @@ while getopts :t:hH:T: tArg; do
                 gpTag="$gpTag $OPTARG"
             fi
             ;;
+        s) gpSize=$OPTARG ;;
         # Common arguments
         h) fUsage long ;;
         H) fUsage "$OPTARG" ;;
