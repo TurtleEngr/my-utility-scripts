@@ -3,7 +3,7 @@
 if [ $# -ne 3 ]; then
     cat <<EOF
 Usage:
-	cvs-html-diff -rN.N File.html DiffFile.html
+        cvs-html-diff -rN.N File.html DiffFile.html
 
 This script generates ins and del tags for the differences between -r
 N.N version of File and the current file.  This works best for xhtml
@@ -36,31 +36,31 @@ cvs diff $pRev -abBwi --ifdef=NeW $pFile >$tTmpFile
 
 awk '
 /^#ifdef NeW/ {
-	Ins = 1
-	print "<ins>"
-	next
+        Ins = 1
+        print "<ins>"
+        next
 }
 /^#endif / && Ins {
-	Ins = 0
-	print "</ins>"
-	next
+        Ins = 0
+        print "</ins>"
+        next
 }
 /^#ifndef NeW/ {
-	Del = 1
-	print "<del>"
-	next
+        Del = 1
+        print "<del>"
+        next
 }
 /^#else / && Del {
-	Del = 0
-	print "</del>"
-	Ins = 1
-	print "<ins>"
-	next
+        Del = 0
+        print "</del>"
+        Ins = 1
+        print "<ins>"
+        next
 }
 /^#endif / && Del {
-	Del = 0
-	print "</del>"
-	next
+        Del = 0
+        print "</del>"
+        next
 }
 {print $0}
 ' <$tTmpFile >$pDiffFile

@@ -2,8 +2,8 @@
 # per-dev/bin/ed
 
 # Usage:
-#	ed -l
-#	ed -d
+#       ed -l
+#       ed -d
 
 # Use: ~/bin/journal2org.sh to convert *.tmp date format to org format
 
@@ -24,11 +24,11 @@ tEdit='emacs -nw'
 case $tHost in
     AN00608453 | AN00622379)
         tDefLog=~/tmp/e.tmp
-        #	if [ -f /usr/bin/emacs-w32.exe ]; then
-        #	    # emacs-w32 does not load ~/.abbrev_defs
-        #	    tEdit="run emacs-w32 -Q"
-        #	    tBG=1
-        #	fi
+        #       if [ -f /usr/bin/emacs-w32.exe ]; then
+        #           # emacs-w32 does not load ~/.abbrev_defs
+        #           tEdit="run emacs-w32 -Q"
+        #           tBG=1
+        #       fi
         ;;
     ec9)
         tDefLog=~/tmp/e.tmp
@@ -89,7 +89,7 @@ if [ $# -ne 0 ]; then
 fi
 
 #if [ "$tFirstFile" != "${tFirstFile%.txt}" ]; then
-#	tLogIt=1
+#       tLogIt=1
 #fi
 
 if [ $tLogIt -ne 0 ]; then

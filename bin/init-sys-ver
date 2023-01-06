@@ -1,5 +1,5 @@
 #!/bin/bash -x
-# $Id: init-sys-ver,v 1.4 2021/10/26 19:26:10 bruce Exp $
+# $Id: init-sys-ver,v 1.5 2023/01/06 18:05:14 bruce Exp $
 # Use this script the first time a server is setup.  It will put the
 # most common config and other server files under version control.
 
@@ -13,10 +13,10 @@ fi
 
 echo >>/etc/CHANGES
 #if [ ! -L /opt ]; then
-#	rmdir /opt
+#       rmdir /opt
 #fi
 #if [ ! -d /opt ]; then
-#	ln -s /usr/local /opt
+#       ln -s /usr/local /opt
 #fi
 
 if [ ! -f /etc/anaconda-ks.cfg ]; then

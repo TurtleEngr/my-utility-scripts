@@ -5,13 +5,13 @@ function fUsage()
 {
     cat <<EOF
 Usage:
-	s3-lsg [-t] [-l N] [-c Config] [-p] bucket[/dir]
+        s3-lsg [-t] [-l N] [-c Config] [-p] bucket[/dir]
 
 Options:
-	-t - use tabs for the levels, default: use '   |'
-	-l N - only show N levels deep, default: 100
-	-c Config - use Config file, default: $HOME/.s3cfg
-	-p - use the previous s3 bucket file name
+        -t - use tabs for the levels, default: use '   |'
+        -l N - only show N levels deep, default: 100
+        -c Config - use Config file, default: $HOME/.s3cfg
+        -p - use the previous s3 bucket file name
 EOF
     exit
 } # fUsage
@@ -32,7 +32,7 @@ cTmp=/tmp/s3-lsg
 # Get options
 
 pDir=""
-pTab="s/	/   |/g"
+pTab="s/        /   |/g"
 pLevel=100
 pConfig=$HOME/.s3cfg
 pPrev=0
@@ -103,18 +103,18 @@ for d in $pDir; do
     done | sort -u >$cTmp.2.tmp
 
     cat $cTmp.2.tmp | $cAWK -v pLevel=$pLevel '
-		BEGIN { getline }
-		{
-			level = gsub("[^/]*/", "", $1)
-			if (level > pLevel) {
-				next
-			}
-			for (i=2; i<=level; i++) {
-				printf("\t")
-			}
-			print "\t" $1 "/"
-		}
-	' | sed "$pTab"
+                BEGIN { getline }
+                {
+                        level = gsub("[^/]*/", "", $1)
+                        if (level > pLevel) {
+                                next
+                        }
+                        for (i=2; i<=level; i++) {
+                                printf("\t")
+                        }
+                        print "\t" $1 "/"
+                }
+        ' | sed "$pTab"
 done
 
 rm $cTmp.2.tmp

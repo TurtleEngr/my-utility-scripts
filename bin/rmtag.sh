@@ -3,8 +3,8 @@
 if [ $# -ne 3 -a $# -ne 1 ]; then
     cat <<EOF
 Usage:
-	rmtag.sh TAG INFILE OUTFILE
-	rmtag.sh TAG <INFILE >OUTFILE
+        rmtag.sh TAG INFILE OUTFILE
+        rmtag.sh TAG <INFILE >OUTFILE
 EOF
 fi
 
@@ -28,7 +28,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 >
 <!--
 Usage:
-	xsltproc -o OUTFILE /tmp/rm-tag.xsl INFILE
+        xsltproc -o OUTFILE /tmp/rm-tag.xsl INFILE
 -->
 
 <xsl:param name="rmtag" select="hide"/>

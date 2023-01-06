@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/doc-fmt,v $
-# $Revision: 1.1 $ $Date: 2023/01/06 16:27:50 $ GMT
+# $Revision: 1.2 $ $Date: 2023/01/06 18:05:13 $ GMT
 
 set -u
 
@@ -130,7 +130,7 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.1 $ $Date: 2023/01/06 16:27:50 $ GMT 
+$Revision: 1.2 $ $Date: 2023/01/06 18:05:13 $ GMT
 
 =cut
 EOF
@@ -311,7 +311,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.1 $'
+cVer='$Revision: 1.2 $'
 fSetGlobals
 
 # -------------------
@@ -374,7 +374,7 @@ for i in $gpFileList; do
     fi
 
     tGen=0
-    
+
     if grep -q '^=pod$' $i; then
         fLog2 -p notice -m "Generating docs for \"$i\"" -l $LINENO
         pod2text <$i >doc/$i.txt

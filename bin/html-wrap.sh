@@ -28,13 +28,13 @@ pre {
   font-family: Courier, sanserif;
 }
 ins {
-	color: green;
+        color: green;
 }
 del {
-	color: red;
+        color: red;
 }
 b {
-	color: blue;
+        color: blue;
 }
 // -->
 </style>

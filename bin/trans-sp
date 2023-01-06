@@ -9,28 +9,28 @@ function fRename()
     local tDup
 
     tNew=$(echo $pOld | perl -ne '
-		chomp;
-		s/:/-/g;
-		tr/-_.a-zA-Z0-9/_/cs;
-		s/_+/_/g;
-		s/-+/-/g;
-		s/\._/_/g;
-		s/_\./_/g;
-		s/\.-/-/g;
-		s/-\./-/g;
-		s/_+/_/g;
-		s/-+/-/g;
-		s/_-_/-/g;
-		s/-_-/_/g;
-		s/_-/_/g;
-		s/-_/-/g;
-		s/_$//;
-		s/-$//;
-		s/\.$//;
-		s/^_+//;
-		s/^-+//;
-		print $_;
-	')
+                chomp;
+                s/:/-/g;
+                tr/-_.a-zA-Z0-9/_/cs;
+                s/_+/_/g;
+                s/-+/-/g;
+                s/\._/_/g;
+                s/_\./_/g;
+                s/\.-/-/g;
+                s/-\./-/g;
+                s/_+/_/g;
+                s/-+/-/g;
+                s/_-_/-/g;
+                s/-_-/_/g;
+                s/_-/_/g;
+                s/-_/-/g;
+                s/_$//;
+                s/-$//;
+                s/\.$//;
+                s/^_+//;
+                s/^-+//;
+                print $_;
+        ')
 
     if [ "$pOld" != "$tNew" ]; then
         tDup=''
@@ -53,13 +53,13 @@ Translate all file/dir names with special char to use '_'
 Valid file/dir names [_-.a-zA-Z0-9]
 
 Translate only files and dirs in current dir:
- 	trans-sp -c
+        trans-sp -c
 
 Translate all files and dirs in current dir on down:
- 	trans-sp -a
+        trans-sp -a
 
 Translate only the one file listed:
- 	trans-sp -f FILENAME
+        trans-sp -f FILENAME
 EOF
     exit
 fi

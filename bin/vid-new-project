@@ -3,7 +3,7 @@
 if [ $# -eq 0 -o "x$1" = "x-h" ]; then
     cat <<EOF
 Usage:
-	vid-new-project ProjectName
+        vid-new-project ProjectName
 EOF
     exit 1
 fi
@@ -37,8 +37,8 @@ if [ -d /home/video/$gpProjName/CVS ]; then
         echo "Use: cvs update"
     else
         cat <<EOF
-	But $CVSROOT/$gpProjName not found.
-	Mount the disk with "$gpProjName" project, then use: cvs update.
+        But $CVSROOT/$gpProjName not found.
+        Mount the disk with "$gpProjName" project, then use: cvs update.
 EOF
     fi
     exit 1

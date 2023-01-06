@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/v4l2loopback-init,v 1.2 2021/10/26 19:26:12 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/v4l2loopback-init,v 1.3 2023/01/06 18:05:15 bruce Exp $
 
 # Install this script:
 #   Put it in /etc/init.d
@@ -17,8 +17,8 @@
 # Default-Stop:      0 1 6
 # Short-Description: video loopback /dev/video4 OBSCam
 # Description:       This creates a virtual camera OBS will output to
-# 		     so that other programs, such as Zoom, can use the
-#		     OBS output as a camera input.
+#                    so that other programs, such as Zoom, can use the
+#                    OBS output as a camera input.
 ### END INIT INFO
 
 # --------------------

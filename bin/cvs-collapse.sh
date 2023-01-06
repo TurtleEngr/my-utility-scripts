@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/cvs-collapse.sh,v $
-# $Revision: 1.10 $ $Date: 2022/12/21 01:43:03 $ GMT
+# $Revision: 1.11 $ $Date: 2023/01/06 18:05:13 $ GMT
 
 set -u
 export cgCacheDir
@@ -295,7 +295,7 @@ TurtleEngr
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.10 $ $Date: 2022/12/21 01:43:03 $ GMT 
+$Revision: 1.11 $ $Date: 2023/01/06 18:05:13 $ GMT
 
 =cut
 EOF
@@ -881,7 +881,7 @@ cName=cvs-collapse.sh
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.10 $'
+cVer='$Revision: 1.11 $'
 fSetGlobals
 
 # -------------------

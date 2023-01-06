@@ -7,7 +7,7 @@ fUsage()
     cat <<EOF
 
 Usage
-	getmanifest.sh [File]
+        getmanifest.sh [File]
 
 The system's manifest will be output to File.
 If no File is specified, it will be output to /var/log/server-manifest.xml
@@ -23,24 +23,24 @@ EOF
 fCmd()
 {
     # Input:
-    # 	$1 - tag
-    # 	$2 - command
-    #	$3 - file (optional)
+    #   $1 - tag
+    #   $2 - command
+    #   $3 - file (optional)
     # Output:
-    #	stdout, stderr
+    #   stdout, stderr
     local pTag=$1
     local pCmd=$2
     local pFile=$3
 
     local tProg=$(echo $pCmd | awk '{print $1}')
     local tCmd=$(echo "$pCmd" | sed '
-		s/&/\&amp;/g
-		s/"/\&quot;/g
-		s/</\&lt;/g
-		s/>/\&gt;/g
-	' | sed "
-		s/'/\&apos;/g
-	")
+                s/&/\&amp;/g
+                s/"/\&quot;/g
+                s/</\&lt;/g
+                s/>/\&gt;/g
+        ' | sed "
+                s/'/\&apos;/g
+        ")
 
     if [ $gCheckExclude -ne 0 ]; then
         if grep -q $pTag $gExcludeTag; then
@@ -69,13 +69,13 @@ fCmd()
     fi
 
     bash -c "$pCmd 2>&1" | sed '
-		s/&/\&amp;/g
-		s/"/\&quot;/g
-		s/</\&lt;/g
-		s/>/\&gt;/g
-	    ' | sed "
-		s/'/\&apos;/g
-	" >>$gOut
+                s/&/\&amp;/g
+                s/"/\&quot;/g
+                s/</\&lt;/g
+                s/>/\&gt;/g
+            ' | sed "
+                s/'/\&apos;/g
+        " >>$gOut
     echo "  </$pTag>" >>$gOut
 } # fCmd
 

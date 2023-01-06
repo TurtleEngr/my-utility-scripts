@@ -3,7 +3,7 @@
 if [ $# -ne 0 ]; then
     cat <<EOF
 Usage:
-	get-video-notes <FILE.kdenlive >FILE.html
+        get-video-notes <FILE.kdenlive >FILE.html
 EOF
     exit 1
 fi

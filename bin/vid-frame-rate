@@ -3,8 +3,8 @@
 if [ $# -eq 0 ]; then
     cat <<EOF
 Usage:
-	vid-frame-rate FILES...
-	Returns: Frame rate of a video
+        vid-frame-rate FILES...
+        Returns: Frame rate of a video
 EOF
     exit 1
 fi

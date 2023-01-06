@@ -3,9 +3,9 @@
 if [ $# -eq 0 ]; then
     cat <<EOF
 Usage:
-	vid-make-timestamp FILE.mp4
+        vid-make-timestamp FILE.mp4
 
-	Output: FILE-timestamp.mp4
+        Output: FILE-timestamp.mp4
 EOF
     exit 1
 fi

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.11 2022/10/17 23:38:38 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/rsnapshot-monitor,v 1.12 2023/01/06 18:05:15 bruce Exp $
 # Put this in /usr/local/sbin/rsnapshot-monitor
 # Run this with cron.d/monitor
 # See also rc.local, check-mail
@@ -215,7 +215,7 @@ function fSpeedTest()
         gOKMsg="$gOKMsg\n\n OK - Download/Upload speeds are OK"
     else
         gErrMsg="$gErrMsg\n\n Problem - Download/Upload speeds are slow"
-        #		let gErr=gErr+1
+        #               let gErr=gErr+1
     fi
 } # fSpeedTest
 

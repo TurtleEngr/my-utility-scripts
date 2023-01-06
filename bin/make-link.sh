@@ -1,57 +1,57 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/make-link.sh,v 1.6 2021/10/26 19:26:10 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/make-link.sh,v 1.7 2023/01/06 18:05:14 bruce Exp $
 
 if [ $# -ne 0 ]; then
     cat <<EOF
 Usage:
-	make-link.sh <InFile.dat >OutFile.html
+        make-link.sh <InFile.dat >OutFile.html
 
 --------------------
 Syntax for InFile:
 
 # comments start with a #,
-	comments and blank lines are ignored
+        comments and blank lines are ignored
 
 Start
-	start a link record
+        start a link record
 
 D [YYYY-MM-DD]
-	Default: Today
-	
+        Default: Today
+
 L [Link]
-	Full URL.  Required
-	
+        Full URL.  Required
+
 T [Title]
-	URL title, all on one line. Required
-	
+        URL title, all on one line. Required
+
 S [N]
-	Number of stars. Default: 1
+        Number of stars. Default: 1
 
 Type [TYPE]
-	Follow by one of:
-		video, ted, article, site, tool, book, podcast, product
-	Default: site
-	video, if youtube in link
-	ted, if ted in link or in title
-	book, if amazon.com in link
-	article, if nytimes.com in link
+        Follow by one of:
+                video, ted, article, site, tool, book, podcast, product
+        Default: site
+        video, if youtube in link
+        ted, if ted in link or in title
+        book, if amazon.com in link
+        article, if nytimes.com in link
 
 Tag [Name, Name, ...]
 
 Cite [Name]
 
 DD
-	Start a DD section. Must be last, if used.
-	Can, and should include html.
-	
-	# Create links with AL, AT
-	AL https://www.youtube.com/watch?v=Snn1k_qEx20
-	AT Grand tour of the International Space Station with Drew and Luca
+        Start a DD section. Must be last, if used.
+        Can, and should include html.
+
+        # Create links with AL, AT
+        AL https://www.youtube.com/watch?v=Snn1k_qEx20
+        AT Grand tour of the International Space Station with Drew and Luca
 End
-	End a record. Required
+        End a record. Required
 
 DONE
-	Stop processing the rest of the file.
+        Stop processing the rest of the file.
 
 --------------------
 # Note: you should put the records into reverse date order (newest first).
@@ -76,7 +76,7 @@ When done, look for ERROR in OutFile.html.
 
 tidyxhtml OutFile.html
 
-	alias tidyxhtml='tidy -m -q -i -w 78 -asxhtml --break-before-br yes --indent-attributes yes --indent-spaces 2 --tidy-mark no --vertical-space no'
+        alias tidyxhtml='tidy -m -q -i -w 78 -asxhtml --break-before-br yes --indent-attributes yes --indent-spaces 2 --tidy-mark no --vertical-space no'
 
 firefox OutFile.html
 
@@ -102,145 +102,145 @@ NF == 0 { next }
 /DONE/ { exit }
 
 /^[Ss]tart$/ {
-	tDate = pDate
-	tTime = pTime
-	tLink = "ERROR"
-	tTitle = "ERROR"
-	tStar = 1
-	tType = "site"
-	tTag = ""
-	tCite = ""
-	tDDTitle = ""
-	tDDLink = ""
-	print("<dt>")
-	tInLink = 0
-	next
+        tDate = pDate
+        tTime = pTime
+        tLink = "ERROR"
+        tTitle = "ERROR"
+        tStar = 1
+        tType = "site"
+        tTag = ""
+        tCite = ""
+        tDDTitle = ""
+        tDDLink = ""
+        print("<dt>")
+        tInLink = 0
+        next
 }
 
 /^[Dd]ate / || /^D / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tDate = $0
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tDate = $0
+        next
 }
 
 /^[Ll]ink / || /^L / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tLink = $0
-	if (match(tLink,/youtube.com/)) {
-		tType = "video"
-	}
-	if (match(tLink,/youtu.be/)) {
-		tType = "video"
-	}
-	if (match(tLink,/ted/)) {
-		tType = "video"
-	}
-	if (match(tLink,/amazon.com/)) {
-		tType = "book"
-	}
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tLink = $0
+        if (match(tLink,/youtube.com/)) {
+                tType = "video"
+        }
+        if (match(tLink,/youtu.be/)) {
+                tType = "video"
+        }
+        if (match(tLink,/ted/)) {
+                tType = "video"
+        }
+        if (match(tLink,/amazon.com/)) {
+                tType = "book"
+        }
+        next
 }
 
 /^[Tt]itle / || /^T / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tTitle = $0
-	if (match(tTitle,/[Tt][Ee][Dd]/)) {
-		tType = "ted"
-	}
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tTitle = $0
+        if (match(tTitle,/[Tt][Ee][Dd]/)) {
+                tType = "ted"
+        }
+        next
 }
 
 /^[Ss]tar / || /^S / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tStar = $0
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tStar = $0
+        next
 }
 
 /^[Tt]ype/ || /^TY / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tType = $0
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tType = $0
+        next
 }
 
 /^[Tt]ag / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tTag = $0
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tTag = $0
+        next
 }
 
 /^[Cc]ite / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tCite = $0
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tCite = $0
+        next
 }
 
 /^ALink / || /^AL / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tDDLink = $0
-	tDDTitle = ""
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tDDLink = $0
+        tDDTitle = ""
+        next
 }
 
 /^ATitle / || /^AT / {
-	$1 = ""
-	sub(/^ /,"",$0)
-	tDDTitle = $0
-	print("<a href=\"" tDDLink "\" target=\"_blank\">" tDDTitle "</a>")
-	tDDLink = ""
-	tDDTitle = ""
-	next
+        $1 = ""
+        sub(/^ /,"",$0)
+        tDDTitle = $0
+        print("<a href=\"" tDDLink "\" target=\"_blank\">" tDDTitle "</a>")
+        tDDLink = ""
+        tDDTitle = ""
+        next
 }
 
 /^DD/ {
-	tInLink = 1
-	tDateId = tDate "_" tTime "_" ++N
-	print("<a name=\"" tDateId "\"")
-	print("id=\"" tDateId "\"")
-	print("href=\"#" tDateId "\">")
-	print(tDate)
-	print("</a> - <a href=\"" tLink "\" target=\"_blank\">")
-	print(tTitle)
-	print("</a> - " tType)
-	for (i=1; i<=tStar; ++i) {
-		print("<img src=\"image/star2.jpg\" alt=\"star\"/>")
-	}
-	print("</dt>")
-	print("<dd>")
-	if (tTag != "") {
-		print("<p><b>Tag:</b>", tTag, "</p>")
-	}
-	if (tCite != "") {
-		print("<p><b>CiteTag:</b>", tCite, "</p>")
-	}
-	next
+        tInLink = 1
+        tDateId = tDate "_" tTime "_" ++N
+        print("<a name=\"" tDateId "\"")
+        print("id=\"" tDateId "\"")
+        print("href=\"#" tDateId "\">")
+        print(tDate)
+        print("</a> - <a href=\"" tLink "\" target=\"_blank\">")
+        print(tTitle)
+        print("</a> - " tType)
+        for (i=1; i<=tStar; ++i) {
+                print("<img src=\"image/star2.jpg\" alt=\"star\"/>")
+        }
+        print("</dt>")
+        print("<dd>")
+        if (tTag != "") {
+                print("<p><b>Tag:</b>", tTag, "</p>")
+        }
+        if (tCite != "") {
+                print("<p><b>CiteTag:</b>", tCite, "</p>")
+        }
+        next
 }
 
 /^[Ee]nd$/ {
-	print("</dd>")
-	print("")
+        print("</dd>")
+        print("")
 
-	if (! tInLink) {
-		print("ERROR: DD not found, above line:", FNR)
-	}
-	tInLink = 0
-	next
+        if (! tInLink) {
+                print("ERROR: DD not found, above line:", FNR)
+        }
+        tInLink = 0
+        next
 }
 
 tInLink {
-	print($0)
-	next
+        print($0)
+        next
 }
 
 {
-	print("ERROR: on line: " FNR, $0)
+        print("ERROR: on line: " FNR, $0)
 }
 EOF
 

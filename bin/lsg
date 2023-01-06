@@ -7,7 +7,7 @@ if [ $# -ne 0 ]; then
     if [ ".$1" = ".-h" ]; then
         cat <<EOF
 Usage:
-	lsg [-d] [-L N] [-C] [-T] [dir...]
+        lsg [-d] [-L N] [-C] [-T] [dir...]
 -d - dir only
 -L N - limit to N levels
 -C - clean, no CVS, no *~, no tmp, and no *.tmp files. And no quotes (not imp)

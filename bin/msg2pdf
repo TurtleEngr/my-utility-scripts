@@ -10,15 +10,15 @@ if [ ! -f ~/tmp/message.eml ]; then
 fi
 
 awk '
-	/Content-Disposition:/ {
-		getline
-		Found = 1
-		next
-	}
-	Found == 0 { next }
-	NF == 0 { next }
-	/--Boundary/ { next }
-	{ print }
+        /Content-Disposition:/ {
+                getline
+                Found = 1
+                next
+        }
+        Found == 0 { next }
+        NF == 0 { next }
+        /--Boundary/ { next }
+        { print }
 ' <~/tmp/message.eml >~/tmp/message.tmp
 
 #dosunix -u ~/tmp/message.tmp

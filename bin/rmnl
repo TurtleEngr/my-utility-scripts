@@ -1,8 +1,8 @@
 #!/bin/bash
 
 awk '
-	/^[ \t]*$/ {
-		next
-	}
-	{ print $0 }
+        /^[ \t]*$/ {
+                next
+        }
+        { print $0 }
 '

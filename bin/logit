@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.9 2022/12/20 00:31:16 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logit,v 1.10 2023/01/06 18:05:14 bruce Exp $
 
 # --------------------
 fUsage()
@@ -23,16 +23,16 @@ Keep a log of your activity.
 
 =head1 SYNOPSIS
 
-	logit		# usage help
-	logit -h   	# long help
+        logit           # usage help
+        logit -h        # long help
 
-	logit [-d pDir] [-s "pDate"] [start|begin] [pText]
-	logit [-d pDir] [-s "pDate"] [stop|done|end|finish] [pText]
-	logit [-d pDir] [-s "pDate"] pText
+        logit [-d pDir] [-s "pDate"] [start|begin] [pText]
+        logit [-d pDir] [-s "pDate"] [stop|done|end|finish] [pText]
+        logit [-d pDir] [-s "pDate"] pText
 
-	logit -m  	# merge log files
-	logit -r 	# report (after merge)
-	
+        logit -m        # merge log files
+        logit -r        # report (after merge)
+
 =head1 DESCRIPTION
 
 logit is a simpler version of logtime. It will log pText to
@@ -59,7 +59,7 @@ start time.  Default: now
 Merge all the logtime.csv files found in current dir and below. The
 lines will be sorted and duplicates removed.  The output will be saved
 in $PWD/logtime.csv
-	    
+
 =item B<-r>
 
 Output a summary report. There needs to be an equal number of "start"
@@ -67,8 +67,8 @@ an "stop" logs.
 
 Report output format:
 
-	,Text
-	ElapsedTime,StartText,StopText
+        ,Text
+        ElapsedTime,StartText,StopText
 
 =item B<-h>
 
@@ -85,53 +85,53 @@ This help.
 
 =head1 EXAMPLES
 
-	cd project/beach
-	logit start project
-	# Creates: project/beach/logtime.csv
+        cd project/beach
+        logit start project
+        # Creates: project/beach/logtime.csv
 
-	cd project/beach/edit
-	# Run editor
-	logit fixed format
-	# Creates: project/beach/edit/logtime.csv
+        cd project/beach/edit
+        # Run editor
+        logit fixed format
+        # Creates: project/beach/edit/logtime.csv
 
-	cd ../render
-	# Add forgotten start time:
-	logit -s 7:00pm start editing
-	# Creates: project/beach/render/logtime.csv
-	logit stop editing
-	logit start rendering
-	sleep 300
-	logit stop  rendering
-	logit stop project
+        cd ../render
+        # Add forgotten start time:
+        logit -s 7:00pm start editing
+        # Creates: project/beach/render/logtime.csv
+        logit stop editing
+        logit start rendering
+        sleep 300
+        logit stop  rendering
+        logit stop project
 
-	cd ..
-	logit -m
-	# Creates: project/beach/logtime.csv
-	# Merges: project/beach/logtime.csv,
-	# project/beach/edit/logtime.csv,
-	# project/beach/render/logtime.csv
+        cd ..
+        logit -m
+        # Creates: project/beach/logtime.csv
+        # Merges: project/beach/logtime.csv,
+        # project/beach/edit/logtime.csv,
+        # project/beach/render/logtime.csv
 
-	logit -r
+        logit -r
 
 =head1 ENVIRONMENT
 
-	gpLogDate=${$gpLogDate:-now}	# -s
-	gpLogDir=${gpLogDir:-$PWD}	# -d
-	gpLogFile=${gpLogFile:-logtime.csv}
+        gpLogDate=${$gpLogDate:-now}    # -s
+        gpLogDir=${gpLogDir:-$PWD}      # -d
+        gpLogFile=${gpLogFile:-logtime.csv}
 
 =head1 FILES
 
-	logtime.csv
+        logtime.csv
 
 =head2 Format of logtime.csv
-	
-	YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
-	1          2        3  4   5    6   7
+
+        YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
+        1          2        3  4   5    6   7
 
 =head1 SEE ALSO
 
-	logtime
-	timelog.sh
+        logtime
+        timelog.sh
 
 =head1 NOTES
 
@@ -251,7 +251,7 @@ BEGIN {
 {
     if ($1 != LastDate) {
         print $1 ",,\"----------\""
-	LastDate = $1
+        LastDate = $1
     }
 }
 
@@ -277,7 +277,7 @@ BEGIN {
 {
     if (! InStart)
         gSec = $4
-	gMsg = $7
+        gMsg = $7
     fi
     print ",," $7
     next

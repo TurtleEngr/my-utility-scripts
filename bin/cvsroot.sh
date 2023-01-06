@@ -5,44 +5,44 @@ function fUsage()
 {
     more <<EOF
 Usage:
-	. cvsroot.sh
+        . cvsroot.sh
 
 Description:
-	All of the cvsroot.rc files that are found on the system will
-	be used to collect the list of cvsroots that you can choose
-	from.
+        All of the cvsroot.rc files that are found on the system will
+        be used to collect the list of cvsroots that you can choose
+        from.
 
-	The directory part of the :pserver: and :ext: strings will
-	be checked to see it those directories exist locally, so that
-	you can set your CVSROOT to a one of the local directories.
+        The directory part of the :pserver: and :ext: strings will
+        be checked to see it those directories exist locally, so that
+        you can set your CVSROOT to a one of the local directories.
 
 cvsroot.rc files that will be used, if found:
-	$cRCFileList
+        $cRCFileList
 
 Local CVS directories that will be checked for CVSROOT:
-	$cCVSDirList
+        $cCVSDirList
 
 Environment Variables:
-	LOGNAME
-	CVSROOT
-	CVS_RSH (if not already set, set to ssh)
-	CVSUser (set to LOGNAME, if not set)
-	CVSUMASK (if not already set)
-	RSYNC_RSH (if not already set, set to ssh)
-	RSYNC_OPT (if not already set)
+        LOGNAME
+        CVSROOT
+        CVS_RSH (if not already set, set to ssh)
+        CVSUser (set to LOGNAME, if not set)
+        CVSUMASK (if not already set)
+        RSYNC_RSH (if not already set, set to ssh)
+        RSYNC_OPT (if not already set)
 
 Format of cvsroot.rc files:
-	# Blank lines and lines beginning with # are ignored.
-	cvsroot-string
-	local-dir
+        # Blank lines and lines beginning with # are ignored.
+        cvsroot-string
+        local-dir
 
 Example cvsroot.rc:
-	/cvs
-	:ext:\$LOGNAME@redwood.sfo.sychron.net:/data/cvs/redwood.cvs
-	:ext:\$LOGNAME@redwood.sfo.sychron.net:/data/cvs/tool.cvs
+        /cvs
+        :ext:\$LOGNAME@redwood.sfo.sychron.net:/data/cvs/redwood.cvs
+        :ext:\$LOGNAME@redwood.sfo.sychron.net:/data/cvs/tool.cvs
 
 Defects
-	The script only works well with bash.
+        The script only works well with bash.
 
 TBD
         * Create CVSUser place holder in .cvsroo.rc. Replace it with the
@@ -76,13 +76,13 @@ fi
 tFile1=/tmp/cvsroot.1.$$
 tFile2=/tmp/cvsroot.2.$$
 cat $cRCFileList 2>/dev/null | $awk '
-	NF == 0 { next }
-	$1 == "#" { next }
-	{ print $0 }
-	$1 ~ /:/ {
-		sub(/.*:/,"",$0)
-		print $0
-	}
+        NF == 0 { next }
+        $1 == "#" { next }
+        { print $0 }
+        $1 ~ /:/ {
+                sub(/.*:/,"",$0)
+                print $0
+        }
 ' 2>/dev/null >$tFile1
 
 for i in $cCVSDirList $(cat $tFile1 2>/dev/null); do
@@ -113,12 +113,12 @@ sort -fu $tFile1 >$tFile2
 
 cat <<ENDHERE
 Current Settings:
-	CVSROOT=$CVSROOT
-	CVS_RSH=$CVS_RSH
-	CVSUser=$CVSUser
-	CVSUMASK=$CVSUMASK
-	RSYNC_OPT=$RSYNC_OPT
-	RSYNC_RSH=$RSYNC_RSH
+        CVSROOT=$CVSROOT
+        CVS_RSH=$CVS_RSH
+        CVSUser=$CVSUser
+        CVSUMASK=$CVSUMASK
+        RSYNC_OPT=$RSYNC_OPT
+        RSYNC_RSH=$RSYNC_RSH
 ENDHERE
 
 PS3="Select a CVSROOT (by number) "

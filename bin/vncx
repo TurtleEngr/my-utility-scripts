@@ -46,12 +46,12 @@ else
         help | -h | --help)
             cat <<EOF
 Usage:
-	vnc help
-	vnc start
-	vnc stop
-	vnc passwd
-	vnc server:port
-	vnc
+        vnc help
+        vnc start
+        vnc stop
+        vnc passwd
+        vnc server:port
+        vnc
 EOF
             ;;
         start)

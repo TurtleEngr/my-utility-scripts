@@ -2,9 +2,9 @@
 
 if [ $# -eq 0 ]; then
     cat <<EOF
-date-id -s	# y-m-d_h-m-s
-date-id -m	# y-m-d_h-m
-date-id -d	# y-m-d
+date-id -s      # y-m-d_h-m-s
+date-id -m      # y-m-d_h-m
+date-id -d      # y-m-d
 EOF
     exit 1
 fi
