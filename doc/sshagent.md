@@ -9,7 +9,7 @@ sshagent - setup the ssh agent process
     cgAgentOwner - user name. Default: $USER
 
     For online help page, go to:
-    https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md
+    L<github|https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md>
 
 # DESCRIPTION
 
@@ -245,4 +245,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.14 $
+$Revision: 1.13 $
