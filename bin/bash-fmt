@@ -1,57 +1,80 @@
 #!/bin/bash
 
-if [ $# -ne 0 ]; then
-    cat <<\EOF
+function fUsage()
+{
+    cat <<\EOF | more 1>&2
+Usage:
+    bash-fmt <pInFile >pOutFile
+        or
+    bash-fmt pFile
+        or
+    bash-fmt -h
 
-This script has been designed to work as a "git clean filter" Read
-from stdin and output to stdout. Expand tabs and remove trailing
-whitespace.  If problems, it exits with an error and outputs nothing,
-so check!
+Description:
 
-To use as a "git clean filter"
+    With no argument this script will work as a "git clean filter"
+    Read from stdin and output to stdout. Expand tabs, remove trailing
+    whitespace, and format with shfmt.  If problems, it exits with an
+    error and outputs nothing, so check!
+
+To use as a "git clean filter":
 
     In ~/.gitconfig add:
         [filter "bash-fmt"]
-	    clean = bash-fmt
+            clean = bash-fmt
 
     In the top repo's dir add .gitattributes
     For example:
-        *.sh	filter=bash-fmt
-        *.inc	filter=bash-fmt
+        *.sh    filter=bash-fmt
+        *.inc   filter=bash-fmt
 
-To use as "safe" script:
+To format a file:
 
-    for tFile in $*; do
-        # optional: leave a backup copy
-        cp -pf --backup=t $tFile .$tFile.bak
-        # this is done to preserve permissions
-        cp -pf $tFile .$tFile.tmp
-        if bash-fmt <$tFile >.$tFile.tmp; then
-            mv .$tFile.tmp $tFile
-        else
-            rm .$tFile.tmp
-        fi
-    done
-
+    if ! bash-fmt FILE-NAME; then
+        echo "There was an error in FILE-NAME."
+    fi
 EOF
     exit 1
+}
+
+pFile=""
+if [ $# -ne 0 ]; then
+    if [ -f $1 ]; then
+        pFile=$1
+    else
+        fUsage
+    fi
 fi
 
 # --------------------
+if ! which shfmt &>/dev/null; then
+    echo "Error: missing shfmt [$LINENO]" 1>&2
+    exit 1
+fi
+if [ -n "$pFile" ]; then
+    if [ ! -w $pFile ]; then
+        echo "Error: Not writable: $pFile [$LINENO]" 1>&2
+        exit 1
+    fi
+fi
+
 cInFile=/tmp/in-$$.tmp
 cOutFile=/tmp/out-$$.tmp
 
-cat >$cInFile
+cat $pFile >$cInFile
 
-head -n 1 <$cInFile | grep -q '#!/bin/bash' >/dev/null 2>&1
+head -n 2 <$cInFile | grep -q '#!/bin/bash' &>/dev/null
 if [ $? -ne 0 ]; then
-    rm -f $cInFile $cOutFile >/dev/null 2>&1
-    exit 1
+    cat <$cInFile
+    echo "Warning: Not a bash file [$LINENO]" 1>&2
+    rm -f $cInFile $cOutFile &>/dev/null
+    exit 0
 fi
 
-bash -n <$cInFile >/dev/null 2>&1
+bash -n <$cInFile &>/dev/null
 if [ $? -ne 0 ]; then
-    rm -f $cInFile $cOutFile >/dev/null 2>&1
+    echo "Error: bash script has syntax errors [$LINENO]" 1>&2
+    rm -f $cInFile $cOutFile &>/dev/null
     exit 1
 fi
 
@@ -60,18 +83,24 @@ expand <$cInFile |
     sed -E 's/[[:space:]]*$//' |
     'shfmt' -i 4 -ci -fn >$cOutFile 2>/dev/null
 if [ $? -ne 0 ]; then
-    rm -f $cInFile $cOutFile >/dev/null 2>&1
+    echo "Error: shfmt errors [$LINENO]" 1>&2
+    rm -f $cInFile $cOutFile &>/dev/null
     exit 1
 fi
 
 # Is the formatted file empty?
 if [ ! -s $cOutFile ]; then
-    rm -f $cInFile $cOutFile >/dev/null 2>&1
+    echo "Error: shfmt errors [$LINENO]" 1>&2
+    rm -f $cInFile $cOutFile &>/dev/null
     exit 1
 fi
 
 # All OK so output the formatted file
-cat <$cOutFile
-rm -f $cInFile $cOutFile >/dev/null 2>&1
+if [ -z "$pFile" ]; then
+    cat <$cOutFile
+else
+    cat <$cOutFile >$pFile
+fi
+rm -f $cInFile $cOutFile &>/dev/null
 
 exit 0

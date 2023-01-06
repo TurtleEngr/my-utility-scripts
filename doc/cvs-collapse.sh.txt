@@ -3,7 +3,7 @@ NAME cvs-collapse.sh
     Save diskspace. Remove files that have been versioned.
 
 SYNOPSIS
-        cvs-collapse.sh -c [-n] [-u] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
+        cvs-collapse.sh -c [-u] [-C] [-h] [-H pStyle] [-l] [-v] [-n] [-x] [-T pTest]
 
 DESCRIPTION
     This only works for DIRs that are versioned with CVS. And only the files
@@ -13,14 +13,17 @@ DESCRIPTION
     COLLAPSED-README.txt file will be put in the directory where this
     command is run. It will have a datestamp and list the files removed.
 
+    If cvs-collapse.sh is run again in the same directory, then any files
+    removed, will be appended to COLLAPSED-README.txt.
+
 OPTIONS
     -c  This option is signal to the script that you know how it is run and
         what it will do.
 
-    -n  If set, then nothing will be done. The planned deletes will be
-        listed. This is the same as -x
-
     -u  Don't run "cvs update". However "cvs ci" will still be run.
+
+    -C  Remove all files in any "cachefiles/" dir found in current dir on
+        down.
 
     -h  Output this "long" usage help. See "-H long"
 
@@ -47,6 +50,8 @@ OPTIONS
         -v - output "notice" and higher.
 
         -vv - output "info" and higher.
+
+    -n  See -x
 
     -x  Set the gpDebug level. Add 1 for each -x. Or you can set gpDebug
         before running the script.
@@ -157,54 +162,34 @@ OPTIONS
 
         See -x
 
-RETURN VALUE
-    [What the program or function returns if successful.]
-
-ERRORS
-    Fatal Error:
-
-    Warning:
-
-    Many error messages may describe where the error is located, with the
-    following log message format:
-
-     Program: PID NNNN: Message [LINE](ErrNo)
-
-EXAMPLES
 ENVIRONMENT
     See Globals section for details.
 
     HOME,USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
 
 SEE ALSO
-    shunit2.1 bash-com.inc bash-com.test
+        shunit2.1,  bash-com.inc, bash-com.test
 
 NOTES
     Tests:
 
-      all
-      testUsage
-      testValidate
-      testUpdate
-      testCheckIn
-
-CAVEATS
-    [Things to take special care with; sometimes called WARNINGS.]
-
-DIAGNOSTICS
-    To verify the script is internally OK, run: cvs-collapse.sh -T all
-
-BUGS
-    [Things that are broken or just don't work quite right.]
-
-RESTRICTIONS
-    [Bugs you don't plan to fix :-)]
+        all - run all tests
+        list - list all tests
+        testUsage
+        testValidate
+        testUpdateFail
+        testUpdateOk
+        testCiError
+        testNopOk
+        testOk
+        testRmCacheOk
+        testRmCacheNop
 
 AUTHOR
-    NAME
+    TurtleEngr
 
 HISTORY
-    GPLv3 (c) Copyright 2021 by COMPANY
+    GPLv3 (c) Copyright 2022
 
-    $Revision: 1.6 $ $Date: 2022/12/20 01:56:59 $ GMT
+    $Revision: 1.7 $ $Date: 2022/12/21 02:36:07 $ GMT
 
