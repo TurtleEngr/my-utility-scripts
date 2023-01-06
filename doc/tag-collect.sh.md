@@ -8,7 +8,7 @@ Output file contents based on the desired "tags"
 
 # SYNOPSIS
 
-        tag-collect.sh -t pTag [-h] [-H pStyle] [-T pTest]
+        tag-collect.sh -t pTag [-s pSize] [-h] [-H pStyle] [-T pTest]
                        pFiles... >OutputFile
 
 # DESCRIPTION
@@ -23,7 +23,7 @@ See the EXAMPLE section for the example of tags in files.
 
 # OPTIONS
 
-- **-t tag**
+- **-t pTag**
 
     Look for {pTag} in the list of Files.
 
@@ -31,6 +31,10 @@ See the EXAMPLE section for the example of tags in files.
     tags. There is an implied "or" for multiple -t tags. If you want an
     "and", then you will need to repeat tag-collect.sh on the OutputFile
     for the tags you also want for the items.
+
+- **-s pSize**
+
+    Maximim number of lines after a tag. Default: 1000
 
 - **-h**
 
@@ -165,4 +169,4 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.6 $ $Date: 2022/12/20 01:56:59 $ GMT 
+$Revision: 1.7 $ $Date: 2023/01/06 16:33:28 $ GMT 

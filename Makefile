@@ -5,7 +5,8 @@ update copy :
 	git pull origin develop
 	-for i in $$(cat ../copy-list.txt); do \
 		cp -a ../$$i bin; \
-		cp -a ../doc/$$i.* doc 2>/dev/null; \
+		cp -a ../doc/$$i.md doc 2>/dev/null; \
+		cp -a ../doc/$$i.int.md doc 2>/dev/null; \
 	done
 	git st
 	echo if OK, make ci

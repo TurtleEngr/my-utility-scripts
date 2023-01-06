@@ -1,42 +1,3 @@
-# tag-collect.sh Internal Documentation
-
-### fUsage pStyle
-
-This function selects the type of help output. See -h and -H options.
-
-## Script Global Variables
-
-## Script Functions
-
-### fCleanUp
-
-Calls fComCleanUp.
-
-### fSetGlobals
-
-Calls fComSetGlobals to set globals used by bash-com.inc.
-
-Set initial values for all of the other globals use by this
-script. The ones that begin with "gp" can usually be overridden by
-setting them before the script is run.
-
-### fValidate
-
-Exit if missing.
-
-### testUsage
-
-Test fUsage. Verify the different output styles work. See also testComUsage
-in bash-com.test.
-
-### testScriptFunctions
-
-This is just a starting point for creating script functionality tests.
-
-### fRunTests
-
-Run unit tests for this script.
-
 <div>
     <hr/>
 </div>
@@ -119,7 +80,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.1 $'
+           cVer='$Revision: 1.2 $'
 
 ### Documentation Format
 

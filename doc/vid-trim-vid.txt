@@ -1,7 +1,0 @@
-Usage:
-    vid-trim-vid -i InFile [-o OutFile] [-s HH:MM:SS] -e HH:MM:SS
-
-If no -o, then default: -o trim-InFile
-if no -s, then default: -s 00:00:00
-
-The extension for InFile and OutFile must be the same.
