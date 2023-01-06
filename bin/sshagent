@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.77 2022/12/20 21:46:45 bruce Exp $
+# $Id: sshagent,v 1.78 2023/01/06 13:12:30 bruce Exp $
 set -u
 
 # Var prefix key
@@ -53,7 +53,7 @@ sshagent - setup the ssh agent process
     cgAgentOwner - user name. Default: $USER
 
     For online help page, go to:
-    L<github|https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md>
+    https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md
 
 =head1 DESCRIPTION
 
@@ -338,7 +338,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.77 $
+$Revision: 1.78 $
 
 =cut
 
