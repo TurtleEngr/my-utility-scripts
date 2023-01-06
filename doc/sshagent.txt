@@ -7,7 +7,7 @@ SYNOPSIS
         cgAgentOwner - user name. Default: $USER
 
         For online help page, go to:
-        L<github|https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md>
+        https://github.com/TurtleEngr/my-utility-scripts/blob/develop/doc/sshagent.md
 
 DESCRIPTION
     Using ssh-agent is a lot more secure than using a passwordless ssh key.
@@ -219,5 +219,5 @@ AUTHOR
     TurtleEngr
 
 HISTORY
-    $Revision: 1.13 $
+    $Revision: 1.14 $
 
