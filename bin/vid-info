@@ -1,15 +1,15 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-info,v 1.4 2021/10/26 19:26:13 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-info,v 1.5 2023/01/06 18:05:16 bruce Exp $
 
 # Extract meta info from video files. Save it in FILE.info
 # See "man exiftool" for where the list of valid file extentions came from
 
 # Usage:
-#	# Local dir only
-#	vid-info -l
+#       # Local dir only
+#       vid-info -l
 #
-#	# Recursive
-#	vid-info -r
+#       # Recursive
+#       vid-info -r
 
 #--------------------
 cExt='.3fr$|.3g2$|.3gp$|.a$|.aa$|.aax$|.acr$|.afm$|.ai$|.aiff$|.ape$|.arw$|.asf$|.avi$|.azw$|.bmp$|.bpg$|.btf$|.chm$|.cos$|.cr2$|.crw$|.cs1$|.dcm$|.dcp$|.dcr$|.dfont$|.divx$|.djvu$|.dll$|.dng$|.doc$|.docx$|.dpx$|.dr4$|.dss$|.dv$|.dvb$|.dylib$|.eip$|.eps$|.epub$|.erf$|.exe$|.exif$|.exr$|.exv$|.f4a$|.fff$|.fla$|.flac$|.flif$|.flv$|.fpf$|.fpx$|.gif$|.gpr$|.gz$|.hdp$|.hdr$|.heic$|.heif$|.icc$|.ics$|.idml$|.iiq$|.ind$|.inx$|.iso$|.itc$|.j2c$|.jng$|.jp2$|.jpeg$|.jpg$|.json$|.k25$|.kdc$|.key$|.la$|.lfp$|.lnk$|.m2ts$|.m4a/v$|.max$|.mef$|.mie$|.miff$|.mka$|.mks$|.mkv$|.mng$|.mobi$|.modd$|.moi$|.mos$|.mov$|.mp3$|.mp4$|.mpc$|.mpg$|.mpo$|.mqv$|.mrw$|.mxf$|.nef$|.nrw$|.numbers$|.o$|.odp$|.ods$|.odt$|.ofr$|.ogg$|.ogv$|.opus$|.orf$|.otf$|.pac$|.pages$|.pbm$|.pcd$|.pdb$|.pdf$|.pef$|.pfa$|.pfb$|.pfm$|.pgf$|.pgm$|.pict$|.plist$|.pmp$|.png$|.ppm$|.ppt$|.pptx$|.ps$|.psb$|.psd$|.psp$|.qtif$|.r3d$|.ra$|.raf$|.ram$|.rar$|.raw$|.riff$|.rm$|.rsrc$|.rtf$|.rw2$|.rwl$|.rwz$|.seq$|.so$|.sr2$|.srf$|.srw$|.svg$|.swf$|.thm$|.tiff$|.torrent$|.ttc$|.ttf$|.vcf$|.vrd$|.vsd$|.wav$|.wdp$|.webm$|.webp$|.wma$|.wmv$|.wv$|.x3f$|.xcf$|.xls$|.xlsx$|.xmp$|.zip'
@@ -23,8 +23,8 @@ elif [ ".$1" = '.-l' ]; then
 else
     cat <<EOF
 Usage:
-	vid-info -l  # local
-	vid-info -r  # recursive
+        vid-info -l  # local
+        vid-info -r  # recursive
 EOF
     exit 1
 fi

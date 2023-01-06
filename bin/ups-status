@@ -3,30 +3,30 @@
 if [ $# -ne 0 ]; then
     cat <<EOF
 Normal Usage
-	ups-status
+        ups-status
 
-	Outputs: STATUS, BCHARGE, TIMELEFT, TONBATT, MBATTCHG,
-		 MINTIMEL, MINTIMEL, MAXTIME, XONBATT, XOFFBAT
+        Outputs: STATUS, BCHARGE, TIMELEFT, TONBATT, MBATTCHG,
+                 MINTIMEL, MINTIMEL, MAXTIME, XONBATT, XOFFBAT
 Help Usage
-	ups-status -h
+        ups-status -h
 
 Show this output.
 
 Uses apcaccess to get status from apcupsd
 
-ups-up					ups-down.txt
------------------------			-----------------------
+ups-up                                  ups-down.txt
+-----------------------                 -----------------------
 APC      : 001,035,0905               | APC      : 001,035,0891
-DATE     : 2020-06-22 22:34:40 -0700  | DATE     : 2020-06-22 22:47:24 -0700 
+DATE     : 2020-06-22 22:34:40 -0700  | DATE     : 2020-06-22 22:47:24 -0700
 HOSTNAME : asimov                       HOSTNAME : asimov
 VERSION  : 3.14.14 (31 May 2016) debi   VERSION  : 3.14.14 (31 May 2016) debi
 UPSNAME  : back-ups-es-725              UPSNAME  : back-ups-es-725
 CABLE    : USB Cable                    CABLE    : USB Cable
 DRIVER   : USB UPS Driver               DRIVER   : USB UPS Driver
 UPSMODE  : Stand Alone                  UPSMODE  : Stand Alone
-STARTTIME: 2019-11-25 00:20:55 -0800    STARTTIME: 2019-11-25 00:20:55 -0800 
-MODEL    : Back-UPS ES 725              MODEL    : Back-UPS ES 725 
-STATUS   : ONLINE                     | STATUS   : ONBATT 
+STARTTIME: 2019-11-25 00:20:55 -0800    STARTTIME: 2019-11-25 00:20:55 -0800
+MODEL    : Back-UPS ES 725              MODEL    : Back-UPS ES 725
+STATUS   : ONLINE                     | STATUS   : ONBATT
 LINEV    : 113.0 Volts                | LINEV    : 0.0 Volts
 LOADPCT  : 3.0 Percent                | LOADPCT  : 5.0 Percent
 BCHARGE  : 100.0 Percent              | BCHARGE  : 84.0 Percent

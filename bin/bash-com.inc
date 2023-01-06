@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.inc,v $
-# $Revision: 1.15 $ $Date: 2022/12/21 01:43:02 $ GMT
+# $Revision: 1.16 $ $Date: 2023/01/06 18:05:12 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -94,8 +94,8 @@ For more help, see the Globals section in fUsage.
  cCurDir - current directory
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
-	# shellcheck disable=SC2016
-	cVer='$Revision: 1.15 $'
+        # shellcheck disable=SC2016
+        cVer='$Revision: 1.16 $'
 
 =internal-head3 Documentation Format
 
@@ -170,7 +170,7 @@ fComSetGlobals()
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.15 $'
+    #cVer='$Revision: 1.16 $'
 
     if [ "$cVer" != "${cVer#*' '}" ]; then
         cVer=${cVer#*' '}
@@ -297,20 +297,20 @@ fComInternalDoc()
 
     if [ ".$pAll" = ".-a" ]; then
         awk '
-			/^=internal-pod/,/^=internal-cut/ {
-				sub(/^=internal-/,"=");
-			}
-			{
-				print $0;
-			}
-		'
+                        /^=internal-pod/,/^=internal-cut/ {
+                                sub(/^=internal-/,"=");
+                        }
+                        {
+                                print $0;
+                        }
+                '
     else
         awk '
-			/^=internal-pod/,/^=internal-cut/ {
-				sub(/^=internal-/,"=");
-				print $0;
-			}
-		'
+                        /^=internal-pod/,/^=internal-cut/ {
+                                sub(/^=internal-/,"=");
+                                print $0;
+                        }
+                '
     fi
     return
 
@@ -609,7 +609,7 @@ See Globals: gpLog, gpFacility, gpVerbose, gpDebug
  fLog info "Output only if -vv" $LINENO 8
  fLog debug "Output only if $gpDebug > 0" $LINENO
  fLog debug-3 "Output only if $gpDebug > 0 and $gpDebug <= 3" $LINENO
- 
+
 =internal-cut
 EOF
 } # fLog

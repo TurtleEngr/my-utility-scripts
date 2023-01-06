@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/countdown,v $
-# $Revision: 1.8 $ $Date: 2021/10/26 19:26:09 $ GMT
+# $Revision: 1.9 $ $Date: 2023/01/06 18:05:13 $ GMT
 
 # Algorithm idea came from:
 # https://superuser.com/questions/611538/is-there-a-way-to-display-a-countdown-or-stopwatch-timer-in-a-terminal
@@ -68,12 +68,12 @@ counter - manage a count up or count down timer for OBS
 
 =head1 SYNOPSIS
 
-	countdown [-m Min | -s Sec | -E Time [-S Time]] [-i Sec] [-F Format]
-		[-f File] [-h] [-H Style] [-l] [-v] [-x] [-T "TestList"]
+        countdown [-m Min | -s Sec | -E Time [-S Time]] [-i Sec] [-F Format]
+                [-f File] [-h] [-H Style] [-l] [-v] [-x] [-T "TestList"]
 
-	Format: S|M|H
-	Style: usage, long, man, html, md, int, int-html, int-md
- 
+        Format: S|M|H
+        Style: usage, long, man, html, md, int, int-html, int-md
+
 =head1 DESCRIPTION
 
 Use -m and -s to set the duration for the timer. Or use -E to set the
@@ -149,14 +149,14 @@ Style is used to select the type of help and how it is formatted.
 
 Styles:
 
-	short|usage - Output short usage help as text.
-	long|text   - Output long usage help as text.
-	man 	    - Output long usage help as a man page.
-	html 	    - Output long usage help as html.
-	md 	    - Output long usage help as markdown.
-	int 	    - Also output internal documentation as text.
-	int-html    - Also output internal documentation as html.
-	int-md 	    - Also output internal documentation as markdown.
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+        int         - Also output internal documentation as text.
+        int-html    - Also output internal documentation as html.
+        int-md      - Also output internal documentation as markdown.
 
 =item B<-l>
 
@@ -215,45 +215,45 @@ To use countdown, point OBS text to read from the counter file
 Countdown timer for 2min 13sec. File /tmp/counter.tmp will be use for
 time remaining.
 
- 	countdown -m 2 -s 13
+        countdown -m 2 -s 13
 
-Start a counter in background for 15 min. The start 
+Start a counter in background for 15 min. The start
 a replacement countdown time for 2 min, before the first one
 finishes.  When the second countdown starts, any running countdowns using file
 /tmp/counter.tmp will die, before the other countdown starts.
 
- 	countdown -m 15 -s 0 &
-	sleep 60
-	countdown -m 2 -s 0 &
+        countdown -m 15 -s 0 &
+        sleep 60
+        countdown -m 2 -s 0 &
 
 If you need to have two countdowns running at the same time, use two
 different countdown files.
 
- 	countdown -m 15 -s 0 -f /tmp/counter1.tmp &
-	countdown -m 2  -s 0 -f /tmp/counter2.tmp &
+        countdown -m 15 -s 0 -f /tmp/counter1.tmp &
+        countdown -m 2  -s 0 -f /tmp/counter2.tmp &
 
 Start countdown timer to end at 2pm.
 
- 	countdown -E 2pm
- 	countdown -E 14:00
+        countdown -E 2pm
+        countdown -E 14:00
 
 Note: if -S is not set, and the current time is past 2pm, then the
 end time will be "tomorrow 2pm"
 
 Start countdown timer to end at 11am on 2020-12-06.
 
- 	countdown -E '2020-12-06 11am'
+        countdown -E '2020-12-06 11am'
 
 Countdown timer. The duration is calculated between the two times
 specified.  To test what dates values are allowed, use the "date
 --date='time'" command.
 
- 	countdown -S '2020-12-06 11am - 7min - 62sec' -E '2020-12-06 11am'
+        countdown -S '2020-12-06 11am - 7min - 62sec' -E '2020-12-06 11am'
 
 Get documentation in different formats:
 
- 	countdown -H html >countdown.html
- 	countdown -H int-html >countdown-internal.html
+        countdown -H html >countdown.html
+        countdown -H int-html >countdown-internal.html
 
 =head1 ENVIRONMENT
 
@@ -279,7 +279,7 @@ date
 
 =head1 HISTORY
 
-$Revision: 1.8 $ GMT 
+$Revision: 1.9 $ GMT
 
 =cut
 EOF
@@ -354,7 +354,7 @@ fUDebug()
 
 If gpUnitDebug is not 0, then echo $pMsg.
 
-If 
+If
 
 =internal-cut
 EOF
@@ -1296,7 +1296,7 @@ export gpTest gpUnitDebug SHUNIT_COLOR
 
 # Script Globals
 export gpCounterFile gpDate gpEnd gpFmt gpInterval gpMin gpSec gpStart
-cVer='$Revision: 1.8 $'
+cVer='$Revision: 1.9 $'
 fSetGlobals
 
 # -------------------

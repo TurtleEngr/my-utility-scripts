@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/s3-put-get,v 1.2 2021/10/26 19:26:12 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/s3-put-get,v 1.3 2023/01/06 18:05:15 bruce Exp $
 
 # Usage:
 #
@@ -18,7 +18,7 @@ s3-put-get - put or get files to or from a S3 bucket
 
 =head1 SYNOPSIS
 
-	s3-put-get -g|-p [-c CONFIG] [-b BUCKET] -d PATH [-h] FILE*
+        s3-put-get -g|-p [-c CONFIG] [-b BUCKET] -d PATH [-h] FILE*
 
 =head1 DESCRIPTION
 

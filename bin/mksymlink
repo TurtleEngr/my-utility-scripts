@@ -54,8 +54,8 @@ Save and restore symlinks to/from .symlink.$HOSTNAME definition files.
 
 =head1 SYNOPSIS
 
-	mksymlink [-s] [-r] [-c] [-f]
-		  [-h] [-H pStyle] [-v] [-x] [-T pTest]
+        mksymlink [-s] [-r] [-c] [-f]
+                  [-h] [-H pStyle] [-v] [-x] [-T pTest]
 
 =head1 DESCRIPTION
 
@@ -122,14 +122,14 @@ pStyle is used to select the type of help and how it is formatted.
 
 Styles:
 
-	short|usage - Output short usage help as text.
-	long|text   - Output long usage help as text.
-	man 	    - Output long usage help as a man page.
-	html 	    - Output long usage help as html.
-	md 	    - Output long usage help as markdown.
-	int 	    - Also output internal documentation as text.
-	int-html    - Also output internal documentation as html.
-	int-md 	    - Also output internal documentation as markdown.
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+        int         - Also output internal documentation as text.
+        int-html    - Also output internal documentation as html.
+        int-md      - Also output internal documentation as markdown.
 
 =item B<-v>
 

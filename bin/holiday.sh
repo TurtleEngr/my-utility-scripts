@@ -17,7 +17,7 @@ Mainly for use in cron, to skip holidays.  For example:
 
 =head1 SYNOPSIS
 
-	holiday.sh [-h] [-d YYYY-MM-DD] [-t HH] [-w TAG]
+        holiday.sh [-h] [-d YYYY-MM-DD] [-t HH] [-w TAG]
 
 =head1 DESCRIPTION
 
@@ -89,12 +89,12 @@ multiple holiday files.  Default: /usr/local/etc/holidays.txt
 
 Format of holiday file (YYYY must be at the very beginning of lines):
 
-	# comment (the full line will be ignored)
- 	YYYY-MM-DD Any text following
- 	YYYY-MM-DD [TAG] Any text following
- 	YYYY-MM-DD [TAG] [TAG] Any text following
- 	YYYY-MM-DD {SH-EH} Any text following
- 	YYYY-MM-DD {SH-EH} [TAG] Any text following
+        # comment (the full line will be ignored)
+        YYYY-MM-DD Any text following
+        YYYY-MM-DD [TAG] Any text following
+        YYYY-MM-DD [TAG] [TAG] Any text following
+        YYYY-MM-DD {SH-EH} Any text following
+        YYYY-MM-DD {SH-EH} [TAG] Any text following
 
 [TAG] is optional.  The record will only be included if a -w TAG
 matches, one or more of the [TAG] words.  If there is no [TAG], then
@@ -131,7 +131,7 @@ Bruce Rafnel
 
 =head1 HISTORY
 
-$Revision: 1.4 $
+$Revision: 1.5 $
 
 =cut
 EOF

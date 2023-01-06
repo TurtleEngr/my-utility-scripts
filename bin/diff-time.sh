@@ -3,11 +3,11 @@
 if [ $# = 0 ]; then
     cat <<EOF
 Usage
-	diff-time.sh Begin End
+        diff-time.sh Begin End
 Example:
-	diff-time.sh 4:44 9:15
+        diff-time.sh 4:44 9:15
 Output:
-	4:31	
+        4:31
 EOF
     exit 1
 fi

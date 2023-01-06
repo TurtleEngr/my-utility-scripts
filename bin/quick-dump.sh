@@ -3,7 +3,7 @@
 if [ $# -ne 1 ]; then
     cat <<EOF
 Usage:
-	quick-dump.sh DBNAME
+        quick-dump.sh DBNAME
 EOF
     exit 1
 fi

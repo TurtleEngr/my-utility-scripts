@@ -1,22 +1,22 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pic-gen.sh,v 1.2 2021/10/26 19:26:11 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/pic-gen.sh,v 1.3 2023/01/06 18:05:14 bruce Exp $
 
 if [ $# -ne 3 ]; then
     cat <<EOF
 Usage:
-	export cInc=10		# Optional. 1 is default.
-	pic-shuffle.sh SuffleFile GenN SetSize
+        export cInc=10          # Optional. 1 is default.
+        pic-shuffle.sh SuffleFile GenN SetSize
 Example:
-	pic-gen.sh pic-shuffle-raw1.txt 1 40
+        pic-gen.sh pic-shuffle-raw1.txt 1 40
 This will create:
-	pic-shuffle-raw1-gen1.txt    - link raw files to gen1/setN dirs
+        pic-shuffle-raw1-gen1.txt    - link raw files to gen1/setN dirs
 Execute ./pic-shuffle-raw1-gen1.txt to generate:
-	gen1/
-		set1/
-		set2/
-		...
+        gen1/
+                set1/
+                set2/
+                ...
 See also:
-	pic-shuffle.sh
+        pic-shuffle.sh
 EOF
     exit 1
 fi

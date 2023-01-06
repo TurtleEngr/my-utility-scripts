@@ -54,7 +54,7 @@ Use the latest version. (See variable: $cLatestVer
 
 =item B<-v KdenLiveVer>
 
-Pick a different kdenlive version. 
+Pick a different kdenlive version.
 
 The archived versions are: 16.11, 16.12, 17.04, 17.12, 19.04, 19.08
 
@@ -146,7 +146,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.33 $ $Date: 2022/12/20 00:31:17 $ GMT 
+$Revision: 1.34 $ $Date: 2023/01/06 18:05:16 $ GMT
 
 =cut
 EOF
@@ -172,7 +172,7 @@ function fError()
 function fLog()
 {
     # Usage:
-    #     gErr=8801		# optional
+    #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
     # pLevel - emerg alert crit err warning notice info debug
 
@@ -265,10 +265,10 @@ function fKLVer()
         21.08) tUse=kdenlive-21.08.0a-x86_64.appimage ;;
         21.11) tUse=kdenlive-21.11.70-9295653-x86_64.appimage ;;
         21.12) tUse=kdenlive-21.12.2-x86_64.appimage ;;
-            #	22.04) tUse=kdenlive-22.04.0-2-x86_64.AppImage ;;
-            #	22.04) tUse=kdenlive-22.04.1-x86_x64.AppImage ;;
+            #   22.04) tUse=kdenlive-22.04.0-2-x86_64.AppImage ;;
+            #   22.04) tUse=kdenlive-22.04.1-x86_x64.AppImage ;;
         22.04) tUse=kdenlive-22.04.2-x86_x64.AppImage ;;
-            #	22.04) tUse=kdenlive-22.04.3-x86_x64.AppImage ;;
+            #   22.04) tUse=kdenlive-22.04.3-x86_x64.AppImage ;;
         22.12) tUse=kdenlive-22.12.0-x86_64.AppImage ;;
         *)
             tUse=kdenlive
@@ -293,15 +293,15 @@ function fCVSCheck()
 
     if [ ! -r CVS/Entries ]; then
         cat <<EOF
-		
+
 Error: there are no CVS directories in this directory. You need to
 add files to CVS, so that files can be versioned.
 
 Recommend:
-	cd /home/video/PROJECT
-	export CVSROOT=/mnt/usb-video/repo/video
-	export CVS_RSH=ssh
-	export CVSUMASK=0003
+        cd /home/video/PROJECT
+        export CVSROOT=/mnt/usb-video/repo/video
+        export CVS_RSH=ssh
+        export CVSUMASK=0003
 EOF
         fError "To fix, add $gpKdenFile to a CVS repository." $LINENO
     fi

@@ -112,34 +112,34 @@ private key files.
 
 In a profile script:
 
- 	. gpgagent ~/.ssh/id.home ~/.ssh/id.work
+        . gpgagent ~/.ssh/id.home ~/.ssh/id.work
 
 In a script run by the 'root' user:
 
- 	export $cgAgentOwner=george
- 	. gpgagent -s
+        export $cgAgentOwner=george
+        . gpgagent -s
 
 You ran gpgagent manually to create an agent, but you forgot to
 "source" the script so that the SSH_* env. are set.  Fix this by just
 running gpgagent with the -s option:
 
- 	. gpgagent -s
+        . gpgagent -s
 
 Add another ssh key to a running agent:
 
- 	gpgagent -a ~/.ssh/id_foo_dsa
+        gpgagent -a ~/.ssh/id_foo_dsa
 
 Add another gpg key to a running agent:
 
- 	gpgagent -a joe@yahoo.com
+        gpgagent -a joe@yahoo.com
 
 List agent and added keys:
 
- 	ssh-add -l
+        ssh-add -l
 
 Kill all agents:
 
- 	gpgagent -k
+        gpgagent -k
 
 =head1 ENVIRONMENT
 
@@ -180,7 +180,7 @@ gpgagent only works well with bash.
 
 (c) Copyright 2009 by TrustedID
 
-$Revision: 1.4 $ GMT 
+$Revision: 1.5 $ GMT
 
 =cut
 EOF

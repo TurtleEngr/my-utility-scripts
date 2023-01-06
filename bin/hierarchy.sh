@@ -1,6 +1,6 @@
 #!/bin/bash
 # Usage:
-#	heirarchy.sh
+#       heirarchy.sh
 
 # --------------------------------
 function fUsage()
@@ -17,7 +17,7 @@ hiearchy.sh - Convert full path names to hiearchy levels
 
 =head1 SYNOPSIS
 
- 	hiearchy.sh [-t] [-l N] [-d] <IN-FILE >OUT-FILE
+        hiearchy.sh [-t] [-l N] [-d] <IN-FILE >OUT-FILE
 
 =head1 DESCRIPTION
 
@@ -149,7 +149,7 @@ fi
 # Defaults
 
 # No tabs
-pTab="s/	/   |/g"
+pTab="s/        /   |/g"
 
 # Max level
 pLevel=200
@@ -189,24 +189,24 @@ fi
 
 eval $pDirOnly | $cAWK -v pLevel=$pLevel '
 NR == 1 {
-	# Output first line in full
-	print $0
-	tTrim = gsub("[^/]*/", "", $0)
-	next
+        # Output first line in full
+        print $0
+        tTrim = gsub("[^/]*/", "", $0)
+        next
 }
 {
-	tEnd = sub("/$","",$0)
-	tLevel = gsub("[^/]*/", "", $0)
-	if ((tLevel - tTrim) > pLevel) {
-		next
-	}
-	for (i=1; i<=(tLevel-tTrim); i++) {
-		printf("\t")
-	}
-	if (tEnd) {
-		print "\t" $0 "/"
-	} else {
-		print "\t" $0
-	}
+        tEnd = sub("/$","",$0)
+        tLevel = gsub("[^/]*/", "", $0)
+        if ((tLevel - tTrim) > pLevel) {
+                next
+        }
+        for (i=1; i<=(tLevel-tTrim); i++) {
+                printf("\t")
+        }
+        if (tEnd) {
+                print "\t" $0 "/"
+        } else {
+                print "\t" $0
+        }
 }
 ' | sed "$pTab"

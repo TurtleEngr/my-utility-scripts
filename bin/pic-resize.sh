@@ -1,10 +1,10 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pic-resize.sh,v 1.2 2021/10/26 19:26:11 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/pic-resize.sh,v 1.3 2023/01/06 18:05:14 bruce Exp $
 
 if [ $# -ne 3 ]; then
     cat <<EOF
 Usage:
-	pic-rsize Ratio SrcDir DestDir
+        pic-rsize Ratio SrcDir DestDir
 EOF
     exit 1
 fi

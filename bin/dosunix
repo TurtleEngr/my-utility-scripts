@@ -15,20 +15,20 @@ function fUsage()
 DosUnix.sh
 
 Usage
-	DosUnix.sh {-u|-d} [%%file%%...]
+        DosUnix.sh {-u|-d} [%%file%%...]
 
 Parameters
-	-h	give this usage help
-	-d	convert files to MS-DOS (PC) format
-	-u	convert files to Unix format
-	file	list file names.  If no files stdin/stdout used.
+        -h      give this usage help
+        -d      convert files to MS-DOS (PC) format
+        -u      convert files to Unix format
+        file    list file names.  If no files stdin/stdout used.
 
 Description
-	Convert files from DOS format to Unix format or from Unix format to
-	DOS format.  The -d or -u option is required to describe the type of
-	conversion desired.  The files will be overritten with the converted
-	file, so you may want to make copies of files that you can not afford
-	to lose.
+        Convert files from DOS format to Unix format or from Unix format to
+        DOS format.  The -d or -u option is required to describe the type of
+        conversion desired.  The files will be overritten with the converted
+        file, so you may want to make copies of files that you can not afford
+        to lose.
 END
     fCleanUp 1
 }

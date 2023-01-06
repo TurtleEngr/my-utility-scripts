@@ -1,11 +1,11 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pdf2jpg,v 1.4 2021/10/26 19:26:11 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/pdf2jpg,v 1.5 2023/01/06 18:05:14 bruce Exp $
 # Source: https://askubuntu.com/questions/100994/convert-pdf-to-image
 
 if [ $# -eq 0 ]; then
     cat <<EOF
 Usage:
-	pdf2jpg Input.pdf
+        pdf2jpg Input.pdf
 
 Input.pdf file will be converted to one image per page. The images are
 put in the current directory. Named: page-NN.jpg.

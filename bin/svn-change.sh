@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/svn-change.sh,v 1.3 2021/10/26 19:26:12 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/svn-change.sh,v 1.4 2023/01/06 18:05:15 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -35,7 +35,7 @@ svn-change.sh - list file have have been added or modified since a specific vers
 
 =head1 SYNOPSIS
 
-	svn-change.sh -n version [-h[elp]] [-v[erbose]] [-d[ebug] level] 
+        svn-change.sh -n version [-h[elp]] [-v[erbose]] [-d[ebug] level]
 
 =head1 DESCRIPTION
 
@@ -103,7 +103,7 @@ Bruce Rafnel
 
 Bruce R.
 
-$Revision: 1.3 $ GMT 
+$Revision: 1.4 $ GMT
 
 =cut
 EOF
@@ -113,9 +113,9 @@ EOF
 function fError()
 {
     # Input:
-    #	$1 - Error number (usually $LINENO)
-    #	$2 - Error message
-    # 	$gNoExit - if =1, then don't exit, and clear the flag
+    #   $1 - Error number (usually $LINENO)
+    #   $2 - Error message
+    #   $gNoExit - if =1, then don't exit, and clear the flag
 
     # Print the error message (fError options).  Then call
     # fCleanUp to exit (if $gNoExit=0)
@@ -129,7 +129,7 @@ function fError()
         return
     fi
     cat <<EOF 1>&2
-Usage: 	$gName -n version [-h[elp]] [-v[erbose]] [-d[ebug] level]  Type: "$gName -h" for more help.
+Usage:  $gName -n version [-h[elp]] [-v[erbose]] [-d[ebug] level]  Type: "$gName -h" for more help.
 EOF
     exit 1
 }
@@ -138,8 +138,8 @@ EOF
 function fLog()
 {
     # Input:
-    #	$1 level (# emerg alert crit err warning notice info debug)
-    #	$2 message
+    #   $1 level (# emerg alert crit err warning notice info debug)
+    #   $2 message
     tErr=""
     if [ $gErr -ne 0 ]; then
         tErr="[$gErr]"
@@ -189,7 +189,7 @@ gVerbose=${gVerbose:-0}
 
 # -------------------
 # Define the version number for this script
-gVer='$Revision: 1.3 $'
+gVer='$Revision: 1.4 $'
 gVer=${gVer#*' '}
 gVer=${gVer%' '*}
 

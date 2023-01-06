@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/bcmnt,v 1.47 2022/03/19 19:31:52 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/bcmnt,v 1.48 2023/01/06 18:05:12 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -33,9 +33,9 @@ function fUsage()
 =head1 SYNOPSIS
 
        bcmnt [-m | -u]
-       	     [-M Dir] [-U Dir] [-C Dir]
- 	     [-a] [-g] [-t Min] [-l]
- 	     [-h] [-v] [-x]
+             [-M Dir] [-U Dir] [-C Dir]
+             [-a] [-g] [-t Min] [-l]
+             [-h] [-v] [-x]
 
 =head1 DESCRIPTION
 
@@ -115,9 +115,9 @@ Debug mode. Multiple -x options turns on more debug output.
 -m or -u cannot be used with -M or -U
 
        bcmnt [-m | -u]
-       	     [-M Dir] [-U Dir] [-C Dir]
- 	     [-a] [-g] [-t Min] [-l]
- 	     [-h] [-v] [-x]
+             [-M Dir] [-U Dir] [-C Dir]
+             [-a] [-g] [-t Min] [-l]
+             [-h] [-v] [-x]
 
 =head1 EXAMPLES
 
@@ -148,8 +148,8 @@ encfs, encfsctl
 
 =head1 HISTORY
 
- $Revision: 1.47 $
- $Date: 2022/03/19 19:31:52 $ GMT 
+ $Revision: 1.48 $
+ $Date: 2023/01/06 18:05:12 $ GMT
 
 =cut
 EOF
@@ -175,7 +175,7 @@ function fError()
 function fLog()
 {
     # Usage:
-    #     gErr=8801		# optional
+    #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
     # pLevel - emerg alert crit err warning notice info debug
 
@@ -315,7 +315,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-export cVer='$Revision: 1.47 $'
+export cVer='$Revision: 1.48 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

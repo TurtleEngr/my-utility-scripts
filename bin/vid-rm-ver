@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-rm-ver,v 1.6 2022/04/22 00:50:04 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-rm-ver,v 1.7 2023/01/06 18:05:16 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -33,7 +33,7 @@ vid-rm-ver - remove all version except HEAD version for files
 
 =head1 SYNOPSIS
 
-	vid-rm-ver [-b] [-n] [-h] [-l] [-v] [-x[x..]] Files...
+        vid-rm-ver [-b] [-n] [-h] [-l] [-v] [-x[x..]] Files...
 
 =head1 DESCRIPTION
 
@@ -133,8 +133,8 @@ They should only use the characters: [a-zA-Z][0-9][.-_]
 
 =head1 HISTORY
 
- $Revision: 1.6 $;
- $Date: 2022/04/22 00:50:04 $ GMT 
+ $Revision: 1.7 $;
+ $Date: 2023/01/06 18:05:16 $ GMT
 
 =cut
 EOF
@@ -217,7 +217,7 @@ export gErr gpDebug cName gpVerbose gpLog cTmp cVer
 cName=${0##*/}
 
 # Define the version number for this script
-cVer='$Revision: 1.6 $'
+cVer='$Revision: 1.7 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

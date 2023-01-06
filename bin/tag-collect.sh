@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.12 $ $Date: 2023/01/04 19:31:46 $ GMT
+# $Revision: 1.13 $ $Date: 2023/01/06 18:05:15 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -89,7 +89,7 @@ Output file contents based on the desired "tags"
 
 =head1 SYNOPSIS
 
-	tag-collect.sh -t pTag [-s pSize] [-h] [-H pStyle] [-T pTest]
+        tag-collect.sh -t pTag [-s pSize] [-h] [-H pStyle] [-T pTest]
                        pFiles... >OutputFile
 
 =head1 DESCRIPTION
@@ -129,14 +129,14 @@ pStyle is used to select the type of help and how it is formatted.
 
 Styles:
 
-	short|usage - Output short usage help as text.
-	long|text   - Output long usage help as text.
-	man 	    - Output long usage help as a man page.
-	html 	    - Output long usage help as html.
-	md 	    - Output long usage help as markdown.
-	int 	    - Also output internal documentation as text.
-	int-html    - Also output internal documentation as html.
-	int-md 	    - Also output internal documentation as markdown.
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+        int         - Also output internal documentation as text.
+        int-html    - Also output internal documentation as html.
+        int-md      - Also output internal documentation as markdown.
 
 =item B<-T pTest>
 
@@ -183,7 +183,7 @@ Fatal Errors:
     Testing 123
     {tag2}
     Testing 456
-       
+
 =head2 Example File: file2.txt
 
     This text is ignored.
@@ -199,7 +199,7 @@ Fatal Errors:
     Testing 1010
     {tagend}
     extra text
-    
+
 =head2 Example command runs
 
     $ tag-collect-sh -t tag1 file[12].txt
@@ -274,7 +274,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.12 $ $Date: 2023/01/04 19:31:46 $ GMT 
+$Revision: 1.13 $ $Date: 2023/01/06 18:05:15 $ GMT
 
 =cut
 EOF
@@ -716,7 +716,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.12 $'
+cVer='$Revision: 1.13 $'
 fSetGlobals
 
 # -------------------

@@ -3,7 +3,7 @@
 if [ $# -eq 0 ]; then
     cat <<EOF
 Usage
-	vid-duration *.mp4 *.mp3
+        vid-duration *.mp4 *.mp3
 EOF
     exit 1
 fi

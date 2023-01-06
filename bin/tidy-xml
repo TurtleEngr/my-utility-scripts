@@ -2,7 +2,7 @@
 if [ $# -eq 0 ]; then
     cat <<EOF
 Usage:
-	tidy-xml FILE...
+        tidy-xml FILE...
 
 Cleanup xml files so they are easier to read (the original file is
 replaced with the re-formatted file).

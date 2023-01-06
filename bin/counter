@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/counter,v 1.7 2021/10/26 19:26:09 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/counter,v 1.8 2023/01/06 18:05:13 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -50,8 +50,8 @@ counter - manage a count up or count down timer for OBS
 
 =head1 SYNOPSIS
 
-	counter [-m Min | -s Sec | -t Time [-T Time]] [-u|-d] [-p] [-i Sec]
-		[-f File] [-S "Start"] [-E "End"] [-h]
+        counter [-m Min | -s Sec | -t Time [-T Time]] [-u|-d] [-p] [-i Sec]
+                [-f File] [-S "Start"] [-E "End"] [-h]
 
 =head1 DESCRIPTION
 
@@ -149,38 +149,38 @@ To use the counter, point OBS text to read from the counter file
 Countdown timer for 2min 13sec. File /tmp/counter.tmp will be use for
 time remaining.
 
- 	counter -m 2 -s 13
+        counter -m 2 -s 13
 
 Countup timer for 2min 13sec, but wait for user to press Enter to
 start it. And first display "Time until Program". At end, display
 "Starting".
 
- 	counter -u -m 2 -s 13 -p -S "Time until Program" -E "Starting"
+        counter -u -m 2 -s 13 -p -S "Time until Program" -E "Starting"
 
-Start a counter in background for 15 min. The start 
+Start a counter in background for 15 min. The start
 a replacement counter time for 2 min, before the first one
 finishes.  When the second counter starts, any running counters using file
 /tmp/counter.tmp will die, before the other counter starts.
 
- 	counter -m 15 -s 0 &
-	sleep 60
-	counter -m 2 -s 0 &
+        counter -m 15 -s 0 &
+        sleep 60
+        counter -m 2 -s 0 &
 
 If you need to have two counters running at the same time, use two
 different counter files.
 
- 	counter -m 15 -s 0 -f /tmp/counter1.tmp &
-	counter -m 2  -s 0 -f /tmp/counter2.tmp &
+        counter -m 15 -s 0 -f /tmp/counter1.tmp &
+        counter -m 2  -s 0 -f /tmp/counter2.tmp &
 
 Start countdown timer to end at 11am.
 
- 	counter -t '2020-12-06 11am'
+        counter -t '2020-12-06 11am'
 
 Countdown timer, duration is calculated between the two times
 specified.  To test what dates values are allowed, use the "date
 --date='time'" command.
 
- 	counter -T '2020-12-06 11am - 7min - 62sec' -t '2020-12-06 11am'
+        counter -T '2020-12-06 11am - 7min - 62sec' -t '2020-12-06 11am'
 
 =head1 ENVIRONMENT
 
@@ -206,7 +206,7 @@ date
 
 =head1 HISTORY
 
-$Revision: 1.7 $ GMT 
+$Revision: 1.8 $ GMT
 
 =cut
 EOF
@@ -233,7 +233,7 @@ function fError()
 function fLog()
 {
     # Usage:
-    #     gErr=8801		# optional
+    #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
     # pLevel - emerg alert crit err warning notice info debug
 
@@ -290,7 +290,7 @@ gErr=0
 
 # -------------------
 # Define the version number for this script
-cVer='$Revision: 1.7 $'
+cVer='$Revision: 1.8 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

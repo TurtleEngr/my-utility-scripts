@@ -1,21 +1,21 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/back-disk-change,v 1.3 2021/10/26 19:26:08 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/back-disk-change,v 1.4 2023/01/06 18:05:12 bruce Exp $
 
 # Usage
-#	back-disk-change BackDir Interval DiskId LastId
+#       back-disk-change BackDir Interval DiskId LastId
 #
 # If the backup disk has been changed, then move all of the old first
 # interval files to an "old" dir, so that the next interval level will
 # be done correctly.
 #
 # Example in rsnapshot.conf
-#	cmd_preexec	back-disk-change /media/disk/rsnapshot hourly disk.id rsnapshot-last.id
+#       cmd_preexec     back-disk-change /media/disk/rsnapshot hourly disk.id rsnapshot-last.id
 #
 # Files, for this example:
 #
-# /media/disk/disk.id 			- id file with date stamp
-# /var/log/rsnapshot-last.id 		- last backup disk id
-# /media/disk/rsnapshot/hourly.0 	- interval file always kept
+# /media/disk/disk.id                   - id file with date stamp
+# /var/log/rsnapshot-last.id            - last backup disk id
+# /media/disk/rsnapshot/hourly.0        - interval file always kept
 # /media/disk/rsnapshot/old_2010-02-24_13_01/rsnapshot-last.id - previous disk
 # /media/disk/rsnapshot/old_2010-02-24_13_01/hourly.* - moved files
 

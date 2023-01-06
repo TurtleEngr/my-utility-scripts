@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-split,v 1.9 2022/05/25 17:19:31 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/vid-split,v 1.10 2023/01/06 18:05:16 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -237,7 +237,7 @@ with no -x option.
 
 =head1 HISTORY
 
-$Revision: 1.9 $
+$Revision: 1.10 $
 
 =cut
 EOF
@@ -263,7 +263,7 @@ function fError()
 function fLog()
 {
     # Usage:
-    #     gErr=8801		# optional
+    #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
     # pLevel - emerg alert crit err warning notice info debug
 
@@ -462,8 +462,8 @@ function fJoin()
 
     if [ "$tMin" -eq 1 ]; then
         fCmd "ffmpeg -f concat -safe 0 -i \
-		 <(printf \"file '$PWD/%s'\n\" ${tBase}-[0-9][0-9][0-9].$tExt) \
-		 -c copy $pFile"
+                 <(printf \"file '$PWD/%s'\n\" ${tBase}-[0-9][0-9][0-9].$tExt) \
+                 -c copy $pFile"
     fi
 
     fDuration "$pFile"
@@ -486,7 +486,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-export cVer='$Revision: 1.9 $'
+export cVer='$Revision: 1.10 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

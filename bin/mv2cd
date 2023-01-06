@@ -11,10 +11,10 @@ mv2cd file...
 
 If you are on the master release/mirror server and in a subdirectory
 under one of:
-	/release/mirror/*/*
-	/release/package/archive/*
-	/release/package/development/*
-	/release/package/released/*
+        /release/mirror/*/*
+        /release/package/archive/*
+        /release/package/development/*
+        /release/package/released/*
 
 then the files that you list will be moved to the /release/cd.archive/
 directory (with the /release/ part of the path stripped off.  Only

@@ -1,38 +1,38 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/logtime,v 1.16 2021/10/26 19:26:10 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/logtime,v 1.17 2023/01/06 18:05:14 bruce Exp $
 
 # --------------------
 if [ $# -eq 0 -o "x$1" = "x-h" ]; then
     cat <<EOF
 Usage
-	logtime	- this help
-	logtime	-h this help
-	logtime [start|begin] [text] - recommended start message
-	logtime [text]
-	logtime [stop|done|end|finish] [text] - then commit
+        logtime - this help
+        logtime -h this help
+        logtime [start|begin] [text] - recommended start message
+        logtime [text]
+        logtime [stop|done|end|finish] [text] - then commit
 Description
-	logtime will log a timestamp message to logtime.csv with this format
+        logtime will log a timestamp message to logtime.csv with this format
 
-	YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,text
-	1          2        3  4   5    6   7
+        YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,text
+        1          2        3  4   5    6   7
 
-	If the "text" begins with one of the "stop" keywords, then the
-	logtime.csv file will be "committed". The Sec field can be used
-	to quickly find the number of sec between each log entry.
+        If the "text" begins with one of the "stop" keywords, then the
+        logtime.csv file will be "committed". The Sec field can be used
+        to quickly find the number of sec between each log entry.
 
-	The logtime.csv file will be looked for in:
-	/home/video/PROJ/logtime.csv
-	./logtime.csv
-	../logtime.csv
-	../../logtime.csv
-	etc.
+        The logtime.csv file will be looked for in:
+        /home/video/PROJ/logtime.csv
+        ./logtime.csv
+        ../logtime.csv
+        ../../logtime.csv
+        etc.
 
-	If not found, and the first word is "start" then logtime.csv
-	will be created in the current directory. Otherwise you will
-	need to create logtime.csv in the "top" directory for the
-	project.
+        If not found, and the first word is "start" then logtime.csv
+        will be created in the current directory. Otherwise you will
+        need to create logtime.csv in the "top" directory for the
+        project.
 See also:
-	timelog.sh
+        timelog.sh
 EOF
     exit 1
 fi

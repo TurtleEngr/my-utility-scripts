@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-#	find * -type d | dir-level [-t] [-l N]
+#       find * -type d | dir-level [-t] [-l N]
 
 # -------------------
 # Config
@@ -16,7 +16,7 @@ fi
 # Get options
 pFileList=""
 pLevel=100
-pTab="s/	/   |/g"
+pTab="s/        /   |/g"
 while getopts :tl: tArg; do
     case $tArg in
         t) pTab="" ;;
@@ -34,13 +34,13 @@ let pLevel=pLevel-1
 
 cat $pFileList |
     $cAWK -v pLevel=$pLevel '{
-	sub("/$","",$1)
-	level = gsub("[^/]*/", "", $1)
-	if (level > pLevel) {
-		next
-	}
-	for (i=1; i<level; i++) {
-		printf("\t")
-	}
-	print $1
+        sub("/$","",$1)
+        level = gsub("[^/]*/", "", $1)
+        if (level > pLevel) {
+                next
+        }
+        for (i=1; i<level; i++) {
+                printf("\t")
+        }
+        print $1
 }' | sed "$pTab"

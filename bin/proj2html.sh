@@ -1,15 +1,15 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/proj2html.sh,v 1.2 2021/10/26 19:26:11 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/proj2html.sh,v 1.3 2023/01/06 18:05:15 bruce Exp $
 
 # -------------------
 if [ $# -ne 1 ]; then
     cat <<EOF
 Usage:
-	proj2html.sh OPEN_PROJ_FILE.xml
+        proj2html.sh OPEN_PROJ_FILE.xml
 Input:
-	OPEN_PROJ_FILE.xml - Microsoft Project xml file
+        OPEN_PROJ_FILE.xml - Microsoft Project xml file
 Output:
-	OPEN_PROJ_FILE.csv
+        OPEN_PROJ_FILE.csv
 EOF
     exit 1
 fi

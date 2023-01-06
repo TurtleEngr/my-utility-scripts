@@ -1,15 +1,15 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/kden2csv.sh,v 1.2 2021/10/26 19:26:10 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/kden2csv.sh,v 1.3 2023/01/06 18:05:14 bruce Exp $
 
 # -------------------
 if [ $# -ne 1 ]; then
     cat <<EOF
 Usage:
-	kden2csv.sh FILE.kdenlive
+        kden2csv.sh FILE.kdenlive
 Input:
-	FILE.kdenlive
+        FILE.kdenlive
 Output:
-	FILE.csv
+        FILE.csv
 EOF
     exit 1
 fi

@@ -3,7 +3,7 @@
 if [ $# -ne 3 ]; then
     cat <<EOF
 Usage:
-	html-diff OldFile.html NewFile.html DiffFile.html
+        html-diff OldFile.html NewFile.html DiffFile.html
 
 This script generates ins and del tags for the differences between
 OldFile and NewFile.  This works best for xhtml files that have been
@@ -47,31 +47,31 @@ diff -bBwi --ifdef=NeW $1 $2 >$tTmpFile
 
 awk '
 /^#ifdef NeW/ {
-	Ins = 1
-	print "<ins>"
-	next
+        Ins = 1
+        print "<ins>"
+        next
 }
 /^#endif / && Ins {
-	Ins = 0
-	print "</ins>"
-	next
+        Ins = 0
+        print "</ins>"
+        next
 }
 /^#ifndef NeW/ {
-	Del = 1
-	print "<del>"
-	next
+        Del = 1
+        print "<del>"
+        next
 }
 /^#else / && Del {
-	Del = 0
-	print "</del>"
-	Ins = 1
-	print "<ins>"
-	next
+        Del = 0
+        print "</del>"
+        Ins = 1
+        print "<ins>"
+        next
 }
 /^#endif / && Del {
-	Del = 0
-	print "</del>"
-	next
+        Del = 0
+        print "</del>"
+        next
 }
 {print $0}
 ' <$tTmpFile >$3

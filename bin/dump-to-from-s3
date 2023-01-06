@@ -46,7 +46,7 @@ select pUpDown in QUIT HELP up down; do
         QUIT) exit 1 ;;
         HELP)
             cat <<EOF
-up   - Upload the FILE in current dir to 
+up   - Upload the FILE in current dir to
 down - Download the FILE in from S3 to the current dir
 EOF
             ;;

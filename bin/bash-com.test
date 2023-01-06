@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/bash-com.test,v $
-# $Revision: 1.7 $ $Date: 2022/12/20 00:31:16 $ GMT
+# $Revision: 1.8 $ $Date: 2023/01/06 18:05:12 $ GMT
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -42,7 +42,7 @@ bash-com.test - test the bash-com.inc functions
 
 =head1 SYNOPSIS
 
-	bash-com.test [testName,testName,...]
+        bash-com.test [testName,testName,...]
 
 =head1 DESCRIPTION
 
@@ -81,7 +81,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.7 $ $Date: 2022/12/20 00:31:16 $ GMT 
+$Revision: 1.8 $ $Date: 2023/01/06 18:05:12 $ GMT
 
 =cut
 EOF
