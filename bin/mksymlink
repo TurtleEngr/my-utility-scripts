@@ -1,7 +1,7 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/mksymlink,v $
 
-export gpCheck gpForce gLinkFile gpRestore gpSave
+export gpCheck gpForce gLinkDefault gLinkFile gLinkFileOr gpRestore gpSave
 
 # ========================================
 # Script Functions
@@ -51,6 +51,8 @@ fUsage()
 =head1 NAME mksymlink
 
 Save and restore symlinks to/from .symlink.$HOSTNAME definition files.
+If .symlink.$HOSTNAME does not exist for restore, then look for
+'.symlink'.
 
 =head1 SYNOPSIS
 
@@ -77,6 +79,9 @@ needed.
 
 Save symlinks to .symlink.$HOSTNAME
 
+Manuall rename .symlink.$HOSTNAME to .symlink if the symlinks will be
+the same across the different hosts.
+
 Convert $HOME/ in links to '~/'.
 
 Only file symlinks are saved. Directory symlinks are ignored (notice output).
@@ -91,13 +96,14 @@ before updating them.
 
 =item B<-r>
 
-Restore symlinks defined in .symlink.$HOSTNAME
+Restore symlinks defined in .symlink.$HOSTNAME or .symlink if
+.symlink.$HOSTNAME is not found.
 
 Skip the ones were the destination file does not exist.
 
 Skip symlinks that are already defined, unless -f option is used.
 
-Error if .symlink.$HOSTNAME is missing.
+Error if .symlink.$HOSTNAME and .symlink files are missing.
 
 =item B<-c>
 
@@ -106,11 +112,11 @@ Check simlinks.
 Warning if an existing symlink does not point to an existing file (or
 directory).
 
-Warning if links in .symlink.$HOSTNAME are not defined in current dir.
+Warning if links in .symlink.$HOSTNAME or .symlink are not found in current dir.
 
-Warning if files are not found for the links in .symlink.$HOSTNAME.
+Warning if files are not found for the links in .symlink.$HOSTNAME or .symlink
 
-Error if .symlink.$HOSTNAME is missing.
+Error if .symlink.$HOSTNAME and .symlink files are missing.
 
 =item B<-h>
 
@@ -314,7 +320,9 @@ fSetGlobals()
     gpRestore=0
     gpCheck=0
     gpForce=0
-    gLinkFile=.symlink.$HOSTNAME
+    gLinkDefault=.symlink.$HOSTNAME
+    gLinkFile=$gLinkDefault
+    gLinkFileOr="$gLinkFile or .symlink"
 
     # Define the Required and the Optional progs, space separated
     fComCheckDeps "awk" "pod2man"
@@ -354,8 +362,11 @@ EOF
 
 fSymlinkExists()
 {
-    if [ ! -f .symlink.$HOSTNAME ]; then
-        fLog2 -p warn -m ".symlink.$HOSTNAME is missing" -l $LINENO
+    if [ ! -f $gLinkFile ]; then
+        gLinkFile=.symlink
+    fi
+    if [ ! -f $gLinkFile ]; then
+        fLog2 -p warn -m "$gLinkFileOr is missing" -l $LINENO
         exit 1
     fi
     return 0
@@ -367,7 +378,7 @@ fCheckValid()
         return 1
     fi
     if [[ -z "$tSrc" || -z "$tDst" || -n "$tOther" ]]; then
-        fLog2 -p warn -m "Problem in .symlink.$HOSTNAME, expected 2 args" -l "$LINENO:$tLine"
+        fLog2 -p warn -m "Problem in $gLinkFileOr, expected 2 args" -l "$LINENO:$tLine"
         return 1
     fi
     if [[ -f $tDst || -d $tDst ]]; then
@@ -408,7 +419,7 @@ fSave()
     'ls' -lF | grep ' -> ' | awk '{print $11,$9}' | while read -r tSrc tDst tOther; do
         ##echo "Processing: $tSrc $tDst $tOther"
         if [ -n "$tOther" ]; then
-            fError2 -i -m "Problem in .symlink.$HOSTNAME with line: $tSrc $tDst $tOther" -l $LINENO
+            fError2 -i -m "Problem in $gLinkFileOr with line: $tSrc $tDst $tOther" -l $LINENO
         fi
         if [ "${tSrc%*/}" != "$tSrc" ]; then
             fLog2 -p warn -m "Dir $tDst symlink will not be saved" -l $LINENO
@@ -433,7 +444,7 @@ fRestore()
 
     fSymlinkExists
 
-    cat .symlink.$HOSTNAME | while read -r tSrc tDst tOther; do
+    cat $gLinkFile | while read -r tSrc tDst tOther; do
         let ++tLine
         if ! fCheckValid; then
             continue
@@ -461,7 +472,7 @@ fCheck()
 
     fSymlinkExists
 
-    cat .symlink.$HOSTNAME | while read -r tSrc tDst tOther; do
+    cat $gLinkFile | while read -r tSrc tDst tOther; do
         let ++tLine
         if ! fCheckValid; then
             continue
@@ -628,23 +639,23 @@ testSavePos()
 
     # ----------
     tResult=$(fSave 2>&1)
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
     assertContains "$LINENO warn dir" "$tResult" "warn: Dir dir2-sym symlink will not be saved"
 
-    tResult=$(cat .symlink.$HOSTNAME 2>&1)
+    tResult=$(cat $gLinkFile 2>&1)
     assertContains "$LINENO file3" "$tResult" "dir1/file3 file3"
     assertContains "$LINENO file4" "$tResult" "dir1/file4 file4sym"
 
     # ----------
     cd $Tmp/test/dir1
     tResult=$(fSave 2>&1)
-    assertTrue "$LINENO file exists $(ls -al) $tResult" "[ -f .symlink.$HOSTNAME ]"
+    assertTrue "$LINENO file exists $(ls -al) $tResult" "[ -f $gLinkFile ]"
 
-    tResult=$(cat .symlink.$HOSTNAME 2>&1)
+    tResult=$(cat $gLinkFile 2>&1)
     assertContains "$LINENO file1" "$tResult" "../file1 file1"
     assertContains "$LINENO file2" "$tResult" "$Tmp/test/file2 file2"
 
-    ##    cat $Tmp/test/dir1/.symlink.$HOSTNAME
+    ##    cat $Tmp/test/dir1/$gLinkFile
     ##    lstree
     return 0
 } # testSavePos
@@ -657,23 +668,23 @@ testSaveNeg()
     # ----------
     cd $Tmp 2>&1
     tResult=$(fSave 2>&1)
-    assertFalse "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertFalse "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
     assertContains "$LINENO no symlinks" "$tResult" "notice: There are no symlinks in this dir"
 
     # ----------
     cd $Tmp/test
     tResult=$(fSave 2>&1)
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
 
     gpForce=1
     tResult=$(fSave 2>&1)
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
-    assertContains "$LINENO warn exists" "$tResult" "warn: .symlink.$HOSTNAME exists"
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
+    assertContains "$LINENO warn exists" "$tResult" "warn: $gLinkDefault exists"
 
     gpForce=0
     tResult=$(fSave 2>&1 < <(echo -e "n\n"))
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
-    assertContains "$LINENO warn exists" "$tResult" "warn: .symlink.$HOSTNAME exists"
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
+    assertContains "$LINENO warn exists" "$tResult" "warn: $gLinkDefault exists"
     assertContains "$LINENO overwrite" "$tResult" "Overwrite?"
     assertContains "$LINENO overwrite" "$tResult" "skipping"
 
@@ -681,33 +692,33 @@ testSaveNeg()
     gpForce=1
     ln -s bar foo
     tResult=$(fSave 2>&1)
-    assertContains "$LINENO warn exists" "$tResult" "warn: .symlink.$HOSTNAME exists"
+    assertContains "$LINENO warn exists" "$tResult" "warn: $gLinkDefault exists"
     assertContains "$LINENO skip" "$tResult" "warn: foo does not exist"
 
-    tResult=$(cat .symlink.$HOSTNAME)
+    tResult=$(cat $gLinkFile)
     assertContains "$LINENO file3" "$tResult" "dir1/file3 file3"
     assertContains "$LINENO file4" "$tResult" "dir1/file4 file4sym"
 
-    ##   cat $Tmp/test/.symlink.$HOSTNAME
+    ##   cat $Tmp/test/$gLinkFile
     ##    lstree
     return 0
 } # testSaveNeg
 
 # --------------------------------
-testRestorePos()
+testRestorePos1()
 {
     local tResult
 
     # ----------
     tResult=$(fRestore 2>&1)
-    assertFalse "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
-    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.$HOSTNAME is missing"
+    assertFalse "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
+    assertContains "$LINENO $tResult" "$tResult" "warn: $gLinkFileOr is missing"
 
     # ----------
     # Setup
     fSave 2>/dev/null
     find * -prune -type l -exec rm {} \;
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
 
     # ----------
     tResult=$(fRestore 2>&1)
@@ -723,7 +734,28 @@ testRestorePos()
     assertContains "$LINENO $tResult" "$tResult" "warn: file4sym file or dir already exists"
 
     return 0
-} # testRestorePos
+} # testRestorePos1
+
+# --------------------------------
+testRestorePos2()
+{
+    local tResult
+    
+    # ----------
+    # Setup
+    fSave 2>/dev/null
+    find * -prune -type l -exec rm {} \;
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
+    mv -f $gLinkFile .symlink
+
+    # ----------
+    tResult=$(fRestore 2>&1)
+    assertTrue "$LINENO file3" "[ -L file3 ]"
+    assertTrue "$LINENO file4" "[ -L file4sym ]"
+
+    return 0
+} # testRestorePos2
+
 
 # --------------------------------
 testRestoreNeg()
@@ -734,13 +766,13 @@ testRestoreNeg()
     # Setup
     fSave 2>/dev/null
     find * -prune -type l -exec rm {} \;
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
 
     # ----------
-    echo "foo" >>.symlink.$HOSTNAME
-    echo "foo bar test" >>.symlink.$HOSTNAME
+    echo "foo" >>$gLinkFile
+    echo "foo bar test" >>$gLinkFile
     tResult=$(fRestore 2>&1)
-    assertContains "$LINENO $tResult" "$tResult" "warn: Problem in .symlink.$HOSTNAME, expected 2 args"
+    assertContains "$LINENO $tResult" "$tResult" "warn: Problem in $gLinkFileOr, expected 2 args"
     assertContains "$LINENO $tResult" "$tResult" ":3]"
     assertContains "$LINENO $tResult" "$tResult" ":4]"
 
@@ -767,13 +799,13 @@ testCheck()
     # ----------
     # Setup
     fSave 2>/dev/null
-    echo "foo" >>.symlink.$HOSTNAME
-    echo "foo bar test" >>.symlink.$HOSTNAME
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f .symlink.$HOSTNAME ]"
+    echo "foo" >>$gLinkFile
+    echo "foo bar test" >>$gLinkFile
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
 
     # ----------
     tResult=$(fCheck 2>&1)
-    assertContains "$LINENO $tResult" "$tResult" "warn: Problem in .symlink.$HOSTNAME, expected 2 args"
+    assertContains "$LINENO $tResult" "$tResult" "warn: Problem in $gLinkFileOr, expected 2 args"
     assertContains "$LINENO $tResult" "$tResult" ":3]"
     assertContains "$LINENO $tResult" "$tResult" ":4]"
 
@@ -800,7 +832,7 @@ testCLISave()
     gpTest=""
 
     tResult=$($cBin/mksymlink -s 2>&1)
-    assertTrue "$LINENO file exists" "[ -f .symlink.$HOSTNAME ]"
+    assertTrue "$LINENO file exists" "[ -f $gLinkFile ]"
     assertContains "$LINENO $tResult" "$tResult" "warn: Dir dir2-sym symlink will not be saved"
     ##assertContains "$LINENO $tResult" "$tResult" "xxx"
 
@@ -828,7 +860,7 @@ testCLIRestore()
     local tResult
 
     gpTest=""
-    fSave
+    fSave &>/dev/null
 
     tResult=$($cBin/mksymlink -r 2>&1)
     assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
@@ -850,7 +882,7 @@ testCLICheck()
     gpTest=""
 
     tResult=$($cBin/mksymlink -c 2>&1)
-    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance is missing"
+    assertContains "$LINENO $tResult" "$tResult" "warn: $gLinkFileOr is missing"
     ##assertContains "$LINENO $tResult $(ls -al)" "$tResult" "xxx"
 
     fSave >/dev/null 2>&1
