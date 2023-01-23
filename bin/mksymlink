@@ -79,8 +79,8 @@ needed.
 
 Save symlinks to .symlink.$HOSTNAME
 
-Manuall rename .symlink.$HOSTNAME to .symlink if the symlinks will be
-the same across the different hosts.
+You need to manually rename .symlink.$HOSTNAME to .symlink if the
+symlinks will be the same across different hosts.
 
 Convert $HOME/ in links to '~/'.
 
@@ -90,9 +90,12 @@ Only current dir symlinks are saved.
 
 Symlink pointing to missing files will not be saved (warning output)
 
-Overwrites the contents of .symlink.$HOSTNAME, so you should do -c and
--r first to not loose links. Also version the .symlink.$HOSTNAME files
-before updating them.
+This option will create a new .symlink.$HOSTNAME, so you should do -c
+and -r first to not loose links. Also version the .symlink.$HOSTNAME
+files before updating them.
+
+If .symlink.$HOSTNAME already exists, then it will be moved to a
+backup version, .symlink.$HOSTNAME.sav~
 
 =item B<-r>
 
@@ -104,6 +107,11 @@ Skip the ones were the destination file does not exist.
 Skip symlinks that are already defined, unless -f option is used.
 
 Error if .symlink.$HOSTNAME and .symlink files are missing.
+
+=item B<-f>
+
+With the -r option, force existing symlinks to be updated if they
+already exist.
 
 =item B<-c>
 
@@ -404,17 +412,9 @@ fSave()
     fi
 
     if [ -f $gLinkFile ]; then
-        fLog2 -p warn -m "$gLinkFile exists" -l $LINENO
-        if [ $gpForce -eq 0 ]; then
-            echo -n "Overwrite? (y/n) "
-            read
-            if [ "$REPLY" != "y" ]; then
-                fLog2 -p notice -m "skipping" -l $LINENO
-                exit 1
-            fi
-        fi
+        fLog2 -p warn -m "$gLinkFile exists, saving before overwriting." -l $LINENO
+        mv --backup=t $gLinkFile $gLinkFile.sav
     fi
-    rm $gLinkFile >/dev/null 2>&1
 
     'ls' -lF | grep ' -> ' | awk '{print $11,$9}' | while read -r tSrc tDst tOther; do
         ##echo "Processing: $tSrc $tDst $tOther"
@@ -509,19 +509,19 @@ setUp()
     # Create valid symlinks.
     # Invalid symlinks or missinging files will be created in individual tests
 
-    mkdir -p $Tmp/test/dir1 $Tmp/test/dir2 >/dev/null 2>&1
+    mkdir -p $Tmp/test/dir1 $Tmp/test/dir2 &>/dev/null
 
-    cd $Tmp/test >/dev/null 2>&1
+    cd $Tmp/test &>/dev/null
     touch file1 file2 dir1/file3 dir1/file4
     ln -s dir1/file3 .
     ln -s dir1/file4 file4sym
     ln -s dir2 dir2-sym
 
-    cd dir1 >/dev/null 2>&1
+    cd dir1 &>/dev/null
     ln -s $Tmp/test/file2 .
     ln -s ../file1 .
 
-    cd $Tmp/test >/dev/null 2>&1
+    cd $Tmp/test &>/dev/null
     ##lstree $Tmp
     return 0
 
@@ -676,31 +676,15 @@ testSaveNeg()
     tResult=$(fSave 2>&1)
     assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
 
-    gpForce=1
     tResult=$(fSave 2>&1)
+    assertContains "$LINENO" "$tResult" "$gLinkFile exists, saving before overwriting"
     assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
-    assertContains "$LINENO warn exists" "$tResult" "warn: $gLinkDefault exists"
-
-    gpForce=0
-    tResult=$(fSave 2>&1 < <(echo -e "n\n"))
-    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
-    assertContains "$LINENO warn exists" "$tResult" "warn: $gLinkDefault exists"
-    assertContains "$LINENO overwrite" "$tResult" "Overwrite?"
-    assertContains "$LINENO overwrite" "$tResult" "skipping"
-
-    # ----------
-    gpForce=1
-    ln -s bar foo
-    tResult=$(fSave 2>&1)
-    assertContains "$LINENO warn exists" "$tResult" "warn: $gLinkDefault exists"
-    assertContains "$LINENO skip" "$tResult" "warn: foo does not exist"
+    assertTrue "$LINENO file .sav exists $(ls -al)" "[ -f $gLinkFile.sav ]"
 
     tResult=$(cat $gLinkFile)
     assertContains "$LINENO file3" "$tResult" "dir1/file3 file3"
     assertContains "$LINENO file4" "$tResult" "dir1/file4 file4sym"
 
-    ##   cat $Tmp/test/$gLinkFile
-    ##    lstree
     return 0
 } # testSaveNeg
 
@@ -836,20 +820,10 @@ testCLISave()
     assertContains "$LINENO $tResult" "$tResult" "warn: Dir dir2-sym symlink will not be saved"
     ##assertContains "$LINENO $tResult" "$tResult" "xxx"
 
-    tResult=$($cBin/mksymlink -s 2>&1 < <(echo -e "n\n"))
-    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance exists"
-    assertContains "$LINENO $tResult" "$tResult" "Overwrite? (y/n)"
-    assertContains "$LINENO $tResult" "$tResult" "mksymlink notice: skipping"
-
-    tResult=$($cBin/mksymlink -s 2>&1 < <(echo -e "y\n"))
-    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance exists"
-    assertContains "$LINENO $tResult" "$tResult" "Overwrite? (y/n)"
-    assertContains "$LINENO $tResult" "$tResult" "mksymlink warn: Dir dir2-sym symlink will not be saved"
-
-    tResult=$($cBin/mksymlink -s -f 2>&1)
-    assertContains "$LINENO $tResult" "$tResult" "warn: .symlink.mxtrance exists"
-    assertNotContains "$LINENO $tResult" "$tResult" "Overwrite? (y/n)"
-    assertContains "$LINENO $tResult" "$tResult" "mksymlink warn: Dir dir2-sym symlink will not be saved"
+    tResult=$($cBin/mksymlink -s 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "exists, saving before overwriting"
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
+    assertTrue "$LINENO file .sav exists $(ls -al)" "[ -f $gLinkFile.sav ]"
 
     return 0
 } # testCLISave
@@ -885,9 +859,9 @@ testCLICheck()
     assertContains "$LINENO $tResult" "$tResult" "warn: $gLinkFileOr is missing"
     ##assertContains "$LINENO $tResult $(ls -al)" "$tResult" "xxx"
 
-    fSave >/dev/null 2>&1
+    fSave &>/dev/null
     find * -prune -type l -exec rm {} \;
-    fRestore >/dev/null 2>&1
+    fRestore &>/dev/null
 
     tResult=$($cBin/mksymlink -c 2>&1)
     assertContains "$LINENO $tResult" "$tResult" "warn: file3 file or dir already exists"
