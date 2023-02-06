@@ -5,6 +5,8 @@
 # NAME mksymlink
 
 Save and restore symlinks to/from .symlink.$HOSTNAME definition files.
+If .symlink.$HOSTNAME does not exist for restore, then look for
+'.symlink'.
 
 # SYNOPSIS
 
@@ -29,6 +31,9 @@ needed.
 
     Save symlinks to .symlink.$HOSTNAME
 
+    You need to manually rename .symlink.$HOSTNAME to .symlink if the
+    symlinks will be the same across different hosts.
+
     Convert $HOME/ in links to '~/'.
 
     Only file symlinks are saved. Directory symlinks are ignored (notice output).
@@ -37,19 +42,28 @@ needed.
 
     Symlink pointing to missing files will not be saved (warning output)
 
-    Overwrites the contents of .symlink.$HOSTNAME, so you should do -c and
-    \-r first to not loose links. Also version the .symlink.$HOSTNAME files
-    before updating them.
+    This option will create a new .symlink.$HOSTNAME, so you should do -c
+    and -r first to not loose links. Also version the .symlink.$HOSTNAME
+    files before updating them.
+
+    If .symlink.$HOSTNAME already exists, then it will be moved to a
+    backup version, .symlink.$HOSTNAME.sav~
 
 - **-r**
 
-    Restore symlinks defined in .symlink.$HOSTNAME
+    Restore symlinks defined in .symlink.$HOSTNAME or .symlink if
+    .symlink.$HOSTNAME is not found.
 
     Skip the ones were the destination file does not exist.
 
     Skip symlinks that are already defined, unless -f option is used.
 
-    Error if .symlink.$HOSTNAME is missing.
+    Error if .symlink.$HOSTNAME and .symlink files are missing.
+
+- **-f**
+
+    With the -r option, force existing symlinks to be updated if they
+    already exist.
 
 - **-c**
 
@@ -58,11 +72,11 @@ needed.
     Warning if an existing symlink does not point to an existing file (or
     directory).
 
-    Warning if links in .symlink.$HOSTNAME are not defined in current dir.
+    Warning if links in .symlink.$HOSTNAME or .symlink are not found in current dir.
 
-    Warning if files are not found for the links in .symlink.$HOSTNAME.
+    Warning if files are not found for the links in .symlink.$HOSTNAME or .symlink
 
-    Error if .symlink.$HOSTNAME is missing.
+    Error if .symlink.$HOSTNAME and .symlink files are missing.
 
 - **-h**
 

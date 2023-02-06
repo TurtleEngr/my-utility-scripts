@@ -1,293 +1,75 @@
-# NAME
+<div>
+    <hr/>
+</div>
 
-counter - manage a count up or count down timer for OBS
+# NAME doc-fmt
+
+    doc-fmt outputs a script's documentaion to doc/
 
 # SYNOPSIS
 
-           countdown [-m Min | -s Sec | -E Time [-S Time]] [-i Sec] [-F Format]
-                   [-f File] [-h] [-H Style] [-l] [-v] [-x] [-T "TestList"]
-
-           Format: S|M|H
-           Style: usage, long, man, html, md, int, int-html, int-md
-    
+    doc-fmt [-h] [-H pStyle] [-T pTest] pScript...
 
 # DESCRIPTION
 
-Use -m and -s to set the duration for the timer. Or use -E to set the
-end time. -E time is assumed to be in the future, or a time greater
-than -S.
+Output each pScript's documentation to doc/ directory. If the pScript
+file is older than doc/pScript.txt, then nothing is output.
 
-Only one version of counter can write to File. So there is a check to
-see if a counter is already running for the specified file. If yes,
-then that counter process is killed, and the File will be used by the
-new counter.  This is done so that a counter can be run in the
-background.
+If a pScript contains '=pod', then output: doc/pScript.man,
+doc/pScript.txt, doc/pScript.html, and doc/pScript.md
+
+If a pScript contains '=internal-pod', then output:
+doc/pScript.int.txt, doc/pScript.int.html, and doc/pScript.int.md
+
+If a pScript does not contain '=pod', then execute:
+
+    ./pScript -h >doc/pScript -h
 
 # OPTIONS
-
-- **-m Min**
-
-    Number of minutes. Default: 0
-
-- **-s Sec**
-
-    Number of seconds. Default: 60
-
-- **-E Time**
-
-    Set the hour, minute time from now. The counter's duration will be set
-    to number of min:sec until that time. The hour HH must use 24 hour time,
-    or add AM/PM to the time. The Time can be any time that is a valid input
-    to the "date" command (i.e. the --date option).
-
-    Setting -E will override any -m and -s settings.
-
-    If there is no -S start time, then the counter will end at exactly at
-    the -E time.
-
-    See Example section.
-
-- **-S Time**
-
-    The start time of the -E calculation can be defined. The default is "now".
-
-    If -S is given, then the number of seconds between -S and -E
-    date/times will be use to set the -s option (-m will be 0). Then that
-    will be used to define an internal end time, and the counter will
-    count down to that time.
-
-    See Example section.
-
-- **-i Sec**
-
-    Interval in seconds. Default: 1
-
-- **-F Format**
-
-    Format for the counter. Default: M
-
-        S - SS
-        M - MM:SS
-        H - HH:MM:SS
-
-- **-f File**
-
-    File location for the counter. Default: /tmp/counter.tmp
 
 - **-h**
 
     Output this "long" usage help. See "-H long"
 
-- **-H Style**
+- **-H pStyle**
 
-    Style is used to select the type of help and how it is formatted.
+    pStyle is used to select the type of help and how it is formatted.
 
     Styles:
 
-            short|usage - Output short usage help as text.
-            long|text   - Output long usage help as text.
-            man         - Output long usage help as a man page.
-            html        - Output long usage help as html.
-            md          - Output long usage help as markdown.
-            int         - Also output internal documentation as text.
-            int-html    - Also output internal documentation as html.
-            int-md      - Also output internal documentation as markdown.
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
 
-- **-l**
-
-    Send log messages to syslog. Default is to just send output to stderr.
-
-- **-v**
-
-    Verbose output. Default is is only output (or log) messages with
-    level "warning" and higher.
-
-    \-v - output "notice" and higher.
-
-    \-vv - output "info" and higher.
-
-- **-x**
-
-    Set the gpDebug level. Add 1 for each -x.
-    Or you can set gpDebug before running the script.
-
-    See: fLog and fLog2 (Internal documentation)
-
-- **-T "TestList"**
+- **-T "pTest"**
 
     Run the unit test functions in this script.
 
-    If TestList is "all", then all of the functions that begin with "test"
-    will be run. Otherwise "Test" should match the test function names
-    separated with spaces.
+    "**-T all**" will run all of the functions that begin with "test".
 
-    If TestList is "com", then $cBin/bash-com.test will be run to test the
-    bash-com.inc functions.
+    "**-T list**" will list all of the test functions.
 
-    For more details about shunit2 (or shunit2.1), see
-    shunit2/shunit2-manual.html
-    [Source](https://github.com/kward/shunit2)
+    Otherwise, "**pTest**" should match the test function names separated
+    with spaces (between quotes).
 
-    See shunit2, shunit2.1, bash-com.inc, and global: gpUnitDebug
-
-    Also for more help, use the "-H int" option.
-
-# RETURN VALUE
-
-# ERRORS
-
-Fatal Error: Bad arguments.
-
-Warnings: Another counter was running, it will be stopped.
-
-# EXAMPLES
-
-To use countdown, point OBS text to read from the counter file
-/tmp/counter.tmp or from the file specified with the -f option.
-
-Countdown timer for 2min 13sec. File /tmp/counter.tmp will be use for
-time remaining.
-
-        countdown -m 2 -s 13
-
-Start a counter in background for 15 min. The start 
-a replacement countdown time for 2 min, before the first one
-finishes.  When the second countdown starts, any running countdowns using file
-/tmp/counter.tmp will die, before the other countdown starts.
-
-        countdown -m 15 -s 0 &
-        sleep 60
-        countdown -m 2 -s 0 &
-
-If you need to have two countdowns running at the same time, use two
-different countdown files.
-
-        countdown -m 15 -s 0 -f /tmp/counter1.tmp &
-        countdown -m 2  -s 0 -f /tmp/counter2.tmp &
-
-Start countdown timer to end at 2pm.
-
-        countdown -E 2pm
-        countdown -E 14:00
-
-Note: if -S is not set, and the current time is past 2pm, then the
-end time will be "tomorrow 2pm"
-
-Start countdown timer to end at 11am on 2020-12-06.
-
-        countdown -E '2020-12-06 11am'
-
-Countdown timer. The duration is calculated between the two times
-specified.  To test what dates values are allowed, use the "date
-\--date='time'" command.
-
-        countdown -S '2020-12-06 11am - 7min - 62sec' -E '2020-12-06 11am'
-
-Get documentation in different formats:
-
-        countdown -H html >countdown.html
-        countdown -H int-html >countdown-internal.html
-
-# ENVIRONMENT
-
-# FILES
-
-    /tmp/counter.tmp
+    For more help, see template.sh
 
 # SEE ALSO
 
-date
-
-# NOTES
-
-# CAVEATS
+shunit2.1
+bash-com.inc
 
 # DIAGNOSTICS
 
-# BUGS
-
-# RESTRICTIONS
-
-# AUTHOR
+To verify the script is internally OK, run: doc-fmt -T all
 
 # HISTORY
 
-$Revision: 1.1 $ GMT 
+GPLv3 (c) Copyright 2023
 
-# count Internal Documentation
-
-### fUsage pStyle
-
-This function selects the type of help output. See -h and -H options.
-
-## Script Global Variables
-
-### setUp
-
-This is run before each test function.
-
-### setUp
-
-This is run before each test function.
-
-## Unit Test Functions
-
-### fUDebug "pMsg"
-
-If gpUnitDebug is not 0, then echo $pMsg.
-
-If 
-
-### testLockCounterFile
-
-Test getting lock dir. Multiple tests are in this function, because
-the order matters for this tests.
-
-gpVerbose is set in some places, so that the fLog messages will be
-output.
-
-## Script Functions
-
-### fCleanUp
-
-Calls fComCleanUp.
-
-### fSetGlobals
-
-Calls fComSetGlobals to set globals used by bash-com.inc.
-
-Set initial values for all of the other globals use by this
-script. The ones that begin with "gp" can usually be overridden by
-setting them before the script is run.
-
-### fSetGlobals pMin pMax pNum
-
-### fValidArgs E-pEnd m-pMin s-pSec
-
-### fValidStartEnd s-pStart e-pEnd
-
-### fValidDir pFile
-
-### fLockCounterFile pLockDir pFile
-
-### fGetCount pEndTime
-
-The aguments are not validated, because it is expected they were
-validated before this function is called.
-
-### fOutput pSec pFmt pFile
-
-### fSetEndTime S-pStart E-pEnd m-pMin s-pSec
-
-### fRunCounter pEndTime pFile pFmt pInt
-
-### fRunTests
-
-Run unit tests for this script.
-
-Note: if the system is "busy" the test times could be off by one
-second. Either wait for the system to not be busy, or implement a
-"mockDate" function to make the times constent for the tests.
+$Revision: 1.2 $ $Date: 2023/02/06 23:13:45 $ GMT
 
 <div>
     <hr/>
@@ -371,7 +153,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.1 $'
+           cVer='$Revision: 1.2 $'
 
 ### Documentation Format
 
@@ -453,7 +235,6 @@ See Globals: gpLog, gpFacility, gpVerbose, gpDebug
     fLog info "Output only if -vv" $LINENO 8
     fLog debug "Output only if $gpDebug > 0" $LINENO
     fLog debug-3 "Output only if $gpDebug > 0 and $gpDebug <= 3" $LINENO
-    
 
 ### fError "pMsg" \[$LINENO\] \[pErr\]
 
@@ -528,7 +309,7 @@ shunit2.1
 
 # HISTORY
 
-$Revision: 1.1 $ $Date: 2022/12/20 01:57:33 $ GMT 
+$Revision: 1.2 $ $Date: 2023/02/06 23:13:45 $ GMT
 
 ## Test bash-com.inc
 
