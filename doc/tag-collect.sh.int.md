@@ -80,7 +80,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.2 $'
+           cVer='$Revision: 1.3 $'
 
 ### Documentation Format
 
@@ -162,7 +162,6 @@ See Globals: gpLog, gpFacility, gpVerbose, gpDebug
     fLog info "Output only if -vv" $LINENO 8
     fLog debug "Output only if $gpDebug > 0" $LINENO
     fLog debug-3 "Output only if $gpDebug > 0 and $gpDebug <= 3" $LINENO
-    
 
 ### fError "pMsg" \[$LINENO\] \[pErr\]
 

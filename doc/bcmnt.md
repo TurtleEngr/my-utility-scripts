@@ -113,5 +113,5 @@ encfs, encfsctl
 
 # HISTORY
 
-    $Revision: 1.11 $
-    $Date: 2022/12/20 01:56:58 $ GMT 
+    $Revision: 1.12 $
+    $Date: 2023/02/06 23:13:45 $ GMT

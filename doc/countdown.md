@@ -4,12 +4,11 @@ counter - manage a count up or count down timer for OBS
 
 # SYNOPSIS
 
-           countdown [-m Min | -s Sec | -E Time [-S Time]] [-i Sec] [-F Format]
-                   [-f File] [-h] [-H Style] [-l] [-v] [-x] [-T "TestList"]
+        countdown [-m Min | -s Sec | -E Time [-S Time]] [-i Sec] [-F Format]
+                [-f File] [-h] [-H Style] [-l] [-v] [-x] [-T "TestList"]
 
-           Format: S|M|H
-           Style: usage, long, man, html, md, int, int-html, int-md
-    
+        Format: S|M|H
+        Style: usage, long, man, html, md, int, int-html, int-md
 
 # DESCRIPTION
 
@@ -150,7 +149,7 @@ time remaining.
 
         countdown -m 2 -s 13
 
-Start a counter in background for 15 min. The start 
+Start a counter in background for 15 min. The start
 a replacement countdown time for 2 min, before the first one
 finishes.  When the second countdown starts, any running countdowns using file
 /tmp/counter.tmp will die, before the other countdown starts.
@@ -212,4 +211,4 @@ date
 
 # HISTORY
 
-$Revision: 1.8 $ GMT 
+$Revision: 1.9 $ GMT

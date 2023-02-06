@@ -1,36 +1,3 @@
-# mksymlink Internal Documentation
-
-### fUsage pStyle
-
-This function selects the type of help output. See -h and -H options.
-
-## Script Global Variables
-
-## Script Functions
-
-### fCleanUp
-
-Calls fComCleanUp.
-
-### fSetGlobals
-
-Calls fComSetGlobals to set globals used by bash-com.inc.
-
-Set initial values for all of the other globals use by this
-script. The ones that begin with "gp" can usually be overridden by
-setting them before the script is run.
-
-### fValidate
-
-### testUsage
-
-Test fUsage. Verify the different output styles work. See also testComUsage
-in bash-com.test.
-
-### fRunTests
-
-Run unit tests for this script.
-
 <div>
     <hr/>
 </div>
@@ -113,7 +80,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.1 $'
+           cVer='$Revision: 1.2 $'
 
 ### Documentation Format
 
@@ -195,7 +162,6 @@ See Globals: gpLog, gpFacility, gpVerbose, gpDebug
     fLog info "Output only if -vv" $LINENO 8
     fLog debug "Output only if $gpDebug > 0" $LINENO
     fLog debug-3 "Output only if $gpDebug > 0 and $gpDebug <= 3" $LINENO
-    
 
 ### fError "pMsg" \[$LINENO\] \[pErr\]
 

@@ -107,7 +107,7 @@ start it. And first display "Time until Program". At end, display
 
         counter -u -m 2 -s 13 -p -S "Time until Program" -E "Starting"
 
-Start a counter in background for 15 min. The start 
+Start a counter in background for 15 min. The start
 a replacement counter time for 2 min, before the first one
 finishes.  When the second counter starts, any running counters using file
 /tmp/counter.tmp will die, before the other counter starts.
@@ -156,4 +156,4 @@ date
 
 # HISTORY
 
-$Revision: 1.7 $ GMT 
+$Revision: 1.8 $ GMT

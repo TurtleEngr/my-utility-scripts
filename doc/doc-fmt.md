@@ -69,4 +69,4 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.1 $ $Date: 2023/01/06 16:27:50 $ GMT 
+$Revision: 1.2 $ $Date: 2023/02/06 23:13:46 $ GMT

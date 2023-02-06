@@ -4,7 +4,7 @@ svn-change.sh - list file have have been added or modified since a specific vers
 
 # SYNOPSIS
 
-        svn-change.sh -n version [-h[elp]] [-v[erbose]] [-d[ebug] level] 
+        svn-change.sh -n version [-h[elp]] [-v[erbose]] [-d[ebug] level]
 
 # DESCRIPTION
 
@@ -67,4 +67,4 @@ Bruce Rafnel
 
 Bruce R.
 
-$Revision: 1.3 $ GMT 
+$Revision: 1.4 $ GMT

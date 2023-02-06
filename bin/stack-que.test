@@ -1,0 +1,478 @@
+#!/bin/bash
+# $Source: /repo/local.cvs/per/bruce/bin/stack-que.test,v $
+# $Revision: 1.5 $ $Date: 2023/02/06 23:12:44 $ GMT
+
+export PWD cCurDir cBin gpTest cName
+export SHUNIT_COLOR
+
+# --------------------------------
+fTestUsage()
+{
+    pod2text $cBin/$cName 2>&1 | more
+    exit 1
+    cat <<\EOF &>/dev/null
+=pod
+
+=head1 NAME
+
+    stack-que.inc  - bash stack and queue functions
+    stack-que.test - test the stack and queue functions
+
+=head1 SYNOPSIS
+
+    fsqNew [pName]
+    fsqPush pElement [pName]
+    fsqPop [pName]
+        See: sqReturn
+    fsqSize [pName]
+        See: sqReturn
+    fsqClear [pName]
+    fsqExists [pName]
+
+=head1 DESCRIPTION
+
+This is a simple implemention of a stack (FILO) and queue (FIFO).
+
+To see this usage text formatted, run:
+
+    ./stack-que.inc -h
+
+=head2 fsqNew pType [pName]
+
+This must be called before any of the other fsq functions.
+
+if pType is "que", then push/pop will behave as a queue.
+Order: First In First Out
+
+if pType is "stack", then push/pop will behave as a stack.
+Order: Last In First Out
+
+If pName is defined, that will set the name of the que or stack.  That
+way multiple queues and stacks can be used.  Default: sqList
+
+=head2 fsqClear [pName]
+
+Empty the stack or queue.
+
+=head2 fsqPush pElement [pName]
+
+Push pElement into queue or stack.
+
+    sqReturn = pElement
+    Return = 0
+
+If there is no pElement
+
+    sqReturn = ""
+    Return = 1
+
+=head2 fsqPop [pName]
+
+Pop and element from a que or stack.
+
+    sqReturn = first element put in queue
+    Return = 0
+
+If there are no elements in the queue
+
+    sqReturn = ""
+    Return = 1
+
+=head2 sqSize [pName]
+
+Return the number of elements in the queue or stack.
+
+    sqReturn = number of elements
+    Return = 0
+
+=head1 RETURN VALUE
+
+    0 - if OK
+    1 - if Error
+
+=head1 ERRORS
+
+If fsqNew is not called first, then all the other functions will
+return non-zero.
+
+=head1 EXAMPLES
+
+    cBin=~/bin
+    . $cBin/stack-que.inc
+
+    fsqNew stack
+    fsqPush one
+    fsqPush two
+    fsqPush three
+    fsqSize
+    echo $sqReturn
+  3
+    fsqPop
+    echo $sqReturn
+  three
+
+    fsqNew que Input
+    fsqPush one Input
+    fsqPush two Input
+    fsqPush three Input
+
+    fsqNew que Output
+    while fsqPop Input; do
+        fsqPush "Processed-$sqReturn" Output
+    done
+    while fsqPop Output; do
+        echo $sqReturn
+    done
+  Processed-one
+  Processed-two
+  Processed-three
+
+=head1 ENVIRONMENT
+
+sqReturn, sqType, sqList, sq[pName]
+
+=for comment =head1 FILES
+
+=head1 SEE ALSO
+
+shunit2.1
+
+=head1 NOTES
+
+=head2 Initial version
+
+This is what Chat-GPT generated with this input: "In bash, write queue
+management functions. Push a string, pop a string, and list the size
+of the queue."
+
+    queue=()
+
+    function push_string() {
+      local string=$1
+      queue=("${queue[@]}" "$string")
+    }
+
+    function pop_string() {
+      local front=${queue[0]}
+      queue=("${queue[@]:1}")
+      echo $front
+    }
+
+    function list_size() {
+      echo ${#queue[@]}
+    }
+
+Nice and simple, but no error handling.
+
+=head2 Enhancemnts
+
+Make this ready for producion use.
+
+ * Put results in sgReturn rather than echo. Makes testing easier.
+ * Renamed functions and prefix with "fsq"
+ * Rename global vars and prefix them with "sq"
+ * Wrote tests. See stack-que.test
+ * Modified fsqPush to be a stack or queue
+ * Added error handling
+ * Added ability to have more than one stack or queue
+ * Added fsqClear, fsqExists
+
+=head2 To test
+
+shunit2.1 is used to run the unit tests for the stack-que.inc
+functions.
+
+For this help:
+
+    ./stack-que.test
+
+Run tests
+
+    ./stack-que.test all
+    ./stack-que.test [testName,testName,...]
+
+=head1 CAVEATS
+
+The elements to be pushed cannot contain spaces.
+
+=for comment =head1 DIAGNOSTICS
+
+=for comment =head1 BUGS
+
+=for comment =head1 RESTRICTIONS
+
+=for comment =head1 AUTHOR
+
+=head1 HISTORY
+
+$Revision: 1.5 $ $Date: 2023/02/06 23:12:44 $ GMT
+
+=cut
+EOF
+} # fTestUsage
+
+# --------------------------------
+##oneTimeSetUp() {
+##    return 0
+##} # oneTimeSetUp
+
+# --------------------------------
+setUp()
+{
+    unset sqList &>/dev/null
+    return 0
+} # setUp
+
+# --------------------------------
+testQueOK()
+{
+    fsqNew que
+
+    fsqSize
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO" "[ $sqReturn -eq 0 ]"
+
+    fsqPush one
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    fsqSize
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ $sqReturn -eq 1 ]"
+
+    fsqPop
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "one" ]"
+    fsqSize
+    assertTrue "$LINENO $sqReturn" "[ $sqReturn -eq 0 ]"
+
+    fsqPush one
+    fsqPush two
+    fsqPush three
+    fsqSize
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO" "[ $sqReturn -eq 3 ]"
+
+    fsqPop
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "one" ]"
+    fsqPop
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "two" ]"
+    fsqPop
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "three" ]"
+
+    fsqPush one
+    fsqPush two
+    fsqPush three
+    fsqSize
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO" "[ $sqReturn -eq 3 ]"
+    fsqClear
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    fsqSize
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO" "[ $sqReturn -eq 0 ]"
+
+    return 0
+} # testQueOK
+
+# --------------------------------
+testStackOK()
+{
+    fsqNew stack
+
+    fsqSize
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO" "[ $sqReturn -eq 0 ]"
+
+    fsqPush one
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    fsqSize
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ $sqReturn -eq 1 ]"
+
+    fsqPop
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "one" ]"
+    fsqSize
+    assertTrue "$LINENO $sqReturn" "[ $sqReturn -eq 0 ]"
+
+    fsqPush one
+    fsqPush two
+    fsqPush three
+
+    fsqPop
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "three" ]"
+    fsqPop
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "two" ]"
+    fsqPop
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "one" ]"
+
+    return 0
+} # testStackOK
+
+# --------------------------------
+testErr()
+{
+    fsqExists foob
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    fsqNew que foob
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+    fsqExists foob
+    assertTrue "$LINENO" "[ $? -eq 0 ]"
+
+    fsqSize
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    fsqSize foo
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    fsqPop
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    fsqPop bar
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    fsqPush
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    fsqPush foobar
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+
+    return 0
+} # testErr
+
+# --------------------------------
+testQueErr()
+{
+    fsqNew que
+
+    fsqPop
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ -z \"$sqReturn\" ]"
+
+    fsqPush
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ -z \"$sqReturn\" ]"
+
+    return 0
+} # testQueErr
+
+# --------------------------------
+testStackErr()
+{
+    fsqNew stack
+
+    fsqPop
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ -z \"$sqReturn\" ]"
+
+    fsqPush
+    assertTrue "$LINENO" "[ $? -ne 0 ]"
+    assertTrue "$LINENO $sqReturn" "[ -z \"$sqReturn\" ]"
+
+    return 0
+} # testStackErr
+
+# --------------------------------
+testMultipleOK()
+{
+    fsqNew que Aque
+    fsqNew que Bque
+    fsqNew stack Astk
+    fsqNew stack Bstk
+
+    fsqPush Aqone Aque
+    fsqPush Aqtwo Aque
+    fsqPush Bqone Bque
+    fsqPush Bqtwo Bque
+
+    fsqPush Aone Astk
+    fsqPush Atwo Astk
+    fsqPush Bone Bstk
+    fsqPush Btwo Bstk
+
+    fsqPop Aque
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "Aqone" ]"
+    fsqPop Bque
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "Bqone" ]"
+    fsqPop Astk
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "Atwo" ]"
+    fsqPop Bstk
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "Btwo" ]"
+} # testMultipleOK
+
+# --------------------------------
+testExample()
+{
+    local tResult
+
+    assertTrue "$LINENO" "fsqNew stack"
+    assertTrue "$LINENO" "fsqPush one"
+    assertTrue "$LINENO" "fsqPush two"
+    assertTrue "$LINENO" "fsqPush three"
+    assertTrue "$LINENO" "fsqSize"
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = 3 ]"
+
+    assertTrue "$LINENO" "fsqPop"
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = "three" ]"
+
+    assertTrue "$LINENO" "fsqNew que Input"
+    assertTrue "$LINENO" "fsqPush one Input"
+    assertTrue "$LINENO" "fsqPush two Input"
+    assertTrue "$LINENO" "fsqPush three Input"
+
+    assertTrue "$LINENO" "fsqNew que Output"
+    while fsqPop Input; do
+        fsqPush "Processed-$sqReturn" Output
+    done
+    fsqSize Output
+    assertTrue "$LINENO $sqReturn" "[ "$sqReturn" = 3 ]"
+
+    tResult=""
+    while fsqPop Output; do
+        tResult="$tResult $sqReturn"
+    done
+    assertTrue "$LINENO x${tResult}x" "[ \"$tResult\" = ' Processed-one Processed-two Processed-three' ]"
+
+    return 0
+} # testExample
+
+# -------------------
+# This should be the last defined function
+fRunTests()
+{
+    if [ "${gpTest:-all}" = "all" ]; then
+        # shellcheck disable=SC1091
+        . /usr/local/bin/shunit2.1
+        exit $?
+    fi
+    # shellcheck disable=SC1091
+    . /usr/local/bin/shunit2.1 -- $gpTest
+    exit $?
+} # fRunTests
+
+# ====================
+# Set current directory location in PWD and cCurDir, because with cron
+# jobs PWD is not set.
+if [ -z "$PWD" ]; then
+    PWD=$(pwd)
+fi
+cCurDir=$PWD
+
+# -------------------
+# Define the location of the script
+cBin=${0%/*}
+if [ "$cBin" = "." ]; then
+    cBin=$PWD
+fi
+cd $cBin
+cBin=$PWD
+cd $cCurDir
+
+# -------------------
+cName=stack-que.test
+
+# -------------------
+if [ $# -eq 0 ]; then
+    fTestUsage
+fi
+
+# Test these functions
+. $cBin/stack-que.inc
+
+# Input: "all" or a comma separated list of test function names
+gpTest="$*"
+fRunTests

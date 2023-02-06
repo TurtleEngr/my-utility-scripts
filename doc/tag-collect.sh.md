@@ -90,7 +90,6 @@ Fatal Errors:
     Testing 123
     {tag2}
     Testing 456
-       
 
 ## Example File: file2.txt
 
@@ -107,7 +106,6 @@ Fatal Errors:
     Testing 1010
     {tagend}
     extra text
-    
 
 ## Example command runs
 
@@ -169,4 +167,4 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.7 $ $Date: 2023/01/06 16:33:28 $ GMT 
+$Revision: 1.8 $ $Date: 2023/02/06 23:13:48 $ GMT

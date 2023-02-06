@@ -37,7 +37,7 @@ one.  On exit, be sure to add any new files.
 
 - **-v KdenLiveVer**
 
-    Pick a different kdenlive version. 
+    Pick a different kdenlive version.
 
     The archived versions are: 16.11, 16.12, 17.04, 17.12, 19.04, 19.08
 
@@ -127,4 +127,4 @@ kdenlive file's version.
 
 # HISTORY
 
-$Revision: 1.11 $ $Date: 2022/12/20 01:57:00 $ GMT 
+$Revision: 1.12 $ $Date: 2023/02/06 23:13:48 $ GMT
