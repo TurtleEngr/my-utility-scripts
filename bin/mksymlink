@@ -84,11 +84,13 @@ symlinks will be the same across different hosts.
 
 Convert $HOME/ in links to '~/'.
 
-Only file symlinks are saved. Directory symlinks are ignored (notice output).
+Only file symlinks are saved. Directory symlinks are ignored, unless
+the -f option is used.
 
 Only current dir symlinks are saved.
 
-Symlink pointing to missing files will not be saved (warning output)
+Symlink pointing to missing files will not be saved (see warning
+output)
 
 This option will create a new .symlink.$HOSTNAME, so you should do -c
 and -r first to not loose links. Also version the .symlink.$HOSTNAME
@@ -393,7 +395,7 @@ fCheckValid()
         fLog2 -p warn -m "$tDst file or dir already exists" -l "$LINENO:$tLine"
         return 1
     fi
-    if [ ! -f $tSrc ]; then
+    if [ ! -e $tSrc ]; then
         fLog2 -p warn -m "$tSrc not found" -l "$LINENO:$tLine"
         return 1
     fi
@@ -421,11 +423,11 @@ fSave()
         if [ -n "$tOther" ]; then
             fError2 -i -m "Problem in $gLinkFileOr with line: $tSrc $tDst $tOther" -l $LINENO
         fi
-        if [ "${tSrc%*/}" != "$tSrc" ]; then
-            fLog2 -p warn -m "Dir $tDst symlink will not be saved" -l $LINENO
+        if [[ "${tSrc%*/}" != "$tSrc" && $gpForce -eq 0 ]]; then
+            fLog2 -p warn -m "Directory $tDst symlink will not be saved" -l $LINENO
             continue
         fi
-        if [ ! -f $tDst ]; then
+        if [ ! -e $tDst ]; then
             fLog2 -p warn -m "$tDst does not exist, skipping" -l $LINENO
             continue
         fi
@@ -522,7 +524,7 @@ setUp()
     ln -s ../file1 .
 
     cd $Tmp/test &>/dev/null
-    ##lstree $Tmp
+#    lstree $Tmp
     return 0
 
     cat <<EOF
@@ -633,14 +635,15 @@ EOF
 } # testUsage
 
 # --------------------------------
-testSavePos()
+testSavePos1()
 {
     local tResult
 
     # ----------
+    gpForce=0
     tResult=$(fSave 2>&1)
     assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
-    assertContains "$LINENO warn dir" "$tResult" "warn: Dir dir2-sym symlink will not be saved"
+    assertContains "$LINENO $tResult" "$tResult" "warn: Directory dir2-sym symlink will not be saved"
 
     tResult=$(cat $gLinkFile 2>&1)
     assertContains "$LINENO file3" "$tResult" "dir1/file3 file3"
@@ -657,8 +660,25 @@ testSavePos()
 
     ##    cat $Tmp/test/dir1/$gLinkFile
     ##    lstree
+
     return 0
-} # testSavePos
+} # testSavePos1
+
+# --------------------------------
+testSavePos2()
+{
+    local tResult
+    
+    # ----------
+    gpForce=1
+    tResult=$(fSave 2>&1)
+    assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
+
+    tResult=$(cat $gLinkFile 2>&1)
+    assertContains "$LINENO $tResult" "$tResult" "dir2-sym"
+
+    return 0
+} # testSavePos2
 
 # --------------------------------
 testSaveNeg()
@@ -817,11 +837,12 @@ testCLISave()
 
     tResult=$($cBin/mksymlink -s 2>&1)
     assertTrue "$LINENO file exists" "[ -f $gLinkFile ]"
-    assertContains "$LINENO $tResult" "$tResult" "warn: Dir dir2-sym symlink will not be saved"
+    assertContains "$LINENO $tResult" "$tResult" "warn: Directory dir2-sym symlink will not be saved"
     ##assertContains "$LINENO $tResult" "$tResult" "xxx"
 
-    tResult=$($cBin/mksymlink -s 2>&1)
+    tResult=$($cBin/mksymlink -sf 2>&1)
     assertContains "$LINENO $tResult" "$tResult" "exists, saving before overwriting"
+    assertNotContains "$LINENO $tResult" "$tResult" "warn: Directory dir2-sym symlink will not be saved"
     assertTrue "$LINENO file exists $(ls -al)" "[ -f $gLinkFile ]"
     assertTrue "$LINENO file .sav exists $(ls -al)" "[ -f $gLinkFile.sav ]"
 

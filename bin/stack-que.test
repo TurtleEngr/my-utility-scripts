@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/stack-que.test,v $
-# $Revision: 1.5 $ $Date: 2023/02/06 23:12:44 $ GMT
+# $Revision: 1.6 $ $Date: 2023/02/08 06:35:10 $ GMT
 
 export PWD cCurDir cBin gpTest cName
 export SHUNIT_COLOR
@@ -20,6 +20,8 @@ fTestUsage()
 
 =head1 SYNOPSIS
 
+    ./stack-que.test -h - full help
+
     fsqNew [pName]
     fsqPush pElement [pName]
     fsqPop [pName]
@@ -35,7 +37,7 @@ This is a simple implemention of a stack (FILO) and queue (FIFO).
 
 To see this usage text formatted, run:
 
-    ./stack-que.inc -h
+    ./stack-que.test -h
 
 =head2 fsqNew pType [pName]
 
@@ -205,7 +207,7 @@ The elements to be pushed cannot contain spaces.
 
 =head1 HISTORY
 
-$Revision: 1.5 $ $Date: 2023/02/06 23:12:44 $ GMT
+$Revision: 1.6 $ $Date: 2023/02/08 06:35:10 $ GMT
 
 =cut
 EOF
@@ -467,6 +469,10 @@ cName=stack-que.test
 
 # -------------------
 if [ $# -eq 0 ]; then
+    pod2usage $cBin/$cName 2>&1 | more
+    exit 1
+fi
+if [ "$1" = "-h" ]; then
     fTestUsage
 fi
 
