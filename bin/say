@@ -1,0 +1,276 @@
+#!/bin/bash
+
+# --------------------
+function fUsage()
+{
+    cat <<\EOF | pod2text | more
+=pod
+
+=for text ========================================
+
+=for html <hr/>
+
+=head1 NAME say
+
+say - using the festival service, say the text
+
+=head1 SYNOPSIS
+
+    say [-r] [-c Count] [-t Sec] [-h] [-v] TEXT
+
+=head1 DESCRIPTION
+
+Say the TEXT with the "festival" program.
+
+If the -r option is given it will repeat saying the TEXT. See the -r
+option for more details.
+
+If words are mispronounced, you can define substitutions in file
+"~/.festival.say". See the FILES section.
+
+You can change the festival voice. See file ~/.festivalrc in the FILES
+section.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-r>
+
+If set, repeat the TEXT every -t sec for -c times. See the defaults
+for -t and -c.
+
+=item B<-c Count>
+
+If -r, the number of times to repeat. Default: 5
+
+=item B<-t Sec>
+
+If -r, the number seconds between each repeat. Default: 10
+
+=item B<-v>
+
+Turn on verbose option.
+
+=item B<-h>
+
+Output this "long" usage help. If no option, then only the short
+synopis help will be output.
+
+=back
+
+=for comment =head1 RETURN VALUE
+
+=for comment =head1 ERRORS
+
+=head1 EXAMPLES
+
+Say "the job is done". Repeat every 5 seconds then stop after 3 times.
+
+    say -rv -t 5 -c 3 job is done
+
+=for comment =head1 ENVIRONMENT
+
+=head1 FILES
+
+=over 4
+
+=item ~/.festival.say
+
+This file contains a list word substitutions. The words should be all
+lowercase.
+
+Format:
+
+    match text/replacement text
+
+A sed script will be generated to do the substitutions. See the file:
+~/.cache/say/say.sed
+
+For example:
+
+    brigitte/bridge eat
+    monday/mun day
+    tue/tues day
+    foo bar/snae foo
+
+    # Lines beginning with # are ignored.
+    # Blank lines are ignored.
+    # Lines that don't have exactly 2 '/' separated argments on
+    # the line, are ignored.
+
+=item ~/.festivalrc
+
+    ; Local config file for festival
+    ; For global config, edit: /usr/share/festival/siteinit.scm
+
+    ; Uncomment the desired voice
+    ;;(voice_rab_diphone)
+    ;;(voice_don_diphone)
+    ;;(voice_kal_diphone)
+    ;;(voice_en1_mbrola)
+    ;;(voice_ked_diphone)
+    (voice_us1_mbrola)
+    ;;(voice_us2_mbrola)
+    ;;(voice_us3_mbrola)
+    ;;(voice_cmu_us_slt_arctic_hts)
+
+=back
+
+=head1 SEE ALSO
+
+=head2 Packages
+
+festival, festival-doc
+
+=head2 Voice Packages
+
+festvox-en1, festvox-kallpc16k, festvox-kdlpc16k, festvox-rablpc16k,
+festvox-us-slt-hts, festvox-us1, festvox-us2, festvox-us3
+
+=for comment =head1 NOTES
+
+=for comment =head1 CAVEATS
+
+=for comment =head1 DIAGNOSTICS
+
+=for comment =head1 BUGS
+
+=for comment =head1 RESTRICTIONS
+
+=for comment =head1 AUTHOR
+
+=head1 HISTORY
+
+    GPLv3 (c) Copyright 2023
+    $Revision: 1.6 $ $Date: 2023/02/15 09:46:42 $ GMT
+
+=cut
+EOF
+    exit 1
+} # fUsage
+
+# --------------------
+function fCreateSedReplaceScript()
+{
+    if [ ! -f ~/.festival.say ]; then
+        if [ ! -f ~/.cache/say/say.sed ]; then
+            mkdir ~/.cache/say &>/dev/null
+            touch ~/.cache/say/say.sed
+        fi
+        return
+    fi
+
+    if [ ! -f ~/.cache/say/say.sed ]; then
+        mkdir ~/.cache/say &>/dev/null
+        touch ~/.cache/say/say.sed
+        sleep 0.5
+        touch ~/.festival.say
+    fi
+
+    if [ ~/.festival.say -nt ~/.cache/say/say.sed ]; then
+        cat ~/.festival.say | awk -F / '
+            NF != 2 {
+                next
+            }
+            /# / {
+                next
+            }
+            {
+                print "s/\\b" $1 "\\b/ " $2 " /gi;"
+            }
+        ' >~/.cache/say/say.sed
+    fi
+} # fCreateSedReplaceScript
+
+# --------------------
+fSay()
+{
+    echo "$gpText" | sed -f ~/.cache/say/say.sed | festival --tts
+} # fSay
+
+# ========================================
+declare -igx gpVerbose=${gpVerbose:-0}
+declare -igx gpSayDelaySec=${gpSayDelaySec:-10}
+declare -igx gpSayCount=${gpSayCount:-5}
+declare -lgx gpText=""
+
+if [ -z "$PWD" ]; then
+    PWD=$(pwd)
+fi
+export cCurDir=$PWD
+export cBin=${0%/*}
+cd $cBin
+cBin=$PWD
+cd $cCurDir
+export cName=say
+
+if [ $# -eq 0 ]; then
+    pod2usage $cBin/$cName
+    exit 1
+fi
+
+if ! which festival &>/dev/null; then
+    fUsage
+    exit 1
+fi
+
+export gpRepeat=0
+while getopts :c:rt:hv tArg; do
+    case $tArg in
+        # Script arguments
+        c) gpSayCount=$OPTARG ;;
+        r) gpRepeat=1 ;;
+        t) gpSayDelaySec=$OPTARG ;;
+        # Common arguments
+        h) fUsage ;;
+        v) ((++gpVerbose)) ;;
+        :)
+            echo "Error: Value required for option: -$OPTARG" -l $LINENO
+            exit 1
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG" -l $LINENO
+            exit1
+            ;;
+    esac
+done
+((--OPTIND))
+shift $OPTIND
+if [ $# -ne 0 ]; then
+    gpText="$*"
+else
+    pod2usage $cBin/$cName
+    exit 1
+fi
+
+fCreateSedReplaceScript
+
+if [ $gpVerbose -ne 0 ]; then
+    echo -n 'Say: '
+    echo "$*" | sed -f ~/.cache/say/say.sed
+fi
+
+if [ $gpRepeat -eq 0 ]; then
+    fSay
+    exit 0
+fi
+
+if [ $gpVerbose -ne 0 ]; then
+    echo "every $gpSayDelaySec sec, $gpSayCount times."
+    sleep 0.25
+fi
+while [ $gpSayCount -ne 0 ]; do
+    fSay
+    if [ $gpVerbose -ne 0 ]; then
+        echo -n "$gpSayCount "
+    fi
+    ((--gpSayCount))
+    if [ $gpSayCount -eq 0 ]; then
+        echo
+        exit 0
+    fi
+    sleep $gpSayDelaySec
+done
+
+exit 0
