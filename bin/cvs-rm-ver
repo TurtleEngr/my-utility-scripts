@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-rm-ver,v 1.7 2023/01/06 18:05:16 bruce Exp $
+# $Header: /repo/local.cvs/per/bruce/bin/cvs-rm-ver,v 1.1 2023/02/15 00:14:43 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -29,11 +29,11 @@ function fUsage()
 
 =head1 NAME
 
-vid-rm-ver - remove all version except HEAD version for files
+cvs-rm-ver - remove all version except HEAD version for files
 
 =head1 SYNOPSIS
 
-        vid-rm-ver [-b] [-n] [-h] [-l] [-v] [-x[x..]] Files...
+        cvs-rm-ver [-b] [-n] [-h] [-l] [-v] [-x[x..]] Files...
 
 =head1 DESCRIPTION
 
@@ -133,8 +133,8 @@ They should only use the characters: [a-zA-Z][0-9][.-_]
 
 =head1 HISTORY
 
- $Revision: 1.7 $;
- $Date: 2023/01/06 18:05:16 $ GMT
+ $Revision: 1.1 $;
+ $Date: 2023/02/15 00:14:43 $ GMT
 
 =cut
 EOF
@@ -217,7 +217,7 @@ export gErr gpDebug cName gpVerbose gpLog cTmp cVer
 cName=${0##*/}
 
 # Define the version number for this script
-cVer='$Revision: 1.7 $'
+cVer='$Revision: 1.1 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
@@ -227,7 +227,7 @@ gpDebug=${gpDebug:-0}
 gpVerbose=""
 gpLog=0
 gErr=0
-cTmp=/tmp/vid-rm-ver.$$
+cTmp=/tmp/cvs-rm-ver.$$
 
 # -------------------
 fLog notice "$cName version $cVer" $LINENO

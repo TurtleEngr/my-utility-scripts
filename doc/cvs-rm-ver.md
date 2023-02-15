@@ -1,10 +1,10 @@
 # NAME
 
-vid-rm-ver - remove all version except HEAD version for files
+cvs-rm-ver - remove all version except HEAD version for files
 
 # SYNOPSIS
 
-        vid-rm-ver [-b] [-n] [-h] [-l] [-v] [-x[x..]] Files...
+        cvs-rm-ver [-b] [-n] [-h] [-l] [-v] [-x[x..]] Files...
 
 # DESCRIPTION
 
@@ -100,5 +100,5 @@ They should only use the characters: \[a-zA-Z\]\[0-9\]\[.-\_\]
 
 # HISTORY
 
-    $Revision: 1.12 $;
-    $Date: 2023/02/06 23:13:48 $ GMT
+    $Revision: 1.1 $;
+    $Date: 2023/02/15 00:19:15 $ GMT

@@ -36,11 +36,13 @@ needed.
 
     Convert $HOME/ in links to '~/'.
 
-    Only file symlinks are saved. Directory symlinks are ignored (notice output).
+    Only file symlinks are saved. Directory symlinks are ignored, unless
+    the -f option is used.
 
     Only current dir symlinks are saved.
 
-    Symlink pointing to missing files will not be saved (warning output)
+    Symlink pointing to missing files will not be saved (see warning
+    output)
 
     This option will create a new .symlink.$HOSTNAME, so you should do -c
     and -r first to not loose links. Also version the .symlink.$HOSTNAME

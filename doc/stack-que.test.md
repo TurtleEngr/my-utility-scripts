@@ -5,6 +5,8 @@
 
 # SYNOPSIS
 
+    ./stack-que.test -h - full help
+
     fsqNew [pName]
     fsqPush pElement [pName]
     fsqPop [pName]
@@ -20,7 +22,7 @@ This is a simple implemention of a stack (FILO) and queue (FIFO).
 
 To see this usage text formatted, run:
 
-    ./stack-que.inc -h
+    ./stack-que.test -h
 
 ## fsqNew pType \[pName\]
 
@@ -180,4 +182,4 @@ The elements to be pushed cannot contain spaces.
 
 # HISTORY
 
-$Revision: 1.5 $ $Date: 2023/02/06 23:12:44 $ GMT
+$Revision: 1.1 $ $Date: 2023/02/15 00:19:16 $ GMT
