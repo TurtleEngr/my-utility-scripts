@@ -524,7 +524,7 @@ setUp()
     ln -s ../file1 .
 
     cd $Tmp/test &>/dev/null
-#    lstree $Tmp
+    #    lstree $Tmp
     return 0
 
     cat <<EOF
@@ -668,7 +668,7 @@ testSavePos1()
 testSavePos2()
 {
     local tResult
-    
+
     # ----------
     gpForce=1
     tResult=$(fSave 2>&1)
@@ -744,7 +744,7 @@ testRestorePos1()
 testRestorePos2()
 {
     local tResult
-    
+
     # ----------
     # Setup
     fSave 2>/dev/null
@@ -759,7 +759,6 @@ testRestorePos2()
 
     return 0
 } # testRestorePos2
-
 
 # --------------------------------
 testRestoreNeg()
