@@ -108,6 +108,10 @@ festvox-us-slt-hts, festvox-us1, festvox-us2, festvox-us3
 
 # NOTES
 
+## Fix 1 for not working as root
+
+This worked for me on mxlinux.
+
 If you run "say" as root and it dees not work, and you get an error
 something like this:
 
@@ -119,9 +123,21 @@ And putting this in the file. Then reboot.
     options snd_hda_intel index=1
 
 Source: https://forums.debian.net/viewtopic.php?t=123902
-Or see archived source: https://archive.ph/2ylth
+Or archived at: https://archive.ph/2ylth
+
+## Fix 2 for not working as root
+
+This worked for me on Ubuntu 18.04.6 LTS. The 'say' script implments
+this fix.
+
+    if [ "$USER" = "root" ]; then
+        export XDG_RUNTIME_DIR=/run/user/$SUDO_UID
+    fi
+
+Source: https://unix.stackexchange.com/questions/231941/cant-run-aplay-as-root
+Or archived at: https://archive.ph/wip/sVgg7
 
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.2 $ $Date: 2023/02/17 02:26:27 $ GMT
+    $Revision: 1.3 $ $Date: 2023/02/17 02:50:19 $ GMT
