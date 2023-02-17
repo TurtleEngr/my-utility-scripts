@@ -53,6 +53,17 @@ Say "the job is done". Repeat every 5 seconds then stop after 3 times.
 
     say -rv -t 5 -c 3 job is done
 
+A fun use is to call 'say' to notify you with status messages. This
+will free you up from always looking at your display. (If you are in
+an open office, you'll want to use your headphones.) For example: you
+are copying some very large files to another system.
+
+    for i in *; do
+        say -v copying file $i
+        scp $i user@example.com:Documents
+    done
+    say -rv all the files have been copied
+
 # FILES
 
 - ~/.festival.say
@@ -140,4 +151,4 @@ Or archived at: https://archive.ph/wip/sVgg7
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.3 $ $Date: 2023/02/17 02:50:19 $ GMT
+    $Revision: 1.4 $ $Date: 2023/02/17 03:05:49 $ GMT
