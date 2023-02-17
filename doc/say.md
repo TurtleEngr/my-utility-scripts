@@ -45,7 +45,7 @@ section.
 - **-h**
 
     Output this "long" usage help. If no option, then only the short
-    synopis help will be output.
+    synopsis help will be output.
 
 # EXAMPLES
 
@@ -68,8 +68,8 @@ are copying some very large files to another system.
 
 - ~/.festival.say
 
-    This file contains a list word substitutions. The words should be all
-    lowercase.
+    This file contains a list of word substitutions. The words should be
+    all lowercase.
 
     Format:
 
@@ -87,7 +87,7 @@ are copying some very large files to another system.
 
         # Lines beginning with # are ignored.
         # Blank lines are ignored.
-        # Lines that don't have exactly 2 '/' separated argments on
+        # Lines that don't have exactly 2 '/' separated arguments on
         # the line, are ignored.
 
 - ~/.festivalrc
@@ -119,11 +119,11 @@ festvox-us-slt-hts, festvox-us1, festvox-us2, festvox-us3
 
 # NOTES
 
-## Fix 1 for not working as root
+## Fix 1 for 'say' not working as root
 
 This worked for me on mxlinux.
 
-If you run "say" as root and it dees not work, and you get an error
+If you run "say" as root and it does not work, and you get an error
 something like this:
 
     ALSA lib pcm_dmix.c:1075:(snd_pcm_dmix_open) unable to open slave aplay:
@@ -136,9 +136,9 @@ And putting this in the file. Then reboot.
 Source: https://forums.debian.net/viewtopic.php?t=123902
 Or archived at: https://archive.ph/2ylth
 
-## Fix 2 for not working as root
+## Fix 2 for 'say' not working as root
 
-This worked for me on Ubuntu 18.04.6 LTS. The 'say' script implments
+This worked for me on Ubuntu 18.04.6 LTS. The 'say' script implements
 this fix.
 
     if [ "$USER" = "root" ]; then
@@ -151,4 +151,4 @@ Or archived at: https://archive.ph/wip/sVgg7
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.4 $ $Date: 2023/02/17 03:05:49 $ GMT
+    $Revision: 1.5 $ $Date: 2023/02/17 05:46:47 $ GMT
