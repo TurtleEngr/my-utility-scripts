@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/local.cvs/per/bruce/bin/template.sh,v $
-# $Revision: 1.73 $ $Date: 2023/01/06 17:59:20 $ GMT
+# $Revision: 1.74 $ $Date: 2023/02/17 02:26:27 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -280,7 +280,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.73 $ $Date: 2023/01/06 17:59:20 $ GMT
+$Revision: 1.74 $ $Date: 2023/02/17 02:26:27 $ GMT
 
 =cut
 EOF
@@ -448,9 +448,9 @@ testUsage()
     assertContains "$LINENO int-md.3" "$tResult" '### testComUsage'
 
     #-----
-    tResult=$($cBin/SCRIPTNAME 2>&1)
+    tResult=$($cBin/$cName 2>&1)
     assertContains "$LINENO cmd-call" "$tResult" "Usage:"
-    assertContains "$LINENO cmd-call" "$tResult" "SCRIPTNAME"
+    assertContains "$LINENO cmd-call" "$tResult" "$cName"
 
     #-----
     return 0
@@ -503,7 +503,7 @@ fRunTests()
     if [ "$gpTest" = "list" ]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
         grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
-        exit $?
+        exit $tErr
     fi
     SHUNIT_COLOR=auto
     # SHUNIT_COLOR=always
@@ -576,7 +576,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.73 $'
+cVer='$Revision: 1.74 $'
 fSetGlobals
 
 # -------------------

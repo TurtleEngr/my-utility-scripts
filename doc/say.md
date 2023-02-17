@@ -106,7 +106,22 @@ festival, festival-doc
 festvox-en1, festvox-kallpc16k, festvox-kdlpc16k, festvox-rablpc16k,
 festvox-us-slt-hts, festvox-us1, festvox-us2, festvox-us3
 
+# NOTES
+
+If you run "say" as root and it dees not work, and you get an error
+something like this:
+
+    ALSA lib pcm_dmix.c:1075:(snd_pcm_dmix_open) unable to open slave aplay:
+
+Then you can probably fix this by creating file /etc/modprobe.d/default.conf
+And putting this in the file. Then reboot.
+
+    options snd_hda_intel index=1
+
+Source: https://forums.debian.net/viewtopic.php?t=123902
+Or see archived source: https://archive.ph/2ylth
+
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.1 $ $Date: 2023/02/15 09:49:45 $ GMT
+    $Revision: 1.2 $ $Date: 2023/02/17 02:26:27 $ GMT
