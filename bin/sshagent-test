@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.4 2022/12/20 00:20:48 bruce Exp $
+# $Id: sshagent-test,v 1.5 2023/05/12 22:31:12 bruce Exp $
 set -u
 
 # Var prefix key
@@ -112,12 +112,12 @@ and after running.
 
 =item *
 
-sshagent-test requires a non X11 /usr/bin/ssh-askpass
+sshagent-test requires a non X11 /bin/ssh-askpass
 
 Create this substitute:
 
     cat <<EOF >~/bin/ssh-askpass
-    #!/usr/bin/bash
+    #!/bin/bash
     read
     echo $REPLY
     EOF
@@ -157,7 +157,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.4 $ $Date: 2022/12/20 00:20:48 $ GMT
+$Revision: 1.5 $ $Date: 2023/05/12 22:31:12 $ GMT
 
 =cut
 EOF

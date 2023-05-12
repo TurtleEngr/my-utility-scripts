@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# --------------------
+fUsage() {
+    cat <<EOF
+Usage:
+    cvs-move OldFile NewFile
+EOF
+    exit 1
+}
+
+# --------------------
+fCmd() {
+    tCmd=$1
+    echo "$tCmd"
+    if ! $tCmd; then
+        echo -e "\tError"
+        fUsage
+    fi
+}
+
+# ====================
+if [ $# -ne 2 ]; then
+    fUsage
+fi
+
+tOld=$1
+tNew=$2
+
+fCmd "test -d CVS"
+fCmd "test ! -f $tNew"
+fCmd "test -f $tOld"
+echo
+fCmd "cp -a $tOld $tNew"
+fCmd "cvs add $tNew"
+fCmd "rm $tOld"
+fCmd "cvs rm $tOld"
+echo
+echo "Now run: cvs ci"
