@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cat <<EOF
+Steps for making an older version to be the new HEAD version.
+
+cvs update -r VER FILE
+mv FILE FILE.new
+cvs update -A FILE
+mv FILE.new FILE
+cvs ci -m "Reverted to VER"
+EOF
