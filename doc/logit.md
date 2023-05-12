@@ -1,0 +1,129 @@
+# NAME logit
+
+Keep a log of your activity.
+
+# SYNOPSIS
+
+        logit           # usage help
+        logit -h        # long help
+
+        logit [-d pDir] [-s "pDate"] [start|begin] [pText]
+        logit [-d pDir] [-s "pDate"] [stop|done|end|finish] [pText]
+        logit [-d pDir] [-s "pDate"] pText
+
+        logit -m        # merge log files
+        logit -r        # report (after merge)
+
+# DESCRIPTION
+
+logit is a simpler version of logtime. It will log pText to
+logtime.csv. The first "word" of pText will be looked at to
+see if the log is a start or stop. The word will be normalized
+to only be a lower case start/stop.
+
+# OPTIONS
+
+- **-d pDir**
+
+    log to pDir/logtime.csv. Can also be set with env.var gpLogDate
+    Default: $PWD
+
+- **-s pDate**
+
+    Change the date/time pDate.  This is useful if you forgot to enter a
+    start time.  Default: now
+
+- **-m**
+
+    Merge all the logtime.csv files found in current dir and below. The
+    lines will be sorted and duplicates removed.  The output will be saved
+    in $PWD/logtime.csv
+
+- **-r**
+
+    Output a summary report. There needs to be an equal number of "start"
+    an "stop" logs.
+
+    Report output format:
+
+            ,Text
+            ElapsedTime,StartText,StopText
+
+- **-h**
+
+    This help.
+
+# RETURN VALUE
+
+    0  - OK
+    !0 - problem
+
+# EXAMPLES
+
+        cd project/beach
+        logit start project
+        # Creates: project/beach/logtime.csv
+
+        cd project/beach/edit
+        # Run editor
+        logit fixed format
+        # Creates: project/beach/edit/logtime.csv
+
+        cd ../render
+        # Add forgotten start time:
+        logit -s 7:00pm start editing
+        # Creates: project/beach/render/logtime.csv
+        logit stop editing
+        logit start rendering
+        sleep 300
+        logit stop  rendering
+        logit stop project
+
+        cd ..
+        logit -m
+        # Creates: project/beach/logtime.csv
+        # Merges: project/beach/logtime.csv,
+        # project/beach/edit/logtime.csv,
+        # project/beach/render/logtime.csv
+
+        logit -r
+
+# ENVIRONMENT
+
+        gpLogDate=${$gpLogDate:-now}    # -s
+        gpLogDir=${gpLogDir:-$PWD}      # -d
+        gpLogFile=${gpLogFile:-logtime.csv}
+
+# FILES
+
+        logtime.csv
+
+## Format of logtime.csv
+
+        YYYY-MM-DD,HH:MM:SS,TZ,Sec,Host,PWD,pText
+        1          2        3  4   5    6   7
+
+# SEE ALSO
+
+        logtime
+        timelog.sh
+
+# NOTES
+
+logit is designed so that you can run it in any directory. It is
+simpler than the "logtime" script, which tries to find a "top"
+logtime.csv file
+
+For the report, if another 'start' is seen before a 'stop', then that
+start's time will be used as and implied stop.
+
+If a 'stop' is seen, but there was not 'start', then the time of the
+last log message will be used for an implied start.
+
+# AUTHOR
+
+TurtleEngr
+
+# HISTORY
+
+GPLv3 (c) Copyright 2022

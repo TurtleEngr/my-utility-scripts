@@ -1,6 +1,6 @@
 #!/bin/bash
-# $Source: /repo/local.cvs/per/bruce/bin/stack-que.test,v $
-# $Revision: 1.6 $ $Date: 2023/02/08 06:35:10 $ GMT
+# $Source: /repo/per-bruce.cvs/bin/stack-que.test,v $
+# $Revision: 1.7 $ $Date: 2023/03/25 22:21:42 $ GMT
 
 export PWD cCurDir cBin gpTest cName
 export SHUNIT_COLOR
@@ -207,7 +207,7 @@ The elements to be pushed cannot contain spaces.
 
 =head1 HISTORY
 
-$Revision: 1.6 $ $Date: 2023/02/08 06:35:10 $ GMT
+$Revision: 1.7 $ $Date: 2023/03/25 22:21:42 $ GMT
 
 =cut
 EOF

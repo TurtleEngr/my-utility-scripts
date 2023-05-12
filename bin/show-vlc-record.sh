@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/show-vlc-record.sh,v 1.2 2021/10/26 19:26:12 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/show-vlc-record.sh,v 1.3 2023/03/25 22:21:42 bruce Exp $
 
 # Start vlc, If recording it will be put in $HOME dir.
 # This will show the last recorded file. If the number changes, a new line

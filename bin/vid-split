@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-split,v 1.10 2023/01/06 18:05:16 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-split,v 1.11 2023/03/25 22:21:43 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -237,7 +237,7 @@ with no -x option.
 
 =head1 HISTORY
 
-$Revision: 1.10 $
+$Revision: 1.11 $
 
 =cut
 EOF
@@ -486,7 +486,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-export cVer='$Revision: 1.10 $'
+export cVer='$Revision: 1.11 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

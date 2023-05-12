@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/cvs-commit-log.sh,v 1.3 2023/01/06 18:05:13 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/cvs-commit-log.sh,v 1.4 2023/03/25 22:21:41 bruce Exp $
 
 for i in $(find doc src -type f | egrep -v 'CVS|raw|proxy|thumbs|titles'); do
     cvs log $i

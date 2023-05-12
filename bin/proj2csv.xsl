@@ -7,7 +7,7 @@ extension-element-prefixes="date exsl"
 >
 
 <!--
-$Header: /repo/local.cvs/per/bruce/bin/proj2csv.xsl,v 1.2 2012/04/20 23:57:11 bruce Exp $
+$Header: /repo/per-bruce.cvs/bin/proj2csv.xsl,v 1.3 2023/03/25 22:21:42 bruce Exp $
 -->
 
 <xsl:output method="text" indent="no"/>

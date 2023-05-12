@@ -19,8 +19,8 @@ cat $pFile >>$tName.html
 cat <<\EOF >>$tName.html
   </pre>
   <hr />
-  <p>$Source: /repo/local.cvs/per/bruce/bin/convert-txt2html.sh,v $</p>
-  <p>$Revision: 1.1 $; $Date: 2020/07/09 04:08:59 $ GMT</p>
+  <p>$Source: /repo/per-bruce.cvs/bin/convert-txt2html.sh,v $</p>
+  <p>$Revision: 1.2 $; $Date: 2023/03/25 22:21:41 $ GMT</p>
 </body>
 </html>
 EOF

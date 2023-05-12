@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/svn-change.sh,v 1.4 2023/01/06 18:05:15 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/svn-change.sh,v 1.5 2023/03/25 22:21:42 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -103,7 +103,7 @@ Bruce Rafnel
 
 Bruce R.
 
-$Revision: 1.4 $ GMT
+$Revision: 1.5 $ GMT
 
 =cut
 EOF
@@ -189,7 +189,7 @@ gVerbose=${gVerbose:-0}
 
 # -------------------
 # Define the version number for this script
-gVer='$Revision: 1.4 $'
+gVer='$Revision: 1.5 $'
 gVer=${gVer#*' '}
 gVer=${gVer%' '*}
 

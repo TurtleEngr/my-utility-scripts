@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/gen-links.sh,v 1.5 2021/10/26 19:26:09 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/gen-links.sh,v 1.6 2023/03/25 22:21:41 bruce Exp $
 
 if [ $# -eq 0 ]; then
     cat <<\EOF2

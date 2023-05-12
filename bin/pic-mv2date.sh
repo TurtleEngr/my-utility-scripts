@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pic-mv2date.sh,v 1.3 2021/10/26 19:26:11 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/pic-mv2date.sh,v 1.4 2023/03/25 22:21:42 bruce Exp $
 
 # Move (ln) all pic file dir (matching 20*) to a date stamped dir
 # Format of files YYYYMMDD_HHMMSS.jpg or YYYY-MM-DD_HHMMSS_NAME.MP4

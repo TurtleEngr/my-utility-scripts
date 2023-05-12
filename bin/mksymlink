@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Source: /repo/local.cvs/per/bruce/bin/mksymlink,v $
+# $Source: /repo/per-bruce.cvs/bin/mksymlink,v $
 
 export gpCheck gpForce gLinkDefault gLinkFile gLinkFileOr gpRestore gpSave
 

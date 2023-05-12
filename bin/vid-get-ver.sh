@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-get-ver.sh,v 1.1 2019/12/17 01:45:00 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-get-ver.sh,v 1.2 2023/03/25 22:21:43 bruce Exp $
 
 tName=$1
 if [ ! -f $tName ]; then

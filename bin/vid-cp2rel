@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-cp2rel,v 1.3 2023/01/06 18:05:15 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-cp2rel,v 1.4 2023/03/25 22:21:43 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -164,7 +164,7 @@ You are cd'd in /home/video/skit/src/final and it has files:
 
 =head1 HISTORY
 
-$Revision: 1.3 $ $Date: 2023/01/06 18:05:15 $ GMT
+$Revision: 1.4 $ $Date: 2023/03/25 22:21:43 $ GMT
 
 =cut
 EOF
@@ -254,7 +254,7 @@ gErr=0
 
 # -------------------
 # Define the version number for this script
-cVer='$Revision: 1.3 $'
+cVer='$Revision: 1.4 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

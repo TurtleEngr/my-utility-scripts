@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/check-status,v 1.13 2023/01/06 18:05:12 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/check-status,v 1.14 2023/03/25 22:21:41 bruce Exp $
 
 # ========================================
 # Functions

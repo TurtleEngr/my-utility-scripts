@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Header: /repo/local.cvs/per/bruce/bin/index-it-rm.pl,v 1.2 2016/10/11 01:25:43 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/index-it-rm.pl,v 1.3 2023/03/25 22:21:41 bruce Exp $
 
 # Usage
 #	index-it-rm.pl <FILE-IN.html >FILE.OUT.html

@@ -1,6 +1,6 @@
 #!/bin/bash
-# $Source: /repo/local.cvs/per/bruce/bin/tag-collect.sh,v $
-# $Revision: 1.13 $ $Date: 2023/01/06 18:05:15 $ GMT
+# $Source: /repo/per-bruce.cvs/bin/tag-collect.sh,v $
+# $Revision: 1.15 $ $Date: 2023/04/14 01:33:10 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -117,7 +117,7 @@ for the tags you also want for the items.
 
 =item B<-s pSize>
 
-Maximim number of lines after a tag. Default: 1000
+Maximum number of lines after a tag. Default: 1000
 
 =item B<-h>
 
@@ -274,7 +274,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.13 $ $Date: 2023/01/06 18:05:15 $ GMT
+$Revision: 1.15 $ $Date: 2023/04/14 01:33:10 $ GMT
 
 =cut
 EOF
@@ -419,7 +419,7 @@ fGetChunk()
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        fLog2 -m "No files were generated" -p warn -l $LINENO
+        fLog2 -m "No files were generated for tag: $pTag" -p warn -l $LINENO
         echo
         return
     fi
@@ -436,7 +436,7 @@ fGetChunk()
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        fLog2 -m "No files were generated" -p warn -l $LINENO
+        fLog2 -m "No files were generated for tag: $pTag" -p warn -l $LINENO
         echo
         return
     fi
@@ -716,7 +716,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.13 $'
+cVer='$Revision: 1.15 $'
 fSetGlobals
 
 # -------------------
