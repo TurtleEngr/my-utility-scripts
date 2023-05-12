@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pic-resize.sh,v 1.3 2023/01/06 18:05:14 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/pic-resize.sh,v 1.4 2023/03/25 22:21:42 bruce Exp $
 
 if [ $# -ne 3 ]; then
     cat <<EOF

@@ -5,7 +5,7 @@
                 xmlns:exsl="http://exslt.org/common"
                 extension-element-prefixes="date exsl">
   <!--
-$Header: /repo/local.cvs/per/bruce/bin/proj2html.xsl,v 1.1 2015/07/25 22:23:00 bruce Exp $
+$Header: /repo/per-bruce.cvs/bin/proj2html.xsl,v 1.2 2023/03/25 22:21:42 bruce Exp $
 -->
   <xsl:output method="html"
               indent="yes" />

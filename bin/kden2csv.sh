@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/kden2csv.sh,v 1.3 2023/01/06 18:05:14 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/kden2csv.sh,v 1.4 2023/03/25 22:21:41 bruce Exp $
 
 # -------------------
 if [ $# -ne 1 ]; then

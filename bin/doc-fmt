@@ -1,6 +1,6 @@
 #!/bin/bash
-# $Source: /repo/local.cvs/per/bruce/bin/doc-fmt,v $
-# $Revision: 1.2 $ $Date: 2023/01/06 18:05:13 $ GMT
+# $Source: /repo/per-bruce.cvs/bin/doc-fmt,v $
+# $Revision: 1.5 $ $Date: 2023/05/12 01:16:35 $ GMT
 
 set -u
 
@@ -62,7 +62,7 @@ doc/pScript.int.txt, doc/pScript.int.html, and doc/pScript.int.md
 
 If a pScript does not contain '=pod', then execute:
 
-    ./pScript -h >doc/pScript -h
+    ./pScript -h >doc/pScript.txt
 
 =head1 OPTIONS
 
@@ -130,7 +130,7 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.2 $ $Date: 2023/01/06 18:05:13 $ GMT
+$Revision: 1.5 $ $Date: 2023/05/12 01:16:35 $ GMT
 
 =cut
 EOF
@@ -311,7 +311,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.2 $'
+cVer='$Revision: 1.5 $'
 fSetGlobals
 
 # -------------------
@@ -395,7 +395,7 @@ for i in $gpFileList; do
     if [ $tGen -eq 0 ]; then
         if grep -q ' getopts .*h' $i; then
             fLog2 -p notice -m "Generating \"$i.txt\"" -l $LINENO
-            ./$i --h >doc/$i.txt
+            ./$i -h >doc/$i.txt
             tGen=1
         fi
     fi

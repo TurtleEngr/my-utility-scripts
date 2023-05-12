@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Header: /repo/local.cvs/per/bruce/bin/map-pkg.pl,v 1.4 2015/07/19 03:30:07 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/map-pkg.pl,v 1.5 2023/03/25 22:21:42 bruce Exp $
 
 # Example: pod2html --noindex --title "mkconf.pl"
 

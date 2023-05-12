@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/speedtest.sh,v 1.6 2021/10/26 19:26:12 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/speedtest.sh,v 1.7 2023/03/25 22:21:42 bruce Exp $
 
 # This despends on: SpeedTest
 # Source: https://github.com/taganaka/SpeedTest

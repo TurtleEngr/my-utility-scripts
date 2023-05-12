@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/timelog.sh,v 1.5 2023/01/06 18:05:15 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/timelog.sh,v 1.6 2023/03/25 22:21:42 bruce Exp $
 
 # --------------------
 if [ $# -ne 1 -o "x$1" = "x-h" ]; then

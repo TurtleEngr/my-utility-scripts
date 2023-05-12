@@ -34,7 +34,7 @@ See the EXAMPLE section for the example of tags in files.
 
 - **-s pSize**
 
-    Maximim number of lines after a tag. Default: 1000
+    Maximum number of lines after a tag. Default: 1000
 
 - **-h**
 
@@ -167,4 +167,4 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.8 $ $Date: 2023/02/06 23:13:48 $ GMT
+$Revision: 1.10 $ $Date: 2023/05/12 01:16:37 $ GMT

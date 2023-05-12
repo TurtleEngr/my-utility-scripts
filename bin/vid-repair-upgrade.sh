@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-repair-upgrade.sh,v 1.2 2021/10/26 19:26:13 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-repair-upgrade.sh,v 1.3 2023/03/25 22:21:43 bruce Exp $
 
 cat <<EOF
 Repair the kdenlive files, by doing an upgrades across the versions.

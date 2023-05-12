@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-rename.sh,v 1.4 2021/10/26 19:26:13 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-rename.sh,v 1.5 2023/03/25 22:21:43 bruce Exp $
 
 # Rename video files to names that include the date and time.
 # Links are created with the new names, the orignal files are not touched.

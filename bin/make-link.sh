@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/make-link.sh,v 1.7 2023/01/06 18:05:14 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/make-link.sh,v 1.8 2023/03/25 22:21:42 bruce Exp $
 
 if [ $# -ne 0 ]; then
     cat <<EOF

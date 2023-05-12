@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/cvs-rm-ver,v 1.1 2023/02/15 00:14:43 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/cvs-rm-ver,v 1.2 2023/03/25 22:21:41 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -133,8 +133,8 @@ They should only use the characters: [a-zA-Z][0-9][.-_]
 
 =head1 HISTORY
 
- $Revision: 1.1 $;
- $Date: 2023/02/15 00:14:43 $ GMT
+ $Revision: 1.2 $;
+ $Date: 2023/03/25 22:21:41 $ GMT
 
 =cut
 EOF
@@ -217,7 +217,7 @@ export gErr gpDebug cName gpVerbose gpLog cTmp cVer
 cName=${0##*/}
 
 # Define the version number for this script
-cVer='$Revision: 1.1 $'
+cVer='$Revision: 1.2 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

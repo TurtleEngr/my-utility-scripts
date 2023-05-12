@@ -1,4 +1,4 @@
-# $Header: /repo/local.cvs/per/bruce/bin/index-it.awk,v 1.4 2016/09/01 01:15:41 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/index-it.awk,v 1.5 2023/03/25 22:21:41 bruce Exp $
 
 # Usage
 #	awk -f index-it.awk [-v gCount=20] <FILE-IN.html >FILE.OUT.html

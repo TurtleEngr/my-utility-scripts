@@ -23,7 +23,7 @@ doc/pScript.int.txt, doc/pScript.int.html, and doc/pScript.int.md
 
 If a pScript does not contain '=pod', then execute:
 
-    ./pScript -h >doc/pScript -h
+    ./pScript -h >doc/pScript.txt
 
 # OPTIONS
 
@@ -69,4 +69,4 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.2 $ $Date: 2023/02/06 23:13:46 $ GMT
+$Revision: 1.4 $ $Date: 2023/05/12 01:16:36 $ GMT

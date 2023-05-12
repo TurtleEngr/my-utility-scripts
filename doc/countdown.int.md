@@ -23,7 +23,7 @@ doc/pScript.int.txt, doc/pScript.int.html, and doc/pScript.int.md
 
 If a pScript does not contain '=pod', then execute:
 
-    ./pScript -h >doc/pScript -h
+    ./pScript -h >doc/pScript.txt
 
 # OPTIONS
 
@@ -69,7 +69,7 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.2 $ $Date: 2023/02/06 23:13:45 $ GMT
+$Revision: 1.4 $ $Date: 2023/05/12 01:16:36 $ GMT
 
 <div>
     <hr/>
@@ -153,7 +153,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.2 $'
+           cVer='$Revision: 1.4 $'
 
 ### Documentation Format
 
@@ -309,7 +309,7 @@ shunit2.1
 
 # HISTORY
 
-$Revision: 1.2 $ $Date: 2023/02/06 23:13:45 $ GMT
+$Revision: 1.4 $ $Date: 2023/05/12 01:16:36 $ GMT
 
 ## Test bash-com.inc
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/pic-review.sh,v 1.2 2021/10/26 19:26:11 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/pic-review.sh,v 1.3 2023/03/25 22:21:42 bruce Exp $
 
 # Review pic found in date stamped dirs.
 # Files already reviewed are put in reviewed.txt

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Header: /repo/local.cvs/per/bruce/bin/diff-time.pl,v 1.3 2009/09/23 04:23:52 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/diff-time.pl,v 1.4 2023/03/25 22:21:41 bruce Exp $
 
 if (@ARGV > 1) {
 	$Meet = $ARGV[0] . ' ' . $ARGV[1];

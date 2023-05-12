@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/local.cvs/per/bruce/bin/vid-cp,v 1.8 2023/01/06 18:05:15 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-cp,v 1.9 2023/03/25 22:21:43 bruce Exp $
 
 # --------------------
 if [ $# -lt 2 -o "x$1" = "x-h" ]; then
