@@ -32,8 +32,7 @@ else
 fi
 
 # --------------------
-fStart()
-{
+fStart() {
     rootUser
     lsmod 2>&1 | grep -q v4l2loopback
     if [ $? -eq 0 ]; then
@@ -45,8 +44,7 @@ fStart()
 }
 
 # --------------------
-fStop()
-{
+fStop() {
     rootUser
     lsmod 2>&1 | grep -q v4l2loopback
     if [ $? -eq 0 ]; then
@@ -56,8 +54,7 @@ fStop()
 }
 
 # --------------------
-fStatus()
-{
+fStatus() {
     # Status doesn't require root
     tState=0
     lsmod 2>&1 | grep -q v4l2loopback
@@ -76,8 +73,7 @@ fStatus()
 }
 
 # --------------------
-rootUser()
-{
+rootUser() {
     if [ "$(whoami)" != "root" ]; then
         echo "Error: you are not root user"
         fUsage
@@ -86,8 +82,7 @@ rootUser()
 }
 
 # --------------------
-fUsage()
-{
+fUsage() {
     echo $"Usage: $0 {start|stop|restart|status}"
 }
 

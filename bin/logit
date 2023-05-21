@@ -2,8 +2,7 @@
 # $Header: /repo/per-bruce.cvs/bin/logit,v 1.12 2023/05/12 01:16:35 bruce Exp $
 
 # --------------------
-fUsage()
-{
+fUsage() {
     # Quick help, run this:
     # SCRIPTNAME -h
 
@@ -169,8 +168,7 @@ EOF
 } # fUsage
 
 # --------------------
-fLogIt()
-{
+fLogIt() {
     local tMsg
 
     case $gpLogTag in
@@ -200,8 +198,7 @@ fLogIt()
 } # fLogIt
 
 # --------------------
-fMerge()
-{
+fMerge() {
     echo "Merging: $(find * -type f -name $gpLogFile)"
     cat $(find * -type f -name $gpLogFile) | sort -u >t.tmp
     mv -f t.tmp $gpLogFile
@@ -209,8 +206,7 @@ fMerge()
 } # fMerge
 
 # --------------------
-fReport()
-{
+fReport() {
     local tStartCount
     local tStopCount
 

@@ -8,8 +8,7 @@ set -u
 # Script Functions
 
 # --------------------------------
-fUsage()
-{
+fUsage() {
     # Quick help, run this:
     # doc-fmt -h
 
@@ -137,15 +136,13 @@ EOF
 } # fUsage
 
 # --------------------------------
-fCleanUp()
-{
+fCleanUp() {
     fComCleanUp
     exit
 } # fCleanUp
 
 # -------------------
-fSetGlobals()
-{
+fSetGlobals() {
     fComSetGlobals
 
     # Put your globals here
@@ -160,8 +157,7 @@ fSetGlobals()
 # Tests
 
 # --------------------------------
-oneTimeSetUp()
-{
+oneTimeSetUp() {
     # When calling $cName, unset gpTest to prevent infinite loop
     gpTest=''
 
@@ -169,26 +165,22 @@ oneTimeSetUp()
 } # oneTimeSetUp
 
 # --------------------------------
-oneTimeTearDown()
-{
+oneTimeTearDown() {
     return 0
 } # oneTearDown
 
 # --------------------------------
-setUp()
-{
+setUp() {
     return 0
 } # setUp
 
 # --------------------------------
-tearDown()
-{
+tearDown() {
     return 0
 } # tearDown
 
 # --------------------------------
-testUsage()
-{
+testUsage() {
     local tResult
 
     #-----
@@ -231,8 +223,7 @@ testUsage()
 } # testUsage
 
 # --------------------------------
-testScript()
-{
+testScript() {
     local tResult
 
     tResult=$(fSetGlobals 2>&1)
@@ -249,8 +240,7 @@ testScript()
 
 # -------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     if [ "$gpTest" = "list" ]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
         exit $?

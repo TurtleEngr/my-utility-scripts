@@ -2,30 +2,26 @@
 # Help with the most common operations.
 
 # ---------------------------------
-function fChangeSecretKeyPassword()
-{
+function fChangeSecretKeyPassword() {
     echo "NA"
 }
 
 # ---------------------------------
-function fExportAllPublicKeys()
-{
+function fExportAllPublicKeys() {
     tCmd="gpg --export --armor >export-all-pub-keys.asc"
     echo "$tCmd"
     eval "$tCmd"
 }
 
 # ---------------------------------
-function fExportAllSecretKeys()
-{
+function fExportAllSecretKeys() {
     tCmd="gpg --export-secret-keys --armor >export-all-sec-keys.asc"
     echo "$tCmd"
     eval "$tCmd"
 }
 
 # ---------------------------------
-function fGetKeyFromKeyserver()
-{
+function fGetKeyFromKeyserver() {
     echo -n "Search for: "
     read tName
     tCmd="gpg --keyserver hkp://subkeys.pgp.net --search-keys $tName"
@@ -34,32 +30,28 @@ function fGetKeyFromKeyserver()
 }
 
 # ---------------------------------
-function fImportKeys()
-{
+function fImportKeys() {
     tCmd="gpg --import <import.asc"
     echo "$tCmd"
     eval "$tCmd"
 }
 
 # ---------------------------------
-function fListAllSecretKeys()
-{
+function fListAllSecretKeys() {
     tCmd="gpg --list-secret-keys --with-colons | grep '^sec:'"
     echo "$tCmd"
     eval "$tCmd"
 }
 
 # ---------------------------------
-function fListAllPublicKeys()
-{
+function fListAllPublicKeys() {
     tCmd="gpg --list-public-keys --with-colons | grep '^pub:'"
     echo "$tCmd"
     eval "$tCmd"
 }
 
 # ---------------------------------
-function fOutputMyPublicKeys()
-{
+function fOutputMyPublicKeys() {
     tCmd="gpg --export --armor 'rafnelb@yahoo.com' >rafnelb.asc"
     echo "$tCmd"
     eval "$tCmd"
@@ -69,24 +61,21 @@ function fOutputMyPublicKeys()
 }
 
 # ---------------------------------
-function fRefreshKeys()
-{
+function fRefreshKeys() {
     tCmd="gpg --keyserver hkp://subkeys.pgp.net --refresh-keys"
     echo "$tCmd"
     eval "$tCmd"
 }
 
 # ---------------------------------
-function fRefreshWebOfTrust()
-{
+function fRefreshWebOfTrust() {
     tCmd="gpg --update-trustdb"
     echo "$tCmd"
     eval "$tCmd"
 }
 
 # ---------------------------------
-function fSignAFile()
-{
+function fSignAFile() {
     echo "NA"
 }
 

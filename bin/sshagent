@@ -27,8 +27,7 @@ export gpDebug
 export cgEnvFile
 
 # --------------------
-fUsage()
-{
+fUsage() {
     local pStyle=$1
 
     gErr=1
@@ -346,8 +345,7 @@ EOF
 } # fUsage
 
 # --------------------
-fSetBin()
-{
+fSetBin() {
     local tBinLoc=this
     local tBin=$PWD
 
@@ -374,8 +372,7 @@ fSetBin()
 } # fSetBin
 
 # --------------------
-fConfig()
-{
+fConfig() {
     if [ "$USER" = "root" ]; then
         if [ -z "$cgAgentOwner" ] && [ -n "$SUDO_USER" ]; then
             cgAgentOwner=$SUDO_USER
@@ -407,8 +404,7 @@ fConfig()
 } # fConfig
 
 # --------------------
-fGetOpts()
-{
+fGetOpts() {
     if [ $gErr -ne 0 ]; then
         return
     fi
@@ -456,8 +452,7 @@ fGetOpts()
 } # fGetOpts
 
 # --------------------
-fValidate()
-{
+fValidate() {
     if [ $gErr -ne 0 ]; then
         return
     fi
@@ -562,8 +557,7 @@ fValidate()
 } # fValidate
 
 # --------------------
-fSARunning()
-{
+fSARunning() {
     if [ $gErr -ne 0 ]; then
         return
     fi
@@ -589,8 +583,7 @@ fSARunning()
 } # fSARunning
 
 # --------------------
-fKill()
-{
+fKill() {
     if [ $gErr -ne 0 ]; then
         return
     fi
@@ -604,8 +597,7 @@ fKill()
 } # fKill
 
 # --------------------
-fScript()
-{
+fScript() {
     if [ $gErr -ne 0 ]; then
         return
     fi
@@ -630,8 +622,7 @@ fScript()
     return
 } # fScript
 
-fAdd()
-{
+fAdd() {
     if [ $gErr -ne 0 ]; then
         return
     fi
@@ -657,8 +648,7 @@ fAdd()
 } # fAdd
 
 # --------------------
-fAction()
-{
+fAction() {
     if [ $gErr -ne 0 ]; then
         return
     fi

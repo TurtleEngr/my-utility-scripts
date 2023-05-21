@@ -16,8 +16,7 @@
 # cVer - current version
 # cName - script's name
 
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 ]; then
         pod2text $0 | more
     else
@@ -157,8 +156,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -172,8 +170,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
@@ -207,8 +204,7 @@ function fLog()
 } # fLog
 
 # ------------------
-function fCreateDir()
-{
+function fCreateDir() {
     local pDir=$1
 
     if [ -d $cTop/.$pDir.ecfs ]; then
@@ -230,8 +226,7 @@ function fCreateDir()
 } # fCreateDir
 
 # ------------------
-function fMount()
-{
+function fMount() {
     local pDir=$1
 
     if [ -f $cTop/$pDir/mounted ]; then
@@ -260,8 +255,7 @@ function fMount()
 } # fMount
 
 # ------------------
-function fUnmount()
-{
+function fUnmount() {
     local pDir=$1
 
     if [ ! -f $cTop/$pDir/mounted ]; then
@@ -273,8 +267,7 @@ function fUnmount()
 } # fUnmount
 
 # ------------------
-function fList()
-{
+function fList() {
     cd $cTop
     fLog info "List dirs:" $LINENO
     for tDir in $('ls' -d .*.ecfs 2>/dev/null); do

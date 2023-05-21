@@ -7,8 +7,7 @@ export gpCheck gpForce gLinkDefault gLinkFile gLinkFileOr gpRestore gpSave
 # Script Functions
 
 # --------------------------------
-fUsage()
-{
+fUsage() {
     # Quick help, run this:
     # mksymlink -h | less
 
@@ -301,8 +300,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-fCleanUp()
-{
+fCleanUp() {
     fComCleanUp
     exit
 
@@ -320,8 +318,7 @@ EOF
 } # fCleanUp
 
 # -------------------
-fSetGlobals()
-{
+fSetGlobals() {
     fComSetGlobals
     gpLog=0
     gpVerbose=1
@@ -354,8 +351,7 @@ EOF
 } # fSetGlobals
 
 # -------------------
-fValidate()
-{
+fValidate() {
     if [[ gpSave+gpRestore+gpCheck -ne 1 ]]; then
         fError "One of -s, -r, or -c needs to be used." $LINENO
     fi
@@ -370,8 +366,7 @@ fValidate()
 EOF
 } # fValidate
 
-fSymlinkExists()
-{
+fSymlinkExists() {
     if [ ! -f $gLinkFile ]; then
         gLinkFile=.symlink
     fi
@@ -382,8 +377,7 @@ fSymlinkExists()
     return 0
 } # fSymlinkExists
 
-fCheckValid()
-{
+fCheckValid() {
     if [ "$tSc" = "#" ]; then
         return 1
     fi
@@ -403,8 +397,7 @@ fCheckValid()
 } # fCheckValid
 
 # -------------------
-fSave()
-{
+fSave() {
     local tSrc
     local tDst
     local tOther
@@ -437,8 +430,7 @@ fSave()
 } # fSave
 
 # -------------------
-fRestore()
-{
+fRestore() {
     local tSrc
     local tDst
     local tOther
@@ -465,8 +457,7 @@ fRestore()
 } # fRestore
 
 # -------------------
-fCheck()
-{
+fCheck() {
     local tSrc
     local tDst
     local tOther
@@ -491,20 +482,17 @@ fCheck()
 # Tests
 
 # --------------------------------
-oneTimeSetUp()
-{
+oneTimeSetUp() {
     return 0
 } # oneTimeSetUp()
 
 # --------------------------------
-oneTimeTearDown()
-{
+oneTimeTearDown() {
     return 0
 } # oneTearDown()
 
 # --------------------------------
-setUp()
-{
+setUp() {
     gpVerbose=2
     gpForce=0
 
@@ -546,8 +534,7 @@ EOF
 } # setUp()
 
 # --------------------------------
-tearDown()
-{
+tearDown() {
     if [ $gpDebug -eq 0 ]; then
         'rm' -f ${cTmpF}*.tmp 2>/dev/null
         find $Tmp -type l -exec rm {} \; 2>/dev/null
@@ -557,8 +544,7 @@ tearDown()
 } # tearDown()
 
 # --------------------------------
-testUsage()
-{
+testUsage() {
     local tResult
 
     #-----
@@ -635,8 +621,7 @@ EOF
 } # testUsage
 
 # --------------------------------
-testSavePos1()
-{
+testSavePos1() {
     local tResult
 
     # ----------
@@ -665,8 +650,7 @@ testSavePos1()
 } # testSavePos1
 
 # --------------------------------
-testSavePos2()
-{
+testSavePos2() {
     local tResult
 
     # ----------
@@ -681,8 +665,7 @@ testSavePos2()
 } # testSavePos2
 
 # --------------------------------
-testSaveNeg()
-{
+testSaveNeg() {
     local tResult
 
     # ----------
@@ -709,8 +692,7 @@ testSaveNeg()
 } # testSaveNeg
 
 # --------------------------------
-testRestorePos1()
-{
+testRestorePos1() {
     local tResult
 
     # ----------
@@ -741,8 +723,7 @@ testRestorePos1()
 } # testRestorePos1
 
 # --------------------------------
-testRestorePos2()
-{
+testRestorePos2() {
     local tResult
 
     # ----------
@@ -761,8 +742,7 @@ testRestorePos2()
 } # testRestorePos2
 
 # --------------------------------
-testRestoreNeg()
-{
+testRestoreNeg() {
     local tResult
 
     # ----------
@@ -795,8 +775,7 @@ testRestoreNeg()
 } # testRestoreNeg
 
 # --------------------------------
-testCheck()
-{
+testCheck() {
     local tResult
 
     # ----------
@@ -828,8 +807,7 @@ testCheck()
 } # testCheck
 
 # --------------------------------
-testCLISave()
-{
+testCLISave() {
     local tResult
 
     gpTest=""
@@ -849,8 +827,7 @@ testCLISave()
 } # testCLISave
 
 # --------------------------------
-testCLIRestore()
-{
+testCLIRestore() {
     local tResult
 
     gpTest=""
@@ -869,8 +846,7 @@ testCLIRestore()
 } # testCLIRestore
 
 # --------------------------------
-testCLICheck()
-{
+testCLICheck() {
     local tResult
 
     gpTest=""
@@ -892,8 +868,7 @@ testCLICheck()
 
 # ---------------------------------------------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     gpUnitDebug=${gpUnitDebug:-0}
     if [ "$gpTest" = "list" ]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'

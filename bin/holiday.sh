@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     # Print usage help for this script, using pod2text.
     pod2text $0
     exit 1

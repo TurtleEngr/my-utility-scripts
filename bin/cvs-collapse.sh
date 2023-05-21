@@ -13,8 +13,7 @@ export gpCvs
 # Script Functions
 
 # --------------------------------
-fUsage()
-{
+fUsage() {
     # Quick help, run this:
     # SCRIPTNAME -h | less
 
@@ -315,8 +314,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-fCleanUp()
-{
+fCleanUp() {
     fComCleanUp
     exit
 
@@ -334,8 +332,7 @@ EOF
 } # fCleanUp
 
 # --------------------------------
-fSetGlobals()
-{
+fSetGlobals() {
     fComSetGlobals
     gpVerbose=1
 
@@ -366,8 +363,7 @@ EOF
 } # fSetGlobals
 
 # --------------------------------
-fProcessFile()
-{
+fProcessFile() {
     local pFile=$1
 
     if [ ! -f $pFile ]; then
@@ -390,8 +386,7 @@ fProcessFile()
 } # fProcessFile
 
 # --------------------------------
-fProcessDir()
-{
+fProcessDir() {
     local pEnt=$1
     local tDir=${pEnt%/CVS/Entries}
     local tFileList
@@ -418,8 +413,7 @@ fProcessDir()
 } # fProcessFiles
 
 # --------------------------------
-fProcessEntries()
-{
+fProcessEntries() {
     local tEntList
     local tEnt
     local tDir
@@ -437,8 +431,7 @@ fProcessEntries()
 } # fProcessEntries
 
 # --------------------------------
-fProcessCache()
-{
+fProcessCache() {
     local tDirList=''
     local tDir=''
 
@@ -471,8 +464,7 @@ fProcessCache()
 # Tests
 
 # -------------------
-fMockCvsCi()
-{
+fMockCvsCi() {
     # Do nothing for 'cvs ci', and return OK
     if [ "$1" = "ci" ]; then
         return 0
@@ -482,8 +474,7 @@ fMockCvsCi()
 } # fMockCvs
 
 # -------------------
-oneTimeSetUp()
-{
+oneTimeSetUp() {
     # Create the initial set of test files, and save in tar file
 
     gpTest=''
@@ -536,16 +527,14 @@ oneTimeSetUp()
 } # oneTimeSetUp
 
 # -------------------
-oneTimeTearDown()
-{
+oneTimeTearDown() {
     #    rm $Tmp/test-files.tgz
     cd $cCurDir &>/dev/null
     return 0
 } # oneTearDown
 
 # -------------------
-setUp()
-{
+setUp() {
     cd $Tmp
     tar -xzf test-files.tgz
 
@@ -554,8 +543,7 @@ setUp()
 } # setUp
 
 # -------------------
-tearDown()
-{
+tearDown() {
     rm -rf $cTestRoot
     rm -rf $cTestWork
 
@@ -564,8 +552,7 @@ tearDown()
 } # tearDown
 
 # -------------------
-testUsage()
-{
+testUsage() {
     local tResult
 
     #-----
@@ -625,8 +612,7 @@ testUsage()
 } # testUsage
 
 # -------------------
-testValidate()
-{
+testValidate() {
     local tResult
 
     tResult=$($cBin/$cName 2>&1)
@@ -655,8 +641,7 @@ testValidate()
 } # testValidate
 
 # -------------------
-testUpdateFail()
-{
+testUpdateFail() {
     local tResult
 
     cd $cTestWork/$cTestTop &>/dev/null
@@ -669,8 +654,7 @@ testUpdateFail()
 } # testUpdate
 
 # -------------------
-testUpdateOk()
-{
+testUpdateOk() {
     local tResult
 
     cd $cTestWork/$cTestTop &>/dev/null
@@ -686,8 +670,7 @@ testUpdateOk()
 } # testUpdateOk
 
 # -------------------
-testCiError()
-{
+testCiError() {
     local tResult
 
     cd $cTestWork/$cTestTop &>/dev/null
@@ -710,8 +693,7 @@ testCiError()
 } # testCiError
 
 # -------------------
-testNopOk()
-{
+testNopOk() {
     local tResult
 
     cd $cTestWork/$cTestTop &>/dev/null
@@ -734,8 +716,7 @@ testNopOk()
 } # testNopOk
 
 # -------------------
-testOk()
-{
+testOk() {
     local tResult
 
     cd $cTestWork/$cTestTop &>/dev/null
@@ -770,8 +751,7 @@ testOk()
 } # testOk
 
 # -------------------
-testRmCacheOk()
-{
+testRmCacheOk() {
     local tResult
 
     cd $cTestWork/$cTestTop &>/dev/null
@@ -787,8 +767,7 @@ testRmCacheOk()
 } # testRmCache
 
 # -------------------
-testRmCacheNop()
-{
+testRmCacheNop() {
     local tResult
 
     cd $cTestWork/$cTestTop &>/dev/null
@@ -805,8 +784,7 @@ testRmCacheNop()
 
 # -------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     if [ "$gpTest" = "list" ]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
         grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'

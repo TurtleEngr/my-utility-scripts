@@ -43,8 +43,7 @@ esac
 # Script Functions
 
 # --------------------------------
-fUsage()
-{
+fUsage() {
     # Quick help, run this:
     # tag-collect.sh -h | less
 
@@ -294,8 +293,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-fCleanUp()
-{
+fCleanUp() {
     fComCleanUp
     exit
 
@@ -313,8 +311,7 @@ EOF
 } # fCleanUp
 
 # -------------------
-fSetGlobals()
-{
+fSetGlobals() {
     fComSetGlobals
     gpLog=0
     gpVerbose=1
@@ -345,8 +342,7 @@ EOF
 } # fSetGlobals
 
 # -------------------
-fValidate()
-{
+fValidate() {
     local tFile
     local tNewList=""
 
@@ -392,8 +388,7 @@ EOF
 } # fValidate
 
 # -------------------
-fGetChunk()
-{
+fGetChunk() {
     local pTag=$1
     local tInTag=""
     local tCount=0
@@ -448,8 +443,7 @@ fGetChunk()
 } # fGetChunk
 
 # -------------------
-fGetTaggedText()
-{
+fGetTaggedText() {
     local tTag
 
     rm $Tmp/unique.tmp >/dev/null 2>&1
@@ -462,8 +456,7 @@ fGetTaggedText()
 # Tests
 
 # --------------------------------
-testUsage()
-{
+testUsage() {
     local tResult
 
     #-----
@@ -533,8 +526,7 @@ EOF
 } # testUsage
 
 # --------------------------------
-testScriptFunctions()
-{
+testScriptFunctions() {
     local tResult
 
     tResult=$(fSetGlobals 2>&1)
@@ -554,8 +546,7 @@ EOF
 } # testScriptFunctions
 
 # --------------------------------
-testValidate()
-{
+testValidate() {
     local tResult
 
     #-----
@@ -592,8 +583,7 @@ testValidate()
     return 0
 } # testValidate
 
-testGetTag()
-{
+testGetTag() {
     local tResult
 
     # Setup
@@ -681,8 +671,7 @@ EOF
 
 # -------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     if [ "$gpTest" = "all" ]; then
         gpTest=""
         # shellcheck disable=SC1091

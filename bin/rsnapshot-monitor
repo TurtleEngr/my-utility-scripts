@@ -5,8 +5,7 @@
 # See also rc.local, check-mail
 
 # -----------------------
-function fMail()
-{
+function fMail() {
     local tTmp=/var/local/rsnapshot-monitor.tmp
     local tPri
     local tStatus
@@ -58,8 +57,7 @@ EOF
 } # fMail
 
 # -----------------------
-function fCheckMount()
-{
+function fCheckMount() {
     local i
     local d
     for i in 1 2; do
@@ -75,8 +73,7 @@ function fCheckMount()
 } # fCheckMount
 
 # -----------------------
-function fCheckSpace()
-{
+function fCheckSpace() {
     local i
     local s
     local tSpace
@@ -96,8 +93,7 @@ function fCheckSpace()
 } # fCheckSpace
 
 # -----------------------
-function fCheckLog()
-{
+function fCheckLog() {
     local i
     local f
     for i in 1 2; do
@@ -113,8 +109,7 @@ function fCheckLog()
 } # fCheckLog
 
 # -----------------------
-function fCheckDate()
-{
+function fCheckDate() {
     local i
     local tCurTime
     local tDirTime
@@ -184,8 +179,7 @@ function fCheckDate()
 } # fCheckDate
 
 # -----------------------
-function fCheckCert()
-{
+function fCheckCert() {
     local tMsg=""
     local i
 
@@ -208,8 +202,7 @@ function fCheckCert()
 } # fCheckCert
 
 # -----------------------
-function fSpeedTest()
-{
+function fSpeedTest() {
     speedtest.sh >/tmp/speedtest.tmp 2>&1
     if [ $? -eq 0 ]; then
         gOKMsg="$gOKMsg\n\n OK - Download/Upload speeds are OK"

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------
-function fUsage()
-{
+function fUsage() {
     cat <<\EOF | pod2text | more
 =pod
 
@@ -191,8 +190,7 @@ EOF
 } # fUsage
 
 # --------------------
-function fCreateSedReplaceScript()
-{
+function fCreateSedReplaceScript() {
     if [ ! -f ~/.festival.say ]; then
         if [ ! -f ~/.cache/say/say.sed ]; then
             mkdir ~/.cache/say &>/dev/null
@@ -224,8 +222,7 @@ function fCreateSedReplaceScript()
 } # fCreateSedReplaceScript
 
 # --------------------
-fSay()
-{
+fSay() {
     echo "$gpText" | sed -f ~/.cache/say/say.sed | festival --tts
 } # fSay
 

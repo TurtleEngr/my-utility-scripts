@@ -21,8 +21,7 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     # Print usage help for this script, using pod2text.
     pod2text $0
     exit 1
@@ -110,8 +109,7 @@ EOF
 }
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Input:
     #   $1 - Error number (usually $LINENO)
     #   $2 - Error message
@@ -135,8 +133,7 @@ EOF
 }
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Input:
     #   $1 level (# emerg alert crit err warning notice info debug)
     #   $2 message

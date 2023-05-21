@@ -5,8 +5,7 @@
 # Functions
 
 # --------------------
-fUsage()
-{
+fUsage() {
     cat <<EOF
 This Help
         check-status -h
@@ -47,8 +46,7 @@ EOF
 } # fUsage
 
 # --------------------
-fValidInput()
-{
+fValidInput() {
     local pCmd=$1
     local pIP=$2
     local pPort=$3
@@ -79,15 +77,13 @@ fValidInput()
 } # fValidInput
 
 # --------------------
-fValidate()
-{
+fValidate() {
     # Clean the inputs. Only digits are allowed.
     echo "$1" | tr -cd '.[:digit:]'
 } # fValidate
 
 # --------------------
-fParseArgs()
-{
+fParseArgs() {
     local pCmd="$1"
     local pIP="$2"
     local pPort="$3"
@@ -101,8 +97,7 @@ fParseArgs()
 } # fParseArgs
 
 # --------------------
-fParseQuery()
-{
+fParseQuery() {
     # Use a secure method to parse QUERY_STRING
     # https://stackoverflow.com/questions/3919755/how-to-parse-query-string-from-a-bash-cgi-script
     # Example: QUERY_STRING='ip=8.8.8.8&port=53'
@@ -145,8 +140,7 @@ fParseQuery()
 } # fParseQuery
 
 # --------------------
-fGetStatus()
-{
+fGetStatus() {
     local pCmd="$1"
     local pIP="$2"
     local pPort="$3"
@@ -180,8 +174,7 @@ fGetStatus()
 } # fGetStatus
 
 # --------------------
-fOutput()
-{
+fOutput() {
     local pCmd="$1"
     local pIP="$2"
     local pPort="$3"
@@ -209,8 +202,7 @@ EOF
 # Unit Tests
 
 # --------------------
-testValidate()
-{
+testValidate() {
     assertEquals "tv-1" "1.22.33" "$(fValidate 1.22.33)"
     assertEquals "tv-2" "1.22.33" "$(fValidate 1.foo22.33bar)"
     assertEquals "tv-3" "1.22.33" "$(fValidate \$x1.22.\$x33)"
@@ -220,8 +212,7 @@ testValidate()
 } # testValidate
 
 # --------------------
-testParseArgs()
-{
+testParseArgs() {
     local tCmd
     local tFile
     local tIP
@@ -265,8 +256,7 @@ testParseArgs()
 } # testParseArgs
 
 # --------------------
-testParseQuery()
-{
+testParseQuery() {
     local tCmd
     local tIP
     local tPort
@@ -320,8 +310,7 @@ testParseQuery()
 } # testParseQuery
 
 # --------------------
-testGetStatus()
-{
+testGetStatus() {
     local tMsg
 
     assertEquals "line=$LINENO" "OK" "$(fGetStatus 1 107.220.116.250 443 file)"
@@ -357,8 +346,7 @@ testGetStatus()
 } # testGetStatus
 
 # --------------------
-testOutput()
-{
+testOutput() {
     local tResult
 
     # -----
@@ -378,8 +366,7 @@ testOutput()
 } # testOutput
 
 # --------------------
-testIntegrate1()
-{
+testIntegrate1() {
     local tIP=""
     local tPort=""
     local tPile=""
@@ -437,8 +424,7 @@ testIntegrate1()
 } # testIntegrate1
 
 # --------------------
-testIntegrate2()
-{
+testIntegrate2() {
     local tMsg
     local tResult
     export QUERY_STRING=""

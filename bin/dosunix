@@ -2,15 +2,13 @@
 # Translate ASCII files from Dos to Unix or Unix to Dos format.
 
 # --------------------------------
-function fCleanUp()
-{
+function fCleanUp() {
     'rm' -f ${tTmpF}[1-9]*.tmp 2>/dev/null
     exit $1
 }
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     cat <<END | more
 DosUnix.sh
 
@@ -34,8 +32,7 @@ END
 }
 
 # --------------------------------
-function fError()
-{
+function fError() {
     cat <<END 1>&2
 Error: $1
 Usage: DosUnix.sh.sh [-h] {-u | -d} file...

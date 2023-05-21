@@ -1,8 +1,7 @@
 #!/bin/bash
 # $Id: crypt.sh,v 1.29 2021/10/26 19:26:09 bruce Exp $
 
-function fGetKey()
-{
+function fGetKey() {
     if [ -n "$tPass" ]; then
         return
     fi

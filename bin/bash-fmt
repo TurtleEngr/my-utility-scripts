@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------
-function fUsage()
-{
+function fUsage() {
     cat <<\EOF | more 1>&2
 Usage:
     bash-fmt <pInFile >pOutFile
@@ -37,8 +36,7 @@ EOF
 } # fUsage
 
 # --------------------
-function fProcess()
-{
+function fProcess() {
     local pFile="$1"
 
     cat $pFile >$cInFile

@@ -2,8 +2,7 @@
 # configuration-dev/service/aws_boot/src/usr/local/sbin/getmanifest.sh
 
 # --------------------
-fUsage()
-{
+fUsage() {
     cat <<EOF
 
 Usage
@@ -20,8 +19,7 @@ EOF
 } # fUsage
 
 # --------------------
-fCmd()
-{
+fCmd() {
     # Input:
     #   $1 - tag
     #   $2 - command
@@ -80,8 +78,7 @@ fCmd()
 } # fCmd
 
 # --------------------
-fCommonInfo()
-{
+fCommonInfo() {
     echo "  <script ver=\"$cVer\">$0</script>" >>$gOut
     echo '  <Id>getmanifest.sh</Id>' >>$gOut
 
@@ -97,8 +94,7 @@ fCommonInfo()
 } # fCommonInfo
 
 # --------------------
-fSunOS()
-{
+fSunOS() {
     fCmd OSRel 'cat /etc/release'
     fCmd KernelModules 'modinfo'
     fCmd Patches 'patchadd -p'
@@ -107,8 +103,7 @@ fSunOS()
 } # fSunOS
 
 # --------------------
-fApps()
-{
+fApps() {
     if [ -d /projects ]; then
         fCmd Project 'find /projects/* -prune -type d' /projects
     fi
@@ -137,8 +132,7 @@ fApps()
 } # fApps
 
 # --------------------
-fOSRel()
-{
+fOSRel() {
     if [ -e /etc/debian_version ]; then
         fCmd OSRel 'cat /etc/debian_version' /etc/debian_version
         fCmd UpdateSources 'cat /etc/apt/sources.list | egrep -v "^#|^$"' /etc/apt/sources.list
@@ -171,8 +165,7 @@ fOSRel()
 } # fOSRel
 
 # --------------------
-fPkgList()
-{
+fPkgList() {
     if [ -d /etc/yum.repos.d ]; then
         fCmd PkgList 'rpm -qa | sort -i'
         for i in $(rpm -qa | sort -i); do
@@ -202,8 +195,7 @@ fPkgList()
 } # fPkgList
 
 # --------------------
-fPkgListVer()
-{
+fPkgListVer() {
     #    if [ -d /etc/yum.repos.d ]; then
     #        fCmd PkgListVer 'rpm -qa | sort -i'
     #        for i in $(rpm -qa | sort -i); do
@@ -233,8 +225,7 @@ fPkgListVer()
 } # fPkgListVer
 
 # --------------------
-fLinuxCommon()
-{
+fLinuxCommon() {
     fCmd SerialNum '/usr/sbin/dmidecode | egrep -i "serial number" | head -n 1'
     fCmd Manufacturer '/usr/sbin/dmidecode | egrep -i "manufacturer" | head -n 1'
     fCmd Product '/usr/sbin/dmidecode | egrep -i "product" | head -n 1'
@@ -273,8 +264,7 @@ fLinuxCommon()
 } # fLinuxCommon
 
 # --------------------
-fLinux()
-{
+fLinux() {
     fLinuxCommon
     fApps
     fOSRel

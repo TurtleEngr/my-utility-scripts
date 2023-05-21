@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 ]; then
         pod2text $0
     else
@@ -154,8 +153,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -169,8 +167,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
@@ -211,8 +208,7 @@ function fLog()
 } # fLog
 
 # ------------------
-function fFileCheck()
-{
+function fFileCheck() {
     # Input: gpKdenFile
     # Ouput: gFileVer
     if [ -z "$gpKdenFile" ]; then
@@ -236,8 +232,7 @@ function fFileCheck()
 } # fFileCheck
 
 # ------------------
-function fKLVer()
-{
+function fKLVer() {
     # Input: gpVer, gFileVer, cLatestVer, cKLBin
     # Output: gKLProg, gpVer, gFileVer
     if [ ! -d $cKLBin ]; then
@@ -286,8 +281,7 @@ function fKLVer()
 } # fKLVer
 
 # ------------------
-function fCVSCheck()
-{
+function fCVSCheck() {
     if [ $gpCVS -ne 1 ]; then
         return
     fi

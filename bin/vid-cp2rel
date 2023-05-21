@@ -19,8 +19,7 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 ]; then
         pod2text $0
     else
@@ -172,8 +171,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -187,8 +185,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8

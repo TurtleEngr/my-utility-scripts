@@ -34,7 +34,7 @@ cd $gpDir
 if [ $gpNoUpdate -eq 0 ]; then
     if ! cvs update; then
         echo "Error: Fix cvs update errors, then run again."
-	cd $cCurDir
+        cd $cCurDir
         exit 1
     fi
 fi
@@ -51,7 +51,7 @@ for tE in $(find * -name Entries); do
         if [ -f $tDir/$tF ]; then
             echo rm $tDir/$tF
             rm $tDir/$tF
-	fi
+        fi
     done
 done
 # list files not removed

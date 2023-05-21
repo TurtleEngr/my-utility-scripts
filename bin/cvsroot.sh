@@ -1,8 +1,7 @@
 #!/bin/bash
 # Select a cvs root to connect to.
 
-function fUsage()
-{
+function fUsage() {
     more <<EOF
 Usage:
         . cvsroot.sh

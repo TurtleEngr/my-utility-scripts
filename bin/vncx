@@ -7,8 +7,7 @@ cBase=499
 cPort=$(id -u)
 let cPort=cPort-cBase
 
-function fView()
-{
+function fView() {
     if [ $# -eq 0 ]; then
         echo "Cmd: vncviewer $cDefHost:$cDefPort &"
         vncviewer -shared $cDefHost:$cDefPort &
