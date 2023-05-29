@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/logit,v 1.12 2023/05/12 01:16:35 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/logit,v 1.13 2023/05/21 01:10:34 bruce Exp $
 
 # --------------------
 fUsage() {

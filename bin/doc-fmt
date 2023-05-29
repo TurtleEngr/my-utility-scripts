@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/doc-fmt,v $
-# $Revision: 1.5 $ $Date: 2023/05/12 01:16:35 $ GMT
+# $Revision: 1.6 $ $Date: 2023/05/21 01:10:34 $ GMT
 
 set -u
 
@@ -129,7 +129,7 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.5 $ $Date: 2023/05/12 01:16:35 $ GMT
+$Revision: 1.6 $ $Date: 2023/05/21 01:10:34 $ GMT
 
 =cut
 EOF
@@ -301,7 +301,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.5 $'
+cVer='$Revision: 1.6 $'
 fSetGlobals
 
 # -------------------

@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/countdown,v $
-# $Revision: 1.10 $ $Date: 2023/03/25 22:21:41 $ GMT
+# $Revision: 1.11 $ $Date: 2023/05/21 01:10:34 $ GMT
 
 # Algorithm idea came from:
 # https://superuser.com/questions/611538/is-there-a-way-to-display-a-countdown-or-stopwatch-timer-in-a-terminal
@@ -278,7 +278,7 @@ date
 
 =head1 HISTORY
 
-$Revision: 1.10 $ GMT
+$Revision: 1.11 $ GMT
 
 =cut
 EOF
@@ -1227,7 +1227,7 @@ export gpTest gpUnitDebug SHUNIT_COLOR
 
 # Script Globals
 export gpCounterFile gpDate gpEnd gpFmt gpInterval gpMin gpSec gpStart
-cVer='$Revision: 1.10 $'
+cVer='$Revision: 1.11 $'
 fSetGlobals
 
 # -------------------

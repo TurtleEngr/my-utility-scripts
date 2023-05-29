@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/rsnapshot-monitor,v 1.13 2023/03/25 22:21:42 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/rsnapshot-monitor,v 1.14 2023/05/21 01:10:34 bruce Exp $
 # Put this in /usr/local/sbin/rsnapshot-monitor
 # Run this with cron.d/monitor
 # See also rc.local, check-mail

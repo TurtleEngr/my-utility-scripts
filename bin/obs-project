@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/obs-project,v 1.9 2023/03/25 22:21:42 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/obs-project,v 1.10 2023/05/21 01:10:34 bruce Exp $
 
 function fUsage() {
     cat <<EOF

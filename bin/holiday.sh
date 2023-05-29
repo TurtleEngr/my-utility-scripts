@@ -130,7 +130,7 @@ Bruce Rafnel
 
 =head1 HISTORY
 
-$Revision: 1.5 $
+$Revision: 1.6 $
 
 =cut
 EOF

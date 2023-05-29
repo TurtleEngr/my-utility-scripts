@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/v4l2loopback-init,v 1.4 2023/03/25 22:21:43 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/v4l2loopback-init,v 1.5 2023/05/21 01:10:35 bruce Exp $
 
 # Install this script:
 #   Put it in /etc/init.d

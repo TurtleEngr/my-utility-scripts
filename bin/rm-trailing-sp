@@ -18,7 +18,7 @@ Usage:
 
 Remove trailing whitespace. If -t, also convert tabs to spaces with
 "expand". This helps tracking differences between file versions.
-For normalizing indents, in scripts, see: bash-fmt
+For normalizing indents, in scripts, see: shfmt (or bash-fmt)
 
 Only use this on text files. The script skips files when the "file"
 command does not show "ASCII text". But don't depend on this check.

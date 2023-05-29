@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/rm-safe,v 1.4 2023/03/25 22:21:42 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/rm-safe,v 1.5 2023/05/21 01:10:34 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -168,7 +168,7 @@ BAR
 
 =head1 HISTORY
 
-$Revision: 1.4 $ $Date: 2023/03/25 22:21:42 $ GMT
+$Revision: 1.5 $ $Date: 2023/05/21 01:10:34 $ GMT
 
 =cut
 EOF
@@ -241,7 +241,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-cVer='$Revision: 1.4 $'
+cVer='$Revision: 1.5 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
