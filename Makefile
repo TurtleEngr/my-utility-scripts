@@ -17,13 +17,13 @@ ci checkin commit save :
 
 push upload :
 	git pull origin develop
-	incver -p VERSION
+	incver.sh -p VERSION
 	git ci -am "inc patch level"
 	git push origin develop
 	echo if OK, make release
 
 release :
-	incver -m VERSION
+	incver.sh -m VERSION
 	git ci -am "inc minor level"
 	git push origin develop
 	git co main
@@ -31,7 +31,7 @@ release :
 	git tag -m "Release $$(cat VERSION)" $$(echo tag-$$(cat VERSION | tr '.' '-'))
 	git push --tags origin main
 	git co develop
-	incver -p VERSION
+	incver.sh -p VERSION
 	git ci -am "inc patch level"
 	git push origin develop
 
