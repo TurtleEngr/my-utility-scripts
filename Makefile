@@ -17,14 +17,23 @@ ci checkin commit save :
 
 push upload :
 	git pull origin develop
+	incver -p VERSION
+	git ci -am "inc patch level"
 	git push origin develop
 	echo if OK, make release
 
 release :
+	incver -m VERSION
+	git ci -am "inc minor level"
+	git push origin develop
 	git co main
-	git merge develop
-	git push origin main
+	git merge develop -m "Merge develop to main"
+	git tag -m "Release $$(cat VERSION)" $$(echo tag-$$(cat VERSION | tr '.' '-'))
+	git push --tags origin main
 	git co develop
+	incver -p VERSION
+	git ci -am "inc patch level"
+	git push origin develop
 
 gist update-gist : ~/ver/github/gist/sshagent/d*/sshagent
 
