@@ -4,8 +4,7 @@
 # This uses the fast trim option
 
 # --------------------
-fUsage()
-{
+fUsage() {
     cat <<EOF
 Usage:
     vid-trim-vid -i InFile [-o OutFile] [-s HH:MM:SS] -e HH:MM:SS

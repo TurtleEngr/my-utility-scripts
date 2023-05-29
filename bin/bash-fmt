@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------
-function fUsage()
-{
+function fUsage() {
     cat <<\EOF | more 1>&2
 Usage:
     bash-fmt <pInFile >pOutFile
@@ -37,8 +36,7 @@ EOF
 } # fUsage
 
 # --------------------
-function fProcess()
-{
+function fProcess() {
     local pFile="$1"
 
     cat $pFile >$cInFile
@@ -59,7 +57,7 @@ function fProcess()
     # expand tabs, remove trailing whitespace, and try formatting
     expand <$cInFile |
         sed -E 's/[[:space:]]*$//' |
-        'shfmt' -i 4 -ci -fn >$cOutFile 2>/dev/null
+        'shfmt' -i 4 -ci >$cOutFile 2>/dev/null
     if [ $? -ne 0 ]; then
         echo "Error: shfmt errors [$LINENO]" 1>&2
         return 1

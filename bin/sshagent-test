@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.4 2022/12/20 00:20:48 bruce Exp $
+# $Id: sshagent-test,v 1.6 2023/05/21 01:10:35 bruce Exp $
 set -u
 
 # Var prefix key
@@ -20,8 +20,7 @@ export gErr
 export gpDebug=0
 export gpTest
 
-fUsageTest()
-{
+fUsageTest() {
     # Quick help, run this:
     # SCRIPTNAME -h
 
@@ -112,12 +111,12 @@ and after running.
 
 =item *
 
-sshagent-test requires a non X11 /usr/bin/ssh-askpass
+sshagent-test requires a non X11 /bin/ssh-askpass
 
 Create this substitute:
 
     cat <<EOF >~/bin/ssh-askpass
-    #!/usr/bin/bash
+    #!/bin/bash
     read
     echo $REPLY
     EOF
@@ -157,7 +156,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.4 $ $Date: 2022/12/20 00:20:48 $ GMT
+$Revision: 1.6 $ $Date: 2023/05/21 01:10:35 $ GMT
 
 =cut
 EOF
@@ -165,8 +164,7 @@ EOF
 } # fUsageTest
 
 # --------------------
-fSetLoc()
-{
+fSetLoc() {
     local tLoc
 
     if [ -f ./sshagent ]; then
@@ -192,8 +190,7 @@ fSetLoc()
 # Tests
 
 # --------------------------------
-oneTimeSetUp()
-{
+oneTimeSetUp() {
     # Unset gpTest to prevent infinite loop
     gpTest=''
 
@@ -214,15 +211,13 @@ oneTimeSetUp()
 } # oneTimeSetUp
 
 # --------------------------------
-oneTimeTearDown()
-{
+oneTimeTearDown() {
     rm -rf $cgTestDir
     return 0
 } # oneTearDown
 
 # --------------------------------
-setUp()
-{
+setUp() {
     pkill -u $USER ssh-agent &>/dev/null
     gpDebug=0
 
@@ -230,8 +225,7 @@ setUp()
 } # setUp
 
 # --------------------------------
-tearDown()
-{
+tearDown() {
     pkill -u $USER ssh-agent &>/dev/null
     rm ~/tmp/result.tmp &>/dev/null
 
@@ -240,8 +234,7 @@ tearDown()
 
 # ========================================
 
-testSetup()
-{
+testSetup() {
     assertTrue "[$LINENO]" "[ -f $cgEnvFile ]"
     assertTrue "[$LINENO]" "[ -f $cgTestDir/id.test1 ]"
     assertTrue "[$LINENO]" "[ -f $cgTestDir/id.test1.pub ]"
@@ -253,8 +246,7 @@ testSetup()
 } # testSetup
 
 # --------------------------------
-testUsageOK()
-{
+testUsageOK() {
     local tResult
 
     tResult=$($cgScript -h 2>&1)
@@ -264,8 +256,7 @@ testUsageOK()
 } # testUsageOK
 
 # --------------------------------
-testUsageError()
-{
+testUsageError() {
     local tResult
 
     tResult=$($cgScript 2>&1)
@@ -295,8 +286,7 @@ testUsageError()
     return 0
 } # testUsageError
 
-testCreateOK()
-{
+testCreateOK() {
     local tResult
 
     assertTrue "[$LINENO]" "[ -f $cgTestDir/id.test1 ]"
@@ -321,8 +311,7 @@ testCreateOK()
     return 0
 } # testCreateOK
 
-testCreateError()
-{
+testCreateError() {
     local tResult
 
     . $cgScript "$cgTestDir/id.xxx" >~/tmp/result.tmp 2>&1 < <(echo foobar)
@@ -333,8 +322,7 @@ testCreateError()
     return 0
 } # testCreateError
 
-testAddOK()
-{
+testAddOK() {
     local tResult
 
     . $cgScript "$cgTestDir/id.test1" >~/tmp/result.tmp 2>&1 < <(echo foobar)
@@ -351,8 +339,7 @@ testAddOK()
     return 0
 } # testAdd()
 
-testCreateWarn()
-{
+testCreateWarn() {
     local tResult
 
     ssh-keygen -t rsa -f $cgTestDir/id.test3 -N "" -C "id.test3" &>/dev/null
@@ -368,8 +355,7 @@ testCreateWarn()
     return 0
 } # testCreateError2
 
-testError()
-{
+testError() {
     local tResult
 
     assertFalse "[$LINENO]" "pgrep -u $USER ssh-agent"
@@ -382,8 +368,7 @@ testError()
     return 0
 }
 
-testKill()
-{
+testKill() {
     local tResult
 
     . $cgScript "$cgTestDir/id.test1" >~/tmp/result.tmp 2>&1 < <(echo foobar)
@@ -400,8 +385,7 @@ testKill()
 
 # -------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     if [ "$gpTest" = "list" ]; then
         grep 'test.*()' $0 | grep -v grep | sed 's/()//g'
         exit $?

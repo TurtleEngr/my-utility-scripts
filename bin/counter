@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/counter,v 1.9 2023/03/25 22:21:41 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/counter,v 1.10 2023/05/21 01:10:34 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -21,8 +21,7 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fCleanUp()
-{
+function fCleanUp() {
     trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
     # Called when script ends (see trap) to remove temporary files,
     rm $gpTimerFile >/dev/null 2>&1
@@ -31,8 +30,7 @@ function fCleanUp()
 } # fCleanUp
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 ]; then
         pod2text $0
     else
@@ -206,7 +204,7 @@ date
 
 =head1 HISTORY
 
-$Revision: 1.9 $ GMT
+$Revision: 1.10 $ GMT
 
 =cut
 EOF
@@ -215,8 +213,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -230,8 +227,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
@@ -290,7 +286,7 @@ gErr=0
 
 # -------------------
 # Define the version number for this script
-cVer='$Revision: 1.9 $'
+cVer='$Revision: 1.10 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

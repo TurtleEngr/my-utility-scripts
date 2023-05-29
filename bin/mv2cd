@@ -4,8 +4,7 @@
 # /release/mirror/ or /release/pachage/) to the corresponding directory
 # in /release/cd.archive/
 
-function fUsage()
-{
+function fUsage() {
     cat <<EOF
 mv2cd file...
 

@@ -2,8 +2,7 @@
 # Translate all file/dir names with special char to use '_'
 # Valid file/dir names [_-.a-zA-Z0-9]
 
-function fRename()
-{
+function fRename() {
     local pOld="$*"
     local tNew
     local tDup

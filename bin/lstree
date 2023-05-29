@@ -1,7 +1,6 @@
 #!/bin/bash
 
-fUsage()
-{
+fUsage() {
     cat <<\EOF
 Usage:
     lstree [-d] [-L N] [-C] [-T] [-c] [-p] [other "tree" options] [dir...]

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     # Print usage help for this script, using pod2text.
     pod2text $0
     exit 1
@@ -131,7 +130,7 @@ Bruce Rafnel
 
 =head1 HISTORY
 
-$Revision: 1.5 $
+$Revision: 1.6 $
 
 =cut
 EOF

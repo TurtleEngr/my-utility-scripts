@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 -a -x /usr/bin/pod2usage ]; then
         pod2usage $0
         exit 1
@@ -177,8 +176,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fDefaultConfig()
-{
+function fDefaultConfig() {
     export cRemoteHome=/rel
     export cRemoteSym=/rel
     export cRemoteHostWan=moria.whyayh.com
@@ -197,8 +195,7 @@ function fDefaultConfig()
 } # fDefaultConfig
 
 # --------------------------------
-function fSetVar()
-{
+function fSetVar() {
     local tVar=$1
     local tConf=$2
     local tVal
@@ -210,8 +207,7 @@ function fSetVar()
 } # fSetVar
 
 # --------------------------------
-function fGetConfig()
-{
+function fGetConfig() {
     if [ -r $GIT_CONFIG ]; then
         fSetVar cRemoteHome remote.${pRel}.home
         fSetVar cRemoteSym remote.${pRel}.sym
@@ -232,8 +228,7 @@ function fGetConfig()
 } # fGetConfig
 
 # --------------------------------
-function fSaveConfig()
-{
+function fSaveConfig() {
     if [ ! -w $GIT_CONFIG ]; then
         echo "Error: can not write to: $GIT_CONFIG"
         exit 1
@@ -260,8 +255,7 @@ function fSaveConfig()
 } # fSaveConfig
 
 # --------------------------------
-function fStatus()
-{
+function fStatus() {
     echo "Config file: $GIT_CONFIG values:"
     git config --list | cat -n
     echo -en "Number of dirs  in $cLocalHome: "

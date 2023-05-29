@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/tag-collect.sh,v $
-# $Revision: 1.15 $ $Date: 2023/04/14 01:33:10 $ GMT
+# $Revision: 1.16 $ $Date: 2023/05/21 01:10:35 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -43,8 +43,7 @@ esac
 # Script Functions
 
 # --------------------------------
-fUsage()
-{
+fUsage() {
     # Quick help, run this:
     # tag-collect.sh -h | less
 
@@ -274,7 +273,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.15 $ $Date: 2023/04/14 01:33:10 $ GMT
+$Revision: 1.16 $ $Date: 2023/05/21 01:10:35 $ GMT
 
 =cut
 EOF
@@ -294,8 +293,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-fCleanUp()
-{
+fCleanUp() {
     fComCleanUp
     exit
 
@@ -313,8 +311,7 @@ EOF
 } # fCleanUp
 
 # -------------------
-fSetGlobals()
-{
+fSetGlobals() {
     fComSetGlobals
     gpLog=0
     gpVerbose=1
@@ -345,8 +342,7 @@ EOF
 } # fSetGlobals
 
 # -------------------
-fValidate()
-{
+fValidate() {
     local tFile
     local tNewList=""
 
@@ -392,8 +388,7 @@ EOF
 } # fValidate
 
 # -------------------
-fGetChunk()
-{
+fGetChunk() {
     local pTag=$1
     local tInTag=""
     local tCount=0
@@ -448,8 +443,7 @@ fGetChunk()
 } # fGetChunk
 
 # -------------------
-fGetTaggedText()
-{
+fGetTaggedText() {
     local tTag
 
     rm $Tmp/unique.tmp >/dev/null 2>&1
@@ -462,8 +456,7 @@ fGetTaggedText()
 # Tests
 
 # --------------------------------
-testUsage()
-{
+testUsage() {
     local tResult
 
     #-----
@@ -533,8 +526,7 @@ EOF
 } # testUsage
 
 # --------------------------------
-testScriptFunctions()
-{
+testScriptFunctions() {
     local tResult
 
     tResult=$(fSetGlobals 2>&1)
@@ -554,8 +546,7 @@ EOF
 } # testScriptFunctions
 
 # --------------------------------
-testValidate()
-{
+testValidate() {
     local tResult
 
     #-----
@@ -592,8 +583,7 @@ testValidate()
     return 0
 } # testValidate
 
-testGetTag()
-{
+testGetTag() {
     local tResult
 
     # Setup
@@ -681,8 +671,7 @@ EOF
 
 # -------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     if [ "$gpTest" = "all" ]; then
         gpTest=""
         # shellcheck disable=SC1091
@@ -716,7 +705,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.15 $'
+cVer='$Revision: 1.16 $'
 fSetGlobals
 
 # -------------------

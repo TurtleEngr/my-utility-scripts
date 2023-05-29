@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/vid-split,v 1.11 2023/03/25 22:21:43 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-split,v 1.12 2023/05/21 01:10:35 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -21,8 +21,7 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 ]; then
         pod2text $0 | more
     else
@@ -237,7 +236,7 @@ with no -x option.
 
 =head1 HISTORY
 
-$Revision: 1.11 $
+$Revision: 1.12 $
 
 =cut
 EOF
@@ -245,8 +244,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then exit
@@ -260,8 +258,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
@@ -306,8 +303,7 @@ function fLog()
 } # fLog
 
 # ------------------
-function fFileExists()
-{
+function fFileExists() {
     local pFile=$1
     if [ ! -r "$pFile" ]; then
         fError "$pFile file is not found or is not readable" $LINENO
@@ -315,8 +311,7 @@ function fFileExists()
 }
 
 # ------------------
-function fFileNotExists()
-{
+function fFileNotExists() {
     local pFile=$1
     if [ -f "$pFile" ]; then
         fError "$pFile exists. Remove or rename it." $LINENO
@@ -324,8 +319,7 @@ function fFileNotExists()
 }
 
 # ------------------
-function fFmtTime()
-{
+function fFmtTime() {
     local pMin=$1
 
     local tHour=0
@@ -339,8 +333,7 @@ function fFmtTime()
 } # fFmtTime
 
 # ------------------
-function fRange()
-{
+function fRange() {
     local pNum=$1
     local pMin=$2
     local pMax=$3
@@ -350,8 +343,7 @@ function fRange()
 } # fRange
 
 # ------------------
-function fCmd()
-{
+function fCmd() {
     local pCmd="$*"
 
     fLog debug "$pCmd" $LINENO
@@ -361,8 +353,7 @@ function fCmd()
 } # fCmd
 
 # ------------------
-function fDuration()
-{
+function fDuration() {
     local pFile=$1
     fFileExists "$pFile"
 
@@ -373,8 +364,7 @@ function fDuration()
 } # fDuration
 
 # ------------------
-function fSplit()
-{
+function fSplit() {
     local pFile=$1
     local pSize=$2
     fRange "$pSize" 10 1900
@@ -387,8 +377,7 @@ function fSplit()
 } # fSplit
 
 # ------------------
-function fMin()
-{
+function fMin() {
     local pFile=$1
     local pMin=$2
     fRange "$pMin" 10 60
@@ -424,8 +413,7 @@ function fMin()
 } # fMin
 
 # ------------------
-function fJoin()
-{
+function fJoin() {
     local pFile=$1
     fFileNotExists "$pFile.sav"
     local tBase=${pFile%.*}
@@ -486,7 +474,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-export cVer='$Revision: 1.11 $'
+export cVer='$Revision: 1.12 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

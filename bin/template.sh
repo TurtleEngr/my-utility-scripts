@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.75 $ $Date: 2023/03/25 22:21:42 $ GMT
+# $Revision: 1.76 $ $Date: 2023/05/16 19:28:19 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -9,8 +9,7 @@ set -u
 # Script Functions
 
 # --------------------------------
-fUsage()
-{
+fUsage() {
     # Quick help, run this:
     # SCRIPTNAME -h
 
@@ -280,7 +279,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.75 $ $Date: 2023/03/25 22:21:42 $ GMT
+$Revision: 1.76 $ $Date: 2023/05/16 19:28:19 $ GMT
 
 =cut
 EOF
@@ -300,8 +299,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-fCleanUp()
-{
+fCleanUp() {
     fComCleanUp
     exit
 
@@ -319,8 +317,7 @@ EOF
 } # fCleanUp
 
 # -------------------
-fSetGlobals()
-{
+fSetGlobals() {
     fComSetGlobals
 
     # Put your globals here
@@ -347,8 +344,7 @@ EOF
 } # fSetGlobals
 
 # -------------------
-fValidateHostName()
-{
+fValidateHostName() {
     if [ -z $gpHostName ]; then
         fError2 -m "The -n or -c option is required." -l $LINENO
     fi
@@ -369,8 +365,7 @@ EOF
 # Tests
 
 # --------------------------------
-oneTimeSetUp()
-{
+oneTimeSetUp() {
     # When calling $cName, unset gpTest to prevent infinite loop
     gpTest=''
 
@@ -378,26 +373,22 @@ oneTimeSetUp()
 } # oneTimeSetUp
 
 # --------------------------------
-oneTimeTearDown()
-{
+oneTimeTearDown() {
     return 0
 } # oneTearDown
 
 # --------------------------------
-setUp()
-{
+setUp() {
     return 0
 } # setUp
 
 # --------------------------------
-tearDown()
-{
+tearDown() {
     return 0
 } # tearDown
 
 # --------------------------------
-testUsage()
-{
+testUsage() {
     local tResult
 
     #-----
@@ -468,8 +459,7 @@ EOF
 } # testUsage
 
 # --------------------------------
-testScriptFunctions()
-{
+testScriptFunctions() {
     local tResult
 
     tResult=$(fSetGlobals 2>&1)
@@ -498,8 +488,7 @@ EOF
 
 # -------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     if [ "$gpTest" = "list" ]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
         grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
@@ -576,7 +565,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.75 $'
+cVer='$Revision: 1.76 $'
 fSetGlobals
 
 # -------------------

@@ -13,8 +13,7 @@ EOF
 fi
 
 # --------------------
-fCalcSec()
-{
+fCalcSec() {
     # Input: HH:MM:SS.FF
     # Output: S
     local pFmt=$1
@@ -37,8 +36,7 @@ fCalcSec()
 }
 
 # --------------------
-fFmtTime()
-{
+fFmtTime() {
     # Input: S
     # Output: DDd:HH:MM:SS
     local pSec=$1
