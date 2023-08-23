@@ -103,15 +103,15 @@ if [ $tLogIt -ne 0 ]; then
             if [ ! -d $cMyLogs ]; then
                 read -p 'Run: "bcmnt -m" (y/n)? '
                 if [ "$REPLY" = 'y' ]; then
-                    bcmnt -m
+                    if ! bcmnt -m; then exit 1; fi
                 fi
             fi
             if [ -d $cMyLogs ]; then
                 echo "Archiving: $tFirstFile"
-                cd $cMyLogs
-                cvs update
+                if ! cd $cMyLogs; then exit 1; fi
+                if ! cvs update; then exit 1; fi
                 cp $tFirstFile .
-                cvs ci -m "Updated"
+                if ! cvs ci -m "Updated"; then exit 1; fi
                 cp ${tFirstFile##*/} $tFirstFile
                 cd - 2>/dev/null
             else

@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.76 $ $Date: 2023/05/16 19:28:19 $ GMT
+# $Revision: 1.77 $ $Date: 2023/08/09 00:09:53 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -279,7 +279,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.76 $ $Date: 2023/05/16 19:28:19 $ GMT
+$Revision: 1.77 $ $Date: 2023/08/09 00:09:53 $ GMT
 
 =cut
 EOF
@@ -565,7 +565,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.76 $'
+cVer='$Revision: 1.77 $'
 fSetGlobals
 
 # -------------------

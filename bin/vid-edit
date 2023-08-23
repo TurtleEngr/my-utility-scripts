@@ -145,7 +145,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.37 $ $Date: 2023/05/21 01:10:35 $ GMT
+$Revision: 1.39 $ $Date: 2023/08/10 00:43:05 $ GMT
 
 =cut
 EOF
@@ -262,7 +262,7 @@ function fKLVer() {
         21.12) tUse=kdenlive-21.12.2-x86_64.appimage ;;
         22.04) tUse=kdenlive-22.04.2-x86_x64.AppImage ;;
         22.12) tUse=kdenlive-22.12.1-x86_64.AppImage ;;
-        23.04) tUse=kdenlive-23.04.1-x86_64.AppImage ;;
+        23.04) tUse=kdenlive-23.04.3-x86_64.AppImage ;;
         *)
             tUse=kdenlive
             fLog "No version available, using: kdenlive." $LINENO
