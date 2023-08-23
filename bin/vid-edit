@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 ]; then
         pod2text $0
     else
@@ -146,7 +145,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.35 $ $Date: 2023/01/09 19:26:35 $ GMT
+$Revision: 1.39 $ $Date: 2023/08/10 00:43:05 $ GMT
 
 =cut
 EOF
@@ -154,8 +153,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -169,8 +167,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
@@ -211,8 +208,7 @@ function fLog()
 } # fLog
 
 # ------------------
-function fFileCheck()
-{
+function fFileCheck() {
     # Input: gpKdenFile
     # Ouput: gFileVer
     if [ -z "$gpKdenFile" ]; then
@@ -236,8 +232,7 @@ function fFileCheck()
 } # fFileCheck
 
 # ------------------
-function fKLVer()
-{
+function fKLVer() {
     # Input: gpVer, gFileVer, cLatestVer, cKLBin
     # Output: gKLProg, gpVer, gFileVer
     if [ ! -d $cKLBin ]; then
@@ -265,12 +260,9 @@ function fKLVer()
         21.08) tUse=kdenlive-21.08.0a-x86_64.appimage ;;
         21.11) tUse=kdenlive-21.11.70-9295653-x86_64.appimage ;;
         21.12) tUse=kdenlive-21.12.2-x86_64.appimage ;;
-            #   22.04) tUse=kdenlive-22.04.0-2-x86_64.AppImage ;;
-            #   22.04) tUse=kdenlive-22.04.1-x86_x64.AppImage ;;
         22.04) tUse=kdenlive-22.04.2-x86_x64.AppImage ;;
-            #   22.04) tUse=kdenlive-22.04.3-x86_x64.AppImage ;;
         22.12) tUse=kdenlive-22.12.1-x86_64.AppImage ;;
-            #   22.12) tUse=kdenlive-22.12.0-x86_64.AppImage ;;
+        23.04) tUse=kdenlive-23.04.3-x86_64.AppImage ;;
         *)
             tUse=kdenlive
             fLog "No version available, using: kdenlive." $LINENO
@@ -286,8 +278,7 @@ function fKLVer()
 } # fKLVer
 
 # ------------------
-function fCVSCheck()
-{
+function fCVSCheck() {
     if [ $gpCVS -ne 1 ]; then
         return
     fi

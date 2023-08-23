@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # --------------------------
-function fUsage()
-{
+function fUsage() {
     cat <<EOF
 Usage:
         s3-lsg [-t] [-l N] [-c Config] [-p] bucket[/dir]

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/cvs-rm-ver,v 1.2 2023/03/25 22:21:41 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/cvs-rm-ver,v 1.3 2023/05/21 01:10:34 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -15,8 +15,7 @@
 # gErr - error code (0 = no error)
 # cName - script's name
 
-function fUsage()
-{
+function fUsage() {
     if [[ $# -ne 0 ]]; then
         pod2text $0 | more
     else
@@ -133,16 +132,15 @@ They should only use the characters: [a-zA-Z][0-9][.-_]
 
 =head1 HISTORY
 
- $Revision: 1.2 $;
- $Date: 2023/03/25 22:21:41 $ GMT
+ $Revision: 1.3 $;
+ $Date: 2023/05/21 01:10:34 $ GMT
 
 =cut
 EOF
 } # fUsage
 
 # --------------------------------
-function fCleanUp()
-{
+function fCleanUp() {
     local pExit=$1
 
     rm -f $cTmp.tmp* >/dev/null 2>&1
@@ -150,8 +148,7 @@ function fCleanUp()
 }
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -165,8 +162,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     fLog notice "Just testing" $LINENO 8
     # pLevel - emerg alert crit err warning notice info debug
@@ -217,7 +213,7 @@ export gErr gpDebug cName gpVerbose gpLog cTmp cVer
 cName=${0##*/}
 
 # Define the version number for this script
-cVer='$Revision: 1.2 $'
+cVer='$Revision: 1.3 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

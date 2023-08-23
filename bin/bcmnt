@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/bcmnt,v 1.49 2023/03/25 22:21:41 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/bcmnt,v 1.50 2023/05/21 01:10:33 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -16,8 +16,7 @@
 # cVer - current version
 # cName - script's name
 
-function fUsage()
-{
+function fUsage() {
     if [ $# -ne 0 ]; then
         pod2text $0 | more
     else
@@ -148,8 +147,8 @@ encfs, encfsctl
 
 =head1 HISTORY
 
- $Revision: 1.49 $
- $Date: 2023/03/25 22:21:41 $ GMT
+ $Revision: 1.50 $
+ $Date: 2023/05/21 01:10:33 $ GMT
 
 =cut
 EOF
@@ -157,8 +156,7 @@ EOF
 } # fUsage
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -172,8 +170,7 @@ function fError()
 } # fError
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Usage:
     #     gErr=8801             # optional
     #     fLog notice "Just testing" $LINENO 8
@@ -207,8 +204,7 @@ function fLog()
 } # fLog
 
 # ------------------
-function fCreateDir()
-{
+function fCreateDir() {
     local pDir=$1
 
     if [ -d $cTop/.$pDir.ecfs ]; then
@@ -230,8 +226,7 @@ function fCreateDir()
 } # fCreateDir
 
 # ------------------
-function fMount()
-{
+function fMount() {
     local pDir=$1
 
     if [ -f $cTop/$pDir/mounted ]; then
@@ -260,8 +255,7 @@ function fMount()
 } # fMount
 
 # ------------------
-function fUnmount()
-{
+function fUnmount() {
     local pDir=$1
 
     if [ ! -f $cTop/$pDir/mounted ]; then
@@ -273,8 +267,7 @@ function fUnmount()
 } # fUnmount
 
 # ------------------
-function fList()
-{
+function fList() {
     cd $cTop
     fLog info "List dirs:" $LINENO
     for tDir in $('ls' -d .*.ecfs 2>/dev/null); do
@@ -315,7 +308,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-export cVer='$Revision: 1.49 $'
+export cVer='$Revision: 1.50 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 

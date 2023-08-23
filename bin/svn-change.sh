@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/svn-change.sh,v 1.5 2023/03/25 22:21:42 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/svn-change.sh,v 1.6 2023/05/21 01:10:35 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -21,8 +21,7 @@
 # cCurDir - current directory
 
 # --------------------------------
-function fUsage()
-{
+function fUsage() {
     # Print usage help for this script, using pod2text.
     pod2text $0
     exit 1
@@ -103,15 +102,14 @@ Bruce Rafnel
 
 Bruce R.
 
-$Revision: 1.5 $ GMT
+$Revision: 1.6 $ GMT
 
 =cut
 EOF
 }
 
 # --------------------------------
-function fError()
-{
+function fError() {
     # Input:
     #   $1 - Error number (usually $LINENO)
     #   $2 - Error message
@@ -135,8 +133,7 @@ EOF
 }
 
 # ------------------
-function fLog()
-{
+function fLog() {
     # Input:
     #   $1 level (# emerg alert crit err warning notice info debug)
     #   $2 message
@@ -189,7 +186,7 @@ gVerbose=${gVerbose:-0}
 
 # -------------------
 # Define the version number for this script
-gVer='$Revision: 1.5 $'
+gVer='$Revision: 1.6 $'
 gVer=${gVer#*' '}
 gVer=${gVer%' '*}
 
