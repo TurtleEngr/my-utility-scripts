@@ -43,9 +43,12 @@ function fProcess() {
 
     head -n 2 <$cInFile | grep -q '#!/bin/bash' &>/dev/null
     if [ $? -ne 0 ]; then
-        cat <$cInFile
-        echo "Warning: Not a bash file [$LINENO]" 1>&2
-        return 1
+        head -n 2 <$cInFile | grep -q '#!/usr/bin/env bash' &>/dev/null
+        if [ $? -ne 0 ]; then
+            cat <$cInFile
+            echo "Warning: Not a bash file [$LINENO]" 1>&2
+            return 1
+        fi
     fi
 
     bash -n <$cInFile &>/dev/null

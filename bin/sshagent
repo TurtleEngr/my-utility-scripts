@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.79 2023/05/21 01:10:35 bruce Exp $
+# $Id: sshagent,v 1.80 2023/05/30 19:55:30 bruce Exp $
 set -u
 
 # Var prefix key
@@ -33,10 +33,10 @@ fUsage() {
     gErr=1
     if [ "$pStyle" = "short" ]; then
         pod2usage $cgBin/$cgScriptName
-        return
+        return 1
     fi
     pod2text $cgBin/$cgScriptName | less
-    return
+    return 1
 
     cat <<'EOF' &>/dev/null
 =pod
@@ -337,7 +337,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.79 $
+$Revision: 1.80 $
 
 =cut
 
@@ -345,8 +345,9 @@ EOF
 } # fUsage
 
 # --------------------
-fSetBin() {
-    local tBinLoc=this
+fSetBin()
+{
+    local tBinLoc=home
     local tBin=$PWD
 
     case $tBinLoc in
@@ -368,7 +369,6 @@ fSetBin() {
     esac
 
     echo "$tBin"
-    return
 } # fSetBin
 
 # --------------------
@@ -399,14 +399,12 @@ fConfig() {
     gpParm=""
     gpDebug=${gpDebug:-0}
     gDebug=$gpDebug
-
-    return
 } # fConfig
 
 # --------------------
 fGetOpts() {
     if [ $gErr -ne 0 ]; then
-        return
+        return 1
     fi
     local tArg
 
@@ -418,7 +416,7 @@ fGetOpts() {
         case $tArg in
             h)
                 fUsage long
-                return
+                return 1
                 ;;
             k) gpAction='kill' ;;
             s) gpAction='script' ;;
@@ -426,12 +424,12 @@ fGetOpts() {
             \?)
                 echo "Error: Unknown option: -$OPTARG [$LINENO]"
                 fUsage short
-                return
+                return 1
                 ;;
             :)
                 echo "Error: Value required for option: $tArg [$LINENO]"
                 fUsage short
-                return
+                return 1
                 ;;
         esac
     done
@@ -448,13 +446,13 @@ fGetOpts() {
         gpAction='add'
     fi
     if [ $gDebug -ne 0 ]; then echo "gpParam=$gpParm"; fi
-    return
+    return 0
 } # fGetOpts
 
 # --------------------
 fValidate() {
     if [ $gErr -ne 0 ]; then
-        return
+        return 1
     fi
     local tParm=""
     local tParmList=""
@@ -464,35 +462,35 @@ fValidate() {
         gErr=$LINENO
         echo "Error: Missing USER env. var. [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     if [ -z "$HOME" ]; then
         gErr=$LINENO
         echo "Error: Missing HOME env. var. [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     if [ ! -w $HOME ]; then
         gErr=$LINENO
         echo "Error: $HOME dir is not writable [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     if [ ! -w $cgEnvDir ]; then
         gErr=$LINENO
         echo "Error: $cgEnvDir is not writable or is missing [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     if [ -z "$gpAction" ]; then
         gErr=$LINENO
         echo "Error: No options were found [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     for tProg in $cgProgList; do
@@ -500,7 +498,7 @@ fValidate() {
             gErr=$LINENO
             echo "Error: Missing program: $tProg [$gErr]"
             fUsage short
-            return
+            return 1
         fi
     done
 
@@ -508,7 +506,7 @@ fValidate() {
         gErr=$LINENO
         echo "Error: $cgScriptName is not 'sourced' [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     # Keep the permissions low
@@ -516,7 +514,7 @@ fValidate() {
         gErr=$LINENO
         echo "Error: with chown [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     find $cgEnvDir -type d -exec chmod u=rwx,go= {} \;
@@ -524,7 +522,7 @@ fValidate() {
         gErr=$LINENO
         echo "Error: with chmod [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     find $cgEnvDir -type f -exec chmod u+rw,go= {} \;
@@ -532,7 +530,7 @@ fValidate() {
         gErr=$LINENO
         echo "Error: with chmod [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     for tParm in $gpParm; do
@@ -542,7 +540,7 @@ fValidate() {
             else
                 gErr=$LINENO
                 echo "Error: Not found: $tParm [$gErr]"
-                return
+                return 1
             fi
         fi
         ssh-keygen -y -f $tParm -P 'xxx' &>/dev/null 2>&1
@@ -553,13 +551,13 @@ fValidate() {
     done
     gpParm=$tParmList
 
-    return
+    return 0
 } # fValidate
 
 # --------------------
 fSARunning() {
     if [ $gErr -ne 0 ]; then
-        return
+        return 1
     fi
 
     # Check to see if an agent is running
@@ -579,13 +577,13 @@ fSARunning() {
         rm -f $cgEnvFile &>/dev/null
     fi
 
-    return
+    return 0
 } # fSARunning
 
 # --------------------
 fKill() {
     if [ $gErr -ne 0 ]; then
-        return
+        return 1
     fi
 
     # Kill all agents owned by $cgAgentOwner
@@ -593,45 +591,45 @@ fKill() {
     killall -u $cgAgentOwner ssh-agent &>/dev/null
     rm -f $cgEnvFile &>/dev/null
 
-    return
+    return 0
 } # fKill
 
 # --------------------
 fScript() {
     if [ $gErr -ne 0 ]; then
-        return
+        return 1
     fi
 
     if [ $gSARunning -eq 0 ]; then
         gErr=$LINENO
         echo "Error: agent is not running [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     if [ ! -x $cgEnvFile ]; then
         gErr=$LINENO
         echo "Error: not found: $cgEnvFile [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     . $cgEnvFile &>/dev/null
     ssh-add -l
 
-    return
+    return 0
 } # fScript
 
 fAdd() {
     if [ $gErr -ne 0 ]; then
-        return
+        return 1
     fi
 
     if [ "$cgAgentOwner" != "$USER" ]; then
         gErr=$LINENO
         echo "Error: cgAgentOwner override cannot be used to add keys [$gErr]"
         fUsage short
-        return
+        return 1
     fi
 
     if [ $gSARunning -eq 0 ]; then
@@ -644,13 +642,13 @@ fAdd() {
 
     ssh-add $gpParm
     ssh-add -l
-    return
+    return 0
 } # fAdd
 
 # --------------------
 fAction() {
     if [ $gErr -ne 0 ]; then
-        return
+        return 1
     fi
 
     case $gpAction in
@@ -664,7 +662,7 @@ fAction() {
             fAdd
             ;;
     esac
-    return
+    return 0
 } # fAction
 
 # ========================================
