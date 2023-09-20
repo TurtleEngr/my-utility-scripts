@@ -144,11 +144,13 @@ fLogFile() {
     if [[ $gArchive -eq 0 ]]; then
         return
     fi
-    read -p "Archive $gFirstFile (y/n)? "
-    if [[ "$REPLY" != 'y' ]]; then
-        return
+    if [[ ! -d $cMyLogDir ]]; then
+        read -p "Archive $gFirstFile (y/n)? "
+        if [[ "$REPLY" != 'y' ]]; then
+            return
+        fi
+        fMount
     fi
-    fMount
     echo "Archiving: $gFirstFile"
     cd $cMyLogDir
     if ! cvs update; then
