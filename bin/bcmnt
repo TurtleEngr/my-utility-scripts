@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/bcmnt,v 1.50 2023/05/21 01:10:33 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/bcmnt,v 1.52 2023/09/19 21:46:54 bruce Exp $
 
 # Prefix codes (show the "scope" of variables):
 # gVar - global variable (may even be external to the script)
@@ -147,8 +147,8 @@ encfs, encfsctl
 
 =head1 HISTORY
 
- $Revision: 1.50 $
- $Date: 2023/05/21 01:10:33 $ GMT
+ $Revision: 1.52 $
+ $Date: 2023/09/19 21:46:54 $ GMT
 
 =cut
 EOF
@@ -270,7 +270,7 @@ function fUnmount() {
 function fList() {
     cd $cTop
     fLog info "List dirs:" $LINENO
-    for tDir in $('ls' -d .*.ecfs 2>/dev/null); do
+    for tDir in $('ls' -dr .*.ecfs 2>/dev/null); do
         tDir=${tDir#.}
         tDir=${tDir%.ecfs}
         echo -n $cTop/$tDir
@@ -308,7 +308,7 @@ export gErr=0
 
 # -------------------
 # Define the version number for this script
-export cVer='$Revision: 1.50 $'
+export cVer='$Revision: 1.52 $'
 cVer=${cVer#*' '}
 cVer=${cVer%' '*}
 
@@ -424,7 +424,7 @@ fi
 
 if [ $gpMountAll -eq 1 ]; then
     cd $cTop
-    for tDir in $('ls' -d .*.ecfs 2>/dev/null); do
+    for tDir in $('ls' -dr .*.ecfs 2>/dev/null); do
         tDir=${tDir#.}
         tDir=${tDir%.ecfs}
         if [ -f $tDir/mounted ]; then

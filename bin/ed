@@ -1,137 +1,257 @@
-#!/bin/bash
-# per-dev/bin/ed
+#!/usr/bin/env bash
+# $Source: /repo/per-bruce.cvs/bin/ed,v $
 
-# Usage:
-#       ed -l
-#       ed -d
+# ========================================
+# Functions
 
-# Use: ~/bin/journal2org.sh to convert *.tmp date format to org format
+# --------------------------------
+fUsage() {
+    cat <<EOF
+ed - run emacs with personal options
+Usage
+    ed [-l] [-j] [-d] [File...]
+Options
+    -l - Log. If no File, a default, based the HOSNAME will be used. Prompt for save?
+    -j - Journal. If no File, a default, in encrypted dir will be used.
+    -d - Date. Put datestamp in the first File.
+    File - one or more files
+Description
+    emacs will be found on the current system and it will be run in a
+    window or in the terminal window, depending on the system.
+    
+    The -l, -j, and -d options will put datestamps in a default file
+    or the first file on the command line.
 
-cMyLogs=/home/bruce/bc/tmp/ver/doc/mylogs
-tBG=0
-tArchive=0
-tDefLog=''
-tEdit='emacs -nw'
-tHost=$HOSTNAME
-if [ -x /etc/inst-env.sh ]; then
-    . /etc/inst-env.sh
-    if [ "$BaseHost" = "ec9" -a "$USER" = "bxr55" ]; then
-        tHost=ec9
-    fi
-fi
+Note:
+    Old log files can be converted from txt to org format with: journal2org.sh
 
-tEdit='emacs -nw'
-case $tHost in
-    AN00608453 | AN00622379)
-        tDefLog=~/tmp/e.tmp
-        #       if [ -f /usr/bin/emacs-w32.exe ]; then
-        #           # emacs-w32 does not load ~/.abbrev_defs
-        #           tEdit="run emacs-w32 -Q"
-        #           tBG=1
-        #       fi
-        ;;
-    ec9)
-        tDefLog=~/tmp/e.tmp
-        ;;
-    asimov*)
-        tDefLog=~/tmp/a.org
-        tEdit=emacs
-        tArchive=1
-        ;;
-    plasma)
-        tDefLog=~/tmp/p.org
-        tEdit=emacs
-        tBG=1
-        tArchive=1
-        ;;
-    mxtrance)
-        tDefLog=~/tmp/m.org
-        tEdit=emacs
-        tBG=1
-        tArchive=1
-        ;;
-    windell5)
-        tDefLog=~/tmp/w.tmp
-        ;;
-    uucc-mac*)
-        tDefLog=~/tmp/u.tmp
-        tEdit=emacs
-        tBG=1
-        ;;
-    *)
-        tDefLog=~/tmp/t.org
-        ;;
-esac
+EOF
+    exit 1
+} # fUsage
 
-if [ -n "CYGWIN" -a -x /usr/bin/mintty ]; then
-    tEdit="mintty -s 80,40 --fs 10 emacs"
-    tBG=1
-fi
-
-tLogIt=0
-if [ $# -ne 0 ]; then
-    if [ "$1" = "-l" ]; then
-        tLogIt=1
-        shift
-    elif [ "$1" = "-d" ]; then
-        tLogIt=1
-        shift
-    fi
-fi
-tFile=''
-tFirstFile=''
-if [ $# -ne 0 ]; then
-    tFirstFile=$1
-    shift
-fi
-if [ $# -ne 0 ]; then
-    tFile="$*"
-fi
-
-#if [ "$tFirstFile" != "${tFirstFile%.txt}" ]; then
-#       tLogIt=1
-#fi
-
-if [ $tLogIt -ne 0 ]; then
-    if [ -z $tFirstFile ]; then
-        tFirstFile=$tDefLog
-    fi
-    head -n 2 $tFirstFile
-    if [ $tArchive -ne 0 -a -d ~/bc ]; then
-        read -p "Archive $tFirstFile (y/n)? "
-        if [ "$REPLY" = 'y' ]; then
-            if [ ! -d $cMyLogs ]; then
-                read -p 'Run: "bcmnt -m" (y/n)? '
-                if [ "$REPLY" = 'y' ]; then
-                    if ! bcmnt -m; then exit 1; fi
-                fi
-            fi
-            if [ -d $cMyLogs ]; then
-                echo "Archiving: $tFirstFile"
-                if ! cd $cMyLogs; then exit 1; fi
-                if ! cvs update; then exit 1; fi
-                cp $tFirstFile .
-                if ! cvs ci -m "Updated"; then exit 1; fi
-                cp ${tFirstFile##*/} $tFirstFile
-                cd - 2>/dev/null
-            else
-                echo "Not archived. Missing $cMyLogs"
-            fi
+# --------------------------------
+fGetHost() {
+    gHost=$HOSTNAME
+    if [[ -x /etc/inst-env.sh ]]; then
+        . /etc/inst-env.sh
+        if [[ "$BaseHost" = "ec9" && "$USER" = "bxr55" ]]; then
+            gHost=ec9
         fi
     fi
-    echo >>$tFirstFile
-    echo '   ---------------------------' >>$tFirstFile
-    if [ "$(date +'%Z')" = "UTC" ]; then
-        date --date='now - 8 hours' +'** %F %R:%S PST %a' >>$tFirstFile
-        date +'  %F %R:%S %Z %a' >>$tFirstFile
-    else
-        date +'** %F %R:%S %Z %a' >>$tFirstFile
+} # fGetHost
+
+# --------------------------------
+fSetDefaults() {
+    case $gHost in
+        AN00608453 | AN00622379)
+            gDefLog=~/tmp/e.tmp
+            #       if [[ -f /usr/bin/emacs-w32.exe ]]; then
+            #           # emacs-w32 does not load ~/.abbrev_defs
+            #           gEdit="run emacs-w32 -Q"
+            #           gBG=1
+            #       fi
+            ;;
+        ec9)
+            gDefLog=~/tmp/e.tmp
+            ;;
+        asimov*)
+            gDefLog=~/tmp/a.org
+            gEdit=emacs
+            ;;
+        plasma)
+            gDefLog=~/tmp/p.org
+            gEdit=emacs
+            gBG=1
+            ;;
+        mxtrance)
+            gDefLog=~/tmp/m.org
+            gEdit=emacs
+            gBG=1
+            ;;
+        windell5)
+            gDefLog=~/tmp/w.tmp
+            ;;
+        uucc-mac*)
+            gDefLog=~/tmp/u.tmp
+            gEdit=emacs
+            gBG=1
+            ;;
+        *)
+            gDefLog=~/tmp/$gHost.org
+            ;;
+    esac
+    
+    if [[ -n "$CYGWIN" && -x /usr/bin/mintty ]]; then
+        gEdit="mintty -s 80,40 --fs 10 emacs"
+        gBG=1
     fi
-    echo >>$tFirstFile
+    
+    if [[ -d ~/bc ]]; then
+        gArchive=1
+    fi
+} # fSetDefaults
+
+# --------------------------------
+fGetOpts() {
+    if [[ $# -eq 0 ]]; then
+        fUsage
+    fi
+    while getopts :ljd:h tArg; do
+        case $tArg in
+            # Script arguments
+            l)  gpLogIt=1
+                gpDateIt=1
+                gFirstFile=$gDefLog
+                ;;
+            j)  gpJournalIt=1
+                gpDateIt=1
+                gFirstFile=$cMyJournal
+                ;;
+            d) gpDateIt=1
+                gFirstFile="$OPTARG"
+                ;;
+
+            # Common arguments
+            h)
+                fUsage
+                exit 1
+                ;;
+            # Problem arguments
+            :) echo "Value required for option: -$OPTARG"
+               exit 1
+               ;;
+            \?) echo "Unknown option: $OPTARG"
+                exit 1
+                ;;
+        esac
+    done
+    ((--OPTIND))
+    shift $OPTIND
+    if [[ $# -ne 0 ]]; then
+        gpList="$*"
+    fi
+    while [[ $# -ne 0 ]]; do
+        shift
+    done
+
+    if [[ $gpLogIt -ne 0 || $gpJournalIt -ne 0 ]]; then
+        gpList="$*"
+    fi
+} # fGetOpts
+
+# --------------------------------
+fLogFile() {
+    if [[ $gArchive -eq 0 ]]; then
+        return
+    fi
+    if [[ ! -d $cMyLogDir ]]; then
+        read -p "Archive $gFirstFile (y/n)? "
+        if [[ "$REPLY" != 'y' ]]; then
+            return
+        fi
+        fMount
+    fi
+    echo "Archiving: $gFirstFile"
+    cd $cMyLogDir
+    if ! cvs update; then
+        cd - >/dev/null 2>&1
+        exit 1
+    fi
+    cp $gFirstFile .
+    if ! cvs ci -m "Updated"; then
+        cd - >/dev/null 2>&1
+        exit 1
+    fi
+    cp ${gFirstFile##*/} $gFirstFile
+    cd - >/dev/null 2>&1
+} # fLogFile
+
+# --------------------------------
+fJournalFile() {
+    if [[ $gArchive -eq 0 ]]; then
+        echo "Could not find: $gFirstFile"
+        exit 1
+    fi
+    fMount
+    cd ${gFirstFile%/*}
+    if ! cvs update; then
+        cd - >/dev/null 2>&1
+        exit 1
+    fi
+    if ! cvs ci -m "Updated"; then
+        cd - >/dev/null 2>&1
+        exit 1
+    fi
+    cd - >/dev/null 2>&1
+    echo "Editing: $gFirstFile"
+} # fJournalFile
+
+# --------------------------------
+fDateFile() {
+    echo >>$gFirstFile
+    if [[ "$('date' +'%Z')" = "UTC" ]]; then
+        'date' --date='now - 8 hours' +'** %F %R:%S PST %a' >>$gFirstFile
+        'date' +'  %F %R:%S %Z %a' >>$gFirstFile
+    else
+        'date' +'** %F %R:%S %Z %a' >>$gFirstFile
+    fi
+} # fDateFile
+
+# --------------------------------
+fMount() {
+    if [[ ! -d $cMyLogDir ]]; then
+        echo 'Running: bcmnt -am'
+         if ! bcmnt -am; then
+             exit 1
+        fi
+    fi
+    if [[ ! -d $cMyLogDir ]]; then
+        echo "Error: could not find: $cMyLogDir"
+        exit 1
+    fi
+    if [[ ! -f $gFirstFile ]]; then
+        echo "Error: could not find: $gFirstFile"
+        exit 1
+    fi
+} # fMount
+
+# ========================================
+# Personal configs
+export cMyLogDir=/home/bruce/bc/tmp/ver/doc/mylogs
+export cMyJournal=/home/bruce/bc/tmp/ver/doc/quest/journal.txt
+
+# Globals
+export gHost=$HOSTNAME
+
+export gArchive=0
+export gBG=0
+export gDefLog=""
+export gEdit='emacs -nw'
+export gFirstFile=""
+
+export gpDateIt=0
+export gpJournalIt=0
+export gpLogIt=0
+export gpList=""
+
+fGetHost
+fSetDefaults
+fGetOpts $*
+
+if [[ $gpLogIt -ne 0 ]]; then
+    fLogFile
 fi
 
-if [ $tBG -ne 0 ]; then
-    $tEdit $tFirstFile $tFile &
+if [[ $gpJournalIt -ne 0 ]]; then
+    fJournalFile
+fi
+
+if [[ $gpDateIt -ne 0 ]]; then
+    fDateFile
+fi
+
+if [[ $gBG -ne 0 ]]; then
+    $gEdit $gFirstFile $gpList &
 else
-    $tEdit $tFirstFile $tFile
+    $gEdit $gFirstFile $gpList
 fi
