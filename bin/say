@@ -15,11 +15,12 @@ say - using the festival service, say the text
 
 =head1 SYNOPSIS
 
-    say [-r] [-c Count] [-t Sec] [-h] [-v] TEXT
+    say [-r] [-c Count] [-t Sec] [-h] [-v] [-f File] [TEXT]
 
 =head1 DESCRIPTION
 
-Say the TEXT with the "festival" program.
+Say the TEXT with the "festival" program. Or if -f, say the text
+in the File.
 
 If the -r option is given it will repeat saying the TEXT. See the -r
 option for more details.
@@ -46,6 +47,11 @@ If -r, the number of times to repeat. Default: 5
 =item B<-t Sec>
 
 If -r, the number seconds between each repeat. Default: 10
+
+=item B<-f File>
+
+Say the text in the File. The -c, -r, and -t options will have no
+effect on the file's text.
 
 =item B<-v>
 
@@ -138,7 +144,13 @@ festival, festival-doc
 festvox-en1, festvox-kallpc16k, festvox-kdlpc16k, festvox-rablpc16k,
 festvox-us-slt-hts, festvox-us1, festvox-us2, festvox-us3
 
-=head1 NOTES
+=for comment =head1 NOTES
+
+=for comment =head1 CAVEATS
+
+=for comment =head1 DIAGNOSTICS
+
+=head1 BUGS
 
 =head2 Fix 1 for 'say' not working as root
 
@@ -162,18 +174,12 @@ Or archived at: https://archive.ph/2ylth
 This worked for me on Ubuntu 18.04.6 LTS. The 'say' script implements
 this fix.
 
-    if [ "$USER" = "root" ]; then
+    if [[ "$USER" = "root" ]]; then
         export XDG_RUNTIME_DIR=/run/user/$SUDO_UID
     fi
 
 Source: https://unix.stackexchange.com/questions/231941/cant-run-aplay-as-root
 Or archived at: https://archive.ph/wip/sVgg7
-
-=for comment =head1 CAVEATS
-
-=for comment =head1 DIAGNOSTICS
-
-=for comment =head1 BUGS
 
 =for comment =head1 RESTRICTIONS
 
@@ -182,7 +188,7 @@ Or archived at: https://archive.ph/wip/sVgg7
 =head1 HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.11 $ $Date: 2023/05/21 01:10:34 $ GMT
+    $Revision: 1.12 $ $Date: 2023/09/21 02:14:01 $ GMT
 
 =cut
 EOF
@@ -191,22 +197,22 @@ EOF
 
 # --------------------
 function fCreateSedReplaceScript() {
-    if [ ! -f ~/.festival.say ]; then
-        if [ ! -f ~/.cache/say/say.sed ]; then
+    if [[ ! -f ~/.festival.say ]]; then
+        if [[ ! -f ~/.cache/say/say.sed ]]; then
             mkdir ~/.cache/say &>/dev/null
             touch ~/.cache/say/say.sed
         fi
         return
     fi
 
-    if [ ! -f ~/.cache/say/say.sed ]; then
+    if [[ ! -f ~/.cache/say/say.sed ]]; then
         mkdir ~/.cache/say &>/dev/null
         touch ~/.cache/say/say.sed
         sleep 0.5
         touch ~/.festival.say
     fi
 
-    if [ ~/.festival.say -nt ~/.cache/say/say.sed ]; then
+    if [[ ~/.festival.say -nt ~/.cache/say/say.sed ]]; then
         cat ~/.festival.say | awk -F / '
             NF != 2 {
                 next
@@ -223,20 +229,58 @@ function fCreateSedReplaceScript() {
 
 # --------------------
 fSay() {
-    echo "$gpText" | sed -f ~/.cache/say/say.sed | festival --tts
+    sed -f ~/.cache/say/say.sed | festival --tts
 } # fSay
+
+# --------------------
+fSayFile() {
+    cat "$gpFile" | fSay
+}
+
+# --------------------
+fSayText() {
+    if [[ $gpVerbose -ne 0 ]]; then
+        echo -n 'Say: '
+        echo "$gpText" | sed -f ~/.cache/say/say.sed
+    fi
+
+    if [[ $gpRepeat -eq 0 ]]; then
+        echo "$gpText" | fSay
+        return 0
+    fi
+
+    if [[ $gpVerbose -ne 0 ]]; then
+        echo "every $gpSayDelaySec sec, $gpSayCount times."
+        sleep 0.25
+    fi
+    while [[ $gpSayCount -ne 0 ]]; do
+        echo "$gpText" | fSay
+        if [[ $gpVerbose -ne 0 ]]; then
+            echo -n "$gpSayCount "
+        fi
+        ((--gpSayCount))
+        if [[ $gpSayCount -eq 0 ]]; then
+            echo
+            return 0
+        fi
+        sleep $gpSayDelaySec
+    done
+ } # fSayText
 
 # ========================================
 declare -igx gpVerbose=${gpVerbose:-0}
 declare -igx gpSayDelaySec=${gpSayDelaySec:-10}
 declare -igx gpSayCount=${gpSayCount:-5}
 declare -lgx gpText=""
+export cName=say
+export gpRepeat=0
+export gpFile=""
 
-if [ "$USER" = "root" ]; then
+if [[ "$USER" = "root" ]]; then
     export XDG_RUNTIME_DIR=/run/user/$SUDO_UID
 fi
 
-if [ -z "$PWD" ]; then
+if [[ -z "$PWD" ]]; then
     PWD=$(pwd)
 fi
 export cCurDir=$PWD
@@ -244,9 +288,8 @@ export cBin=${0%/*}
 cd $cBin
 cBin=$PWD
 cd $cCurDir
-export cName=say
 
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
     pod2usage $cBin/$cName
     exit 1
 fi
@@ -256,11 +299,11 @@ if ! which festival &>/dev/null; then
     exit 1
 fi
 
-export gpRepeat=0
-while getopts :c:rt:hv tArg; do
+while getopts :c:f:rt:hv tArg; do
     case $tArg in
         # Script arguments
         c) gpSayCount=$OPTARG ;;
+        f) gpFile=$OPTARG ;;
         r) gpRepeat=1 ;;
         t) gpSayDelaySec=$OPTARG ;;
         # Common arguments
@@ -278,40 +321,22 @@ while getopts :c:rt:hv tArg; do
 done
 ((--OPTIND))
 shift $OPTIND
-if [ $# -ne 0 ]; then
+if [[ $# -ne 0 ]]; then
     gpText="$*"
-else
+fi
+if [[ -z "$gpText" && -z "$gpFile" ]]; then
     pod2usage $cBin/$cName
     exit 1
 fi
 
 fCreateSedReplaceScript
 
-if [ $gpVerbose -ne 0 ]; then
-    echo -n 'Say: '
-    echo "$*" | sed -f ~/.cache/say/say.sed
+if [[ -n "$gpText" ]]; then
+    fSayText
 fi
 
-if [ $gpRepeat -eq 0 ]; then
-    fSay
-    exit 0
+if [[ -n "$gpFile" ]]; then
+    fSayFile
 fi
-
-if [ $gpVerbose -ne 0 ]; then
-    echo "every $gpSayDelaySec sec, $gpSayCount times."
-    sleep 0.25
-fi
-while [ $gpSayCount -ne 0 ]; do
-    fSay
-    if [ $gpVerbose -ne 0 ]; then
-        echo -n "$gpSayCount "
-    fi
-    ((--gpSayCount))
-    if [ $gpSayCount -eq 0 ]; then
-        echo
-        exit 0
-    fi
-    sleep $gpSayDelaySec
-done
 
 exit 0
