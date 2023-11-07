@@ -1,7 +1,7 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/obs-project,v 1.10 2023/05/21 01:10:34 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/obs-project,v 1.11 2023/11/07 18:28:28 bruce Exp $
 
-function fUsage() {
+fUsage() {
     cat <<EOF
 Usage
         obs-project [-c]
@@ -9,7 +9,8 @@ Usage
 The "obs-config" directory must be found the current directory. Or use
 the -c option to create that directory.
 
-This script will set the obs config dir to "obs-config" in the current directory. This overides the default directory at ~/.config/obs-studio/.
+This script will set the obs config dir to "obs-config" in the current
+directory. This overides the default directory: ~/.config/obs-studio/.
 
 For how this is done, see:
 https://maex.me/2019/12/the-power-of-the-xdg-base-directory-specification/
