@@ -7,6 +7,7 @@ update copy :
 		cp -a ../$$i bin; \
 		cp -a ../doc/$$i.md doc 2>/dev/null; \
 		cp -a ../doc/$$i.int.md doc 2>/dev/null; \
+		cp -a ../doc/$$i.txt doc 2>/dev/null; \
 	done
 	git st
 	echo if OK, make ci

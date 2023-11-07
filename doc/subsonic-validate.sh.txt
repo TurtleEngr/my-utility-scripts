@@ -1,0 +1,16 @@
+subsonic-validate - Validate Playlists
+Usage
+    subsonic-validate -r -f -x -u
+Options
+    -r - generate report.
+         FileOut: ~/tmp/sv-play.txt     >PlayListFile (uniq)
+         FileOut: ~/tmp/sv-report.txt   >CurDir/Track
+    -f - find track, from files in report
+         FileIn: ~/tmp/sv-report.txt    <CurDir/Track
+         FileOut: ~/tmp/sv-found.sed
+             Format: s;CurDir/Track;NewDir/Track;
+             (Could be multiple matches.)
+    -x - fix playlists
+         FileIn: ~/tmp/sv-play.txt      <PlayListFile
+         FileIn: ~/tmp/sv-fix.sed       <edited: ~/tmp/sv-found.sed)
+    -u - rename the *_fixed playlists. Save backups in *_bak
