@@ -8,11 +8,12 @@ say - using the festival service, say the text
 
 # SYNOPSIS
 
-    say [-r] [-c Count] [-t Sec] [-h] [-v] TEXT
+    say [-r] [-c Count] [-t Sec] [-h] [-v] [-f File] [TEXT]
 
 # DESCRIPTION
 
-Say the TEXT with the "festival" program.
+Say the TEXT with the "festival" program. Or if -f, say the text
+in the File.
 
 If the -r option is given it will repeat saying the TEXT. See the -r
 option for more details.
@@ -37,6 +38,11 @@ section.
 - **-t Sec**
 
     If -r, the number seconds between each repeat. Default: 10
+
+- **-f File**
+
+    Say the text in the File. The -c, -r, and -t options will have no
+    effect on the file's text.
 
 - **-v**
 
@@ -117,7 +123,7 @@ festival, festival-doc
 festvox-en1, festvox-kallpc16k, festvox-kdlpc16k, festvox-rablpc16k,
 festvox-us-slt-hts, festvox-us1, festvox-us2, festvox-us3
 
-# NOTES
+# BUGS
 
 ## Fix 1 for 'say' not working as root
 
@@ -141,7 +147,7 @@ Or archived at: https://archive.ph/2ylth
 This worked for me on Ubuntu 18.04.6 LTS. The 'say' script implements
 this fix.
 
-    if [ "$USER" = "root" ]; then
+    if [[ "$USER" = "root" ]]; then
         export XDG_RUNTIME_DIR=/run/user/$SUDO_UID
     fi
 
@@ -151,4 +157,4 @@ Or archived at: https://archive.ph/wip/sVgg7
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.6 $ $Date: 2023/05/12 01:16:37 $ GMT
+    $Revision: 1.7 $ $Date: 2023/11/07 17:47:46 $ GMT

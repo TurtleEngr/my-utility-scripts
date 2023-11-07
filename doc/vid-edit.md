@@ -100,17 +100,18 @@ AppImage binaries.
 
 # SEE ALSO
 
-logit
+logit, cvs, sshagent
 
 # NOTES
 
-CVS is used for versioning, rather than the git, because it is easier to
+CVS is used for versioning, rather than git, because it is easier to
 remove large binary files and versions.
 
 If you are working on a project where there is a lot of collaboration
-AND all have a high speed network, the git would be a better
-choice. However the will still be a need to remove old binary files
-from the git repo, or it will become too large to be useable.
+AND all have a high speed network, then git would be a better
+choice. However there will still be a need to remove old binary files
+from the git repo, or it will become too large to be useable. You'll
+probably want to make a git repo for each projcect.
 
 # CAVEATS
 
@@ -127,4 +128,4 @@ kdenlive file's version.
 
 # HISTORY
 
-$Revision: 1.13 $ $Date: 2023/05/12 01:16:38 $ GMT
+$Revision: 1.14 $ $Date: 2023/11/07 17:47:47 $ GMT
