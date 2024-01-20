@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.test,v $
-# $Revision: 1.9 $ $Date: 2023/03/25 22:21:41 $ GMT
+# $Revision: 1.10 $ $Date: 2023/11/07 18:35:01 $ GMT
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -57,31 +57,31 @@ listed, then all of the test functions will be run.
 
 Look for the assert errors.
 
-=head1 EXAMPLES
+=for comment =head1 EXAMPLES
 
-=head1 ENVIRONMENT
+=for comment =head1 ENVIRONMENT
 
-=head1 FILES
+=for comment =head1 FILES
 
 =head1 SEE ALSO
 
 shunit2.1
 
-=head1 NOTES
+=for comment =head1 NOTES
 
-=head1 CAVEATS
+=for comment =head1 CAVEATS
 
-=head1 DIAGNOSTICS
+=for comment =head1 DIAGNOSTICS
 
-=head1 BUGS
+=for comment =head1 BUGS
 
-=head1 RESTRICTIONS
+=for comment =head1 RESTRICTIONS
 
-=head1 AUTHOR
+=for comment =head1 AUTHOR
 
 =head1 HISTORY
 
-$Revision: 1.9 $ $Date: 2023/03/25 22:21:41 $ GMT
+$Revision: 1.10 $ $Date: 2023/11/07 18:35:01 $ GMT
 
 =cut
 EOF
