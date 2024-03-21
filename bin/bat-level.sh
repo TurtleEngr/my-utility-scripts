@@ -24,14 +24,12 @@ EOF
 # --------------------------------
 fFull() {
     inxi -Bx
-    exit 0
 } # fFull
 
 # --------------------------------
 fShort() {
     tL=$(cat /sys/class/power_supply/BAT0/capacity)
     echo "$tL%"
-    exit 0
 } # fShort
 
 # --------------------------------
@@ -49,14 +47,25 @@ fLog() {
         sed -i "1,${tDel}d" $cLogFile
     fi
     
-    # Warning
-    if [[ $tL -le 25 && "$tS" = "Discharging" ]]; then
+    # Give one warning to plug-in or unplug
+    tPlugIn=0
+    tUnplug=0
+    if [[ -f $cInFile ]]; then
+        tPlugIn=1
+    fi
+    if [[ -f $cOutFile ]]; then
+        tUnplug=1
+    fi
+    if [[ $tL -le 25 && "$tS" = "Discharging" && $tPlugIn -eq 0 ]]; then
         wall "Battery is at $tL%. Plug it in."
+        touch $cInFile
+        rm $cOutFile >/dev/null 2>&1
     fi
-    if [[ $tL -ge 85 && "$tS" = "Charging" ]]; then
+    if [[ $tL -ge 85 && "$tS" = "Charging" && $tUnplug -eq 0 ]]; then
         wall "Battery is at $tL%. Unplug it."
+        touch $cOutFile
+        rm $cInFile >/dev/null 2>&1
     fi
-    exit 0
 } # fLog
 
 # --------------------------------
@@ -64,7 +73,6 @@ fCron() {
     echo "# Min Hour day month week cmd"
     # Run every 5 min
     echo "   */5 * * * * $HOME/bin/bat-level.sh -l"
-    exit 0
 } # fCron
 
 # --------------------------------
@@ -102,7 +110,6 @@ EOF
     gnuplot -p /var/tmp/bat-level.plot
     ##png gnuplot /var/tmp/bat-level.plot
     ##png eog /var/tmp/bat-level.png
-    exit 0
 } # fPlot
 
 # ========================================
@@ -118,6 +125,8 @@ fi
 # If run once every 5 min for 24 hours 288
 export cMaxVal=288
 export cLogFile=/var/tmp/bat-level.log
+export cInFile=/var/tmp/bat-level-in.tmp
+export cOutFile=/var/tmp/bat-level-out.tmp
 
 while getopts :cflsph tArg; do
     case $tArg in
@@ -130,7 +139,6 @@ while getopts :cflsph tArg; do
         # Common arguments
         h)
             fUsage
-            exit 1
             ;;
         # Problem arguments
         :) echo "Value required for option: -$OPTARG"
@@ -144,11 +152,8 @@ done
 ((--OPTIND))
 shift $OPTIND
 if [ $# -ne 0 ]; then
-    gpList="$*"
+    echo "Unknown option: $*"
+    exit 1
 fi
-while [ $# -ne 0 ]; do
-    shift
-done
 
-# --------------------
-# Functional section
+exit 0

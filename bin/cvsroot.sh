@@ -55,7 +55,7 @@ EOF
 
 # ==============================
 cRCFileList="$HOME/.cvsroot.rc /usr/local/etc/cvsroot.rc /etc/cvsroot.rc cvsroot.rc"
-cCVSDirList="/cvs /cvs/* /repo/*.cvs /data/cvs/* /data/*.cvs /home/cvs/* /home/*.cvs"
+cCVSDirList="/cvs /cvs/* /repo/*.cvs /project/*.cvs /data/cvs/* /data/*.cvs /home/cvs/* /home/*.cvs"
 
 export gErr=0
 if [ ! -f $HOME/.cvsroot.rc -a ! -f /usr/local/etc/cvsroot.rc ]; then

@@ -68,7 +68,7 @@ fSetDefaults() {
             gDefLog=~/tmp/w.tmp
             ;;
         uucc-mac*)
-            gDefLog=~/tmp/u.tmp
+            gDefLog=~/tmp/u.org
             gEdit=emacs
             gBG=1
             ;;
