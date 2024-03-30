@@ -117,9 +117,6 @@ EOF
 
 # -------------------
 # Get Args Section
-if [ $# -eq 0 ]; then
-    fUsage
-fi
 
 # If run once a min for 24 hours 1440
 # If run once every 5 min for 24 hours 288
@@ -127,6 +124,13 @@ export cMaxVal=288
 export cLogFile=/var/tmp/bat-level.log
 export cInFile=/var/tmp/bat-level-in.tmp
 export cOutFile=/var/tmp/bat-level-out.tmp
+
+if [ $# -eq 0 ]; then
+    fShort
+    fLog
+    echo
+    fUsage
+fi
 
 while getopts :cflsph tArg; do
     case $tArg in
