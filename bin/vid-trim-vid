@@ -11,6 +11,7 @@ Usage:
 
 If no -o, then default: -o trim-InFile
 if no -s, then default: -s 00:00:00
+if no -e, then default to the end
 
 The extension for InFile and OutFile must be the same.
 EOF
@@ -32,19 +33,32 @@ while getopts i:o:s:e:h tArg; do
         i) gpIn="$OPTARG" ;;
         o) gpOut="$OPTARG" ;;
         s) gpStart="$OPTARG" ;;
-        e) gpEnd="$OPTARG" ;;
+        e) gpEnd="-to $OPTARG" ;;
         :) echo "Error: Value required for option: $OPTARG" ;;
         \?) echo "Error: Unknown option: $OPTARG" ;;
     esac
 done
-if [ -z "$gpEnd" ]; then
-    echo "Error: missing -e option"
+if [ -z "$gpIn" ]; then
+    echo "Error: missing -i option"
+    fUsage
+    exit 1
+fi
+if [ ! -r $gpIn ]; then
+    echo "Error: Cannot read -i $gpIn"
+    fUsage
     exit 1
 fi
 if [ -z "$gpOut" ]; then
     gpOut="trim-$gpIn"
 fi
+if [ -f $gpOut ]; then
+    echo "Error: -o $gpOut exists. Remove it, then run again."
+    fUsage
+    exit 1
+fi
 
-tCmd="ffmpeg -i $gpIn -ss $gpStart -to $gpEnd -c:v copy -c:a copy $gpOut"
+tCmd="ffmpeg -i $gpIn -ss $gpStart $gpEnd -c:v copy -c:a copy $gpOut"
+echo
 echo $tCmd
+echo
 $tCmd

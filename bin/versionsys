@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: versionsys,v 1.5 2021/10/26 19:26:12 bruce Exp $
+# $Id: versionsys,v 1.6 2024/06/01 19:42:25 bruce Exp $
 
 # This script may be different for each server that it is installed
 # on, so don't just over-write it with newer versions.
@@ -30,6 +30,6 @@ cvs commit -m Updated
 
 # /etc
 chmod a+r /etc/CHANGES
-chmod a+r /etc/ntp.conf
+#chmod a+r /etc/ntp.conf
 chmod ug=r,o= /etc/sudoers
 #chmod a+r /etc/yum.conf
