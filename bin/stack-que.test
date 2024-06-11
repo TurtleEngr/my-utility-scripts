@@ -1,13 +1,12 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/stack-que.test,v $
-# $Revision: 1.7 $ $Date: 2023/03/25 22:21:42 $ GMT
+# $Revision: 1.8 $ $Date: 2024/06/11 02:44:13 $ GMT
 
 export PWD cCurDir cBin gpTest cName
 export SHUNIT_COLOR
 
 # --------------------------------
-fTestUsage()
-{
+fTestUsage() {
     pod2text $cBin/$cName 2>&1 | more
     exit 1
     cat <<\EOF &>/dev/null
@@ -207,7 +206,7 @@ The elements to be pushed cannot contain spaces.
 
 =head1 HISTORY
 
-$Revision: 1.7 $ $Date: 2023/03/25 22:21:42 $ GMT
+$Revision: 1.8 $ $Date: 2024/06/11 02:44:13 $ GMT
 
 =cut
 EOF
@@ -219,15 +218,13 @@ EOF
 ##} # oneTimeSetUp
 
 # --------------------------------
-setUp()
-{
+setUp() {
     unset sqList &>/dev/null
     return 0
 } # setUp
 
 # --------------------------------
-testQueOK()
-{
+testQueOK() {
     fsqNew que
 
     fsqSize
@@ -276,8 +273,7 @@ testQueOK()
 } # testQueOK
 
 # --------------------------------
-testStackOK()
-{
+testStackOK() {
     fsqNew stack
 
     fsqSize
@@ -311,8 +307,7 @@ testStackOK()
 } # testStackOK
 
 # --------------------------------
-testErr()
-{
+testErr() {
     fsqExists foob
     assertTrue "$LINENO" "[ $? -ne 0 ]"
     fsqNew que foob
@@ -337,8 +332,7 @@ testErr()
 } # testErr
 
 # --------------------------------
-testQueErr()
-{
+testQueErr() {
     fsqNew que
 
     fsqPop
@@ -353,8 +347,7 @@ testQueErr()
 } # testQueErr
 
 # --------------------------------
-testStackErr()
-{
+testStackErr() {
     fsqNew stack
 
     fsqPop
@@ -369,8 +362,7 @@ testStackErr()
 } # testStackErr
 
 # --------------------------------
-testMultipleOK()
-{
+testMultipleOK() {
     fsqNew que Aque
     fsqNew que Bque
     fsqNew stack Astk
@@ -397,8 +389,7 @@ testMultipleOK()
 } # testMultipleOK
 
 # --------------------------------
-testExample()
-{
+testExample() {
     local tResult
 
     assertTrue "$LINENO" "fsqNew stack"
@@ -434,8 +425,7 @@ testExample()
 
 # -------------------
 # This should be the last defined function
-fRunTests()
-{
+fRunTests() {
     if [ "${gpTest:-all}" = "all" ]; then
         # shellcheck disable=SC1091
         . /usr/local/bin/shunit2.1

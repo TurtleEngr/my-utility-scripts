@@ -345,8 +345,8 @@ if [ -r $gExcludeTag ]; then
 fi
 
 if [ ! -x /usr/local/lstree ]; then
-   cp /home/bruce/bin/lstree /usr/local/bin
-   chmod a+rx /usr/local/bin/lstree
+    cp /home/bruce/bin/lstree /usr/local/bin
+    chmod a+rx /usr/local/bin/lstree
 fi
 
 # ------------------------------------------------------------

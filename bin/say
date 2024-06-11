@@ -188,7 +188,7 @@ Or archived at: https://archive.ph/wip/sVgg7
 =head1 HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.12 $ $Date: 2023/09/21 02:14:01 $ GMT
+    $Revision: 1.13 $ $Date: 2024/06/11 02:44:12 $ GMT
 
 =cut
 EOF
@@ -265,7 +265,7 @@ fSayText() {
         fi
         sleep $gpSayDelaySec
     done
- } # fSayText
+} # fSayText
 
 # ========================================
 declare -igx gpVerbose=${gpVerbose:-0}

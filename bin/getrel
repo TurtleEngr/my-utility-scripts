@@ -358,7 +358,7 @@ fGetConfig
 # ----------
 # Validation
 
-if [ ! -w $cLocalHome ]; then
+if [ ! -w $cLocalHome/ ]; then
     echo "Error: LocalHome: $cLocalHome is not writable."
     exit 1
 fi
