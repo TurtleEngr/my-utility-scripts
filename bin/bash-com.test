@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.test,v $
-# $Revision: 1.9 $ $Date: 2023/03/25 22:21:41 $ GMT
+# $Revision: 1.11 $ $Date: 2024/06/11 02:44:12 $ GMT
 
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
@@ -21,8 +21,7 @@ cBin=$PWD
 cd $cCurDir
 
 # --------------------------------
-fComBashTestUsage()
-{
+fComBashTestUsage() {
     # This is mainly used to test fComUsage, for the script usage styles
     return
     cat <<\EOF >/dev/null
@@ -57,45 +56,43 @@ listed, then all of the test functions will be run.
 
 Look for the assert errors.
 
-=head1 EXAMPLES
+=for comment =head1 EXAMPLES
 
-=head1 ENVIRONMENT
+=for comment =head1 ENVIRONMENT
 
-=head1 FILES
+=for comment =head1 FILES
 
 =head1 SEE ALSO
 
 shunit2.1
 
-=head1 NOTES
+=for comment =head1 NOTES
 
-=head1 CAVEATS
+=for comment =head1 CAVEATS
 
-=head1 DIAGNOSTICS
+=for comment =head1 DIAGNOSTICS
 
-=head1 BUGS
+=for comment =head1 BUGS
 
-=head1 RESTRICTIONS
+=for comment =head1 RESTRICTIONS
 
-=head1 AUTHOR
+=for comment =head1 AUTHOR
 
 =head1 HISTORY
 
-$Revision: 1.9 $ $Date: 2023/03/25 22:21:41 $ GMT
+$Revision: 1.11 $ $Date: 2024/06/11 02:44:12 $ GMT
 
 =cut
 EOF
 }
 
 # --------------------------------
-fCleanUp()
-{
+fCleanUp() {
     fComCleanUp
 } # fCleanUp
 
 # --------------------------------
-fComUDebug()
-{
+fComUDebug() {
     if [ ${gpUnitDebug:-0} -ne 0 ]; then
         echo "fComUDebug: $*"
     fi
@@ -108,8 +105,7 @@ EOF
 } # fComUDebug
 
 # --------------------------------
-oneTimeSetUp()
-{
+oneTimeSetUp() {
     . $cBin/bash-com.inc
     fComSetGlobals
 
@@ -150,8 +146,7 @@ EOF
 } # oneTimeSetUp
 
 # --------------------------------
-setUp()
-{
+setUp() {
     # Restore global values, before each test
     Tmp=$tDefault_Tmp
     cBin=$tDefault_cBin
@@ -181,8 +176,7 @@ EOF
 } # setUp
 
 # --------------------------------
-testComInitialConfig()
-{
+testComInitialConfig() {
     local tProg
     local tResult
 
@@ -229,8 +223,7 @@ EOF
 } # testInitialConfig
 
 # --------------------------------
-testComLog_MultiplePermutations()
-{
+testComLog_MultiplePermutations() {
     local tMsg
     local tLevel
     local tLine
@@ -314,8 +307,7 @@ EOF
 } # testLog
 
 # --------------------------------
-testComSysLog()
-{
+testComSysLog() {
     local tErr
     local tLevel
     local tLine
@@ -373,8 +365,7 @@ EOF
 } # testSysLog
 
 # --------------------------------
-testComErrorLog()
-{
+testComErrorLog() {
     local tMsg
     local tLevel
     local tLine
@@ -427,8 +418,7 @@ EOF
 } # testErrorLog
 
 # --------------------------------
-testComCleanUp()
-{
+testComCleanUp() {
     gpDebug=0
     local tResult
 
@@ -457,8 +447,7 @@ EOF
 } # testComCleanUp
 
 # --------------------------------
-testComUsage()
-{
+testComUsage() {
     local tResult
 
     gpUnitDebug=0
@@ -538,8 +527,7 @@ EOF
 } # testComUsage
 
 # --------------------------------
-testComFunctions()
-{
+testComFunctions() {
     local tResult
 
     tResult=$(fComCheckDeps 2>&1)
@@ -567,8 +555,7 @@ EOF
 
 # -------------------
 # This should be the last defined function
-fComRunTests()
-{
+fComRunTests() {
     export gpUnitDebug=${gpUnitDebug:-0}
     if [ "${gpTest:-all}" = "all" ]; then
         # shellcheck disable=SC1091

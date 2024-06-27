@@ -49,12 +49,12 @@ found at:
 [github TurtleEngr](https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin)
 - sshagent-test will kill all of your running ssh-agent processes before
 and after running.
-- sshagent-test requires a non X11 /usr/bin/ssh-askpass
+- sshagent-test requires a non X11 /bin/ssh-askpass
 
     Create this substitute:
 
         cat <<EOF >~/bin/ssh-askpass
-        #!/usr/bin/bash
+        #!/bin/bash
         read
         echo $REPLY
         EOF
@@ -83,4 +83,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.3 $ $Date: 2023/05/12 01:16:37 $ GMT
+$Revision: 1.5 $ $Date: 2024/06/11 02:44:14 $ GMT

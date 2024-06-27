@@ -1,0 +1,8 @@
+Usage:
+        s3-lsg [-t] [-l N] [-c Config] [-p] bucket[/dir]
+
+Options:
+        -t - use tabs for the levels, default: use '   |'
+        -l N - only show N levels deep, default: 100
+        -c Config - use Config file, default: /home/bruce/.s3cfg
+        -p - use the previous s3 bucket file name

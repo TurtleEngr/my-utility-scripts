@@ -1,0 +1,18 @@
+Usage:
+    lstree [-d] [-L N] [-C] [-T] [-c] [-p] [other "tree" options] [dir...]
+
+-d - dir only
+-L N - limit to N levels
+-C adds - -I 'CVS|.git|.svn|*~|tmp|*.tmp'
+-T - replace '|' with tabs
+-c - compact, replace tabs with 4 spaces
+-p - use '--' before names
+
+dir - default $PWD
+
+For more options see: man tree
+Note: do not use the tree's -I opton with -C
+
+Current options used:
+    -a -Q -F --dirsfirst --charset=ascii -n --noreport
+

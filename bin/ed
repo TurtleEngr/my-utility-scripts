@@ -9,19 +9,15 @@ fUsage() {
     cat <<EOF
 ed - run emacs with personal options
 Usage
-    ed [-l] [-j] [-d] [File...]
+    ed [-l] [-j] [-d File...]
 Options
-    -l - Log. If no File, a default, based the HOSNAME will be used. Prompt for save?
-    -j - Journal. If no File, a default, in encrypted dir will be used.
+    -l - Log. The default file is based the HOSNAME
+    -j - Journal. The default file is defined in the cMyJournal variable
     -d - Date. Put datestamp in the first File.
     File - one or more files
 Description
     emacs will be found on the current system and it will be run in a
     window or in the terminal window, depending on the system.
-    
-    The -l, -j, and -d options will put datestamps in a default file
-    or the first file on the command line.
-
 Note:
     Old log files can be converted from txt to org format with: journal2org.sh
 
@@ -72,7 +68,7 @@ fSetDefaults() {
             gDefLog=~/tmp/w.tmp
             ;;
         uucc-mac*)
-            gDefLog=~/tmp/u.tmp
+            gDefLog=~/tmp/u.org
             gEdit=emacs
             gBG=1
             ;;
@@ -133,10 +129,6 @@ fGetOpts() {
     while [[ $# -ne 0 ]]; do
         shift
     done
-
-    if [[ $gpLogIt -ne 0 || $gpJournalIt -ne 0 ]]; then
-        gpList="$*"
-    fi
 } # fGetOpts
 
 # --------------------------------

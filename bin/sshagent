@@ -1,6 +1,6 @@
 #!/bin/bash
-# $Id: sshagent,v 1.80 2023/05/30 19:55:30 bruce Exp $
-set -u
+# $Id: sshagent,v 1.82 2024/06/11 02:44:12 bruce Exp $
+#set -u
 
 # Var prefix key
 #    cgVar - global constant
@@ -10,20 +10,19 @@ set -u
 #    tVar  - a local variable
 
 # Globals that will be unset at end
-export cgBin
-export cgEnvDir
-export cgHomeDir
-export cgProgList
-export cgScriptName
-export gpAction
-export gDebug=0
+export cgBin=""
+export cgEnvDir=""
+export cgHomeDir=""
+export cgProgList=""
+export cgScriptName=""
+export gpAction=""
 export gErr=0
-export gSARunning
+export gSARunning=""
 export gpParm=""
 
 # Globals that will not be unset at end
 export cgAgentOwner
-export gpDebug
+export gpDebug=${gpDebug:-0}
 export cgEnvFile
 
 # --------------------
@@ -337,7 +336,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.80 $
+$Revision: 1.82 $
 
 =cut
 
@@ -345,8 +344,7 @@ EOF
 } # fUsage
 
 # --------------------
-fSetBin()
-{
+fSetBin() {
     local tBinLoc=home
     local tBin=$PWD
 
