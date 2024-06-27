@@ -1,13 +1,12 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.inc,v $
-# $Revision: 1.17 $ $Date: 2023/03/25 22:21:41 $ GMT
+# $Revision: 1.18 $ $Date: 2024/06/11 02:44:12 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
 
 # --------------------------------
-fBashComInternalDoc()
-{
+fBashComInternalDoc() {
     return
     # This should be the first =internal-pod
     cat <<\EOF >/dev/null
@@ -95,7 +94,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.17 $'
+        cVer='$Revision: 1.18 $'
 
 =internal-head3 Documentation Format
 
@@ -129,8 +128,7 @@ EOF
 # Common Functions
 
 # -------------------
-fComSetGlobals()
-{
+fComSetGlobals() {
     # -------------------
     # Set name of this script
     local tName=${0##*/}
@@ -170,7 +168,7 @@ fComSetGlobals()
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.17 $'
+    #cVer='$Revision: 1.18 $'
 
     if [ "$cVer" != "${cVer#*' '}" ]; then
         cVer=${cVer#*' '}
@@ -223,8 +221,7 @@ EOF
 } # fComSetGlobals
 
 # --------------------------------
-fComCleanUp()
-{
+fComCleanUp() {
     # shellcheck disable=SC2172
     trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
     if [ $gpDebug -eq 0 ]; then
@@ -246,8 +243,7 @@ EOF
 } # fComCleanUp
 
 # --------------------------------
-fComCheckDeps()
-{
+fComCheckDeps() {
     local pRequired="$1"
     local pOptional="$2"
 
@@ -291,8 +287,7 @@ EOF
 } # fComCheckDeps
 
 # --------------------------------
-fComInternalDoc()
-{
+fComInternalDoc() {
     local pAll="$1"
 
     if [ ".$pAll" = ".-a" ]; then
@@ -329,8 +324,7 @@ EOF
 } # fComInternalDoc
 
 # --------------------------------
-fComUsage()
-{
+fComUsage() {
     local pFileList=""
     local pStyle="long"
     local pInt=0
@@ -470,8 +464,7 @@ EOF
 } # fComUsage
 
 # ------------------
-fFmtLog()
-{
+fFmtLog() {
     local pLevel=$1
     local pMsg="$2"
     local pLine=$3
@@ -553,8 +546,7 @@ EOF
 } # fFmtLog
 
 # ------------------
-fLog()
-{
+fLog() {
     local pLevel="alert"
     local pMsg="Missing message"
     local pLine=""
@@ -615,8 +607,7 @@ EOF
 } # fLog
 
 # --------------------------------
-fError()
-{
+fError() {
     # Usage:
     #     fError pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
@@ -643,8 +634,7 @@ EOF
 } # fError
 
 # ------------------
-fLog2()
-{
+fLog2() {
     local pLevel="info"
     local pMsg=""
     local pLine=""
@@ -688,8 +678,7 @@ EOF
 } # fLog2
 
 # --------------------------------
-fError2()
-{
+fError2() {
     local pMsg="Error"
     local pLine="."
     local pErr=1
@@ -742,8 +731,7 @@ EOF
 } # fError2
 
 # --------------------------------
-fTimeoutFunction()
-{
+fTimeoutFunction() {
     # Number of seconds
     declare -i pTimeout
     # Cmd including args

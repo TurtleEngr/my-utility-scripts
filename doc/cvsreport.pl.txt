@@ -1,0 +1,208 @@
+    (c) Copyright 2002 by Computer
+
+NAME
+    cvsreport.pl - Report changes in CVS
+
+SYNOPSIS
+     cvsreport.pl
+            -co
+
+            -root RootPath
+            -dir RepositoryPath
+
+            -from Tag|Date
+            -to Tag|Date
+
+            -show files,numrev,diff,add,del
+            -sort name|numrev|diff|add|del
+
+            -html
+            -rawfile RawFileName
+
+            -help
+            -fmthelp text|html|man
+            -debug Level
+            -verbose
+
+DESCRIPTION
+    For a given list of CVS directory names (relative to the CVSROOT),
+    generate a summary report, for the number of lines that have changed
+    between the specified CVS version.
+
+    Report the total number of lines across all files, in the directory
+    (recursively), that were: deleted or added.
+
+    For each file in each dir., list the number of lines: deleted or added.
+    (-show files)
+
+    Select the revision from/to range by: tags or dates. (-to, -from)
+
+    Output an HTML report. (-html)
+
+    Also output a file with the raw report values represented as Perl hash
+    variables. This will be useful for debugging and for writing other
+    reporting scripts. (-rawfile)
+
+OPTIONS
+    -co If the files are already checked out, and you are cd'ed into the
+        directory that you want for the report. If this option isn't given,
+        then "rlog" will be used (i.e. there is no need to checkout the
+        files).
+
+        Note: this should not be a "development" directory, i.e. no files
+        should be modified, so that "cvs update" will always update all
+        files.
+
+    -root RootPath
+        Specify the CVSROOT directory. ":ext:" can be used, but the CVS_RSH
+        env. var. will need to be defined before the script is run.
+
+        Default: use the value in CVS/Root, else use the CVSROOT env. var,
+        else error.
+
+        This option is Ignored if "-co" is used.
+
+    -dir RepositoryPath
+        "RepositoryPath" is a directory name, relative to CVSROOT. More than
+        one -dir can specified.
+
+        This option is Ignored if "-co" is used.
+
+    -from Tag|Date
+        Earliest date or tag. If "yesterday" is used, then a date 24 hours
+        before now will be used. Default: version 1.1 (BASE) for all files.
+
+    -to Tag|Date
+        Latest date or tag. If "today" is used, then this implies HEAD.
+        Default: HEAD
+
+        If the "-co" option is used, then the current directory will be
+        updated to this date or tag.
+
+    -html
+        Specify this option to output the HTML formatted report.
+
+    -show files,numrev,diff,add,del
+        This option controls what is shown in the HTML report. One or more
+        of these options can be specified.
+
+        files - show the individual files, rather than just the directories.
+        If "files" isn't on the show list, then the number of changed files
+        will be output.
+
+        numrev - show the number of revisions.
+
+        diff - show the number of lines added plus the number of lines
+        deleted.
+
+        add - show the number of lines added.
+
+        del - show the number of lines deleted.
+
+        Default: numrev,diff,add,del
+
+    -sort name|numrev|diff|add|del
+        This option will define the sort column. Only one can be specified.
+        Note: if the column isn't shown (see -show), the results could be
+        confusing.
+
+        If two numbers are equal, then the names will be used as a secondary
+        sort key.
+
+        Default: numrev
+
+    -rawfile RawFileName
+        If specified output the Perl variables, used to generate the report
+        totals, to RawFile. This file's format will be suitable for
+        inclusion in other Perl scripts (with eval).
+
+    -help
+        This help.
+
+    -debug Level
+        Level is a number between 0 and 100. If set to 0, debug is off
+        (default: 0).
+
+        Larger debug levels output more debug messages. The debug messages
+        include the debug level number, so that you can see how to turn them
+        off.
+
+        Setting debug to 1 or larger, will also turn on the verbose option.
+
+    -verbose
+        If this is set, output verbose status messages.
+
+RETURN VALUE
+ERRORS
+EXAMPLES
+ENVIRONMENT
+FILES
+SEE ALSO
+    cvs rlog
+
+NOTES
+    Date format:
+
+     YYYY-MM-DD [HH:MM[Z]]
+
+    Adding a Z to the time, will define the time as Zulu (UTC), otherwise
+    local time will be used.
+
+CAVEATS
+    1. The directory list is limited to the same repository. I.e. the
+    CVSROOT doesn't change.
+
+    Enhancement: Support different CVSROOTs. However, tag names used in the
+    ranges may not make sense across multiple repositories.
+
+    2.Binary files (i.e. with the -kb option) will not be included in the
+    report.
+
+    Enhancement: If a binary file has been changed, the number of versions
+    in the range could be reported in the detailed report.
+
+    3. Changes are reported for single ranges. If a change history is
+    desired, then a simple wrapper script can be used to step through the
+    different ranges (use the output file of raw Perl variables).
+
+    4. Summaries are limited to single directories. If multiple directories
+    need to be merged into a single "category", then a wrapper script would
+    be the best way of doing this.
+
+    5. Files: added or deleted may be ignored.
+
+    Enhancement: make a summary report of these files and list the file
+    names in the detailed report. However for this to work, the script may
+    need to run on the cvs server.
+
+    6. "Moved" files can not be handled by cvsreport. This is a CVS
+    limitation.
+
+    7. Files with zero changes (i.e. add/del lines both equal zero), for the
+    range, will not be listed.
+
+    Enhancement: Add an option to set a limits on what files will be
+    reported. For example: show all files with more than 1000 lines changed.
+    Or show the files with changes in the top 10'th percential, for the
+    specified range. Or show files with changes greater than the average
+    number of changes seen, for the specified range.
+
+    8. If "rlog" is not supported with you version of CVS, then the "-co"
+    option must be used.
+
+DIAGNOSTICS
+    See the -debug option. For minimal debug info, use:
+
+            -debug 1
+
+BUGS
+    * If CVSROOT can't be found or accessed, the script silently does
+    nothing.
+
+    * -rawfile is not implemented.
+
+RESTRICTIONS
+AUTHOR
+    Bruce Rafnel
+
+HISTORY

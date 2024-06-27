@@ -6,8 +6,7 @@ declare -Algx sqType
 declare -gx sqReturn
 
 # --------------------
-fsqExists()
-{
+fsqExists() {
     local pName=${1:-sqList}
 
     # sqType should be q or s
@@ -20,8 +19,7 @@ fsqExists()
 } # fsqExists
 
 # --------------------
-fsqNew()
-{
+fsqNew() {
     declare -l pType=$1
     local pName=${2:-sqList}
 
@@ -47,8 +45,7 @@ fsqNew()
 } # fsqNew
 
 # --------------------
-fsqClear()
-{
+fsqClear() {
     local pName=${1:-sqList}
 
     if ! fsqExists $pName; then
@@ -61,8 +58,7 @@ fsqClear()
 } # fsqClear
 
 # --------------------
-fsqPush()
-{
+fsqPush() {
     sqReturn="$1"
     local pName=${2:-sqList}
 
@@ -83,8 +79,7 @@ fsqPush()
 } # fsqPush
 
 # --------------------
-fsqPop()
-{
+fsqPop() {
     local pName=${1:-sqList}
 
     if ! fsqExists $pName; then
@@ -102,8 +97,7 @@ fsqPop()
 } # fsqPop
 
 # --------------------
-fsqSize()
-{
+fsqSize() {
     local pName=${1:-sqList}
 
     if ! fsqExists $pName; then

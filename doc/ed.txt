@@ -1,0 +1,14 @@
+ed - run emacs with personal options
+Usage
+    ed [-l] [-j] [-d File...]
+Options
+    -l - Log. The default file is based the HOSNAME
+    -j - Journal. The default file is defined in the cMyJournal variable
+    -d - Date. Put datestamp in the first File.
+    File - one or more files
+Description
+    emacs will be found on the current system and it will be run in a
+    window or in the terminal window, depending on the system.
+Note:
+    Old log files can be converted from txt to org format with: journal2org.sh
+

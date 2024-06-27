@@ -19,28 +19,10 @@ listed, then all of the test functions will be run.
 
 Look for the assert errors.
 
-# EXAMPLES
-
-# ENVIRONMENT
-
-# FILES
-
 # SEE ALSO
 
 shunit2.1
 
-# NOTES
-
-# CAVEATS
-
-# DIAGNOSTICS
-
-# BUGS
-
-# RESTRICTIONS
-
-# AUTHOR
-
 # HISTORY
 
-$Revision: 1.13 $ $Date: 2023/05/12 01:16:35 $ GMT
+$Revision: 1.15 $ $Date: 2024/06/11 02:44:13 $ GMT

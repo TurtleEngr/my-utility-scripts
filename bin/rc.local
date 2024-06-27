@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/rc.local,v 1.4 2023/03/25 22:21:42 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/rc.local,v 1.5 2024/06/11 02:44:12 bruce Exp $
 #
 # /etc/rc.local
 #
@@ -12,8 +12,7 @@
 #
 
 # -----------------------
-function fMail()
-{
+function fMail() {
     local tTmp=/var/tmp/rc.local.mail.tmp
     local tStatus="Notice"
 
@@ -41,8 +40,7 @@ EOF
 } # fMail
 
 # -----------------------
-function fMountDisks()
-{
+function fMountDisks() {
     # Mount backup disks, if not mounted
     for i in 1 2; do
         if [ ! -e /mnt/backup$i/rsnapshot$i ]; then
@@ -53,8 +51,7 @@ function fMountDisks()
 } # fMountDisks
 
 # -----------------------
-function fServiceChecks()
-{
+function fServiceChecks() {
     local i
     local tInitList=" \
 apache2 \
@@ -102,8 +99,7 @@ ufw \
 } # fServiceChecks
 
 # -----------------------
-function fMountChecks()
-{
+function fMountChecks() {
     local i
     local tDiskList=" \
 /mnt/asimov.home \

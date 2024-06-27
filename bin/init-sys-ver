@@ -1,9 +1,15 @@
 #!/bin/bash -x
-# $Id: init-sys-ver,v 1.5 2023/01/06 18:05:14 bruce Exp $
+# $Id: init-sys-ver,v 1.8 2024/06/11 02:44:12 bruce Exp $
 # Use this script the first time a server is setup.  It will put the
 # most common config and other server files under version control.
 
 # Tuned for RH distribution
+# Tuned for MX Linux distribution
+
+# Defects: CVS is added to Entries, directories are not added with cvs
+# add.
+
+exit 1
 
 cd /
 if [ ! -d CVS ]; then
@@ -19,102 +25,150 @@ echo >>/etc/CHANGES
 #       ln -s /usr/local /opt
 #fi
 
-if [ ! -f /etc/anaconda-ks.cfg ]; then
-    cp -i /root/anaconda-ks.cfg /etc
-fi
+# RedHat
+#if [ ! -f /etc/anaconda-ks.cfg ]; then
+#    cp -i /root/anaconda-ks.cfg /etc
+#fi
 
-cvs add etc
-sleep 1
-cvs add usr var
-sleep 1
-
-cd /etc
-cvs add \
-    profile.d \
-    rc.d \
-    ssh \
-    sudoers \
-    sysconfig
+# First level
+tListDir="etc usr var"
+cvs add $tListDir
 sleep 1
 
-cvs add \
-    anaconda-ks.cfg \
+# Second level
+tListDir=""
+tListFile=""
+for i in \
+    /etc/apt \
+    /etc/bash_completion.d \
+    /etc/cron.* \
+    /etc/default \
+    /etc/init.d \
+    /etc/profile.d \
+    /etc/sudoers.d \
+    /etc/sysconfig \
+    /etc/ufw/applications.d; do
+    if [ -d $i ]; then
+        tListDir="$tListDir $i"
+        tListFile="$tListFile $i/*"
+    fi
+done
+cvs add $tListDir
+sleep 1
+cvs add $tListFile
+sleep 1
+
+cd etc
+for i in \
     *.conf \
     *.config \
+    crontab \
     CHANGES \
+    bash.* \
+    bash_completion \
     exports \
     fstab \
     group \
-    hosts \
+    host* \
     issue \
     issue.net \
     motd \
     my.cnf \
     passwd \
     profile \
-    shadow
+    rc.local \
+    rc.shutdown \
+    shadow; do
+    if [ -f $i ]; then
+        tListFile="$tListFile $i"
+    fi
+done
+cvs add $tListFile
 sleep 1
+
+#cd /etc
+#cvs add selinux
+#cd selinux
+#cvs add config
+
+#if [ -d /etc/yum.repos.d ]; then
+#    cd /etc
+#    cvs add yum.conf yum.repos.d
+#    sleep 1
+#    cd /etc/yum.repos.d
+#    cvs add *
+#    sleep 1
+#fi
 
 cd /etc
-cvs add selinux
-cd selinux
-cvs add config
-
-cd /etc/profile.d
-cvs add cvs.sh local.sh less.sh
-
-if [ -d /etc/yum.repos.d ]; then
-    cd /etc
-    cvs add yum.conf
-    cvs add yum.repos.d
-    cd /etc/yum.repos.d
-    cvs add *
-fi
-
+cvs add ssh
+sleep 1
 cd /etc/ssh
-cvs add *config
+for i in \
+    ssh-banner \
+    *config*; do
+    if [ -f $i ]; then
+        tListFile="$tListFile $i"
+    fi
+done
+cvs add $tListFile
+sleep 1
 
-cd /etc/rc.d
-cvs add init.d rc.local
-sleep 1
-cd init.d
-sleep 1
-cvs add ntpd
-
-cd /etc/sysconfig
-cvs add httpd network hwconf ntpd syslog xinitd
-cvs add network-scripts $(find * -prune -type f)
-cd network-scripts
-sleep 1
-cvs add ifcfg-eth[0123]
+#cd /etc/sysconfig
+#cvs add httpd network hwconf ntpd syslog xinitd
+#cvs add network-scripts $(find * -prune -type f)
+#cd network-scripts
+#sleep 1
+#cvs add ifcfg-eth[0123]
 
 cd /usr
 cvs add local
 sleep 1
 cd local
 cvs add bin
-cd bin
 sleep 1
+cd bin
 cvs add *
 sleep 1
 
 cd /var
 cvs add log spool
-cd log
-cvs add rpmpkgs
-cvs add yum.log
+sleep 1
 
 cd /var/spool
-cvs add cron
+cvs add *
+sleep 1
+
+#apt/apt.conf
+#wgetrc
+#speech-dispatcher
+#smartmontools
+#skel
+#shells
+#services
+#rsyslog.d
+#nfs.conf.d
+#logrotate.d
+#inittab
+#gshadow
+#grub.d
+#festival.scm
+#emacs
+#debian_version
+#cupshelpers
+#cups
+#conf.d
+#apparmor.d
+#apparmor
 
 cd /
-# cvs commit -m Added
+echo "If OK execute: cvs commit -m Added"
 
 cat <<EOF
 Now get ntp configured and added to start on boot.
 web files go in /var/www/VIRT-SERVER-NAME/html/
 Update /etc/motd (template software/tool/local/trunk/src/etc/motd)
-Update /etc/CHANGES (template software/tool/local/trunk/src/etc/CHANGES)
+Update /etc/CHANGES
 
 Before editing any config files, first do a
 'cvs add' and commit the file.

@@ -1,0 +1,81 @@
+bcmnt
+SYNOPSIS
+           bcmnt [-m | -u]
+                 [-M Dir] [-U Dir] [-C Dir]
+                 [-a] [-g] [-t Min] [-l]
+                 [-h] [-v] [-x]
+
+DESCRIPTION
+    Mount encrypted drives.
+
+OPTIONS
+    -m  Mount all ~/bc/.*.ecfs dirs.
+
+    -u  Unmount all ~/bc/.*.ecfs dirs.
+
+    -a  Use the same prompted password the Dirs.
+
+    -g  Use a GUI prompt, if available. Text prompt is the default.
+
+    -t Min
+        Set the timeout period. Default is unlimited.
+
+    -M Dir
+        Mount one or more Dir. I.e. multiple -M options can be used.
+
+    -U Dir
+        Unount one or more Dir. I.e. multiple -U options can be used.
+
+    -C Dir
+        Create an encrypted directory named Dir in ~/bc/. A corresponding
+        ~/bc/.Dir.ecfs will be created. You'll be prompted for different
+        options.
+
+        All other options will be ignored and only one Dir can be specified.
+
+    -l  List all the possible bc mounts. If -v option is used, then give
+        information about each mount.
+
+        All other options will be ignored.
+
+    -h  This help.
+
+    -v  Verbose output. Sent to stderr.
+
+    -x  Debug mode. Multiple -x options turns on more debug output.
+
+RETURN VALUE
+     0 - OK
+     !0 - Error
+
+ERRORS
+    -m and -u cannot be used at the same time.
+
+    -m or -u cannot be used with -M or -U
+
+           bcmnt [-m | -u]
+                 [-M Dir] [-U Dir] [-C Dir]
+                 [-a] [-g] [-t Min] [-l]
+                 [-h] [-v] [-x]
+
+EXAMPLES
+ENVIRONMENT
+FILES
+     ~/bc/.*.ecfs
+     ~/bc/*/mounted - exists if ~/bc/.*.ecfs is mounted.
+
+SEE ALSO
+    encfs, encfsctl
+
+NOTES
+CAVEATS
+    -l and -C options will ignore all other options.
+
+DIAGNOSTICS
+BUGS
+RESTRICTIONS
+AUTHOR
+HISTORY
+     $Revision: 1.16 $
+     $Date: 2024/06/11 02:44:13 $ GMT
+

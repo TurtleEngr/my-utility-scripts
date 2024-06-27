@@ -104,10 +104,6 @@ fSunOS() {
 
 # --------------------
 fApps() {
-    if [ -d /projects ]; then
-        fCmd Project 'find /projects/* -prune -type d' /projects
-    fi
-
     if [ -e /usr/sbin/httpd ]; then
         fCmd ApacheVer '/usr/sbin/httpd -v'
         fCmd ApacheInfo '/usr/sbin/httpd -V'
@@ -128,6 +124,28 @@ fApps() {
         fCmd PHPVer '/opt/php/bin/php -v'
         fCmd PHPMod '/opt/php/bin/php -m'
         fCmd PHPInfo '/opt/php/bin/php -i'
+    fi
+    if [ -d /mnt ]; then
+        fCmd Mnt 'lstree -L2 /mnt'
+    fi
+    if [ -d /opt ]; then
+        fCmd Opt 'lstree -L1 /opt'
+    fi
+    if [ -d /usr/local/bin ]; then
+        fCmd LocalBin 'lstree -L1 /usr/local/bin'
+    fi
+    if [ -d /projects ]; then
+        fCmd Project 'find /projects/* -prune -type d' /projects
+    fi
+    if [ -d /site ]; then
+        fCmd Sites 'lstree -L1 /site'
+        fCmd Apache 'lstree -C -L2 /etc/apache2'
+    fi
+    if [ -d /repo ]; then
+        fCmd Repos 'lstree -L1 /repo'
+        fCmd RepoLocal 'lstree -L2 /repo/local.cvs'
+        fCmd RepoPublic 'lstree -L2 /repo/public.cvs'
+        fCmd RepoBruce 'lstree -L2 /repo/per-bruce.cvs/app /repo/per-bruce.cvs/project'
     fi
 } # fApps
 
@@ -326,7 +344,12 @@ if [ -r $gExcludeTag ]; then
     gCheckExclude=1
 fi
 
-# --------------------
+if [ ! -x /usr/local/lstree ]; then
+    cp /home/bruce/bin/lstree /usr/local/bin
+    chmod a+rx /usr/local/bin/lstree
+fi
+
+# ------------------------------------------------------------
 echo '<?xml version="1.0"?>' >$gOut
 echo '<server>' >>$gOut
 fCommonInfo
@@ -343,6 +366,6 @@ chmod a+rw $gTagList
 rm $gTagTmp
 
 echo
-echo "Manifest was written to $gOut.gz"
+echo "Manifest was written to $gOut"
 echo "Tags outputted can be found at: $gTagList"
 echo "Create $gExcludeTag to exclude tags, and run again."
