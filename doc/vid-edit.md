@@ -113,6 +113,53 @@ choice. However there will still be a need to remove old binary files
 from the git repo, or it will become too large to be useable. You'll
 probably want to make a git repo for each projcect.
 
+## install
+
+See: https://kdenlive.org/en/download/
+
+## Appimage install
+
+Note: on Ubuntu 18 Appimages after version 23 do not work. Use
+flatpak.
+
+Download the latest Appimage
+
+    chmod a+rx kdenlive-[VER]-x86_64.AppImage
+    sudo mv kdenlive-[VER]-x86_64.AppImage /usr/local/bin
+    sudo cd /usr/local/bin; ln -sf kdenlive-[VER]-x86_64.AppImage kdenlive
+
+### Flatpak install
+
+    https://linuxiac.com/flatpak-beginners-guide/
+    https://docs.flatpak.org/en/latest/using-flatpak.html
+
+Click on Flatpak on download page.
+
+Select the Manual install option (down arrow).
+
+    sudo flatpak install flathub org.kde.kdenlive
+
+Create kdenlive-flatpak
+
+    sudo -s
+    cd /usr/local/bin
+    cat <<END >kdenlive-flatpak
+    #!/bin/bash
+    flatpak run org.kde.kdenlive $* &>/tmp/kdenlive.log &
+    echo "If errors, see: /tmp/kdenlive.log"
+    END
+    chmod a+rx kdenlive-flatpak
+    # Optional
+    ln -sf kdenlive-flatpak kdenlive
+
+#### Flatpak update
+
+    sudo flatpak update org.kde.kdenlive
+
+#### Flatpak run
+
+See: /usr/local/bin/kdenlive-flatpak
+
 # CAVEATS
 
 There is no warning, if you specify a version that is earlier than the
@@ -128,4 +175,4 @@ kdenlive file's version.
 
 # HISTORY
 
-$Revision: 1.15 $ $Date: 2024/06/11 02:44:15 $ GMT
+$Revision: 1.16 $ $Date: 2024/08/08 17:58:13 $ GMT

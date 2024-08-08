@@ -58,11 +58,17 @@ fLog() {
     fi
     if [[ $tL -le 25 && "$tS" = "Discharging" && $tPlugIn -eq 0 ]]; then
         wall "Battery is at $tL%. Plug it in."
+        if [[ -x $cSay ]]; then
+            $cSay "The battery is at $tL%. Plug it in."
+        fi
         touch $cInFile
         rm $cOutFile >/dev/null 2>&1
     fi
     if [[ $tL -ge 85 && "$tS" = "Charging" && $tUnplug -eq 0 ]]; then
         wall "Battery is at $tL%. Unplug it."
+        if [[ -x $cSay ]]; then
+            $cSay "The battery is at $tL%. Unplug it."
+        fi
         touch $cOutFile
         rm $cInFile >/dev/null 2>&1
     fi
@@ -124,6 +130,7 @@ export cMaxVal=288
 export cLogFile=/var/tmp/bat-level.log
 export cInFile=/var/tmp/bat-level-in.tmp
 export cOutFile=/var/tmp/bat-level-out.tmp
+export cSay=/usr/local/bin/say
 
 if [ $# -eq 0 ]; then
     fShort

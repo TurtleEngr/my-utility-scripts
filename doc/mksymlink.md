@@ -67,6 +67,8 @@ needed.
     With the -r option, force existing symlinks to be updated if they
     already exist.
 
+    With the -s option, force saving symlinks to directories.
+
 - **-c**
 
     Check simlinks.

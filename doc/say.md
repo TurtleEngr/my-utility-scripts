@@ -75,26 +75,37 @@ are copying some very large files to another system.
 - ~/.festival.say
 
     This file contains a list of word substitutions. The words should be
-    all lowercase.
+    all lowercase. However if you want to override any substitutions
+    defined in /usr/local/etc/festival.say, make the first letter of the
+    MatchText uppercase.
+
+    It is best to use '-' rather than spaces in the replacemet-text, so
+    that later rules won't replace the changed text.
 
     Format:
 
-        match text/replacement text
+        MatchText/replacement-text
 
     A sed script will be generated to do the substitutions. See the file:
     ~/.cache/say/say.sed
 
     For example:
 
-        brigitte/bridge eat
-        monday/mun day
-        tue/tues day
-        foo bar/snae foo
+        brigitte/bridge-eat
+        monday/mun-day
+        mon/mun-day
+        tue/tues-day
+        foo bar/snae-foo
 
-        # Lines beginning with # are ignored.
         # Blank lines are ignored.
-        # Lines that don't have exactly 2 '/' separated arguments on
-        # the line, are ignored.
+        # Lines beginning with # are ignored.
+        # Lines that don't have exactly 2 argument separated with a '/'
+        #   will be ignored.
+
+- /usr/local/etc/festival.say
+
+    This is a system wide word substitution file. The fromat is the same
+    as the user's ~/.festival.say file.
 
 - ~/.festivalrc
 
@@ -157,4 +168,4 @@ Or archived at: https://archive.ph/wip/sVgg7
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.8 $ $Date: 2024/06/11 02:44:14 $ GMT
+    $Revision: 1.9 $ $Date: 2024/08/08 17:39:33 $ GMT

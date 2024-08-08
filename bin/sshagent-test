@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.6 2023/05/21 01:10:35 bruce Exp $
+# $Id: sshagent-test,v 1.7 2024/08/08 17:38:38 bruce Exp $
 set -u
 
 # Var prefix key
@@ -102,7 +102,7 @@ shunit2.1 has a minor change to fix up colors when background is not black.
 
 The latest versions of sshagent, sshagent-test, and shunit2.1 can be
 found at:
-L<github TurtleEngr|https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin>
+L<github TurtleEngr|https://github.com/TurtleEngr/my-utility-scripts/tree/main/bin>
 
 =item *
 
@@ -156,7 +156,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.6 $ $Date: 2023/05/21 01:10:35 $ GMT
+$Revision: 1.7 $ $Date: 2024/08/08 17:38:38 $ GMT
 
 =cut
 EOF

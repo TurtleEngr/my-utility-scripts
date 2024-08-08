@@ -43,7 +43,7 @@ if [ $pNewFile = $pDiffFile ]; then
 fi
 
 # -----------------
-diff -bBwi --ifdef=NeW $1 $2 >$tTmpFile
+diff -bBwid --ifdef=NeW $1 $2 >$tTmpFile
 
 awk '
 /^#ifdef NeW/ {

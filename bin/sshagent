@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.82 2024/06/11 02:44:12 bruce Exp $
+# $Id: sshagent,v 1.84 2024/08/08 17:57:21 bruce Exp $
 #set -u
 
 # Var prefix key
@@ -238,7 +238,8 @@ your keys "active" on the computer.
 
 =head1 SEE ALSO
 
-    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2
+    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2.1,
+    gpg-agent
 
 =head1 NOTES
 
@@ -283,7 +284,7 @@ other pod programs. For example:
 
 For TDD you can find the latest versions of sshagent and sshagent-test
 at:
-L<github|https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin>
+L<github|https://github.com/TurtleEngr/my-utility-scripts/tree/main/bin>
 
 =head1 CAVEATS
 
@@ -336,7 +337,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.82 $
+$Revision: 1.84 $
 
 =cut
 

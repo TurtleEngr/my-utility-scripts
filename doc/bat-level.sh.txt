@@ -1,0 +1,10 @@
+bat-level.sh - Report battery levels
+Usage
+    bat-level.sh [-s] [-f] [-l] [-c] [-p] [-h]
+Options
+    -s short report
+    -f full report
+    -l log values to /var/tmp/bat-level.log
+    -c output crontab file line needed to run once every 5 min. Adjust as needed.
+    -p plot the values in /var/tmp/bat-level.log
+    -h this help

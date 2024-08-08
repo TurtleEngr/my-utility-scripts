@@ -114,6 +114,8 @@ Error if .symlink.$HOSTNAME and .symlink files are missing.
 With the -r option, force existing symlinks to be updated if they
 already exist.
 
+With the -s option, force saving symlinks to directories.
+
 =item B<-c>
 
 Check simlinks.
