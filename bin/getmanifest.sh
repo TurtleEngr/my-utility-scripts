@@ -1,5 +1,5 @@
 #!/bin/bash
-# configuration-dev/service/aws_boot/src/usr/local/sbin/getmanifest.sh
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.23 2024/08/08 16:58:29 bruce Exp $
 
 # --------------------
 fUsage() {
@@ -141,11 +141,29 @@ fApps() {
         fCmd Sites 'lstree -L1 /site'
         fCmd Apache 'lstree -C -L2 /etc/apache2'
     fi
+    if [ -d /etc/apache2/auth ]; then
+        fCmd WebAuth 'lstree -C -L2 /etc/apache2/auth'
+        for i in /etc/apache2/auth/*; do
+            fCmd WebAuth "cat $i"
+        done
+    fi
     if [ -d /repo ]; then
         fCmd Repos 'lstree -L1 /repo'
-        fCmd RepoLocal 'lstree -L2 /repo/local.cvs'
-        fCmd RepoPublic 'lstree -L2 /repo/public.cvs'
-        fCmd RepoBruce 'lstree -L2 /repo/per-bruce.cvs/app /repo/per-bruce.cvs/project'
+        # RepoPub
+        for i in /repo/git /repo/mirror.cvs /repo/site.cvs /repo/video.cvs; do
+            fCmd RepoPub "lstree -L1 $i"
+        done
+        for i in /repo/local.cvs /repo/public.cvs /repo/qa.cvs /repo/work.cvs; do
+            fCmd RepoPub "lstree -L2 $i | grep -v ',v'" 
+        done
+
+        # RepoPri
+        for i in /repo/sys.cvs; do
+            fCmd RepoPri "lstree -L1 $i"
+        done
+        for i in /repo/per-*.cvs /repo/pri*.cvs; do
+            fCmd RepoPri "lstree -L2 $i | grep -v ',v'"
+        done
     fi
 } # fApps
 
@@ -173,14 +191,37 @@ fOSRel() {
         done
     fi
 
+    fCmd OSRel 'cat /etc/issue.net' /etc/issue.net
+    fCmd OSRel 'cat /etc/issue' /etc/issue
+    
+    fCmd OSRelVer 'cat /etc/os-release' /etc/os-release
+    if [ -f /etc/lsb-release ]; then
+        fCmd OSRelVer 'cat /etc/lsb-release'
+    fi
+
     if [ -e /etc/mx-version ]; then
-        fCmd OSRel 'cat /etc/mx-version' /etc/mx-version
+        fCmd OSRelVer 'cat /etc/mx-version' /etc/mx-version
     fi
 
     if which lsb_release >/dev/null 2>&1; then
-        fCmd OSRel 'lsb_release -a'
+        fCmd OSRelVer 'lsb_release -a'
     fi
 } # fOSRel
+
+# --------------------
+fPkgAppImage() {
+    fCmd fPkgAppImage 'locate AppImage | grep "\.AppImage$"'
+} # fPkgAppImage
+
+# --------------------
+fPkgFlatpak() {
+    if [ ! -x /usr/bin/flatpak ]; then
+        return
+    fi
+    
+    fCmd fPkgFlatpakList 'flatpak list'
+    fCmd fPkgFlatpakApp 'flatpak list --app'
+} # fPkgFlatpak
 
 # --------------------
 fPkgList() {
@@ -254,22 +295,18 @@ fLinuxCommon() {
     fCmd RAM 'grep "MemTotal" /proc/meminfo' /proc/meminfo
 
     if which inxi &>/dev/null; then
-        fCmd SysInfo 'inxi -c 0 -F'
+        fCmd HwInfo 'inxi -c 0 -F'
     fi
     if which lshw &>/dev/null; then
-        fCmd lshw 'lshw'
+        fCmd HwInfo 'lshw'
     fi
     if which hwinfo &>/dev/null; then
-        fCmd hwinfo 'hwinfo --short'
+        fCmd HwInfo 'hwinfo --short'
     fi
 
     fCmd Partition 'cat /proc/partitions' /proc/partitions
     fCmd Mount 'cat /proc/mounts' /proc/mounts
     fCmd DiskSize 'df -m'
-
-    fCmd OSName 'cat /etc/issue.net' /etc/issue.net
-    fCmd OSName 'cat /etc/issue' /etc/issue
-    fCmd OSName 'cat /etc/os-release' /etc/os-release
 
     fCmd Network '/sbin/ifconfig | egrep "eth|inet addr" | grep -v 127.0.0.1'
     fCmd KernelVer 'uname -r'
@@ -286,12 +323,17 @@ fLinux() {
     fLinuxCommon
     fApps
     fOSRel
+    fPkgAppImage
+    fPkgFlatpak
     fPkgListVer
     fPkgList
 } # fLinux
 
 # ============================================
-export cVer=4.1
+export cVer='$Revision: 1.23 $'
+cVer=${cVer#\$Revision: }
+cVer=${cVer% \$}
+
 export cOS=$(uname -s)
 export gOut
 export gTagTmp=/tmp/getmanifext-tag.tmp
@@ -359,10 +401,8 @@ case $cOS in
 esac
 echo "</server>" >>$gOut
 
-##gzip -f $gOut
-
 sort -uf <$gTagTmp >$gTagList
-chmod a+rw $gTagList
+chmod a+r $gOut $gTagList
 rm $gTagTmp
 
 echo
