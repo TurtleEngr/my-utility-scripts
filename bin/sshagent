@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.85 2024/08/08 18:08:19 bruce Exp $
+# $Id: sshagent,v 1.86 2024/08/08 20:44:41 bruce Exp $
 #set -u
 
 # Var prefix key
@@ -239,8 +239,7 @@ your keys "active" on the computer.
 
 =head1 SEE ALSO
 
-    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2.1,
-    gpg-agent
+    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2.1
 
 =head1 NOTES
 
@@ -338,7 +337,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.85 $
+$Revision: 1.86 $
 
 =cut
 

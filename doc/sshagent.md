@@ -174,8 +174,7 @@ your keys "active" on the computer.
 
 # SEE ALSO
 
-    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2.1,
-    gpg-agent
+    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2.1
 
 # NOTES
 
@@ -247,4 +246,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.20 $
+$Revision: 1.21 $
