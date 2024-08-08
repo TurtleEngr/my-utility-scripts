@@ -129,11 +129,12 @@ You will only need to do this when the computer started or rebooted.
 
         if ! pgrep ssh-agent &>/dev/null; then
             . sshagent ~/.ssh/id.home ~/.ssh/id.work
+        else
+            . sshagent -s
         fi
 
 - You ran sshagent to create an agent, but you forgot to "source" the
-script so that the SSH\_\* env. are not set.  Just repeat the command,
-with a ". " at the front.
+script so that the SSH\_\* env. are not set.  Just run '. sshagent -s'
 - In a profile script add this line. That way when you start a new
 terminal it will use any keys from the agent. This can also be
 put in a script if it needs the keys saved on the agent.
@@ -207,7 +208,7 @@ other pod programs. For example:
 
 For TDD you can find the latest versions of sshagent and sshagent-test
 at:
-[github](https://github.com/TurtleEngr/my-utility-scripts/tree/develop/bin)
+[github](https://github.com/TurtleEngr/my-utility-scripts/tree/main/bin)
 
 # CAVEATS
 
@@ -246,4 +247,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.18 $
+$Revision: 1.20 $
