@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.84 2024/08/08 17:57:21 bruce Exp $
+# $Id: sshagent,v 1.85 2024/08/08 18:08:19 bruce Exp $
 #set -u
 
 # Var prefix key
@@ -181,13 +181,14 @@ You will only need to do this when the computer started or rebooted.
 
     if ! pgrep ssh-agent &>/dev/null; then
         . sshagent ~/.ssh/id.home ~/.ssh/id.work
+    else
+        . sshagent -s
     fi
 
 =item *
 
 You ran sshagent to create an agent, but you forgot to "source" the
-script so that the SSH_* env. are not set.  Just repeat the command,
-with a ". " at the front.
+script so that the SSH_* env. are not set.  Just run '. sshagent -s'
 
 =item *
 
@@ -337,7 +338,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.84 $
+$Revision: 1.85 $
 
 =cut
 
