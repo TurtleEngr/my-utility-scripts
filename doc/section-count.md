@@ -15,6 +15,9 @@ SHORT-DESCRIPTION
 Output the word count for each of an org-mode file. The counts are
 cumulitive for heading levels one to four.
 
+The heading levels will be reordered to be after the headings under
+them.
+
 # OPTIONS
 
 - **-f FileName**
@@ -215,4 +218,4 @@ script from ~/bin.
 
 GPLv2 (c) Copyright 2024
 
-$Revision: 1.1 $ $Date: 2024/08/17 15:43:36 $ GMT
+$Revision: 1.2 $ $Date: 2024/08/17 19:57:20 $ GMT
