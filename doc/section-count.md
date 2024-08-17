@@ -2,23 +2,24 @@
     <hr/>
 </div>
 
-# NAME SCRIPTNAME
+# NAME section-count
 
 SHORT-DESCRIPTION
 
 # SYNOPSIS
 
-        SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
+        section-count -f FileName [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 # DESCRIPTION
 
-Describe the script.
+Output the word count for each of an org-mode file. The counts are
+cumulitive for heading levels one to four.
 
 # OPTIONS
 
-- **-o Name=Value**
+- **-f FileName**
 
-    \[This is a placeholder for user options.\]
+    Name of the the org file to be processed. Required option.
 
 - **-h**
 
@@ -35,15 +36,14 @@ Describe the script.
         man         - Output long usage help as a man page.
         html        - Output long usage help as html.
         md          - Output long usage help as markdown.
-        int         - Also output internal documentation as text.
-        int-html    - Also output internal documentation as html.
-        int-md      - Also output internal documentation as markdown.
 
 - **-l**
 
     Send log messages to syslog. Default is to just send output to stderr.
 
 - **-v**
+
+    Currently there is no verbose text.
 
     Verbose output. Default is is only output (or log) messages with
     level "warning" and higher.
@@ -53,6 +53,8 @@ Describe the script.
     \-vv - output "info" and higher.
 
 - **-x**
+
+    Currently there is no debug output.
 
     Set the gpDebug level. Add 1 for each -x.
     Or you can set gpDebug before running the script.
@@ -90,9 +92,9 @@ The the "common" CLI flags will override the initial variable settings.
 
 - **Tmp**
 
-    This is the top directory where tmp file will be put.
+    This is the top directory where tmp files will be put.
 
-    Default: /tmp/$USER/SCRIPTNAME/
+    Default: /tmp/$USER/section-count/
 
     if gpDebug is 0, temp files will usually include the PID.
 
@@ -172,16 +174,16 @@ The the "common" CLI flags will override the initial variable settings.
 
 # ERRORS
 
-Fatal Error:
+Fatal Error: no options
 
-Warning:
+Fatal Error: no -f
+
+Fatal Error: File not readable
 
 Many error messages may describe where the error is located, with the
 following log message format:
 
     Program: PID NNNN: Message [LINE](ErrNo)
-
-# EXAMPLES
 
 # ENVIRONMENT
 
@@ -197,26 +199,20 @@ bash-com.test
 
 # CAVEATS
 
-\[Things to take special care with; sometimes called WARNINGS.\]
+## To Do
 
-# DIAGNOSTICS
-
-To verify the script is internally OK, run: SCRIPTNAME -T all
+Put tmp files in $Tmp.
 
 # BUGS
 
-\[Things that are broken or just don't work quite right.\]
+Because of a defect, the -T option will only work if the script is in
+the ~/bin directory.
 
-# RESTRICTIONS
-
-\[Bugs you don't plan to fix :-)\]
-
-# AUTHOR
-
-NAME
+Workaround: put a symlink in ~/bin to this script. Then call the
+script from ~/bin.
 
 # HISTORY
 
-GPLv3 (c) Copyright 2021 by COMPANY
+GPLv2 (c) Copyright 2024
 
-$Revision: 1.17 $ $Date: 2024/08/17 15:43:36 $ GMT
+$Revision: 1.1 $ $Date: 2024/08/17 15:43:36 $ GMT
