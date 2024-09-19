@@ -10,6 +10,9 @@ function fRename() {
     tNew=$(echo $pOld | perl -ne '
                 chomp;
                 s/:/-/g;
+                s/_\.mp/.mp/;
+                s/_mp3$/.mp3/;
+                s/_mp4$/.mp4/;
                 tr/-_.a-zA-Z0-9/_/cs;
                 s/_+/_/g;
                 s/-+/-/g;

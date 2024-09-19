@@ -193,7 +193,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.41 $ $Date: 2024/08/06 20:47:28 $ GMT
+$Revision: 1.42 $ $Date: 2024/08/10 18:30:05 $ GMT
 
 =cut
 EOF
@@ -313,7 +313,7 @@ function fKLVer() {
         23.04) tUse=kdenlive-23.04.3-x86_64.AppImage ;;
         *)
             tUse=kdenlive
-            fLog "No version available, using: kdenlive." $LINENO
+            fLog warning "No version available, using: kdenlive." $LINENO
             ;;
     esac
     gKLProg=$cKLBin/$tUse

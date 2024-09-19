@@ -2,9 +2,9 @@
     <hr/>
 </div>
 
-# NAME SCRIPTNAME
+# NAME sshagent-test
 
-SHORT-DESCRIPTION
+Test the sshagent script.
 
 # SYNOPSIS
 
@@ -12,7 +12,8 @@ SHORT-DESCRIPTION
 
 # DESCRIPTION
 
-Describe the script.
+This script is used to test the sshagent script. See the Notes section
+for how to set it up and the dependent scipts.
 
 # OPTIONS
 
@@ -35,7 +36,7 @@ HOME, USER
 
 # SEE ALSO
 
-ssh-agent, ssh, ssh-askpass, shunit2.1
+ssh-agent, ssh, ssh-askpass, shunit2.1, shellcheck
 
 # NOTES
 
@@ -83,4 +84,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.7 $ $Date: 2024/08/08 20:45:09 $ GMT
+$Revision: 1.8 $ $Date: 2024/09/19 19:31:09 $ GMT

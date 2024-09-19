@@ -1,12 +1,13 @@
 ========================================
-NAME SCRIPTNAME
-    SHORT-DESCRIPTION
+NAME sshagent-test
+    Test the sshagent script.
 
 SYNOPSIS
         sshagent-test [-h] [-T pTest]
 
 DESCRIPTION
-    Describe the script.
+    This script is used to test the sshagent script. See the Notes section
+    for how to set it up and the dependent scipts.
 
 OPTIONS
     -h  Output this "long" usage help. See "-H long"
@@ -23,7 +24,7 @@ ENVIRONMENT
     HOME, USER
 
 SEE ALSO
-    ssh-agent, ssh, ssh-askpass, shunit2.1
+    ssh-agent, ssh, ssh-askpass, shunit2.1, shellcheck
 
 NOTES
     *   For more details about shunit2 (or shunit2.1), see
@@ -70,5 +71,5 @@ AUTHOR
     TurtleEngr
 
 HISTORY
-    $Revision: 1.7 $ $Date: 2024/08/08 20:45:09 $ GMT
+    $Revision: 1.8 $ $Date: 2024/09/19 19:31:09 $ GMT
 
