@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.7 2024/08/08 17:38:38 bruce Exp $
+# $Id: sshagent-test,v 1.8 2024/09/19 19:30:49 bruce Exp $
 set -u
 
 # Var prefix key
@@ -44,9 +44,9 @@ fUsageTest() {
 
 =for html <hr/>
 
-=head1 NAME SCRIPTNAME
+=head1 NAME sshagent-test
 
-SHORT-DESCRIPTION
+Test the sshagent script.
 
 =head1 SYNOPSIS
 
@@ -54,7 +54,8 @@ SHORT-DESCRIPTION
 
 =head1 DESCRIPTION
 
-Describe the script.
+This script is used to test the sshagent script. See the Notes section
+for how to set it up and the dependent scipts.
 
 =head1 OPTIONS
 
@@ -85,7 +86,7 @@ HOME, USER
 
 =head1 SEE ALSO
 
-ssh-agent, ssh, ssh-askpass, shunit2.1
+ssh-agent, ssh, ssh-askpass, shunit2.1, shellcheck
 
 =head1 NOTES
 
@@ -156,7 +157,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.7 $ $Date: 2024/08/08 17:38:38 $ GMT
+$Revision: 1.8 $ $Date: 2024/09/19 19:30:49 $ GMT
 
 =cut
 EOF
