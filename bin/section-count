@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.78 $ $Date: 2024/08/17 15:23:21 $ GMT
+# $Source: /repo/per-bruce.cvs/bin/section-count,v $
+# $Revision: 1.4 $ $Date: 2024/08/29 02:39:25 $ GMT
 
-export gpHostName gpTag
+export gpFileName
+export gAwkScript
+
 set -u
 
 # ========================================
@@ -11,7 +13,7 @@ set -u
 # --------------------------------
 fUsage() {
     # Quick help, run this:
-    # SCRIPTNAME -h
+    # section-count -h
 
     local pStyle="$1"
 
@@ -22,21 +24,11 @@ fUsage() {
         html)
             fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
             ;;
-        int)
-            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long | more
-            ;;
-        int-html)
-            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
-            ;;
-        int-md)
-            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
-            ;;
         *)
             fComUsage -f $cBin/$cName -s short | more
             ;;
     esac
     fCleanUp
-    # Defect: this exit doesn't seem to work.
     exit 1
 
     # POD Syntax: https://perldoc.perl.org/perlpod
@@ -50,25 +42,29 @@ fUsage() {
 
 =for html <hr/>
 
-=head1 NAME SCRIPTNAME
+=head1 NAME section-count
 
 SHORT-DESCRIPTION
 
 =head1 SYNOPSIS
 
-        SCRIPTNAME [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
+        section-count -f FileName [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 =head1 DESCRIPTION
 
-Describe the script.
+Output the word count for each of an org-mode file. The counts are
+cumulitive for heading levels one to four.
+
+The heading levels will be reordered to be after the headings under
+them.
 
 =head1 OPTIONS
 
 =over 4
 
-=item B<-o Name=Value>
+=item B<-f FileName>
 
-[This is a placeholder for user options.]
+Name of the the org file to be processed. Required option.
 
 =item B<-h>
 
@@ -85,15 +81,14 @@ Styles:
     man         - Output long usage help as a man page.
     html        - Output long usage help as html.
     md          - Output long usage help as markdown.
-    int         - Also output internal documentation as text.
-    int-html    - Also output internal documentation as html.
-    int-md      - Also output internal documentation as markdown.
 
 =item B<-l>
 
 Send log messages to syslog. Default is to just send output to stderr.
 
 =item B<-v>
+
+Currently there is no verbose text.
 
 Verbose output. Default is is only output (or log) messages with
 level "warning" and higher.
@@ -103,6 +98,8 @@ level "warning" and higher.
 -vv - output "info" and higher.
 
 =item B<-x>
+
+Currently there is no debug output.
 
 Set the gpDebug level. Add 1 for each -x.
 Or you can set gpDebug before running the script.
@@ -144,9 +141,9 @@ The the "common" CLI flags will override the initial variable settings.
 
 =item B<Tmp>
 
-This is the top directory where tmp file will be put.
+This is the top directory where tmp files will be put.
 
-Default: /tmp/$USER/SCRIPTNAME/
+Default: /tmp/$USER/section-count/
 
 if gpDebug is 0, temp files will usually include the PID.
 
@@ -228,16 +225,18 @@ See -x
 
 =head1 ERRORS
 
-Fatal Error:
+Fatal Error: no options
 
-Warning:
+Fatal Error: no -f
+
+Fatal Error: File not readable
 
 Many error messages may describe where the error is located, with the
 following log message format:
 
  Program: PID NNNN: Message [LINE](ErrNo)
 
-=head1 EXAMPLES
+=for comment=head1 EXAMPLES
 
 =head1 ENVIRONMENT
 
@@ -257,44 +256,31 @@ bash-com.test
 
 =head1 CAVEATS
 
-[Things to take special care with; sometimes called WARNINGS.]
+=head2 To Do
 
-=head1 DIAGNOSTICS
+Put tmp files in $Tmp.
 
-To verify the script is internally OK, run: SCRIPTNAME -T all
+=for comment =head1 DIAGNOSTICS
 
 =head1 BUGS
 
-[Things that are broken or just don't work quite right.]
+Because of a defect, the -T option will only work if the script is in
+the ~/bin directory.
 
-=head1 RESTRICTIONS
+Workaround: put a symlink in ~/bin to this script. Then call the
+script from ~/bin.
 
-[Bugs you don't plan to fix :-)]
+=for comment =head1 RESTRICTIONS
 
-=head1 AUTHOR
-
-NAME
+=for comment =head1 AUTHOR
 
 =head1 HISTORY
 
-GPLv3 (c) Copyright 2021 by COMPANY
+GPLv2 (c) Copyright 2024
 
-$Revision: 1.78 $ $Date: 2024/08/17 15:23:21 $ GMT
+$Revision: 1.4 $ $Date: 2024/08/29 02:39:25 $ GMT
 
 =cut
-EOF
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head1 SCRIPTNAME Internal Documentation
-
-=internal-head3 fUsage pStyle
-
-This function selects the type of help output. See -h and -H options.
-
-=internal-head2 Script Global Variables
-
-=internal-cut
 EOF
 } # fUsage
 
@@ -302,18 +288,6 @@ EOF
 fCleanUp() {
     fComCleanUp
     exit
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head2 Script Functions
-
-=internal-head3 fCleanUp
-
-Calls fComCleanUp.
-
-=internal-cut
-EOF
 } # fCleanUp
 
 # -------------------
@@ -321,45 +295,84 @@ fSetGlobals() {
     fComSetGlobals
 
     # Put your globals here
-    gpTag=${gpTag:-build}
-    gpHostName=$HOSTNAME
+    gpFileName=""
+    gAwkScript=${cTmpF}.awk
 
     # Define the Required and the Optional progs, space separated
-    fComCheckDeps "cat" "cat"
+    fComCheckDeps "wc sort cat" "shunit2.1"
     return
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fSetGlobals
-
-Calls fComSetGlobals to set globals used by bash-com.inc.
-
-Set initial values for all of the other globals use by this
-script. The ones that begin with "gp" can usually be overridden by
-setting them before the script is run.
-
-=internal-cut
-EOF
 } # fSetGlobals
 
-# -------------------
-fValidateHostName() {
-    if [ -z $gpHostName ]; then
-        fError2 -m "The -n or -c option is required." -l $LINENO
-    fi
-    return
+# --------------------------------
+fCount() {
+  cat <<\EOF >$gAwkScript
 
-    cat <<EOF >/dev/null
-=internal-pod
+function fOutputLevel(pLevel) {
+  if (tText[pLevel] != "") {
+    printf("%s = ", tTitle[pLevel])
+    print tText[pLevel] | "wc -w"
+    close("wc -w")
+    tText[pLevel] = ""
+  }
+}
 
-=internal-head3 fValidateHostName
+function fOutput(pLevel) {
+  tLevel = pLevel
+  for (i=4; i>=pLevel; --i) {
+    fOutputLevel(i)
+  }
+  tTitle[pLevel] = tCount " " tLine
+}
 
-Exit if missing.
+BEGIN {
+  tCount = 0
+  tLevel = 1
+  for (i=1; i<=4; ++i) {
+    tTitle[i] = ""
+    tText[i] = ""
+  }
+}
 
-=internal-cut
+{
+  # tCount is needed so lines can be put back into the correct order
+  ++tCount
+  tLine = $0
+}
+
+/^\*\*\*\* / {
+  fOutput(4)
+  next
+}
+
+/^\*\*\* / {
+  fOutput(3)
+  next
+}
+
+/^\*\* / {
+  fOutput(2)
+  next
+}
+
+/^\* / {
+  fOutput(1)
+  next
+}
+
+NF != 0 {
+  for (i=1; i<=tLevel; ++i) {
+    tText[i] = (tText[i] " " tLine)
+  }
+}
+
+END {
+  fOutput(1)
+}
 EOF
-} # fValidateHostName
+
+  awk -f $gAwkScript <$gpFileName | sort -n | sed 's/^[0-9]* //'
+  rm -f $gAwkScript 2>/dev/null
+} # fCount
 
 # ========================================
 # Tests
@@ -369,11 +382,28 @@ oneTimeSetUp() {
     # When calling $cName, unset gpTest to prevent infinite loop
     gpTest=''
 
+    gpFileName=${cTmpF}-test.org
+    cat <<\EOF >$gpFileName
+* Level One
+Text in One
+** Level Two
+Text in Two
+More text.
+*** Level Three
+Text.
+**** Level Four
+1 2 3 4 5
+** Level 2 Two
+More text. More text.
+* Level 2 One
+One more.
+EOF
     return 0
 } # oneTimeSetUp
 
 # --------------------------------
 oneTimeTearDown() {
+    rm -f ${cTmpF}* 2>/dev/null
     return 0
 } # oneTearDown
 
@@ -393,11 +423,11 @@ testUsage() {
 
     #-----
     tResult=$(fUsage short 2>&1)
-    assertContains "$LINENO short" "$tResult" "NAME SCRIPTNAME"
+    assertContains "$LINENO short" "$tResult" "NAME section-count"
 
     #-----
     tResult=$(fUsage foo 2>&1)
-    assertContains "$LINENO foo.1" "$tResult" "NAME SCRIPTNAME"
+    assertContains "$LINENO foo.1" "$tResult" "NAME section-count"
 
     #-----
     tResult=$(fUsage text 2>&1)
@@ -421,77 +451,54 @@ testUsage() {
     assertContains "$LINENO md.2" "$tResult" '# HISTORY'
 
     #-----
-    tResult=$(fUsage int 2>&1)
-    assertContains "$LINENO internal.1" "$tResult" 'Template Use'
-    assertContains "$LINENO internal.2" "$tResult" 'fComSetGlobals'
-
-    #-----
-    tResult=$(fUsage int-html 2>&1)
-    assertContains "$LINENO int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
-    assertContains "$LINENO int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
-    assertContains "$LINENO int-html.3" "$tResult" 'Internal Doc</title>'
-    assertContains "$LINENO int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
-
-    #-----
-    tResult=$(fUsage int-md 2>&1)
-    assertContains "$LINENO int-md.1" "$tResult" '## Template Use'
-    assertContains "$LINENO int-md.2" "$tResult" '### fComSetGlobals'
-    assertContains "$LINENO int-md.3" "$tResult" '### testComUsage'
-
-    #-----
     tResult=$($cBin/$cName 2>&1)
     assertContains "$LINENO cmd-call" "$tResult" "Usage:"
     assertContains "$LINENO cmd-call" "$tResult" "$cName"
 
     #-----
     return 0
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 testUsage
-
-Test fUsage. Verify the different output styles work. See also testComUsage
-in bash-com.test.
-
-=internal-cut
-EOF
 } # testUsage
 
 # --------------------------------
-testScriptFunctions() {
+testScript() {
     local tResult
 
     tResult=$(fSetGlobals 2>&1)
     assertTrue "$LINENO tsf-fSetGlobals" "[ $? -eq 0 ]"
 
-    gpHostName="foobar"
-    tResult=$(fValidateHostName 2>&1)
-    assertTrue "$LINENO tsf-fValidateHostName.1" "[ $? -eq 0 ]"
+    assertTrue "$LINENO file exists" "[ -f $gpFileName ]"
+    assertTrue "$LINENO org file" "grep -q '^* ' $gpFileName"
 
-    gpHostName=""
-    tResult=$(fValidateHostName 2>&1)
-    assertContains "$LINENO tsf-fValidateHostName.2" "$tResult" "required."
+    tResult=$(fCount)
+    
+    # Uncomment to see full output
+    ##assertContains "$LINENO $tResult" "$tResult" 'NA'
+
+    assertContains "$LINENO $tResult" "$tResult" '* Level One'
+    assertContains "$LINENO $tResult" "$tResult" '** Level Two'
+    assertContains "$LINENO $tResult" "$tResult" '** Level 2 Two'
+    assertContains "$LINENO $tResult" "$tResult" '*** Level Three'
+    assertContains "$LINENO $tResult" "$tResult" '**** Level Four'
+    assertContains "$LINENO $tResult" "$tResult" '* Level 2 One'
+    
+    assertContains "$LINENO $tResult" "$tResult" '**** Level Four = 5'
+    assertContains "$LINENO $tResult" "$tResult" '*** Level Three = 6'
+    assertContains "$LINENO $tResult" "$tResult" '** Level Two = 11'
+    assertContains "$LINENO $tResult" "$tResult" '** Level 2 Two = 4'
+    assertContains "$LINENO $tResult" "$tResult" '* Level One = 18'
+    assertContains "$LINENO $tResult" "$tResult" '* Level 2 One = 2'
+
 
     return 0
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 testScriptFunctions
-
-This is just a starting point for creating script functionality tests.
-
-=internal-cut
 EOF
-} # testScriptFunctions
+} # testScript
 
 # -------------------
 # This should be the last defined function
 fRunTests() {
+    tErr=0
     if [ "$gpTest" = "list" ]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
-#        grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
         exit 1
     fi
     SHUNIT_COLOR=auto
@@ -511,16 +518,6 @@ fRunTests() {
     # shellcheck disable=SC1091
     . /usr/local/bin/shunit2.1 -- $gpTest
     exit $?
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fRunTests
-
-Run unit tests for this script.
-
-=internal-cut
-EOF
 } # fRunTests
 
 # ========================================
@@ -565,7 +562,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.78 $'
+cVer='$Revision: 1.4 $'
 fSetGlobals
 
 # -------------------
@@ -573,12 +570,10 @@ fSetGlobals
 if [ $# -eq 0 ]; then
     fError2 -m "Missing options." -l $LINENO
 fi
-while getopts :cn:t:hH:lT:vx tArg; do
+while getopts :f:hH:lT:vx tArg; do
     case $tArg in
         # Script arguments
-        c) gpHostName=$(hostname) ;;
-        n) gpHostName="$OPTARG" ;;
-        t) gpTag="$OPTARG" ;;
+        f) gpFileName="$OPTARG" ;;
         # Common arguments
         h)
             fUsage long
@@ -616,44 +611,18 @@ fi
 # -------------------
 # Validate Args Section
 
-fValidateHostName
+if [[ -z "$gpFileName" ]]; then
+    fError2 -m "Missing -f FileName" -l $LINENO
+fi
 
-# -------------------
-# Verify connections section
-
-# -------------------
-# Read-only section
-
-cat <<EOF >$cTmp1
-        \$1 == "$gpTag" {
-                if (\$2 ~ /$gpHostName/) {
-                        \$1 = ""
-                        \$2 = ""
-                        sub(/^  /,"",\$0)
-                        echo \$0
-                 }
-                 next
-        }
-        { echo \$0}
-EOF
-timeout 5 awk -f $cTmp1 >$cTmp2
-
-tList=""
-for i in $(seq 2 40); do
-    if [ -e "File$i" ]; then
-        fLog2 -m "Found File$i"
-        tList="$tList File$i"
-    fi
-done >>$cTmp2
+if [[ ! -r "$gpFileName" ]]; then
+    fError2 -m "File not readable: $gpFileName" -l $LINENO
+fi
 
 # -------------------
 # Write section
 
-##fProcess $tList
-
-# -------------------
-# Output section
-cat $cTmp2
+fCount
 
 # -------------------
 # CleanUp Section

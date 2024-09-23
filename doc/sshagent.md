@@ -129,11 +129,12 @@ You will only need to do this when the computer started or rebooted.
 
         if ! pgrep ssh-agent &>/dev/null; then
             . sshagent ~/.ssh/id.home ~/.ssh/id.work
+        else
+            . sshagent -s
         fi
 
 - You ran sshagent to create an agent, but you forgot to "source" the
-script so that the SSH\_\* env. are not set.  Just repeat the command,
-with a ". " at the front.
+script so that the SSH\_\* env. are not set.  Just run '. sshagent -s'
 - In a profile script add this line. That way when you start a new
 terminal it will use any keys from the agent. This can also be
 put in a script if it needs the keys saved on the agent.
@@ -173,8 +174,7 @@ your keys "active" on the computer.
 
 # SEE ALSO
 
-    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2.1,
-    gpg-agent
+    ssh-agent, ssh-add, sshagent-test, ssh-askpass, shunit2.1
 
 # NOTES
 
@@ -246,4 +246,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.19 $
+$Revision: 1.21 $
