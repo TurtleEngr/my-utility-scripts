@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.86 2024/08/08 20:44:41 bruce Exp $
+# $Id: sshagent,v 1.89 2024/10/24 16:30:32 bruce Exp $
 #set -u
 
 # Var prefix key
@@ -337,7 +337,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.86 $
+$Revision: 1.89 $
 
 =cut
 
@@ -572,7 +572,7 @@ fSARunning() {
 
     if [ $gSARunning -eq 0 ]; then
         unset SSH_AUTH_SOCK SSH_AGENT_PID
-        killall -u $cgAgentOwner ssh-agent &>/dev/null
+        pkill -u $cgAgentOwner ssh-agent &>/dev/null
         rm -f $cgEnvFile &>/dev/null
     fi
 
@@ -587,8 +587,9 @@ fKill() {
 
     # Kill all agents owned by $cgAgentOwner
     echo "Notice: Killing all of your ssh-agents"
-    killall -u $cgAgentOwner ssh-agent &>/dev/null
+    pkill -u $cgAgentOwner ssh-agent &>/dev/null
     rm -f $cgEnvFile &>/dev/null
+    unset SSH_AUTH_SOCK SSH_AGENT_PID
 
     return 0
 } # fKill
@@ -661,6 +662,10 @@ fAction() {
             fAdd
             ;;
     esac
+
+    if [ $gErr -ne 0 ]; then
+        return 1
+    fi
     return 0
 } # fAction
 
