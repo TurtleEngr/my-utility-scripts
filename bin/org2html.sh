@@ -13,6 +13,12 @@ Usage
 Debug
     Before $cName is run, all files in $Tmp
     are removed, unless env. var. gpDebug is set and not 0.
+Replacements
+    '+ ' - will be changed to <li>
+    '- ' - will be regular paragraphs
+    '**** ' - will be replaced with <h4> (similarly for 5 and 6 *)
+    '{.*}' - will be replaced with <cite>.*</cite>
+    '[TBD.*] - will be replaced with <span class="tbd">[TBD.*]</span>
 EOF
     exit 1
 } # fUsage
@@ -42,6 +48,7 @@ cTmp3=${cTmpF}-part3.tmp
 cTmp4=${cTmpF}-part4.tmp
 cTmpErr=${cTmpF}-part3.err
 cPreFix=${cTmpF}-prefix.sed
+cPreFixPl=${cTmpF}-prefix.pl
 cPostFix=${cTmpF}-postfix.sed
 
 # -------------------
@@ -65,6 +72,13 @@ s/^ *- /\n\n/g
 s;^\*\*\*\* \(.*\);\n<h4>\1</h4>\n;
 s;^\*\*\*\*\* \(.*\);\n<h5>\1</h5>\n;
 s;\*\*\*\*\*\* \(.*\);\n<h6>\1</h6>\n;
+EOF
+
+cat <<\EOF >$cPreFixPl
+    while (<>) {
+        s/\[TBD([^]]*])/<span class="tbd">[TBD$1<\/span>/;
+        print $_;
+    }
 EOF
 
 cat <<\EOF >$cPostFix
@@ -102,13 +116,14 @@ s;</h6></p>;</h6>;g
 
 s;{\(.\);<cite>{\1;g
 s;\(.\)};\1}</cite>;g
+
 s;<h2;<hr><h2;g
 EOF
 
 # --------------------
 # Functional section
 
-sed -f $cPreFix  <$pFileIn >$cTmp1
+sed -f $cPreFix  <$pFileIn | perl  $cPreFixPl >$cTmp1
 pandoc -f org -t html <$cTmp1 >$cTmp2
 
 sed -f /$cPostFix <$cTmp2 >$cTmp3
