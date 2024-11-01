@@ -428,6 +428,7 @@ fSave() {
         fi
         echo $tSrc $tDst >>$gLinkFile
     done
+    fLog2 -p notice -m "Symlinks saved in: $gLinkFile" -l $LINENO
     return
 } # fSave
 
