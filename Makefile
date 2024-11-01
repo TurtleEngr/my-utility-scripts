@@ -39,10 +39,10 @@ release :
 gist update-gist : ~/ver/github/gist/sshagent/d*/sshagent
 
 ~/ver/github/gist/sshagent/d*/sshagent : bin/sshagent
-	cd ~/ver/github/gist/sshagent/d*; \
+	-cd ~/ver/github/gist/sshagent/d*; \
 		git pull origin develop
 	cp -f $? $@
-	cd ~/ver/github/gist/sshagent/d*; \
+	-cd ~/ver/github/gist/sshagent/d*; \
 		git ci -am Updated
-	cd ~/ver/github/gist/sshagent/d*; \
+	-cd ~/ver/github/gist/sshagent/d*; \
 		git push origin develop
