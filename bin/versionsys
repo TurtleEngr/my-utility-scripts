@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: versionsys,v 1.6 2024/06/01 19:42:25 bruce Exp $
+# $Id: versionsys,v 1.8 2024/11/08 18:19:06 bruce Exp $
 
 # This script may be different for each server that it is installed
 # on, so don't just over-write it with newer versions.
@@ -12,6 +12,9 @@ if [ "$(whoami)" != "root" ]; then
     echo "Error: You have to be root to run this."
     exit 1
 fi
+
+export cgAgentOwner=bruce
+. sshagent -s
 
 export CVSROOT=$(cat /CVS/Root)
 export CVSUMASK=002
@@ -29,7 +32,7 @@ cvs commit -m Updated
 # bit of the CVS repository file.
 
 # /etc
-chmod a+r /etc/CHANGES
-#chmod a+r /etc/ntp.conf
+chmod a+r /etc/CHANGES*
 chmod ug=r,o= /etc/sudoers
+#chmod a+r /etc/ntp.conf
 #chmod a+r /etc/yum.conf

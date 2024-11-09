@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.23 2024/08/08 16:58:29 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.24 2024/11/08 05:34:15 bruce Exp $
 
 # --------------------
 fUsage() {
@@ -80,7 +80,7 @@ fCmd() {
 # --------------------
 fCommonInfo() {
     echo "  <script ver=\"$cVer\">$0</script>" >>$gOut
-    echo '  <Id>getmanifest.sh</Id>' >>$gOut
+    echo "  <date>$('date' +%F_%T_%a)</date>" >>$gOut
 
     fCmd hostname hostname
     fCmd IP "dig \$(hostname) | grep \"^\$(hostname)\" | awk '{print \$5}'"
@@ -330,7 +330,8 @@ fLinux() {
 } # fLinux
 
 # ============================================
-export cVer='$Revision: 1.23 $'
+# Main
+export cVer='$Revision: 1.24 $'
 cVer=${cVer#\$Revision: }
 cVer=${cVer% \$}
 
