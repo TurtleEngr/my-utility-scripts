@@ -50,6 +50,11 @@ fSetDefaults() {
         ec9)
             gDefLog=~/tmp/e.tmp
             ;;
+        adric)
+            gDefLog=~/tmp/d.org
+            gEdit=emacs
+            gBG=1
+            ;;
         asimov*)
             gDefLog=~/tmp/a.org
             gEdit=emacs

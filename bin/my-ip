@@ -1,0 +1,60 @@
+#!/bin/bash
+# Upload local IP to asimov:~/.ssh (via CVS)
+# Put "Include ~/.ssh/host.*.ip" at top of ~/.ssh/config file
+set -u
+
+logger -p user.info "my-ip running xxxxxxxxxxxxxxxxxxx"
+
+. sshagent -s
+pushd ~/.ssh >/dev/null 2>&1
+timeout 30 cvs update
+if [[ $? -ne 0 ]]; then
+    logger -s -p user.warning "my-ip no-key-try-override xxxxxxxxxxxxxxxxxxx"
+    ~/.ssh/.override
+    . sshagent -s
+    timeout 30 cvs update
+    if [[ $? -ne 0 ]]; then
+        logger -s -p user.crit "my-ip cvs-update-failed xxxxxxxxxxxxxxxxxxx"
+        exit 1
+    fi
+fi
+chmod -R go= ~/.ssh/*
+
+cName=$(hostname -s)
+cConfig=~/.ssh/host.$(hostname -s).ip
+
+cIP=$(ifconfig | egrep 'inet 192\.168|inet 107\.220\.116' | head -n 1 | awk '{print $2}')
+if [ -z "$cIP" ]; then
+    popd >/dev/null 2>&1
+    logger -s -p user.warning "my-ip not-on-lan xxxxxxxxxxxxxxxxxxx"
+    exit 1
+fi
+echo "IP=$cIP"
+
+cSavedIP=""
+if [ -f $cConfig ]; then
+    cSavedIP=$(grep Hostname $cConfig | awk '{print $2}')
+fi
+##echo "SavedIP=$cSavedIP"
+if [ "$cIP" = "$cSavedIP" ]; then
+    popd >/dev/null 2>&1
+    logger -p user.info "my-ip no-change xxxxxxxxxxxxxxxxxxx"
+    exit 0
+fi
+
+cat <<EOF >$cConfig
+Host $cName $cName.lan $cIP
+        Hostname $cIP
+        CheckHostIP yes
+        Compression yes
+        IdentitiesOnly=yes
+        IdentityFile ~/.ssh/id.bruceraf
+        User bruce
+EOF
+chmod go= $cConfig
+cvs add $cName >/dev/null 2>&1
+cvs ci -m "Updated $cName"
+popd >/dev/null 2>&1
+
+logger -p user.notice "my-ip updated xxxxxxxxxxxxxxxxxxx"
+exit 0
