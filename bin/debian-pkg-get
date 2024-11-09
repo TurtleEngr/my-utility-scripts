@@ -39,11 +39,11 @@ if [ $# -eq 2 ]; then
             print $0
         }
     ' >$tTmp/$tBase.pkg
-    egrep -v 'PkgListVer|Status|Err|Name' <$tTmp/$tBase.pkg | \
+    egrep -v 'PkgListVer|Status|Err|Name' <$tTmp/$tBase.pkg |
         sort -u >$tTmp/$tBase.pkg2
 else
     dpkg -l | grep '^ii ' >$tTmp/$tBase.pkg
-    grep '^ii ' <$tTmp/$tBase.pkg | awk '{print $2, $3}' | \
+    grep '^ii ' <$tTmp/$tBase.pkg | awk '{print $2, $3}' |
         sort -u >$tTmp/$tBase.pkg2
 fi
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.24 2024/11/08 05:34:15 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.25 2024/11/09 20:12:17 bruce Exp $
 
 # --------------------
 fUsage() {
@@ -154,7 +154,7 @@ fApps() {
             fCmd RepoPub "lstree -L1 $i"
         done
         for i in /repo/local.cvs /repo/public.cvs /repo/qa.cvs /repo/work.cvs; do
-            fCmd RepoPub "lstree -L2 $i | grep -v ',v'" 
+            fCmd RepoPub "lstree -L2 $i | grep -v ',v'"
         done
 
         # RepoPri
@@ -193,7 +193,7 @@ fOSRel() {
 
     fCmd OSRel 'cat /etc/issue.net' /etc/issue.net
     fCmd OSRel 'cat /etc/issue' /etc/issue
-    
+
     fCmd OSRelVer 'cat /etc/os-release' /etc/os-release
     if [ -f /etc/lsb-release ]; then
         fCmd OSRelVer 'cat /etc/lsb-release'
@@ -218,7 +218,7 @@ fPkgFlatpak() {
     if [ ! -x /usr/bin/flatpak ]; then
         return
     fi
-    
+
     fCmd fPkgFlatpakList 'flatpak list'
     fCmd fPkgFlatpakApp 'flatpak list --app'
 } # fPkgFlatpak
@@ -331,7 +331,7 @@ fLinux() {
 
 # ============================================
 # Main
-export cVer='$Revision: 1.24 $'
+export cVer='$Revision: 1.25 $'
 cVer=${cVer#\$Revision: }
 cVer=${cVer% \$}
 

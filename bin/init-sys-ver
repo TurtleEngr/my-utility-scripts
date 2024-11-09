@@ -1,5 +1,5 @@
 #!/bin/bash -x
-# $Id: init-sys-ver,v 1.9 2024/11/08 02:02:34 bruce Exp $
+# $Id: init-sys-ver,v 1.10 2024/11/09 20:12:17 bruce Exp $
 # Use this script the first time a server is setup.  It will put the
 # most common config and other server files under version control.
 
@@ -31,8 +31,7 @@ for i in \
     profile.d \
     sudoers.d \
     sysconfig \
-    ufw \
-    ; do
+    ufw; do
     if [ -d $i ]; then
         cvs add $i
         sleep 0.5
@@ -80,8 +79,7 @@ for i in \
     rc.shutdown \
     services \
     shadow \
-    shells \
-    ; do
+    shells; do
     if [ -f $i ]; then
         cvs add $i
     fi
@@ -116,8 +114,6 @@ cd /var
 cvs add log spool
 #cd /var/spool
 #cvs add $(find * -prune -type f)
-
-
 
 #wgetrc
 #speech-dispatcher
