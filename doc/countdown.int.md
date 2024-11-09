@@ -69,7 +69,7 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.6 $ $Date: 2024/06/11 02:44:13 $ GMT
+$Revision: 1.7 $ $Date: 2024/11/09 20:12:17 $ GMT
 
 <div>
     <hr/>
@@ -153,7 +153,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.6 $'
+           cVer='$Revision: 1.7 $'
 
 ### Documentation Format
 
@@ -291,7 +291,7 @@ shunit2.1
 
 # HISTORY
 
-$Revision: 1.6 $ $Date: 2024/06/11 02:44:13 $ GMT
+$Revision: 1.7 $ $Date: 2024/11/09 20:12:17 $ GMT
 
 ## Test bash-com.inc
 

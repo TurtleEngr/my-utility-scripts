@@ -1,8 +1,10 @@
 #!/bin/bash
-# $Id: versionsys,v 1.8 2024/11/08 18:19:06 bruce Exp $
+# $Id: versionsys,v 1.10 2024/11/09 20:12:17 bruce Exp $
 
 # This script may be different for each server that it is installed
 # on, so don't just over-write it with newer versions.
+
+# See profile/init-sys-ver for setup information.
 
 # Commit all of the versioned config files for this system.
 # This script is run as root, and it patches up any permission
@@ -32,7 +34,7 @@ cvs commit -m Updated
 # bit of the CVS repository file.
 
 # /etc
-chmod a+r /etc/CHANGES*
+chmod a+r /etc/CHANGES
+chmod a+r /etc/ntp.conf
 chmod ug=r,o= /etc/sudoers
-#chmod a+r /etc/ntp.conf
 #chmod a+r /etc/yum.conf
