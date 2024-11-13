@@ -1,15 +1,9 @@
 #!/bin/bash -x
-# $Id: init-sys-ver,v 1.8 2024/06/11 02:44:12 bruce Exp $
+# $Id: init-sys-ver,v 1.10 2024/11/09 20:12:17 bruce Exp $
 # Use this script the first time a server is setup.  It will put the
 # most common config and other server files under version control.
 
-# Tuned for RH distribution
 # Tuned for MX Linux distribution
-
-# Defects: CVS is added to Entries, directories are not added with cvs
-# add.
-
-exit 1
 
 cd /
 if [ ! -d CVS ]; then
@@ -17,47 +11,43 @@ if [ ! -d CVS ]; then
     exit 1
 fi
 
-echo >>/etc/CHANGES
-#if [ ! -L /opt ]; then
-#       rmdir /opt
-#fi
-#if [ ! -d /opt ]; then
-#       ln -s /usr/local /opt
-#fi
-
-# RedHat
-#if [ ! -f /etc/anaconda-ks.cfg ]; then
-#    cp -i /root/anaconda-ks.cfg /etc
-#fi
+echo >>/etc/CHANGES.org
 
 # First level
-tListDir="etc usr var"
-cvs add $tListDir
-sleep 1
+cvs add etc
+cvs add usr
+cvs add var
 
 # Second level
-tListDir=""
-tListFile=""
+export i
+cd /etc
 for i in \
-    /etc/apt \
-    /etc/bash_completion.d \
-    /etc/cron.* \
-    /etc/default \
-    /etc/init.d \
-    /etc/profile.d \
-    /etc/sudoers.d \
-    /etc/sysconfig \
-    /etc/ufw/applications.d; do
+    apt \
+    bash_completion.d \
+    cron.* \
+    default \
+    init.d \
+    logrotate.d \
+    profile.d \
+    sudoers.d \
+    sysconfig \
+    ufw; do
     if [ -d $i ]; then
-        tListDir="$tListDir $i"
-        tListFile="$tListFile $i/*"
+        cvs add $i
+        sleep 0.5
+        cd $i
+        cvs add $(find * -prune -type f)
+        sleep 0.5
+        cd -
     fi
 done
-cvs add $tListDir
-sleep 1
-cvs add $tListFile
-sleep 1
 
+cd /etc/apt
+cvs add sources.list.d
+cd sources.list.d
+cvs add $(find * -prune -type f)
+
+tListFile=''
 cd etc
 for i in \
     *.conf \
@@ -66,43 +56,38 @@ for i in \
     CHANGES \
     bash.* \
     bash_completion \
+    debian_version \
     exports \
     fstab \
     group \
+    gshadow \
     host* \
+    inittab \
+    initrd-release \
+    issue \
     issue \
     issue.net \
+    issue.net \
+    lsb-release \
     motd \
+    mx-version \
     my.cnf \
+    os-release \
     passwd \
     profile \
     rc.local \
     rc.shutdown \
-    shadow; do
+    services \
+    shadow \
+    shells; do
     if [ -f $i ]; then
-        tListFile="$tListFile $i"
+        cvs add $i
     fi
 done
-cvs add $tListFile
 sleep 1
-
-#cd /etc
-#cvs add selinux
-#cd selinux
-#cvs add config
-
-#if [ -d /etc/yum.repos.d ]; then
-#    cd /etc
-#    cvs add yum.conf yum.repos.d
-#    sleep 1
-#    cd /etc/yum.repos.d
-#    cvs add *
-#    sleep 1
-#fi
 
 cd /etc
 cvs add ssh
-sleep 1
 cd /etc/ssh
 for i in \
     ssh-banner \
@@ -112,45 +97,29 @@ for i in \
     fi
 done
 cvs add $tListFile
-sleep 1
 
-#cd /etc/sysconfig
-#cvs add httpd network hwconf ntpd syslog xinitd
-#cvs add network-scripts $(find * -prune -type f)
-#cd network-scripts
-#sleep 1
-#cvs add ifcfg-eth[0123]
+cd /etc/ufw
+cvs add applications.d
+cd applications.d
+cvs add $(find * -prune -type f)
 
 cd /usr
 cvs add local
-sleep 1
 cd local
 cvs add bin
-sleep 1
 cd bin
-cvs add *
-sleep 1
+cvs add $(find * -prune -type f)
 
 cd /var
 cvs add log spool
-sleep 1
+#cd /var/spool
+#cvs add $(find * -prune -type f)
 
-cd /var/spool
-cvs add *
-sleep 1
-
-#apt/apt.conf
 #wgetrc
 #speech-dispatcher
 #smartmontools
 #skel
-#shells
-#services
-#rsyslog.d
 #nfs.conf.d
-#logrotate.d
-#inittab
-#gshadow
 #grub.d
 #festival.scm
 #emacs

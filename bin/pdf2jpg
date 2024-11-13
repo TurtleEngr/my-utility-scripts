@@ -1,24 +1,61 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/pdf2jpg,v 1.6 2023/03/25 22:21:42 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/pdf2jpg,v 1.7 2024/11/06 22:44:59 bruce Exp $
 # Source: https://askubuntu.com/questions/100994/convert-pdf-to-image
 
 if [ $# -eq 0 ]; then
-    cat <<EOF
+    cat <<EOF | more
 Usage:
-        pdf2jpg Input.pdf
+    pdf2jpg Input.pdf
 
-Input.pdf file will be converted to one image per page. The images are
-put in the current directory. Named: page-NN.jpg.
+Description
+    Input.pdf file will be converted to one image per page. The images
+    are put in the current directory. Named: page-NN.jpg.
 
+    Also page-NN-fit.jpg files are created, using cgWidth and
+    cgHeight values.
+
+    Note: the page files are only generated if Input.pdf is newer than
+    the page files.
+
+EnvVar:
+    Set and export these env. var. to override the defaults.
+
+    cgDPI, default=600
+
+    cgWidth, default=1920
+    cgHeight, default=1080
+    cgFill, default=black
 EOF
     exit 1
 fi
 
 gpInFile=$1
-export cDPI=${cDPI:-600}
+export cgDPI=${cDPI:-600}
+export cgWidth=${cgWidth:-1920}
+export cgHeight=${cgHeight:-1080}
+export cgFill=${cgFill:-black}
 
-echo gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cDPI -sOutputFile='page-%02d.jpg' $gpInFile
-gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cDPI -sOutputFile='page-%02d.jpg' $gpInFile
+if [ ! -r $gpFile ]; then
+    echo "Error: Could not read $gpFile"
+    exit 1
+fi
 
-# Force higher resolution?  Also add -dDEVICEHEIGHT-1080  ?
-#gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cDPI -dFIXEDMEDIA -FitPage  -sOutputFile='page-%02d.jpg' $gpInFile
+if [ ! -f page-01.jpg -o $gpInFile -nt page-01.jpg ]; then
+    echo "gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cgDPI -sOutputFile='page-%02d.jpg' $gpInFile"
+    gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cgDPI -sOutputFile='page-%02d.jpg' $gpInFile
+fi
+
+# Resize, preserve aspect ratio, put black boarders to fill
+if [ ! -r page-01.jpg ]; then
+    echo "Error: Could not find input page files."
+    exit 1
+fi
+
+if [ $gpInFile -nt page-01-fit.jpg ]; then
+    for i in page-[0-9]*.jpg; do
+        echo "Generating: ${i%.jpg}-fill.jpg"
+        convert $i -quality 90% -scale ${cgWidth}x${cgHeight} -background $cgFill -gravity center -extent ${cgWidth}x${cgHeight} ${i%.jpg}-fit.jpg
+    done
+fi
+
+exit 0

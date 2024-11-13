@@ -175,4 +175,4 @@ kdenlive file's version.
 
 # HISTORY
 
-$Revision: 1.16 $ $Date: 2024/08/08 17:58:13 $ GMT
+$Revision: 1.17 $ $Date: 2024/11/09 20:12:20 $ GMT

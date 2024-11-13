@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    cat <<EOF
+Usage
+        vid-h265 FILE-IN FIle-OUT
+Note: Any extension (after .) will be replaced with '.mp4'
+EOF
+    exit 1
+fi
+
+pIn=$1
+pOut=${2%.*}.mp4
+
+if [ ! -r $pIn ]; then
+    echo "Missing $pIn ?"
+    exit 1
+fi
+if [ -f $pOut ]; then
+    echo "Warning $pOut exists."
+fi
+
+echo "Execute: ffmpeg  -i $pIn -c:v libx265 -vtag hvc1 $pOut"
+echo "Press Enter to continue, ^C to quit"
+read
+ffmpeg -i $pIn -c:v libx265 -vtag hvc1 $pOut

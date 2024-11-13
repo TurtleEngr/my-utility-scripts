@@ -114,7 +114,8 @@ For example:
     monday/mun-day
     mon/mun-day
     tue/tues-day
-    foo bar/snae-foo
+    foobar/snae-foo
+    wtf/what-the-fork
 
     # Blank lines are ignored.
     # Lines beginning with # are ignored.
@@ -132,15 +133,19 @@ as the user's ~/.festival.say file.
     ; For global config, edit: /usr/share/festival/siteinit.scm
 
     ; Uncomment the desired voice
-    ;;(voice_rab_diphone)
+    ;;(voice_cmu_us_slt_arctic_hts)
     ;;(voice_don_diphone)
-    ;;(voice_kal_diphone)
     ;;(voice_en1_mbrola)
+    ;;(voice_kal_diphone)
     ;;(voice_ked_diphone)
+    ;;(voice_rab_diphone)
     (voice_us1_mbrola)
     ;;(voice_us2_mbrola)
     ;;(voice_us3_mbrola)
-    ;;(voice_cmu_us_slt_arctic_hts)
+
+=item ~/.cache/say/say.sed
+
+Temporay file with all replacement words.
 
 =back
 
@@ -199,7 +204,7 @@ Or archived at: https://archive.ph/wip/sVgg7
 =head1 HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.15 $ $Date: 2024/07/08 20:18:07 $ GMT
+    $Revision: 1.16 $ $Date: 2024/11/12 15:30:45 $ GMT
 
 =cut
 EOF
@@ -212,7 +217,7 @@ function fCreateSedReplaceScript() {
         echo "# Add mispronounced words to this file." >~/.festival.say
         echo "# These will be added to words in /usr/local/etc/festival.say" >>~/.festival.say
         if [[ ! -f ~/.cache/say/say.sed ]]; then
-            mkdir ~/.cache/say &>/dev/null
+            mkdir -p ~/.cache/say &>/dev/null
             touch ~/.cache/say/say.sed
         fi
         return

@@ -1,10 +1,50 @@
 #!/bin/bash
 # debian-pkgget host
 
-if [ $# -eq 0 ]; then
-    echo "Usage: debian-pkg-get HostName"
+if [ $# -eq 0 -o $# -gt 2 ]; then
+    cat <<EOF
+Usage:
+    1) debian-pkg-get HostName
+        Use dpkg -l to get package names.
+
+    2) debian-pkg-get HostName Manifest
+        Use Manifest file from getmanifest.sh to get package names between
+        '<PkgListVer ' to </PkgListVer>
+
+Output:
+    tmp/HostName.pkg - dpkg -l output or manifest file lines
+    tmp/HostName.pkg2 - PackageName PackageVersion
+    tmp/HostName.pkg3 - PackageName
+
+See Also
+    map-pkg.pl
+    debian-pkg-diff
+
+EOF
     exit 1
 fi
 
+# -------------------------
+tTmp=${Tmp:-tmp}
+if [ ! -d $tTmp ]; then
+    mkdir $tTmp
+fi
+
 tBase=$1
-dpkg -l >/tmp/$tBase.pkg
+tFile=""
+if [ $# -eq 2 ]; then
+    tFile=$2
+    cat $tFile | awk '
+        /<PkgListVer /, /<\/PkgListVer>/ {
+            print $0
+        }
+    ' >$tTmp/$tBase.pkg
+    egrep -v 'PkgListVer|Status|Err|Name' <$tTmp/$tBase.pkg |
+        sort -u >$tTmp/$tBase.pkg2
+else
+    dpkg -l | grep '^ii ' >$tTmp/$tBase.pkg
+    grep '^ii ' <$tTmp/$tBase.pkg | awk '{print $2, $3}' |
+        sort -u >$tTmp/$tBase.pkg2
+fi
+
+awk '{print $1}' <$tTmp/$tBase.pkg2 | rmnl >$tTmp/$tBase.pkg3

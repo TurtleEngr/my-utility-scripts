@@ -1,17 +1,21 @@
 #!/bin/bash
-# $Id: versionsys,v 1.6 2024/06/01 19:42:25 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/versionsys,v 1.12 2024/11/12 16:53:34 bruce Exp $
+# Commit all of the versioned config files for this system.
+# Must be run as root. See bin/init-sys-ver for setup information.
 
 # This script may be different for each server that it is installed
 # on, so don't just over-write it with newer versions.
 
-# Commit all of the versioned config files for this system.
-# This script is run as root, and it patches up any permission
-# or ownership changes, that CVS may make.
+# The script patches up any important permission or ownership changes,
+# that CVS may make.
 
-if [ "$(whoami)" != "root" ]; then
+if [ "$USER" != "root" ]; then
     echo "Error: You have to be root to run this."
     exit 1
 fi
+
+export cgAgentOwner=bruce
+. sshagent -s
 
 export CVSROOT=$(cat /CVS/Root)
 export CVSUMASK=002
@@ -19,17 +23,23 @@ export CVS_RSH=ssh
 
 umask 022
 cd /
-cvs commit -m Updated
+if [[ $# -ne 0 ]]; then
+    # If any argument, don't trim the output
+    cvs commit -m Updated
+else
+    # Default, minimal output
+    cvs commit -m Updated 2>&1 | grep -Ev '^\? |^cvs commit: '
+fi
 
 # --------------------
-# Fix permissions and ownership
-# You only need to add fixed for files that actually get changed to
-# incorrect values.  Most of the time CVS does the right thing.  If you
-# see that the execute bit keeps getting cleared, then set the execute
-# bit of the CVS repository file.
+# Fix permissions and ownership.
+
+# You only need to add fixes for files that actually get changed to
+# incorrect values.  Most of the time CVS does the right thing.  If
+# you see the execute bit keeps getting cleared, then set the execute
+# bit for the file in the CVS repository file.
 
 # /etc
-chmod a+r /etc/CHANGES
-#chmod a+r /etc/ntp.conf
+chmod a+r /etc/CHANGES*
+chmod a+r /etc/ntp.conf
 chmod ug=r,o= /etc/sudoers
-#chmod a+r /etc/yum.conf
