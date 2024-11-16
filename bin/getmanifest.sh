@@ -1,19 +1,192 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.25 2024/11/09 20:12:17 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.26 2024/11/16 16:01:47 bruce Exp $
 
 # --------------------
 fUsage() {
-    cat <<EOF
+    local pStyle="$1"
+    local tProg=""
+    
+    case $pStyle in
+        short | usage)
+            tProg=pod2usage
+            ;;
+        long | text)
+            tProg=pod2text
+            ;;
+        html)
+            tProg="pod2html --title=$cName"
+            ;;
+        html)
+            tProg=pod2html
+            ;;
+        md)
+            tProg=pod2markdown
+            ;;
+        man)
+            tProg=pod2man
+            ;;
+        *)
+            tProg=pod2text
+            ;;
+    esac
 
-Usage
-        getmanifest.sh [File]
+    # Default to pod2text if tProg does not exist
+    if ! which ${tProg%% *} >/dev/null; then
+        tProg=pod2text
+    fi
+    cat $cBin/$cName | $tProg | more
+    exit 1
+    
+    cat <<\EOF >/dev/null
+=pod
 
-The system's manifest will be output to File.
-If no File is specified, it will be output to /var/log/server-manifest.xml
-If $gExcludeTag file exists, then tags, listed in that file,
-will not be output.
-All tags that are outputted can be found at: $gTagList
+=for text ========================================
 
+=for html <hr/>
+
+=head1 NAME getmanifest.sh
+
+Get a manifest of a system's hardware and software.
+
+=head1 SYNOPSIS
+
+    getmanifest.sh [-e ExcludeFile] [-n LogFile] [-h] [-H pStyle]
+
+=head1 DESCRIPTION
+
+The system's manifest will be output to LogFile. It must be run as
+root user.
+
+If no LogFile is specified, it will be output to
+/var/log/server-manifest.xml
+
+If ExcludeFile file exists, then tags, listed in that file, will not
+be output.
+
+All tags that are outputted can be found at: /tmp/getmanifext-tag.txt
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-e ExcludeFile>
+
+ExcludeFile contains a list of "tags" (one per line) to not be put in
+LogFile. /tmp/getmanifext-tag.txt has the list of tags output by
+getmanifest.sh.
+
+To get the full list of tag names run getmanifest.sh with -e /dev/null
+-n /dev/null
+
+Default: /usr/local/etc/getmanifext-exclude.txt
+
+=item B<-n LogFile>
+
+Log file name and location. The fil name should end with xml.
+
+Default: /var/log/server-manifest.xml
+
+=item B<-h>
+
+Output this "long" usage help. See "-H long"
+
+=item B<-H pStyle>
+
+pStyle is used to select the type of help and how it is formatted.
+
+Styles:
+
+    short|usage - Output short usage help as text.
+    long|text   - Output long usage help as text.
+    man         - Output long usage help as a man page.
+    html        - Output long usage help as html.
+    md          - Output long usage help as markdown.
+
+=back
+
+=head1 RETURN VALUE
+
+ 0 - ran ok
+ !0 - errors, did not run
+
+=for comment =head1 ERRORS
+
+=head1 EXAMPLES
+
+=head2 ExcludeFile method 1
+
+  getmanifest -n /dev/null -e /dev/null
+  cp /tmp/getmanifext-tag.txt /usr/local/etc/getmanifext-exclude.txt
+
+Edit /usr/local/etc/getmanifext-exclude.txt and remove the tags that
+you want in your LogFile report. Then rerun getmanifest.sh with no
+options and review /var/log/server-manifest.xml
+
+=head2 ExcludeFile method 2
+
+If you are filing a defect report, they often want information about
+
+
+  getmanifest -n /dev/null -e /dev/null
+  cp /tmp/getmanifext-tag.txt /tmp/include-tag.txt
+  edit /tmp/include-tag.txt
+    Remove the tags you don't want.
+  cat /tmp/getmanifext-tag.txt /tmp/include-tag.txt | \
+    sort | uniq -u >/tmp/exclude-tag.txt
+  getmanifest -e /tmp/exclude-tag.txt -n /tmp/manifext.xml 
+
+Now you can include /tmp/manifext.xml with your defect report.
+
+=for comment =head1 ENVIRONMENT
+
+=head1 FILES
+
+  /var/log/server-manifest.xml - default log file (-n)
+  /usr/local/etc/getmanifext-exclude.txt - default exclude file (-e)
+  /tmp/getmanifext-tag.txt - list of tags output
+
+=for comment =head1 SEE ALSO
+
+=head1 NOTES
+
+What if you have added or removed packages? If you are on a Debian
+based system, you can trigger getmanifest.sh to run with this
+setup. Create these files, and once a day, getmanifest will run if apt
+was run with install, remove, or upgrade.
+
+=head2 /etc/apt/apt.conf.d/92getmanifest
+
+  // Signal getmanifest.sh needs to be run. See /etc/cron.daily/getmanifest
+  DPkg::Post-Invoke { "if [ -x /usr/local/bin/getmanifest.sh ]; then touch /var/cache/apt/getmanifest; fi"; };
+
+=head2 /etc/cron.daily/getmanifest
+
+  #!/bin/bash
+  # /var/cache/apt/getnanifest signal file is set by:
+  # /etc/apt/apt.conf.d/92getmanifest when apt-get is run.
+  if [[ ! -f /var/cache/apt/getmanifest ]]; then
+      exit 0
+  fi
+  /usr/local/bin/getmanifest.sh
+  rm /var/cache/apt/getmanifest
+
+=for comment =head1 CAVEATS
+
+=for comment =head1 DIAGNOSTICS
+
+=for comment =head1 BUGS
+
+=for comment =head1 RESTRICTIONS
+
+=for comment =head1 AUTHOR
+
+=head1 HISTORY
+
+GPLv2 (c) Copyright
+
+$Revision: 1.26 $ $Date: 2024/11/16 16:01:47 $ GMT
+
+=cut
 EOF
     exit 1
 } # fUsage
@@ -41,27 +214,27 @@ fCmd() {
         ")
 
     if [ $gCheckExclude -ne 0 ]; then
-        if grep -q $pTag $gExcludeTag; then
+        if grep -q $pTag $pgExcludeFile; then
             echo "Skipping: $pTag $pCmd"
             return
         fi
     fi
     echo "$pTag" >>$gTagTmp
 
-    echo '' >>$gOut
-    echo '  <!-- ******************** -->' >>$gOut
-    echo "  <$pTag cmd=\"$tCmd\">" >>$gOut
+    echo '' >>$pgLogFile
+    echo '  <!-- ******************** -->' >>$pgLogFile
+    echo "  <$pTag cmd=\"$tCmd\">" >>$pgLogFile
 
     if ! which $tProg >/dev/null 2>&1; then
-        echo "Error: command $tProg not found ($pTag)" >>$gOut
-        echo "  </$pTag>" >>$gOut
+        echo "Error: command $tProg not found ($pTag)" >>$pgLogFile
+        echo "  </$pTag>" >>$pgLogFile
         return
     fi
 
     if [ -n "$pFile" ]; then
         if [ ! -r "$pFile" ]; then
-            echo "Error: file $pFile not found, or not readable ($pTag)" >>$gOut
-            echo "  </$pTag>" >>$gOut
+            echo "Error: file $pFile not found, or not readable ($pTag)" >>$pgLogFile
+            echo "  </$pTag>" >>$pgLogFile
             return
         fi
     fi
@@ -73,14 +246,14 @@ fCmd() {
                 s/>/\&gt;/g
             ' | sed "
                 s/'/\&apos;/g
-        " >>$gOut
-    echo "  </$pTag>" >>$gOut
+        " >>$pgLogFile
+    echo "  </$pTag>" >>$pgLogFile
 } # fCmd
 
 # --------------------
 fCommonInfo() {
-    echo "  <script ver=\"$cVer\">$0</script>" >>$gOut
-    echo "  <date>$('date' +%F_%T_%a)</date>" >>$gOut
+    echo "  <script ver=\"$cVer\">$0</script>" >>$pgLogFile
+    echo "  <date>$('date' +%F_%T_%a)</date>" >>$pgLogFile
 
     fCmd hostname hostname
     fCmd IP "dig \$(hostname) | grep \"^\$(hostname)\" | awk '{print \$5}'"
@@ -170,7 +343,7 @@ fApps() {
 # --------------------
 fOSRel() {
     if [ -e /etc/debian_version ]; then
-        fCmd OSRel 'cat /etc/debian_version' /etc/debian_version
+        fCmd OSRel1 'cat /etc/debian_version' /etc/debian_version
         fCmd UpdateSources 'cat /etc/apt/sources.list | egrep -v "^#|^$"' /etc/apt/sources.list
         for i in /etc/apt/sources.list.d/*.list; do
             fCmd Update "cat $i | egrep -v '^#|^$'" $i
@@ -178,33 +351,33 @@ fOSRel() {
     fi
 
     if [ -e /etc/redhat-release ]; then
-        fCmd OSRel 'cat /etc/redhat-release' /etc/redhat-release
+        fCmd OSRel2 'cat /etc/redhat-release' /etc/redhat-release
         for i in /etc/yum.repos.d/*.repo; do
             fCmd Update "cat $i | egrep -v '^#|^$'" $i
         done
     fi
 
     if [ -e /etc/SuSE-release ]; then
-        fCmd OSRel 'cat /etc/SuSE-release' /etc/SuSE-release
+        fCmd OSRel3 'cat /etc/SuSE-release' /etc/SuSE-release
         for i in /etc/zypp/repos.d/*.repo; do
             fCmd Update "cat $i | egrep -v '^#|^$'" $i
         done
     fi
 
-    fCmd OSRel 'cat /etc/issue.net' /etc/issue.net
-    fCmd OSRel 'cat /etc/issue' /etc/issue
+    fCmd OSRel4 'cat /etc/issue.net' /etc/issue.net
+    fCmd OSRel5 'cat /etc/issue' /etc/issue
 
-    fCmd OSRelVer 'cat /etc/os-release' /etc/os-release
+    fCmd OSRelVer1 'cat /etc/os-release' /etc/os-release
     if [ -f /etc/lsb-release ]; then
-        fCmd OSRelVer 'cat /etc/lsb-release'
+        fCmd OSRelVer2 'cat /etc/lsb-release'
     fi
 
     if [ -e /etc/mx-version ]; then
-        fCmd OSRelVer 'cat /etc/mx-version' /etc/mx-version
+        fCmd OSRelVer3 'cat /etc/mx-version' /etc/mx-version
     fi
 
     if which lsb_release >/dev/null 2>&1; then
-        fCmd OSRelVer 'lsb_release -a'
+        fCmd OSRelVer4 'lsb_release -a'
     fi
 } # fOSRel
 
@@ -295,13 +468,13 @@ fLinuxCommon() {
     fCmd RAM 'grep "MemTotal" /proc/meminfo' /proc/meminfo
 
     if which inxi &>/dev/null; then
-        fCmd HwInfo 'inxi -c 0 -F'
+        fCmd HwInfo1 'inxi -c 0 -F'
     fi
     if which lshw &>/dev/null; then
-        fCmd HwInfo 'lshw'
+        fCmd HwInfo2 'lshw'
     fi
     if which hwinfo &>/dev/null; then
-        fCmd HwInfo 'hwinfo --short'
+        fCmd HwInfo3 'hwinfo --short'
     fi
 
     fCmd Partition 'cat /proc/partitions' /proc/partitions
@@ -331,59 +504,89 @@ fLinux() {
 
 # ============================================
 # Main
-export cVer='$Revision: 1.25 $'
+
+export cName=getmanifest.sh
+export cOS=$(uname -s)
+
+export cVer='$Revision: 1.26 $'
 cVer=${cVer#\$Revision: }
 cVer=${cVer% \$}
 
-export cOS=$(uname -s)
-export gOut
+cBin=${0%/*}
+if [[ "$cBin" = "." ]]; then
+    cBin=$PWD
+fi
+cd $cBin >/dev/null 2>&1
+cBin=$PWD
+cd - >/dev/null 2>&1
+
 export gTagTmp=/tmp/getmanifext-tag.tmp
 export gTagList=/tmp/getmanifext-tag.txt
-export gExcludeTag=/tmp/getmanifext-exclude.txt
-export gCheckExclude=0
 
 # --------------------
 # Get options
 
-if [ $# -eq 0 ]; then
-    #gOut="$(hostname).xml"
-    #gOut="/tmp/server-manifest.xml"
-    #gOut="server-manifest.xml"
-    gOut="/var/log/server-manifest.xml"
-else
-    if [ "x$1" = "x-h" ]; then
-        fUsage
-    fi
-    gOut=$1
+export pgLogFile="/var/log/server-manifest.xml"
+export pgExcludeFile=/usr/local/etc/getmanifext-exclude.txt
+export gCheckExclude=0
+
+while getopts :n:e:hH: tArg; do
+    case $tArg in
+        # Script arguments
+        e) pgExcludeFile="$OPTARG"
+           gCheckExclude=1
+           ;;
+        n) pgLogFile="$OPTARG" ;;
+        # Common arguments
+        h)
+            fUsage long
+            ;;
+        H)
+            fUsage $OPTARG
+            ;;
+        # Problem arguments
+        :) echo "Error: Value required for option: -$OPTARG"
+           fUsage usage
+        ;;
+        \?) echo "Error: Unknown option: $OPTARG"
+            fUsage usage
+        ;;
+    esac
+done
+((--OPTIND))
+shift $OPTIND
+if [ $# -ne 0 ]; then
+    echo "Error: Unknown option: $*"
+    fUsage usage
 fi
 
 # --------------------
 # Validations
 
-if [ "$(whoami)" != "root" ]; then
+if [ "$USER" != "root" ]; then
     echo "Error: not root user"
-    exit 1
+    fUsage usage
 fi
 
-touch $gOut $gOut.gz
+touch $pgLogFile
 if [ $? -ne 0 ]; then
-    echo "Error: can not write to file: $gOut or $gOut.gz"
-    exit 1
+    echo "Error: can not write to file: $pgLogFile"
+    fUsage usage
 fi
-if [ ! -w $gOut -o ! -w $gOut.gz ]; then
-    echo "Error: can not write to file: $gOut or $gOut.gz"
-    exit 1
+if [ ! -w $pgLogFile ]; then
+    echo "Error: can not write to file: $pgLogFile"
+    fUsage usage
 fi
 
 for i in bash sed awk; do
     if ! which $i >/dev/null 2>&1; then
         echo "Error: can not find $i"
-        exit 1
+        fUsage usage
     fi
 done
 echo >$gTagTmp
 
-if [ -r $gExcludeTag ]; then
+if [ -r $pgExcludeFile ]; then
     gCheckExclude=1
 fi
 
@@ -393,20 +596,20 @@ if [ ! -x /usr/local/lstree ]; then
 fi
 
 # ------------------------------------------------------------
-echo '<?xml version="1.0"?>' >$gOut
-echo '<server>' >>$gOut
+echo '<?xml version="1.0"?>' >$pgLogFile
+echo '<server>' >>$pgLogFile
 fCommonInfo
 case $cOS in
     SunOS) fSunOS ;;
     Linux) fLinux ;;
 esac
-echo "</server>" >>$gOut
+echo "</server>" >>$pgLogFile
 
 sort -uf <$gTagTmp >$gTagList
-chmod a+r $gOut $gTagList
+chmod a+r $pgLogFile $gTagList
 rm $gTagTmp
 
 echo
-echo "Manifest was written to $gOut"
+echo "Manifest was written to $pgLogFile"
 echo "Tags outputted can be found at: $gTagList"
-echo "Create $gExcludeTag to exclude tags, and run again."
+echo "Create $pgExcludeFile to exclude tags, and run again."

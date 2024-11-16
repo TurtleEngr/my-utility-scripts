@@ -2,6 +2,30 @@
 set -u
 
 # ========================================
+# Config
+
+export cConf=~/.config/bat-level-rc
+if [[ -f $cConf ]]; then
+    . $cConf
+fi
+
+export cMin=${cMin:-15}
+export cMax=${cMax:-95}
+export cMinSay=${cMinSay:-"The battery is below ${cMin}%. Plug it in."}
+export cMaxSay=${cMaxSay:-"The battery is above ${cMax}%. Unplug it."}
+export cSay=${cSay:-/usr/local/bin/say}
+
+# If run once a min for 24 hours 1440 vals/day
+# If run once every 5 min for 24 hours 288 vals/day
+export cPlotVal=288
+
+export Tmp=${Tmp:-~/tmp}
+
+export cLogFile=${cLogFile:-$Tmp/bat-level.log}
+export cInFile=${cInFile:-$Tmp/bat-level-in.tmp}
+export cOutFile=${cOutFile:-$Tmp/bat-level-out.tmp}
+
+# ========================================
 # Functions
 
 # --------------------------------
@@ -42,8 +66,8 @@ fLog() {
     
     # Trim file
     tCur=$(wc -l < $cLogFile)
-    if [[ $tCur -gt $cMaxVal ]]; then
-        tDel=$((tCur - cMaxVal))
+    if [[ $tCur -gt $cPlotVal ]]; then
+        tDel=$((tCur - cPlotVal))
         sed -i "1,${tDel}d" $cLogFile
     fi
     
@@ -56,15 +80,15 @@ fLog() {
     if [[ -f $cOutFile ]]; then
         tUnplug=1
     fi
-    if [[ $tL -le 25 && "$tS" = "Discharging" && $tPlugIn -eq 0 ]]; then
+    if [[ $tL -le $cMin && "$tS" = "Discharging" && $tPlugIn -eq 0 ]]; then
         wall "Battery is at $tL%. Plug it in."
         if [[ -x $cSay ]]; then
-            $cSay "The battery is at $tL%. Plug it in."
+            $cSay "The battery is low. Plug it in."
         fi
         touch $cInFile
         rm $cOutFile >/dev/null 2>&1
     fi
-    if [[ $tL -ge 85 && "$tS" = "Charging" && $tUnplug -eq 0 ]]; then
+    if [[ $tL -ge $cMax && "$tS" = "Charging" && $tUnplug -eq 0 ]]; then
         wall "Battery is at $tL%. Unplug it."
         if [[ -x $cSay ]]; then
             $cSay "The battery is at $tL%. Unplug it."
@@ -121,18 +145,14 @@ EOF
 # ========================================
 # Main
 
+if [[ ! -d Tmp ]]; then
+    mkdir -p $Tmp
+fi
+
 # -------------------
 # Get Args Section
 
-# If run once a min for 24 hours 1440
-# If run once every 5 min for 24 hours 288
-export cMaxVal=288
-export cLogFile=/var/tmp/bat-level.log
-export cInFile=/var/tmp/bat-level-in.tmp
-export cOutFile=/var/tmp/bat-level-out.tmp
-export cSay=/usr/local/bin/say
-
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
     fShort
     fLog
     echo
@@ -162,7 +182,7 @@ while getopts :cflsph tArg; do
 done
 ((--OPTIND))
 shift $OPTIND
-if [ $# -ne 0 ]; then
+if [[ $# -ne 0 ]]; then
     echo "Unknown option: $*"
     exit 1
 fi
