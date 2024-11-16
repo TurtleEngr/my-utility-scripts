@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.78 $ $Date: 2024/08/17 15:23:21 $ GMT
+# $Revision: 1.79 $ $Date: 2024/11/12 04:11:53 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -237,7 +237,7 @@ following log message format:
 
  Program: PID NNNN: Message [LINE](ErrNo)
 
-=head1 EXAMPLES
+=for comment =head1 EXAMPLES
 
 =head1 ENVIRONMENT
 
@@ -271,7 +271,7 @@ To verify the script is internally OK, run: SCRIPTNAME -T all
 
 [Bugs you don't plan to fix :-)]
 
-=head1 AUTHOR
+=for comment =head1 AUTHOR
 
 NAME
 
@@ -279,7 +279,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.78 $ $Date: 2024/08/17 15:23:21 $ GMT
+$Revision: 1.79 $ $Date: 2024/11/12 04:11:53 $ GMT
 
 =cut
 EOF
@@ -526,6 +526,8 @@ EOF
 # ========================================
 # Main
 
+cName=template.sh
+
 # -------------------
 # Include common bash functions at $cBin/bash-com.inc But first we
 # need to set cBin
@@ -565,7 +567,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.78 $'
+cVer='$Revision: 1.79 $'
 fSetGlobals
 
 # -------------------
