@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.26 2024/11/16 16:01:47 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.27 2024/11/17 16:37:10 bruce Exp $
 
 # --------------------
 fUsage() {
@@ -61,9 +61,10 @@ If no LogFile is specified, it will be output to
 /var/log/server-manifest.xml
 
 If ExcludeFile file exists, then tags, listed in that file, will not
-be output.
+be output. Default: /usr/local/etc/getmanifext-exclude.txt
 
-All tags that are outputted can be found at: /tmp/getmanifext-tag.txt
+All tags that are outputted with the last run can be found at:
+/tmp/getmanifext-tag.txt
 
 =head1 OPTIONS
 
@@ -71,18 +72,22 @@ All tags that are outputted can be found at: /tmp/getmanifext-tag.txt
 
 =item B<-e ExcludeFile>
 
-ExcludeFile contains a list of "tags" (one per line) to not be put in
-LogFile. /tmp/getmanifext-tag.txt has the list of tags output by
-getmanifest.sh.
+If it exists, ExcludeFile contains a list of "tags" (one per line) to
+not be put in LogFile. /tmp/getmanifext-tag.txt has the list of tags
+output by the last run of getmanifest.sh.
 
-To get the full list of tag names run getmanifest.sh with -e /dev/null
--n /dev/null
+To get the full list of tag names run
+
+  getmanifest.sh with -e /dev/null -n /dev/null
+
+If you want to always exclude some information from any run, the put
+the tags in the default exclude file.
 
 Default: /usr/local/etc/getmanifext-exclude.txt
 
 =item B<-n LogFile>
 
-Log file name and location. The fil name should end with xml.
+Log file name and location. The file name should end with xml.
 
 Default: /var/log/server-manifest.xml
 
@@ -125,14 +130,20 @@ options and review /var/log/server-manifest.xml
 =head2 ExcludeFile method 2
 
 If you are filing a defect report, they often want information about
-
+your system. It is easier to create a list of tags you want to
+"include," so use this method.
 
   getmanifest -n /dev/null -e /dev/null
   cp /tmp/getmanifext-tag.txt /tmp/include-tag.txt
+
+  # Remove the tags you don't want.
   edit /tmp/include-tag.txt
-    Remove the tags you don't want.
+  
+  # This removes duplicates so the include-tag.txt list will be in the
+  # report.
   cat /tmp/getmanifext-tag.txt /tmp/include-tag.txt | \
     sort | uniq -u >/tmp/exclude-tag.txt
+    
   getmanifest -e /tmp/exclude-tag.txt -n /tmp/manifext.xml 
 
 Now you can include /tmp/manifext.xml with your defect report.
@@ -184,7 +195,7 @@ was run with install, remove, or upgrade.
 
 GPLv2 (c) Copyright
 
-$Revision: 1.26 $ $Date: 2024/11/16 16:01:47 $ GMT
+$Revision: 1.27 $ $Date: 2024/11/17 16:37:10 $ GMT
 
 =cut
 EOF
@@ -508,7 +519,7 @@ fLinux() {
 export cName=getmanifest.sh
 export cOS=$(uname -s)
 
-export cVer='$Revision: 1.26 $'
+export cVer='$Revision: 1.27 $'
 cVer=${cVer#\$Revision: }
 cVer=${cVer% \$}
 
