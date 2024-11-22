@@ -67,9 +67,12 @@ NOTES
                # add this line after all other PATH settings
                PATH=$HOME/bin:$PATH
 
+            If you get the ssh-askass popup, you'll need to use option 1, or
+            you can give the test key's password 'foobar' at every prompt.
+
 AUTHOR
     TurtleEngr
 
 HISTORY
-    $Revision: 1.9 $ $Date: 2024/11/09 20:12:19 $ GMT
+    $Revision: 1.10 $ $Date: 2024/11/22 16:42:44 $ GMT
 
