@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.9 2024/11/22 16:41:38 bruce Exp $
+# $Id: sshagent-test,v 1.10 2024/11/22 18:39:27 bruce Exp $
 set -u
 
 # Var prefix key
@@ -118,7 +118,7 @@ Create this substitute:
 
     cat <<EOF >~/bin/ssh-askpass
     #!/bin/bash
-    read
+    read -t 5 -p "ssh password? "
     echo $REPLY
     EOF
     chmod a+rx,go-w ~/bin/ssh-askpass
@@ -142,8 +142,8 @@ so it finds ssh-askpass in your bin dir.
    # add this line after all other PATH settings
    PATH=$HOME/bin:$PATH
 
-If you get the ssh-askass popup, you'll need to use option 1, or you
-can give the test key's password 'foobar' at every prompt.
+If you still get the ssh-askass popup, you'll need to use option 1, or
+you can give the test key's password 'foobar' at every prompt.
 
 =back
 
@@ -160,7 +160,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.9 $ $Date: 2024/11/22 16:41:38 $ GMT
+$Revision: 1.10 $ $Date: 2024/11/22 18:39:27 $ GMT
 
 =cut
 EOF
