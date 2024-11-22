@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# --------------------------------
+fUsage() {
+    cat <<EOF
+change-log - log root changes to /etc/CHANGES.org
+
+1) change.log
+   Put a date stamp in /etc/CHANGES.org
+   Example: change.log
+       ** 2024-11-11_19:44:00_Mon
+
+2) change.log Text
+   Put a date stamp in /etc/CHANGES.org and add $PWD Text
+   Example: change.log cvs add subscriptions.conf.sav
+       ** 2024-11-11_19:44:00_Mon
+       /etc/cups cvs add subscriptions.conf.sav
+
+3) change.log -n Text or change.log -d Text
+   Add $PWD Text. No datestamp.
+   Example: change.log -n cvs add subscriptions.conf.sav
+       /etc/cups cvs add subscriptions.conf.sav
+EOF
+    exit 1
+} # fUsage
+
+if [[ "$1" = '-h' ]]; then
+    fUsage
+fi
+
+if [[ "$USER" != "root" ]]; then
+    echo "Error: You must be root to use this."
+    fUsage
+fi
+
+
+if [[ "$1" = '-n' || "$1" = "-d" ]]; then
+    shift 1
+else
+    'date' +'** %F_%T_%a' >>/etc/CHANGES.org
+fi
+
+if [ $# -eq 0 ]; then
+    exit 0
+fi
+
+echo "$PWD $*" >>/etc/CHANGES.org
