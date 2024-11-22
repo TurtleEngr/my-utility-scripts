@@ -1,0 +1,17 @@
+change-log - log root changes to /etc/CHANGES.org
+
+1) change.log
+   Put a date stamp in /etc/CHANGES.org
+   Example: change.log
+       ** 2024-11-11_19:44:00_Mon
+
+2) change.log Text
+   Put a date stamp in /etc/CHANGES.org and add /home/bruce/bin/doc Text
+   Example: change.log cvs add subscriptions.conf.sav
+       ** 2024-11-11_19:44:00_Mon
+       /etc/cups cvs add subscriptions.conf.sav
+
+3) change.log -n Text or change.log -d Text
+   Add /home/bruce/bin/doc Text. No datestamp.
+   Example: change.log -n cvs add subscriptions.conf.sav
+       /etc/cups cvs add subscriptions.conf.sav
