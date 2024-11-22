@@ -56,7 +56,7 @@ and after running.
 
         cat <<EOF >~/bin/ssh-askpass
         #!/bin/bash
-        read
+        read -t 5 -p "ssh password? "
         echo $REPLY
         EOF
         chmod a+rx,go-w ~/bin/ssh-askpass
@@ -78,8 +78,8 @@ and after running.
             # add this line after all other PATH settings
             PATH=$HOME/bin:$PATH
 
-        If you get the ssh-askass popup, you'll need to use option 1, or you
-        can give the test key's password 'foobar' at every prompt.
+        If you still get the ssh-askass popup, you'll need to use option 1, or
+        you can give the test key's password 'foobar' at every prompt.
 
 # AUTHOR
 
@@ -87,4 +87,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.10 $ $Date: 2024/11/22 16:42:44 $ GMT
+$Revision: 1.11 $ $Date: 2024/11/22 18:40:23 $ GMT
