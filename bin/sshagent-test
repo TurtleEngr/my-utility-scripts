@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.11 2024/11/22 19:03:09 bruce Exp $
+# $Id: sshagent-test,v 1.12 2024/11/22 20:14:51 bruce Exp $
 set -u
 
 # Var prefix key
@@ -16,25 +16,46 @@ export cgScript
 export cgTestDir
 export cgTmp
 export cgEnvFile
-export gErr
+export gErr=0
 export gpDebug=0
-export gpTest
+export gpTest=""
 
 fUsageTest() {
     # Quick help, run this:
     # SCRIPTNAME -h
 
     local pStyle=$1
+    local tProg=""
 
-    case $pStyle in
-        short)
-            pod2usage $0
+        case $pStyle in
+        short | usage)
+            tProg=pod2usage
             ;;
-        long)
-            pod2text $0 | more
+        long | text)
+            tProg=pod2text
+            ;;
+        html)
+            tProg="pod2html --title=$cName"
+            ;;
+        html)
+            tProg=pod2html
+            ;;
+        md)
+            tProg=pod2markdown
+            ;;
+        man)
+            tProg=pod2man
+            ;;
+        *)
+            tProg=pod2text
             ;;
     esac
 
+    # Default to pod2text if tProg does not exist
+    if ! which ${tProg%% *} >/dev/null; then
+        tProg=pod2text
+    fi
+    cat $cgName | $tProg | more
     exit 1
 
     cat <<EOF
@@ -50,7 +71,9 @@ Test the sshagent script.
 
 =head1 SYNOPSIS
 
-    sshagent-test [-h] [-T pTest]
+    sshagent-test -T all
+    sshagent-test -T list
+    sshagent-test [-h] [-H pStyle] [-T pTest]
 
 =head1 DESCRIPTION
 
@@ -64,6 +87,18 @@ for how to set it up and the dependent scipts.
 =item B<-h>
 
 Output this "long" usage help. See "-H long"
+
+=item B<-H pStyle>
+
+pStyle is used to select the type of help and how it is formatted.
+
+Styles:
+
+    short|usage - Output short usage help as text.
+    long|text   - Output long usage help as text.
+    man         - Output long usage help as a man page.
+    html        - Output long usage help as html.
+    md          - Output long usage help as markdown.
 
 =item B<-T "pTest">
 
@@ -159,7 +194,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.11 $ $Date: 2024/11/22 19:03:09 $ GMT
+$Revision: 1.12 $ $Date: 2024/11/22 20:14:51 $ GMT
 
 =cut
 EOF
@@ -431,9 +466,10 @@ if [ $# -eq 0 ]; then
     echo "Error: Missing options. [$LINENO]"
     fUsageTest short
 fi
-while getopts :hT: tArg; do
+while getopts :hH:T: tArg; do
     case $tArg in
         h) fUsageTest long ;;
+        H) fUsageTest "$OPTARG" ;;
         T) gpTest="$OPTARG" ;;
         # Problem arguments
         :)
