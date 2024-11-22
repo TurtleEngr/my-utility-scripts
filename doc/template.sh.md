@@ -181,8 +181,6 @@ following log message format:
 
     Program: PID NNNN: Message [LINE](ErrNo)
 
-# EXAMPLES
-
 # ENVIRONMENT
 
 See Globals section for details.
@@ -211,12 +209,10 @@ To verify the script is internally OK, run: SCRIPTNAME -T all
 
 \[Bugs you don't plan to fix :-)\]
 
-# AUTHOR
-
 NAME
 
 # HISTORY
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.17 $ $Date: 2024/08/17 15:43:36 $ GMT
+$Revision: 1.18 $ $Date: 2024/11/22 16:42:44 $ GMT

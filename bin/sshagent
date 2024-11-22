@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.89 2024/10/24 16:30:32 bruce Exp $
+# $Id: sshagent,v 1.90 2024/11/22 16:41:38 bruce Exp $
 #set -u
 
 # Var prefix key
@@ -32,9 +32,15 @@ fUsage() {
     gErr=1
     if [ "$pStyle" = "short" ]; then
         pod2usage $cgBin/$cgScriptName
-        return 1
+    else
+        pod2text $cgBin/$cgScriptName | less
     fi
-    pod2text $cgBin/$cgScriptName | less
+    
+    set +u
+    unset cgBin cgEnvDir cgHomeDir cgProgList cgScriptName gDebug gErr
+    unset gSARunning gpAction gpParm
+    unset -f fAction fAdd fConfig fGetOpts fKill fSARunning fScript
+    unset -f fSetBin fValidate
     return 1
 
     cat <<'EOF' &>/dev/null
@@ -337,7 +343,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.89 $
+$Revision: 1.90 $
 
 =cut
 
@@ -687,6 +693,5 @@ fAction
 set +u
 unset cgBin cgEnvDir cgHomeDir cgProgList cgScriptName gDebug gErr
 unset gSARunning gpAction gpParm
-
 unset -f fAction fAdd fConfig fGetOpts fKill fSARunning fScript
-unset -f fSetBin fUsage fValidate
+unset -f fSetBin fValidate fUsage
