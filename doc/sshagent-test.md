@@ -8,7 +8,9 @@ Test the sshagent script.
 
 # SYNOPSIS
 
-    sshagent-test [-h] [-T pTest]
+    sshagent-test -T all
+    sshagent-test -T list
+    sshagent-test [-h] [-H pStyle] [-T pTest]
 
 # DESCRIPTION
 
@@ -20,6 +22,18 @@ for how to set it up and the dependent scipts.
 - **-h**
 
     Output this "long" usage help. See "-H long"
+
+- **-H pStyle**
+
+    pStyle is used to select the type of help and how it is formatted.
+
+    Styles:
+
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
 
 - **-T "pTest"**
 
@@ -86,4 +100,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.12 $ $Date: 2024/11/22 19:03:20 $ GMT
+$Revision: 1.13 $ $Date: 2024/11/22 20:14:51 $ GMT
