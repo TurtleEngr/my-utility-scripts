@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.10 2024/11/22 18:39:27 bruce Exp $
+# $Id: sshagent-test,v 1.11 2024/11/22 19:03:09 bruce Exp $
 set -u
 
 # Var prefix key
@@ -139,7 +139,6 @@ so it finds ssh-askpass in your bin dir.
 =item 2. Change your path so ~/bin is look in first:
 
    ed ~/.bash_profile
-   # add this line after all other PATH settings
    PATH=$HOME/bin:$PATH
 
 If you still get the ssh-askass popup, you'll need to use option 1, or
@@ -160,7 +159,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.10 $ $Date: 2024/11/22 18:39:27 $ GMT
+$Revision: 1.11 $ $Date: 2024/11/22 19:03:09 $ GMT
 
 =cut
 EOF

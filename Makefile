@@ -36,13 +36,13 @@ release :
 	git ci -am "inc patch level"
 	git push origin develop
 
-gist update-gist : ~/ver/github/gist/sshagent/d*/sshagent
-
-~/ver/github/gist/sshagent/d*/sshagent : bin/sshagent
+gist update-gist :
+	cd ~/ver/github/gist/sshagent/d*
 	-cd ~/ver/github/gist/sshagent/d*; \
 		git pull origin develop
-	cp -f $? $@
+	cp -f bin/sshagent bin/sshagent-test ~/ver/github/gist/sshagent/d*
+	cp -f doc/sshagent.md doc/sshagent-test.md ~/ver/github/gist/sshagent/d*
 	-cd ~/ver/github/gist/sshagent/d*; \
 		git ci -am Updated
-	-cd ~/ver/github/gist/sshagent/d*; \
+	cd ~/ver/github/gist/sshagent/d*; \
 		git push origin develop
