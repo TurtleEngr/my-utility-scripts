@@ -75,7 +75,6 @@ and after running.
     - 2. Change your path so ~/bin is look in first:
 
             ed ~/.bash_profile
-            # add this line after all other PATH settings
             PATH=$HOME/bin:$PATH
 
         If you still get the ssh-askass popup, you'll need to use option 1, or
@@ -87,4 +86,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.11 $ $Date: 2024/11/22 18:40:23 $ GMT
+$Revision: 1.12 $ $Date: 2024/11/22 19:03:20 $ GMT
