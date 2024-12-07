@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.12 2024/11/22 20:14:51 bruce Exp $
+# $Id: sshagent-test,v 1.13 2024/11/22 20:28:18 bruce Exp $
 set -u
 
 # Var prefix key
@@ -106,7 +106,7 @@ Styles:
 
 "B<-T list>" will list all of the test functions.
 
-Otherwise, B<pTest> should be a space separated list to test function
+Otherwise, B<pTest> should be a space separated list of test function
 names, between the quotes.
 
 =back
@@ -194,7 +194,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.12 $ $Date: 2024/11/22 20:14:51 $ GMT
+$Revision: 1.13 $ $Date: 2024/11/22 20:28:18 $ GMT
 
 =cut
 EOF

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.27 2024/11/17 16:37:10 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.28 2024/11/26 21:23:08 bruce Exp $
 
 # --------------------
 fUsage() {
@@ -80,7 +80,7 @@ To get the full list of tag names run
 
   getmanifest.sh with -e /dev/null -n /dev/null
 
-If you want to always exclude some information from any run, the put
+If you want to always exclude some information from any run, then put
 the tags in the default exclude file.
 
 Default: /usr/local/etc/getmanifext-exclude.txt
@@ -195,7 +195,7 @@ was run with install, remove, or upgrade.
 
 GPLv2 (c) Copyright
 
-$Revision: 1.27 $ $Date: 2024/11/17 16:37:10 $ GMT
+$Revision: 1.28 $ $Date: 2024/11/26 21:23:08 $ GMT
 
 =cut
 EOF
@@ -519,7 +519,7 @@ fLinux() {
 export cName=getmanifest.sh
 export cOS=$(uname -s)
 
-export cVer='$Revision: 1.27 $'
+export cVer='$Revision: 1.28 $'
 cVer=${cVer#\$Revision: }
 cVer=${cVer% \$}
 

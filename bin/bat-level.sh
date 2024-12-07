@@ -4,11 +4,6 @@ set -u
 # ========================================
 # Config
 
-export cConf=~/.config/bat-level-rc
-if [[ -f $cConf ]]; then
-    . $cConf
-fi
-
 export cMin=${cMin:-15}
 export cMax=${cMax:-95}
 export cMinSay=${cMinSay:-"The battery is below ${cMin}%. Plug it in."}
@@ -25,23 +20,48 @@ export cLogFile=${cLogFile:-$Tmp/bat-level.log}
 export cInFile=${cInFile:-$Tmp/bat-level-in.tmp}
 export cOutFile=${cOutFile:-$Tmp/bat-level-out.tmp}
 
+export cConf=~/.config/bat-level-rc
+if [[ -f $cConf ]]; then
+    . $cConf
+else
+    cat <<EOF >$cConf
+cMin=${cMin}
+cMax=${cMax}
+cMinSay="${cMinSay}"
+cMaxSay="${cMaxSay}"
+cSay=/usr/local/bin/say
+cPlotVal=288
+Tmp=${Tmp:-~/tmp}
+cLogFile=${cLogFile}
+cInFile=${cInFile}
+cOutFile=${cOutFile}
+EOF
+    chmod a+rx $cConf
+fi
+
 # ========================================
 # Functions
 
 # --------------------------------
 fUsage() {
-    cat <<EOF
+    cat <<\EOF
 bat-level.sh - Report battery levels
 Usage
     bat-level.sh [-s] [-f] [-l] [-c] [-p] [-h]
 Options
     -s short report
     -f full report
-    -l log values to /var/tmp/bat-level.log
-    -c output crontab file line needed to run once every 5 min. Adjust as needed.
-    -p plot the values in /var/tmp/bat-level.log
+    -l log values to $cLogFile
+    -c output crontab file line needed to run once every 5 min.
+       Adjust as needed.
+    -p plot the values in $cLogFile
     -h this help
+Config
+    ~/.config/bat-level-rc - remove to reset to defaults
 EOF
+    if [[ -r $cConf ]]; then
+        cat $cConf
+    fi
     exit 1
 } # fUsage
 

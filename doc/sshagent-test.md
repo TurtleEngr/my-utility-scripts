@@ -41,7 +41,7 @@ for how to set it up and the dependent scipts.
 
     "**-T list**" will list all of the test functions.
 
-    Otherwise, **pTest** should be a space separated list to test function
+    Otherwise, **pTest** should be a space separated list of test function
     names, between the quotes.
 
 # ENVIRONMENT
@@ -100,4 +100,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.14 $ $Date: 2024/11/22 20:24:26 $ GMT
+$Revision: 1.15 $ $Date: 2024/11/22 20:28:41 $ GMT
