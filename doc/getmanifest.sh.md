@@ -36,7 +36,7 @@ All tags that are outputted with the last run can be found at:
 
         getmanifest.sh with -e /dev/null -n /dev/null
 
-    If you want to always exclude some information from any run, the put
+    If you want to always exclude some information from any run, then put
     the tags in the default exclude file.
 
     Default: /usr/local/etc/getmanifext-exclude.txt
@@ -133,4 +133,4 @@ was run with install, remove, or upgrade.
 
 GPLv2 (c) Copyright
 
-$Revision: 1.1 $ $Date: 2024/11/22 20:24:43 $ GMT
+$Revision: 1.2 $ $Date: 2024/11/26 21:23:26 $ GMT

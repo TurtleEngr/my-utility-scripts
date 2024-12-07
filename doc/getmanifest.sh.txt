@@ -28,8 +28,8 @@ OPTIONS
 
           getmanifest.sh with -e /dev/null -n /dev/null
 
-        If you want to always exclude some information from any run, the put
-        the tags in the default exclude file.
+        If you want to always exclude some information from any run, then
+        put the tags in the default exclude file.
 
         Default: /usr/local/etc/getmanifext-exclude.txt
 
@@ -112,5 +112,5 @@ NOTES
 HISTORY
     GPLv2 (c) Copyright
 
-    $Revision: 1.1 $ $Date: 2024/11/22 20:24:43 $ GMT
+    $Revision: 1.2 $ $Date: 2024/11/26 21:23:26 $ GMT
 
