@@ -1,0 +1,136 @@
+<div>
+    <hr/>
+</div>
+
+# NAME getmanifest.sh
+
+Get a manifest of a system's hardware and software.
+
+# SYNOPSIS
+
+    getmanifest.sh [-e ExcludeFile] [-n LogFile] [-h] [-H pStyle]
+
+# DESCRIPTION
+
+The system's manifest will be output to LogFile. It must be run as
+root user.
+
+If no LogFile is specified, it will be output to
+/var/log/server-manifest.xml
+
+If ExcludeFile file exists, then tags, listed in that file, will not
+be output. Default: /usr/local/etc/getmanifext-exclude.txt
+
+All tags that are outputted with the last run can be found at:
+/tmp/getmanifext-tag.txt
+
+# OPTIONS
+
+- **-e ExcludeFile**
+
+    If it exists, ExcludeFile contains a list of "tags" (one per line) to
+    not be put in LogFile. /tmp/getmanifext-tag.txt has the list of tags
+    output by the last run of getmanifest.sh.
+
+    To get the full list of tag names run
+
+        getmanifest.sh with -e /dev/null -n /dev/null
+
+    If you want to always exclude some information from any run, then put
+    the tags in the default exclude file.
+
+    Default: /usr/local/etc/getmanifext-exclude.txt
+
+- **-n LogFile**
+
+    Log file name and location. The file name should end with xml.
+
+    Default: /var/log/server-manifest.xml
+
+- **-h**
+
+    Output this "long" usage help. See "-H long"
+
+- **-H pStyle**
+
+    pStyle is used to select the type of help and how it is formatted.
+
+    Styles:
+
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+
+# RETURN VALUE
+
+    0 - ran ok
+    !0 - errors, did not run
+
+# EXAMPLES
+
+## ExcludeFile method 1
+
+    getmanifest -n /dev/null -e /dev/null
+    cp /tmp/getmanifext-tag.txt /usr/local/etc/getmanifext-exclude.txt
+
+Edit /usr/local/etc/getmanifext-exclude.txt and remove the tags that
+you want in your LogFile report. Then rerun getmanifest.sh with no
+options and review /var/log/server-manifest.xml
+
+## ExcludeFile method 2
+
+If you are filing a defect report, they often want information about
+your system. It is easier to create a list of tags you want to
+"include," so use this method.
+
+    getmanifest -n /dev/null -e /dev/null
+    cp /tmp/getmanifext-tag.txt /tmp/include-tag.txt
+
+    # Remove the tags you don't want.
+    edit /tmp/include-tag.txt
+    
+    # This removes duplicates so the include-tag.txt list will be in the
+    # report.
+    cat /tmp/getmanifext-tag.txt /tmp/include-tag.txt | \
+      sort | uniq -u >/tmp/exclude-tag.txt
+      
+    getmanifest -e /tmp/exclude-tag.txt -n /tmp/manifext.xml 
+
+Now you can include /tmp/manifext.xml with your defect report.
+
+# FILES
+
+    /var/log/server-manifest.xml - default log file (-n)
+    /usr/local/etc/getmanifext-exclude.txt - default exclude file (-e)
+    /tmp/getmanifext-tag.txt - list of tags output
+
+# NOTES
+
+What if you have added or removed packages? If you are on a Debian
+based system, you can trigger getmanifest.sh to run with this
+setup. Create these files, and once a day, getmanifest will run if apt
+was run with install, remove, or upgrade.
+
+## /etc/apt/apt.conf.d/92getmanifest
+
+    // Signal getmanifest.sh needs to be run. See /etc/cron.daily/getmanifest
+    DPkg::Post-Invoke { "if [ -x /usr/local/bin/getmanifest.sh ]; then touch /var/cache/apt/getmanifest; fi"; };
+
+## /etc/cron.daily/getmanifest
+
+    #!/bin/bash
+    # /var/cache/apt/getnanifest signal file is set by:
+    # /etc/apt/apt.conf.d/92getmanifest when apt-get is run.
+    if [[ ! -f /var/cache/apt/getmanifest ]]; then
+        exit 0
+    fi
+    /usr/local/bin/getmanifest.sh
+    rm /var/cache/apt/getmanifest
+
+# HISTORY
+
+GPLv2 (c) Copyright
+
+$Revision: 1.2 $ $Date: 2024/11/26 21:23:26 $ GMT

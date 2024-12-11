@@ -117,6 +117,9 @@ s;</h6></p>;</h6>;g
 s;{\(.\);<cite>{\1;g
 s;\(.\)};\1}</cite>;g
 
+s;<cite><cite>;<cite>;g
+s;</cite></cite>;</cite>;g
+
 s;<h1;<hr><h1;g
 s;<h2;<hr><h2;g
 EOF
