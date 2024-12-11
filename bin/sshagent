@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.89 2024/10/24 16:30:32 bruce Exp $
+# $Id: sshagent,v 1.91 2024/11/22 20:14:51 bruce Exp $
 #set -u
 
 # Var prefix key
@@ -28,13 +28,38 @@ export cgEnvFile
 # --------------------
 fUsage() {
     local pStyle=$1
+    local tProg=""
 
     gErr=1
-    if [ "$pStyle" = "short" ]; then
-        pod2usage $cgBin/$cgScriptName
-        return 1
+    case $pStyle in
+        short | usage)
+            tProg=pod2usage
+            ;;
+        long | text)
+            tProg=pod2text
+            ;;
+        html)
+            tProg="pod2html --title=$cName"
+            ;;
+        html)
+            tProg=pod2html
+            ;;
+        md)
+            tProg=pod2markdown
+            ;;
+        man)
+            tProg=pod2man
+            ;;
+        *)
+            tProg=pod2text
+            ;;
+    esac
+
+    # Default to pod2text if tProg does not exist
+    if ! which ${tProg%% *} >/dev/null; then
+        tProg=pod2text
     fi
-    pod2text $cgBin/$cgScriptName | less
+    cat $cgBin/$cgScriptName | $tProg | less
     return 1
 
     cat <<'EOF' &>/dev/null
@@ -337,7 +362,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.89 $
+$Revision: 1.91 $
 
 =cut
 
@@ -411,10 +436,14 @@ fGetOpts() {
     if [ $gDebug -ne 0 ]; then echo 1NumArgs: "$#" OPTIND: $OPTIND; fi
     if [ $gDebug -ne 0 ]; then echo 1ArgsAs: "$*" OPTIND: $OPTIND; fi
     if [ $gDebug -ne 0 ]; then echo 1ArgsAt: "$@" OPTIND: $OPTIND; fi
-    while getopts :hksx tArg; do
+    while getopts :hH:ksx tArg; do
         case $tArg in
             h)
                 fUsage long
+                return 1
+                ;;
+            H)
+                fUsage $OPTARG
                 return 1
                 ;;
             k) gpAction='kill' ;;
@@ -681,12 +710,10 @@ fGetOpts $*
 
 fValidate
 fSARunning
-
 fAction
 
 set +u
 unset cgBin cgEnvDir cgHomeDir cgProgList cgScriptName gDebug gErr
 unset gSARunning gpAction gpParm
-
 unset -f fAction fAdd fConfig fGetOpts fKill fSARunning fScript
-unset -f fSetBin fUsage fValidate
+unset -f fSetBin fValidate fUsage

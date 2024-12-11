@@ -8,7 +8,9 @@ Test the sshagent script.
 
 # SYNOPSIS
 
-    sshagent-test [-h] [-T pTest]
+    sshagent-test -T all
+    sshagent-test -T list
+    sshagent-test [-h] [-H pStyle] [-T pTest]
 
 # DESCRIPTION
 
@@ -21,13 +23,25 @@ for how to set it up and the dependent scipts.
 
     Output this "long" usage help. See "-H long"
 
+- **-H pStyle**
+
+    pStyle is used to select the type of help and how it is formatted.
+
+    Styles:
+
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+
 - **-T "pTest"**
 
     "**-T all**" will run all of the functions that begin with "test".
 
     "**-T list**" will list all of the test functions.
 
-    Otherwise, **pTest** should be a space separated list to test function
+    Otherwise, **pTest** should be a space separated list of test function
     names, between the quotes.
 
 # ENVIRONMENT
@@ -56,7 +70,7 @@ and after running.
 
         cat <<EOF >~/bin/ssh-askpass
         #!/bin/bash
-        read
+        read -t 5 -p "ssh password? "
         echo $REPLY
         EOF
         chmod a+rx,go-w ~/bin/ssh-askpass
@@ -75,8 +89,10 @@ and after running.
     - 2. Change your path so ~/bin is look in first:
 
             ed ~/.bash_profile
-            # add this line after all other PATH settings
             PATH=$HOME/bin:$PATH
+
+        If you still get the ssh-askass popup, you'll need to use option 1, or
+        you can give the test key's password 'foobar' at every prompt.
 
 # AUTHOR
 
@@ -84,4 +100,4 @@ TurtleEngr
 
 # HISTORY
 
-$Revision: 1.9 $ $Date: 2024/11/09 20:12:19 $ GMT
+$Revision: 1.15 $ $Date: 2024/11/22 20:28:41 $ GMT

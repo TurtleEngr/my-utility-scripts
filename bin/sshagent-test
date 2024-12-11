@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.8 2024/09/19 19:30:49 bruce Exp $
+# $Id: sshagent-test,v 1.13 2024/11/22 20:28:18 bruce Exp $
 set -u
 
 # Var prefix key
@@ -16,25 +16,46 @@ export cgScript
 export cgTestDir
 export cgTmp
 export cgEnvFile
-export gErr
+export gErr=0
 export gpDebug=0
-export gpTest
+export gpTest=""
 
 fUsageTest() {
     # Quick help, run this:
     # SCRIPTNAME -h
 
     local pStyle=$1
+    local tProg=""
 
-    case $pStyle in
-        short)
-            pod2usage $0
+        case $pStyle in
+        short | usage)
+            tProg=pod2usage
             ;;
-        long)
-            pod2text $0 | more
+        long | text)
+            tProg=pod2text
+            ;;
+        html)
+            tProg="pod2html --title=$cName"
+            ;;
+        html)
+            tProg=pod2html
+            ;;
+        md)
+            tProg=pod2markdown
+            ;;
+        man)
+            tProg=pod2man
+            ;;
+        *)
+            tProg=pod2text
             ;;
     esac
 
+    # Default to pod2text if tProg does not exist
+    if ! which ${tProg%% *} >/dev/null; then
+        tProg=pod2text
+    fi
+    cat $cgName | $tProg | more
     exit 1
 
     cat <<EOF
@@ -50,7 +71,9 @@ Test the sshagent script.
 
 =head1 SYNOPSIS
 
-    sshagent-test [-h] [-T pTest]
+    sshagent-test -T all
+    sshagent-test -T list
+    sshagent-test [-h] [-H pStyle] [-T pTest]
 
 =head1 DESCRIPTION
 
@@ -65,13 +88,25 @@ for how to set it up and the dependent scipts.
 
 Output this "long" usage help. See "-H long"
 
+=item B<-H pStyle>
+
+pStyle is used to select the type of help and how it is formatted.
+
+Styles:
+
+    short|usage - Output short usage help as text.
+    long|text   - Output long usage help as text.
+    man         - Output long usage help as a man page.
+    html        - Output long usage help as html.
+    md          - Output long usage help as markdown.
+
 =item B<-T "pTest">
 
 "B<-T all>" will run all of the functions that begin with "test".
 
 "B<-T list>" will list all of the test functions.
 
-Otherwise, B<pTest> should be a space separated list to test function
+Otherwise, B<pTest> should be a space separated list of test function
 names, between the quotes.
 
 =back
@@ -118,7 +153,7 @@ Create this substitute:
 
     cat <<EOF >~/bin/ssh-askpass
     #!/bin/bash
-    read
+    read -t 5 -p "ssh password? "
     echo $REPLY
     EOF
     chmod a+rx,go-w ~/bin/ssh-askpass
@@ -139,8 +174,10 @@ so it finds ssh-askpass in your bin dir.
 =item 2. Change your path so ~/bin is look in first:
 
    ed ~/.bash_profile
-   # add this line after all other PATH settings
    PATH=$HOME/bin:$PATH
+
+If you still get the ssh-askass popup, you'll need to use option 1, or
+you can give the test key's password 'foobar' at every prompt.
 
 =back
 
@@ -157,7 +194,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.8 $ $Date: 2024/09/19 19:30:49 $ GMT
+$Revision: 1.13 $ $Date: 2024/11/22 20:28:18 $ GMT
 
 =cut
 EOF
@@ -429,9 +466,10 @@ if [ $# -eq 0 ]; then
     echo "Error: Missing options. [$LINENO]"
     fUsageTest short
 fi
-while getopts :hT: tArg; do
+while getopts :hH:T: tArg; do
     case $tArg in
         h) fUsageTest long ;;
+        H) fUsageTest "$OPTARG" ;;
         T) gpTest="$OPTARG" ;;
         # Problem arguments
         :)

@@ -95,7 +95,8 @@ are copying some very large files to another system.
         monday/mun-day
         mon/mun-day
         tue/tues-day
-        foo bar/snae-foo
+        foobar/snae-foo
+        wtf/what-the-fork
 
         # Blank lines are ignored.
         # Lines beginning with # are ignored.
@@ -113,15 +114,19 @@ are copying some very large files to another system.
         ; For global config, edit: /usr/share/festival/siteinit.scm
 
         ; Uncomment the desired voice
-        ;;(voice_rab_diphone)
+        ;;(voice_cmu_us_slt_arctic_hts)
         ;;(voice_don_diphone)
-        ;;(voice_kal_diphone)
         ;;(voice_en1_mbrola)
+        ;;(voice_kal_diphone)
         ;;(voice_ked_diphone)
+        ;;(voice_rab_diphone)
         (voice_us1_mbrola)
         ;;(voice_us2_mbrola)
         ;;(voice_us3_mbrola)
-        ;;(voice_cmu_us_slt_arctic_hts)
+
+- ~/.cache/say/say.sed
+
+    Temporay file with all replacement words.
 
 # SEE ALSO
 
@@ -168,4 +173,4 @@ Or archived at: https://archive.ph/wip/sVgg7
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.10 $ $Date: 2024/11/09 20:12:19 $ GMT
+    $Revision: 1.11 $ $Date: 2024/11/22 16:42:44 $ GMT
