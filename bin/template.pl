@@ -50,14 +50,13 @@ $cmclient, $HOME
 
 =head1 SEE ALSO
 
-=head1 NOTES
+=for comment =head1 NOTES
 
 =head1 CAVEATS
 
 [Things to take special care with; sometimes called WARNINGS.]
 
 =head1 DIAGNOSTICS
-
 [All possible messages the program can print out--and what they mean.]
 
 =head1 BUGS
@@ -76,7 +75,7 @@ Bruce Rafnel
 
 (c) Copyright 2004 by COMPANY
 
-$Revision: 1.35 $ GMT 
+$Revision: 1.36 $ GMT 
 
 =cut
 
