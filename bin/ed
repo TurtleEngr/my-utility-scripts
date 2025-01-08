@@ -223,7 +223,7 @@ export gHost=$HOSTNAME
 export gArchive=0
 export gBG=0
 export gDefLog=""
-export gEdit='emacs -nw'
+export gEdit='emacs -nw --color=never'
 export gFirstFile=""
 
 export gpDateIt=0

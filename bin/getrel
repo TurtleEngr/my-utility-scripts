@@ -137,14 +137,14 @@ getrel_onlan, GIT_CONFIG, HOME, USER
  [opt]
         exclude = --exclude=.svn --exclude=.git --exclude=CVS
         # -d
-        dir = -rvptgoPCl -f+_*/ -f-_*
+        dir = -rvptgoPl -f+_*/ -f-_*
         # -g
-        get = -vptgoPCl
+        get = -vptgoPl
         get-no-force = --ignore-existing
         # -gf
         get-force = --update
         # -u
-        update = -vptgoPCl
+        update = -vptgoPl
         update-no-force = --ignore-existing
         # -uf
         update-force = --update
@@ -185,11 +185,11 @@ function fDefaultConfig() {
     export cLocalHome=/rel
     export cLocalSym=/rel
     export cOptExclude='--exclude=.svn --exclude=.git --exclude=CVS --exclude=*~'
-    export cOpt_d='-rvptgoPCl -f+_*/ -f-_*'
-    export cOpt_g='-vptgoPCl'
+    export cOpt_d='-rvptgoPl -f+_*/ -f-_*'
+    export cOpt_g='-vptgoPl'
     export cOpt_gnf='--ignore-existing'
     export cOpt_gf='--update'
-    export cOpt_u='-rvptgoPCl'
+    export cOpt_u='-rvptgoPl'
     export cOpt_unf='--ignore-existing'
     export cOpt_uf='--update'
 } # fDefaultConfig
