@@ -39,14 +39,11 @@ $cmclient, $HOME
 
 # SEE ALSO
 
-# NOTES
-
 # CAVEATS
 
 \[Things to take special care with; sometimes called WARNINGS.\]
 
 # DIAGNOSTICS
-
 \[All possible messages the program can print out--and what they mean.\]
 
 # BUGS
@@ -65,4 +62,4 @@ Bruce Rafnel
 
 (c) Copyright 2004 by COMPANY
 
-$Revision: 1.11 $ GMT 
+$Revision: 1.12 $ GMT 

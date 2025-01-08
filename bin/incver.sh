@@ -9,7 +9,7 @@ export cName=incver.sh
 fUsage() {
     local pStyle="${1:-usage}"
     local tProg=""
-    
+
     case $pStyle in
         short | usage)
             tProg=pod2usage
@@ -37,7 +37,7 @@ fUsage() {
     fi
     cat $cBin/$cName | $tProg | less
     exit 1
-    
+
     cat <<\EOF >/dev/null
 =pod
 
@@ -69,14 +69,14 @@ Increment the major number (first).
 =item B<-m>
 
 Increment the minor number (second).
-    
+
 =item B<-p>
 
 Increment the patch number (third).
 
 =item B<-s pChar>
 
-Change the separator charactre. Default: '.' 
+Change the separator charactre. Default: '.'
 
 =item B<-f FILE or FILE>
 
@@ -122,7 +122,7 @@ $Revision: 1.3 $ $Date: 2025/01/08 22:11:31 $ GMT
 
 =cut
 EOF
-        exit 1
+    exit 1
 } # fUsage
 
 # ========================================
@@ -164,14 +164,16 @@ while getopts :Mmps:f:hH: tArg; do
             fUsage $OPTARG
             ;;
         # Problem arguments
-        :) echo "Error: Value required for option: -$OPTARG"
-           fUsage usage
-           exit 1
-        ;;
-        \?) echo "Error: Unknown option: $OPTARG"
+        :)
+            echo "Error: Value required for option: -$OPTARG"
             fUsage usage
             exit 1
-        ;;
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG"
+            fUsage usage
+            exit 1
+            ;;
     esac
 done
 ((--OPTIND))
@@ -212,15 +214,18 @@ if [ -n "$tExtra" ]; then
 fi
 
 case $gpLevel in
-    M) ((++tMajor))
-       tMinor=0
-       tPatch=0
-    ;;
-    m) ((++tMinor))
-       tPatch=0
-    ;;
-    p) ((++tPatch))
-    ;;
+    M)
+        ((++tMajor))
+        tMinor=0
+        tPatch=0
+        ;;
+    m)
+        ((++tMinor))
+        tPatch=0
+        ;;
+    p)
+        ((++tPatch))
+        ;;
 esac
 
 echo "${tMajor}${gpSep}${tMinor}${gpSep}${tPatch}$tExtra" >$gpFile
