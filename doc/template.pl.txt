@@ -28,13 +28,11 @@ ENVIRONMENT
 
 FILES
 SEE ALSO
-NOTES
 CAVEATS
     [Things to take special care with; sometimes called WARNINGS.]
 
 DIAGNOSTICS
-    [All possible messages the program can print out--and what they mean.]
-
+[All possible messages the program can print out--and what they mean.]
 BUGS
     [Things that are broken or just don't work quite right.]
 
@@ -47,5 +45,5 @@ AUTHOR
 HISTORY
     (c) Copyright 2004 by COMPANY
 
-    $Revision: 1.11 $ GMT
+    $Revision: 1.12 $ GMT
 

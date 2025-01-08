@@ -119,14 +119,14 @@ getrel\_onlan, GIT\_CONFIG, HOME, USER
     [opt]
            exclude = --exclude=.svn --exclude=.git --exclude=CVS
            # -d
-           dir = -rvptgoPCl -f+_*/ -f-_*
+           dir = -rvptgoPl -f+_*/ -f-_*
            # -g
-           get = -vptgoPCl
+           get = -vptgoPl
            get-no-force = --ignore-existing
            # -gf
            get-force = --update
            # -u
-           update = -vptgoPCl
+           update = -vptgoPl
            update-no-force = --ignore-existing
            # -uf
            update-force = --update
