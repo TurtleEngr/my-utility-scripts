@@ -17,6 +17,10 @@ Description:
     whitespace, and format with shfmt.  If problems, it exits with an
     error and outputs nothing, so check!
 
+    shfmt can be found at:
+    /rel/archive/software/ThirdParty/shfmt/
+    https://github.com/mvdan/sh/releases/download/v3.1.2/shfmt_v3.1.2_linux_amd64
+
 To use as a "git clean filter":
 
     In ~/.gitconfig add:

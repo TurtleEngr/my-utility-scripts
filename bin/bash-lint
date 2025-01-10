@@ -87,6 +87,11 @@ cat <<EOF
 
 Disable shellcheck codes with comments like:
 # shellcheck disable=SC1090,SC2003
+
+shellcheck codes and more can be found at:
+https://gist.github.com/nicerobot/53cee11ee0abbdc997661e65b348f375
+https://github.com/koalaman/shellcheck
+https://www.shellcheck.net/wiki/Home
 EOF
 
 shellcheck -x -e $tAlwaysSkip,$tWarning $tFile >/dev/null 2>&1
@@ -95,11 +100,14 @@ let gErr+=$?
 exit $gErr
 
 # ----------
-# spellcheck codes
+# shellcheck codes
 # https://gist.github.com/nicerobot/53cee11ee0abbdc997661e65b348f375
+# https://github.com/koalaman/shellcheck
+# https://www.shellcheck.net/wiki/Home
 
 # Document the ones that this script disables.
 #         s - skip; w - warning; all others set error code
+
 # SC1090: s Can't follow non-constant source. Use a directive to specify location. (because you used ". $var/foo")
 # SC2003: s expr is antiquated. Consider rewriting this using $((..)), ${} or [[ ]].
 # SC2006: s Use $(...) notation instead of legacy backticked `...`.
