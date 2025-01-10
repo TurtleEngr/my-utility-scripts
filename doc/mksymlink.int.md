@@ -80,7 +80,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.10 $'
+           cVer='$Revision: 1.11 $'
 
 ### Documentation Format
 
