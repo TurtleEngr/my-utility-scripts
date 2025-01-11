@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent,v 1.93 2025/01/10 01:40:41 bruce Exp $
+# $Id: sshagent,v 1.94 2025/01/10 01:52:30 bruce Exp $
 #set -u
 
 # My usual prefix code are not used because the "unset" cmds at the
@@ -364,7 +364,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.93 $
+$Revision: 1.94 $
 
 =cut
 
@@ -475,7 +475,7 @@ faGetOpts() {
         gpaParm="$*"
         gpaAction='add'
     fi
-    if [ $gaDebug -ne 0 ]; then echo "gpParam=$gpaParm"; fi
+    if [ $gaDebug -ne 0 ]; then echo "gpaParam=$gpaParm"; fi
     return 0
 } # faGetOpts
 
