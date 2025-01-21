@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.inc,v $
-# $Revision: 1.18 $ $Date: 2024/06/11 02:44:12 $ GMT
+# $Revision: 1.20 $ $Date: 2025/01/21 02:10:44 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -94,7 +94,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.18 $'
+        cVer='$Revision: 1.20 $'
 
 =internal-head3 Documentation Format
 
@@ -137,16 +137,16 @@ fComSetGlobals() {
     # -------------------
     # Set current directory location in PWD and cCurDir, because with cron
     # jobs PWD is not set.
-    if [ -z "$PWD" ]; then
+    if [[ -z "$PWD" ]]; then
         PWD=$(pwd)
     fi
     cCurDir=${cCurDir:-$PWD}
 
     # -------------------
     # Define the location of the com script if not already set
-    if [ -z "$cBin" ]; then
+    if [[ -z "$cBin" ]]; then
         cBin=${0%/*}
-        if [ "$cBin" = "." ]; then
+        if [[ "$cBin" = "." ]]; then
             cBin=$PWD
         fi
         cd $cBin
@@ -162,15 +162,15 @@ fComSetGlobals() {
     gpVerbose=${gpVerbose:-0}
     # -l
     gpLog=${gpLog:-0}
-    gpFacility=${gpFacility:=user}
+    gpFacility=${gpFacility:-user}
     gErr=0
 
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.18 $'
+    #cVer='$Revision: 1.20 $'
 
-    if [ "$cVer" != "${cVer#*' '}" ]; then
+    if [[ "$cVer" != "${cVer#*' '}" ]]; then
         cVer=${cVer#*' '}
         cVer=${cVer%' '*}
     fi
@@ -178,9 +178,9 @@ fComSetGlobals() {
     # -------------------
     # Setup a temporary directory for each user/script.
     Tmp=${Tmp:-"/tmp/$USER/$cName"}
-    if [ ! -d $Tmp ]; then
+    if [[ ! -d $Tmp ]]; then
         mkdir -p $Tmp 2>/dev/null
-        if [ ! -d $Tmp ]; then
+        if [[ ! -d $Tmp ]]; then
             fError2 -m "Could not find directory $Tmp (\$Tmp)." -l $LINENO
         fi
     fi
@@ -192,7 +192,7 @@ fComSetGlobals() {
     # "${cTmpF}-*.tmp"
     cPID=$$
     cTmpF=$Tmp/file-$cPID
-    if [ $gpDebug -ne 0 ]; then
+    if [[ $gpDebug -ne 0 ]]; then
         cTmpF=$Tmp/file
         rm -f ${cTmpF}*.tmp 2>/dev/null
     fi
@@ -224,7 +224,7 @@ EOF
 fComCleanUp() {
     # shellcheck disable=SC2172
     trap - 1 2 3 4 5 6 7 8 10 11 12 13 14 15
-    if [ $gpDebug -eq 0 ]; then
+    if [[ $gpDebug -eq 0 ]]; then
         'rm' -f ${cTmpF}*.tmp 2>/dev/null
     fi
     ##fLog notice "Done" $LINENO 9900
@@ -266,10 +266,10 @@ fComCheckDeps() {
         fi
     done
 
-    if [ $tErr -eq 2 ]; then
+    if [[ $tErr -eq 2 ]]; then
         fError2 -m "Missing one or more required programs." -l $LINENO
     fi
-    if [ $tErr -eq 1 ]; then
+    if [[ $tErr -eq 1 ]]; then
         fLog2 -p warning -m "Missing some some optional programs." -l $LINENO
     fi
     return
@@ -290,7 +290,7 @@ EOF
 fComInternalDoc() {
     local pAll="$1"
 
-    if [ ".$pAll" = ".-a" ]; then
+    if [[ ".$pAll" = ".-a" ]]; then
         awk '
                         /^=internal-pod/,/^=internal-cut/ {
                                 sub(/^=internal-/,"=");
@@ -354,17 +354,17 @@ fComUsage() {
         esac
     done
     shift $((OPTIND - 1))
-    if [ $# -ne 0 ]; then
+    if [[ $# -ne 0 ]]; then
         fError2 -i -m "fComUsage: Unknown option: $*" -l $LINENO
     fi
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         shift
     done
 
     case $pStyle in
         short | usage)
             tProg=pod2usage
-            if [ $pInt -ne 0 ]; then
+            if [[ $pInt -ne 0 ]]; then
                 # This fails, don't know why
                 tProg='pod2text | head -n 24'
                 tProg=pod2text
@@ -372,7 +372,7 @@ fComUsage() {
             ;;
         man)
             tProg=pod2man
-            if [ $pInt -ne 0 ]; then
+            if [[ $pInt -ne 0 ]]; then
                 tProg=pod2text
             fi
             ;;
@@ -392,27 +392,27 @@ fComUsage() {
 
     # Validate
     pFileList=$pFileList
-    if [ -z "$pFileList" ]; then
+    if [[ -z "$pFileList" ]]; then
         fError2 -i -m "fComUsage missing pFileList" -l $LINENO
     fi
     for tFile in $pFileList; do
-        if [ -r $tFile ]; then
+        if [[ -r $tFile ]]; then
             tFileList="$tFileList $tFile"
         else
             fError2 -i -m "fComUsage cannot read: $tFile" -l $LINENO
         fi
     done
     tFileList=$tFileList
-    if [ -z "$tFileList" ]; then
+    if [[ -z "$tFileList" ]]; then
         fError2 -i -m "fComUsage missing a valid pFileList" -l $LINENO
     fi
 
-    if [ $pInt -eq 0 ]; then
-        if [ "$pStyle" = "html" ]; then
+    if [[ $pInt -eq 0 ]]; then
+        if [[ "$pStyle" = "html" ]]; then
             # shellcheck disable=SC2002
             cat $pFileList | $tProg --title="$pTitle" | $tTidy
         else
-            if [ "$pStyle" = "short" ]; then
+            if [[ "$pStyle" = "short" ]]; then
                 # shellcheck disable=SC2002
                 cat $tFileList | pod2text | head -n 20
             else
@@ -421,7 +421,7 @@ fComUsage() {
             fi
         fi
     else
-        if [ "$pStyle" = "html" ]; then
+        if [[ "$pStyle" = "html" ]]; then
             # shellcheck disable=SC2002
             cat $pFileList | fComInternalDoc $pAll | $tProg --title="$pTitle" | $tTidy
         else
@@ -475,11 +475,6 @@ fFmtLog() {
     local tLine
     local tErr
 
-    # Use this to turn PID on/off in logs
-    local tPID_Flag=0
-    local tPID=""
-    local tPID_Opt=""
-
     # Set any missing globals
     gpLog=${gpLog:-0}
     gpFacility=${gpFacility:-user}
@@ -489,12 +484,12 @@ fFmtLog() {
     tLevel=$pLevel
 
     # Check debug
-    if [ $gpDebug -eq 0 ] && [ "${pLevel%-*}" = "debug" ]; then
+    if [[ $gpDebug -eq 0 ]] && [[ "${pLevel%-*}" = "debug" ]]; then
         return
     fi
-    if [ $gpDebug -ne 0 ] && [ "${pLevel%%-*}" != "$pLevel" ]; then
+    if [[ $gpDebug -ne 0 ]] && [[ "${pLevel%%-*}" != "$pLevel" ]]; then
         tDebugLevel=${pLevel##*-}
-        if [ $tDebugLevel -gt $gpDebug ]; then
+        if [[ $tDebugLevel -gt $gpDebug ]]; then
             return
         fi
         tLevel=debug
@@ -510,26 +505,21 @@ fFmtLog() {
 
     # LineNo format
     tLine=""
-    if [ -n "$pLine" ]; then
+    if [[ -n "$pLine" ]]; then
         tLine="[$pLine]"
     fi
 
     # Err format
     tErr=""
-    if [ -n "$pErr" ]; then
+    if [[ -n "$pErr" ]]; then
         tErr="($pErr)"
     fi
 
-    if [ $tPID_Flag -eq 1 ]; then
-        tPID="[$tPID]"
-        tPID_Opt="-i"
-    fi
-
     # Output
-    if [ $gpLog -eq 0 ]; then
-        echo "${cName}$tPID $pLevel: $pMsg $tLine$tErr" 1>&2
+    if [[ $gpLog -eq 0 ]]; then
+        echo "${cName} $pLevel: $pMsg $tLine$tErr" 1>&2
     else
-        logger -s $tPID_Opt -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
+        logger -s -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
     fi
     return
 
@@ -657,7 +647,7 @@ fLog2() {
         esac
     done
     shift $((OPTIND - 1))
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         shift
     done
 
@@ -699,19 +689,19 @@ fError2() {
         esac
     done
     shift $((OPTIND - 1))
-    if [ $# -ne 0 ]; then
+    if [[ $# -ne 0 ]]; then
         pMsg="$pMsg $*"
     fi
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         shift
     done
     gErr=$pErr
 
-    if [ $pInt -eq 1 ]; then
+    if [[ $pInt -eq 1 ]]; then
         pMsg="Internal: $pMsg"
     fi
     fLog2 -p crit -l $pLine -e $pErr -m "$pMsg"
-    if [ $pInt -eq 0 ]; then
+    if [[ $pInt -eq 0 ]]; then
         fUsage usage
     fi
     exit 1

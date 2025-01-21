@@ -119,7 +119,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.7 $'
+           cVer='$Revision: 1.8 $'
 
 ### Documentation Format
 
@@ -261,6 +261,11 @@ Test fLog and fLog2.
 ### testSysLog
 
 Test fLog and fLog2, and verify messages are in a syslog file.
+
+### testSysLog
+
+Test fLog and fLog2, and verify messages are in a syslog file created by
+rsyslog rule for local1. See template.sh NOTES, Custom Script Logs.
 
 ### testErrorLog
 

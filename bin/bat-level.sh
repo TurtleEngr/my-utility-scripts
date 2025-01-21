@@ -101,17 +101,17 @@ fLog() {
         tUnplug=1
     fi
     if [[ $tL -le $cMin && "$tS" = "Discharging" && $tPlugIn -eq 0 ]]; then
-        wall "Battery is at $tL%. Plug it in."
+        wall "$HOSTNAME's battery is at $tL%. Plug it in."
         if [[ -x $cSay ]]; then
-            $cSay "The battery is low. Plug it in."
+            $cSay "$HOSTNAME's battery is low."
         fi
         touch $cInFile
         rm $cOutFile >/dev/null 2>&1
     fi
     if [[ $tL -ge $cMax && "$tS" = "Charging" && $tUnplug -eq 0 ]]; then
-        wall "Battery is at $tL%. Unplug it."
+        wall "$HOSTNAME's Battery is at $tL%. Unplug it."
         if [[ -x $cSay ]]; then
-            $cSay "The battery is at $tL%. Unplug it."
+            $cSay "$HOSTNAME's battery is at $tL%."
         fi
         touch $cOutFile
         rm $cInFile >/dev/null 2>&1

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.79 $ $Date: 2024/11/12 04:11:53 $ GMT
+# $Revision: 1.81 $ $Date: 2025/01/21 02:10:44 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -154,7 +154,8 @@ if gpDebug is 0, temp files will usually include the PID.
 
 If set to 0, log messages will only be sent to stderr.
 
-If set to 1, log messages will be sent to stderr and syslog.
+If set to 1, log messages will be sent to stderr and syslog. See
+gpFacility for more details.
 
 See -l, fLog and fErr for details
 
@@ -165,39 +166,39 @@ Default: 0
 Log messages sent to syslog will be sent to the "facility" specified
 by by gpFacility.
 
-"user" log messages will be sent to /var/log/user.log, or
-/var/log/syslog, or /var/log/messages.log
-
-See: fLog
+See: fLog. Also see Notes, Custom Script Logs
 
 Default: user
 
 Allowed facility names:
 
  local0 through local7 - local system facilities
- user - misc scripts, generic user-level messages
- auth - security/authorization messages
+ user - misc scripts, generic user-level messages, /var/log/user.log
+ auth - security/authorization messages, /var/log/auth.log
  authpriv - security/authorization messages (private)
- cron - clock daemon (cron and at)
- daemon - system daemons without separate facility value
+ cron - clock daemon (cron and at), /var/log/cron.log
+ daemon - system daemons without separate facility value, /var/log/daemon.log
  ftp - ftp daemon
  kern - kernel  messages  (these  can't be generated from user processes)
  lpr - line printer subsystem
  mail - mail subsystem
  news - USENET news subsystem
- syslog - messages generated internally by syslogd(8)
+ syslog - messages generated internally by syslogd(8), /var/log/syslog.log
  uucp - UUCP subsystem
 
 These are some suggested uses for the localN facilities:
 
- local0 - system or application configuration
- local1 - application processes
+ local0 - system or application configuration (e.g. CFEngine)
+ local1 - application processes, /var/log/app-$cName.log
  local2 - web site errors
  local3 - web site access
  local4 - backend processes
- local5 - publishing
- local6 - available
- local7 - available
+ local5 - publishing/deployments
+ local6 - ?
+ local7 - ?
+
+Priority levels: emerg, alert, crit, err, warning, notice, info,
+debug, debug-N
 
 =item B<gpVerbose>
 
@@ -253,7 +254,31 @@ shunit2.1
 bash-com.inc
 bash-com.test
 
-=for comment =head1 NOTES
+=head1 NOTES
+
+=head2 Custom Script Logs
+
+Create this file /etc/rsyslog.d/10-custom-formats.conf
+
+  $template PriCSV,"\"%timegenerated%\",%HOSTNAME%,%pri-text%,%syslogtag%%msg%\n"
+  $template PriSp,"%timegenerated% %HOSTNAME% %pri-text% %syslogtag%%msg%\n"
+
+  $template TLocal1,"/var/log/app-%programname%.log"
+  local1.*       -?TLocal1;PriSp
+
+You can also edit /etc/rsyslog.conf to use the PriSp or PriCSV
+templates for all the log files. Just append ";PriSp" after each of
+the log file names. These templates include the faclity and priority
+levels with the messages, so it will be easier to redefine the rsyslog
+config to limit missplaced or verbose messages.
+
+Restart rsyslog to use the new config.
+
+Now if gpLog is set to 1 and gpFacility is set to local1, log messages
+will be sent to: /var/log/app-$cName.log
+
+In addition see the "# Setup default logging" code below. If gpLog is
+1, then all stdout and stderr output will be sent to $gpFacility.info.
 
 =head1 CAVEATS
 
@@ -279,7 +304,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.79 $ $Date: 2024/11/12 04:11:53 $ GMT
+$Revision: 1.81 $ $Date: 2025/01/21 02:10:44 $ GMT
 
 =cut
 EOF
@@ -345,7 +370,7 @@ EOF
 
 # -------------------
 fValidateHostName() {
-    if [ -z $gpHostName ]; then
+    if [[ -z "$gpHostName" ]]; then
         fError2 -m "The -n or -c option is required." -l $LINENO
     fi
     return
@@ -489,7 +514,7 @@ EOF
 # -------------------
 # This should be the last defined function
 fRunTests() {
-    if [ "$gpTest" = "list" ]; then
+    if [[ "$gpTest" = "list" ]]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
 #        grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
         exit 1
@@ -497,13 +522,13 @@ fRunTests() {
     SHUNIT_COLOR=auto
     # SHUNIT_COLOR=always
     # SHUNIT_COLOR=none
-    if [ "$gpTest" = "all" ]; then
+    if [[ "$gpTest" = "all" ]]; then
         gpTest=""
         # shellcheck disable=SC1091
         . /usr/local/bin/shunit2.1
         exit $?
     fi
-    if [ "$gpTest" = "com" ]; then
+    if [[ "$gpTest" = "com" ]]; then
         gpTest=""
         $cBin/bash-com.test
         exit $?
@@ -535,7 +560,7 @@ cName=template.sh
 # -------------------
 # Set current directory location in PWD and cCurDir, because with cron
 # jobs PWD is not set.
-if [ -z "$PWD" ]; then
+if [[ -z "$PWD" ]]; then
     PWD=$(pwd)
 fi
 cCurDir=$PWD
@@ -552,7 +577,7 @@ case $tBin in
     system) cBin=/usr/bin ;;
     this)
         cBin=${0%/*}
-        if [ "$cBin" = "." ]; then
+        if [[ "$cBin" = "." ]]; then
             cBin=$PWD
         fi
         cd $cBin
@@ -567,12 +592,12 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.79 $'
+cVer='$Revision: 1.81 $'
 fSetGlobals
 
 # -------------------
 # Get Args Section
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
     fError2 -m "Missing options." -l $LINENO
 fi
 while getopts :cn:t:hH:lT:vx tArg; do
@@ -601,18 +626,26 @@ while getopts :cn:t:hH:lT:vx tArg; do
 done
 ((--OPTIND))
 shift $OPTIND
-if [ $# -ne 0 ]; then
+if [[ $# -ne 0 ]]; then
     # File names are usually the only arguments not matched.
     # If nothing is expected, then change this to fError...
     gpFileList="$*"
 fi
-while [ $# -ne 0 ]; do
+while [[ $# -ne 0 ]]; do
     shift
 done
 
 # -------------------
-if [ -n "$gpTest" ]; then
+if [[ -n "$gpTest" ]]; then
     fRunTests
+fi
+
+# -------------------
+# Setup default logging
+
+if [[ $gpLog -ne 0 ]]; then
+    gpFacility=local1
+    exec 1> >(logger -s -t $cName -p $gpFacility.info) 2>&1
 fi
 
 # -------------------
@@ -642,7 +675,7 @@ timeout 5 awk -f $cTmp1 >$cTmp2
 
 tList=""
 for i in $(seq 2 40); do
-    if [ -e "File$i" ]; then
+    if [[ -e "File$i" ]]; then
         fLog2 -m "Found File$i"
         tList="$tList File$i"
     fi

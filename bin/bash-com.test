@@ -1,24 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.test,v $
-# $Revision: 1.11 $ $Date: 2024/06/11 02:44:12 $ GMT
-
-# -------------------
-# Set current directory location in PWD and cCurDir, because with cron
-# jobs PWD is not set.
-if [ -z "$PWD" ]; then
-    PWD=$(pwd)
-fi
-cCurDir=$PWD
-
-# -------------------
-# Define the location of the script
-cBin=${0%/*}
-if [ "$cBin" = "." ]; then
-    cBin=$PWD
-fi
-cd $cBin
-cBin=$PWD
-cd $cCurDir
+# $Revision: 1.13 $ $Date: 2025/01/21 02:10:44 $ GMT
 
 # --------------------------------
 fComBashTestUsage() {
@@ -80,7 +62,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.11 $ $Date: 2024/06/11 02:44:12 $ GMT
+$Revision: 1.13 $ $Date: 2025/01/21 02:10:44 $ GMT
 
 =cut
 EOF
@@ -93,7 +75,7 @@ fCleanUp() {
 
 # --------------------------------
 fComUDebug() {
-    if [ ${gpUnitDebug:-0} -ne 0 ]; then
+    if [[ ${gpUnitDebug:-0} -ne 0 ]]; then
         echo "fComUDebug: $*"
     fi
     return
@@ -109,6 +91,10 @@ oneTimeSetUp() {
     . $cBin/bash-com.inc
     fComSetGlobals
 
+    echo "sudo chmod a+r /var/log/user.log /var/log/app-bash-com.test.log"
+    sudo touch /var/log/user.log /var/log/app-bash-com.test.log
+    sudo chmod a+r /var/log/user.log /var/log/app-bash-com.test.log
+
     # Save global values
     export tDefault_Tmp=$Tmp
     export tDefault_cBin=$cBin
@@ -123,7 +109,7 @@ oneTimeSetUp() {
     export tDefault_gpFacility=user
     export tDefault_gpLog=0
     export tDefault_gpVerbose=0
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
@@ -144,6 +130,13 @@ Calls:
 =internal-cut
 EOF
 } # oneTimeSetUp
+
+oneTimeTearDown() {
+#    if [[ $gpDebug -eq 0 ]]; then
+#        sudo rm /var/log/app-bash-com.test.log
+#    fi
+    return 0
+} # oneTimeTearDown
 
 # --------------------------------
 setUp() {
@@ -249,12 +242,12 @@ testComLog_MultiplePermutations() {
                     for tLog in "fLog" "fLog2"; do
                         echo -n '.' 1>&2
                         tTestMsg="l-$gpLog.v-$gpVerbose.d-$gpDebug.$tLevel.$tLog"
-                        if [ "$tLog" = "fLog" ]; then
+                        if [[ "$tLog" = "fLog" ]]; then
                             fComUDebug " "
                             fComUDebug "Call: fLog $tLevel \"$tMsg\" $tLine $tErr"
                             tResult=$(fLog $tLevel "$tMsg" $tLine $tErr 2>&1)
                         fi
-                        if [ "$tLog" = "fLog2" ]; then
+                        if [[ "$tLog" = "fLog2" ]]; then
                             fComUDebug " "
                             fComUDebug "Call: fLog2 -p $tLevel -m \"$tMsg\" -l $tLine -e $tErr"
                             tResult=$(fLog2 -p $tLevel -m "$tMsg" -l $tLine -e $tErr 2>&1)
@@ -317,10 +310,7 @@ testComSysLog() {
     local tTestMsg
 
     # ADJUST? This is dependent on your syslog configuration.
-    # ADJUST? Also these files should be readable (a+r)
     export tSyslog=/var/log/user.log
-    #export tSyslog=/var/log/messages.log
-    #export tSyslog=/var/log/syslog
 
     # Check syslog
     gpUnitDebug=0
@@ -333,11 +323,11 @@ testComSysLog() {
             echo -n '.' 1>&2
             tTestMsg="$tLevel.$tLog"
             fComUDebug " "
-            if [ "$tLog" = "fLog" ]; then
+            if [[ "$tLog" = "fLog" ]]; then
                 fComUDebug "Call: $tLog $tLevel $tMsg"
                 tResult=$($tLog $tLevel "$tMsg" 2>&1)
             fi
-            if [ "$tLog" = "fLog2" ]; then
+            if [[ "$tLog" = "fLog2" ]]; then
                 fComUDebug "Call: $tLog -p $tLevel -m \"$tMsg\""
                 tResult=$($tLog -p $tLevel -m "$tMsg" 2>&1)
             fi
@@ -365,6 +355,75 @@ EOF
 } # testSysLog
 
 # --------------------------------
+testComSysLogLocal1() {
+    local tErr
+    local tLevel
+    local tLine
+    local tLog
+    local tMsg
+    local tResult
+    local tTestMsg
+
+    if ! grep -q TLocal1 /etc/rsyslog.d/* >/dev/null 2>&1; then
+        echo -e '\tSkipping testComSysLogLocal1 - it has not been defined.' 1>&2
+        return 0
+    fi
+
+    # ADJUST? This is dependent on your syslog configuration.
+    export tSyslog=/var/log/app-bash-com.test.log
+    sudo chmod a+r,ugo+w $tSyslog
+    sudo echo >$tSyslog
+
+    # Check syslog
+    gpUnitDebug=0
+    gpLog=1
+    gpFacility=local1
+    gpVerbose=0
+    tMsg="Testing 123"
+    #for tLevel in crit err warning; do
+    for tLevel in crit err warning; do
+        for tLog in "fLog" "fLog2"; do
+            echo -n '.' 1>&2
+            tTestMsg="$tLevel.$tLog"
+            fComUDebug " "
+            if [[ "$tLog" = "fLog" ]]; then
+                fComUDebug "Call: $tLog $tLevel $tMsg"
+                tResult=$($tLog $tLevel "$tMsg" 2>&1)
+            fi
+            if [[ "$tLog" = "fLog2" ]]; then
+                fComUDebug "Call: $tLog -p $tLevel -m \"$tMsg\""
+                tResult=$($tLog -p $tLevel -m "$tMsg" 2>&1)
+            fi
+            fComUDebug "tResult=$tResult"
+            assertContains "$LINENO $tTestMsg" "$tResult" "$tLevel:"
+            tResult=$(tail -n1 $tSyslog)
+            fComUDebug "syslog tResult=$tResult"
+            assertContains "$LINENO $tTestMsg" "$tResult" "$tLevel:"
+            assertContains "$LINENO $tTestMsg" "$tResult" "local1.$tLevel"
+            assertContains "$LINENO $tTestMsg" "$tResult" "bash-com.test:"
+            assertContains "$LINENO $tTestMsg" "$tResult" "$HOSTNAME"
+            assertContains "$LINENO $tTestMsg" "$tResult" "$tMsg"
+            sleep 1
+        done
+    done
+    echo 1>&2
+
+    gpUnitDebug=0
+    return
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 testSysLog
+
+Test fLog and fLog2, and verify messages are in a syslog file created by
+rsyslog rule for local1. See template.sh NOTES, Custom Script Logs.
+
+=internal-cut
+EOF
+} # testSysLogLocal1
+
+# --------------------------------
 testComErrorLog() {
     local tMsg
     local tLevel
@@ -384,11 +443,11 @@ testComErrorLog() {
             echo -n '.' 1>&2
             tTestMsg="l-$gpLog.$tLog"
             fComUDebug " "
-            if [ "$tLog" = "fError" ]; then
+            if [[ "$tLog" = "fError" ]]; then
                 fComUDebug "Call: $tLog \"$tMsg\" $tLine"
                 tResult=$($tLog "$tMsg" $tLine 2>&1)
             fi
-            if [ "$tLog" = "fError2" ]; then
+            if [[ "$tLog" = "fError2" ]]; then
                 fComUDebug "Call: $tLog -m \"$tMsg\" -l $tLine"
                 tResult=$($tLog -m "$tMsg" -l $tLine 2>&1)
             fi
@@ -557,7 +616,7 @@ EOF
 # This should be the last defined function
 fComRunTests() {
     export gpUnitDebug=${gpUnitDebug:-0}
-    if [ "${gpTest:-all}" = "all" ]; then
+    if [[ "${gpTest:-all}" = "all" ]]; then
         # shellcheck disable=SC1091
         . $cBin/shunit2.1
         exit $?
@@ -577,7 +636,8 @@ Run unit tests for the common functions.
 EOF
 } # fComRunTests
 
-# ====================
+# ========================================
+# Main
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose
@@ -586,6 +646,24 @@ export gErr gpDebug gpFacility gpLog gpVerbose
 export gpTest
 export gpUnitDebug
 export SHUNIT_COLOR
+
+# -------------------
+# Set current directory location in PWD and cCurDir, because with cron
+# jobs PWD is not set.
+if [[ -z "$PWD" ]]; then
+    PWD=$(pwd)
+fi
+cCurDir=$PWD
+
+# -------------------
+# Define the location of the script
+cBin=${0%/*}
+if [[ "$cBin" = "." ]]; then
+    cBin=$PWD
+fi
+cd $cBin
+cBin=$PWD
+cd $cCurDir
 
 # -----
 # Optional input: a comma separated list of test function names
