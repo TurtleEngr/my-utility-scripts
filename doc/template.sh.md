@@ -203,7 +203,7 @@ Create this file /etc/rsyslog.d/10-custom-formats.conf
     $template PriCSV,"\"%timegenerated%\",%HOSTNAME%,%pri-text%,%syslogtag%%msg%\n"
     $template PriSp,"%timegenerated% %HOSTNAME% %pri-text% %syslogtag%%msg%\n"
 
-    $template TLocal1,"/var/log/app-%programname%.log"
+    $template TLocal1,"/var/log/app/%programname%.log"
     local1.*       -?TLocal1;PriSp
 
 You can also edit /etc/rsyslog.conf to use the PriSp or PriCSV
@@ -219,6 +219,45 @@ will be sent to: /var/log/app-$cName.log
 
 In addition see the "# Setup default logging" code below. If gpLog is
 1, then all stdout and stderr output will be sent to $gpFacility.info.
+
+## More Custom Logs
+
+Optionally, the other localN facilities can be setup to log other
+intersting services.
+
+    local0 - configuration, /var/log/config/$cName.log
+    local1 - application processes, /var/log/app/$cName.log
+    local2 - web site errors, /var/log/web/$Site.error.log
+    local3 - web site access, /var/log/web/$Site.access.log
+    local4 - backend processes, /var/log/backend/$cName.log
+    local5 - publishing/deployments, /var/log/publish/$cName.log
+    local6 - ?, /var/log/syslog
+    local7 - ?, /var/log/syslog
+
+
+    $template TLocal0,"/var/log/config/%programname%.log"
+    local0.*       -?TLocal0;PriSp
+     
+    $template TLocal1,"/var/log/app/%programname%.log"
+    local1.*       -?TLocal1;PriSp
+
+    $template TLocal2,"/var/log/web/%programname%.error.log"
+    local2.*       -?TLocal2;PriSp
+
+    $template TLocal3,"/var/log/app/%programname%.access.log"
+    local3.*       -?TLocal3;PriSp
+
+    $template TLocal4,"/var/log/backend/%programname%.log"
+    local4.*       -?TLocal4;PriSp
+
+    $template TLocal5,"/var/log/publish/%programname%.log"
+    local5.*       -?TLocal5;PriSp
+
+    $template TLocal6,"/var/log/syslog
+    local6.*       -?TLocal6;PriSp
+
+    $template TLocal7,"/var/log/syslog
+    local7.*       -?TLocal6;PriSp
 
 # CAVEATS
 
@@ -242,4 +281,4 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.19 $ $Date: 2025/01/21 02:13:08 $ GMT
+$Revision: 1.20 $ $Date: 2025/01/21 19:37:52 $ GMT

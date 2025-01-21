@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.test,v $
-# $Revision: 1.13 $ $Date: 2025/01/21 02:10:44 $ GMT
+# $Revision: 1.14 $ $Date: 2025/01/21 19:34:27 $ GMT
 
 # --------------------------------
 fComBashTestUsage() {
@@ -62,7 +62,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.13 $ $Date: 2025/01/21 02:10:44 $ GMT
+$Revision: 1.14 $ $Date: 2025/01/21 19:34:27 $ GMT
 
 =cut
 EOF
@@ -91,9 +91,11 @@ oneTimeSetUp() {
     . $cBin/bash-com.inc
     fComSetGlobals
 
-    echo "sudo chmod a+r /var/log/user.log /var/log/app-bash-com.test.log"
-    sudo touch /var/log/user.log /var/log/app-bash-com.test.log
-    sudo chmod a+r /var/log/user.log /var/log/app-bash-com.test.log
+    echo "sudo chmod a+r /var/log/user.log /var/log/app/bash-com.test.log"
+    
+    sudo touch /var/log/user.log /var/log/app/bash-com.test.log
+    sudo chmod a+rwx /var/log/app/
+    sudo chmod a+rw /var/log/user.log /var/log/app/bash-com.test.log
 
     # Save global values
     export tDefault_Tmp=$Tmp
@@ -132,9 +134,10 @@ EOF
 } # oneTimeSetUp
 
 oneTimeTearDown() {
-#    if [[ $gpDebug -eq 0 ]]; then
-#        sudo rm /var/log/app-bash-com.test.log
-#    fi
+    if [[ $gpDebug -eq 0 ]]; then
+        echo sudo rm /var/log/app/bash-com.test.log
+        sudo chmod go-w /var/log/user.log /var/log/app /var/log/app/*
+    fi
     return 0
 } # oneTimeTearDown
 
@@ -370,8 +373,9 @@ testComSysLogLocal1() {
     fi
 
     # ADJUST? This is dependent on your syslog configuration.
-    export tSyslog=/var/log/app-bash-com.test.log
-    sudo chmod a+r,ugo+w $tSyslog
+    export tSyslog=/var/log/app/bash-com.test.log
+    sudo chmod a+rwx /var/log/app
+    sudo chmod a+rw $tSyslog
     sudo echo >$tSyslog
 
     # Check syslog
@@ -394,6 +398,7 @@ testComSysLogLocal1() {
                 fComUDebug "Call: $tLog -p $tLevel -m \"$tMsg\""
                 tResult=$($tLog -p $tLevel -m "$tMsg" 2>&1)
             fi
+            sleep 1
             fComUDebug "tResult=$tResult"
             assertContains "$LINENO $tTestMsg" "$tResult" "$tLevel:"
             tResult=$(tail -n1 $tSyslog)
@@ -403,7 +408,6 @@ testComSysLogLocal1() {
             assertContains "$LINENO $tTestMsg" "$tResult" "bash-com.test:"
             assertContains "$LINENO $tTestMsg" "$tResult" "$HOSTNAME"
             assertContains "$LINENO $tTestMsg" "$tResult" "$tMsg"
-            sleep 1
         done
     done
     echo 1>&2
