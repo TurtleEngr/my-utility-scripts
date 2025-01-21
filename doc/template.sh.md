@@ -100,7 +100,8 @@ The the "common" CLI flags will override the initial variable settings.
 
     If set to 0, log messages will only be sent to stderr.
 
-    If set to 1, log messages will be sent to stderr and syslog.
+    If set to 1, log messages will be sent to stderr and syslog. See
+    gpFacility for more details.
 
     See -l, fLog and fErr for details
 
@@ -111,39 +112,39 @@ The the "common" CLI flags will override the initial variable settings.
     Log messages sent to syslog will be sent to the "facility" specified
     by by gpFacility.
 
-    "user" log messages will be sent to /var/log/user.log, or
-    /var/log/syslog, or /var/log/messages.log
-
-    See: fLog
+    See: fLog. Also see Notes, Custom Script Logs
 
     Default: user
 
     Allowed facility names:
 
         local0 through local7 - local system facilities
-        user - misc scripts, generic user-level messages
-        auth - security/authorization messages
+        user - misc scripts, generic user-level messages, /var/log/user.log
+        auth - security/authorization messages, /var/log/auth.log
         authpriv - security/authorization messages (private)
-        cron - clock daemon (cron and at)
-        daemon - system daemons without separate facility value
+        cron - clock daemon (cron and at), /var/log/cron.log
+        daemon - system daemons without separate facility value, /var/log/daemon.log
         ftp - ftp daemon
         kern - kernel  messages  (these  can't be generated from user processes)
         lpr - line printer subsystem
         mail - mail subsystem
         news - USENET news subsystem
-        syslog - messages generated internally by syslogd(8)
+        syslog - messages generated internally by syslogd(8), /var/log/syslog.log
         uucp - UUCP subsystem
 
     These are some suggested uses for the localN facilities:
 
-        local0 - system or application configuration
-        local1 - application processes
+        local0 - system or application configuration (e.g. CFEngine)
+        local1 - application processes, /var/log/app-$cName.log
         local2 - web site errors
         local3 - web site access
         local4 - backend processes
-        local5 - publishing
-        local6 - available
-        local7 - available
+        local5 - publishing/deployments
+        local6 - ?
+        local7 - ?
+
+    Priority levels: emerg, alert, crit, err, warning, notice, info,
+    debug, debug-N
 
 - **gpVerbose**
 
@@ -193,6 +194,32 @@ shunit2.1
 bash-com.inc
 bash-com.test
 
+# NOTES
+
+## Custom Script Logs
+
+Create this file /etc/rsyslog.d/10-custom-formats.conf
+
+    $template PriCSV,"\"%timegenerated%\",%HOSTNAME%,%pri-text%,%syslogtag%%msg%\n"
+    $template PriSp,"%timegenerated% %HOSTNAME% %pri-text% %syslogtag%%msg%\n"
+
+    $template TLocal1,"/var/log/app-%programname%.log"
+    local1.*       -?TLocal1;PriSp
+
+You can also edit /etc/rsyslog.conf to use the PriSp or PriCSV
+templates for all the log files. Just append ";PriSp" after each of
+the log file names. These templates include the faclity and priority
+levels with the messages, so it will be easier to redefine the rsyslog
+config to limit missplaced or verbose messages.
+
+Restart rsyslog to use the new config.
+
+Now if gpLog is set to 1 and gpFacility is set to local1, log messages
+will be sent to: /var/log/app-$cName.log
+
+In addition see the "# Setup default logging" code below. If gpLog is
+1, then all stdout and stderr output will be sent to $gpFacility.info.
+
 # CAVEATS
 
 \[Things to take special care with; sometimes called WARNINGS.\]
@@ -215,4 +242,4 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.18 $ $Date: 2024/11/22 16:42:44 $ GMT
+$Revision: 1.19 $ $Date: 2025/01/21 02:13:08 $ GMT

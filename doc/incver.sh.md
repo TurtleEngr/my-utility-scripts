@@ -31,7 +31,7 @@ First initialize the version of FILE to have 3 numbers, e.g. 1.0.0
 
 - **-s pChar**
 
-    Change the separator charactre. Default: '.' 
+    Change the separator charactre. Default: '.'
 
 - **-f FILE or FILE**
 
@@ -57,4 +57,4 @@ First initialize the version of FILE to have 3 numbers, e.g. 1.0.0
 
 GPLv2 (c) Copyright
 
-$Revision: 1.2 $ $Date: 2025/01/10 01:42:04 $ GMT
+$Revision: 1.3 $ $Date: 2025/01/21 02:13:08 $ GMT
