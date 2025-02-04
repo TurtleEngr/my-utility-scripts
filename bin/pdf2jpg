@@ -1,8 +1,15 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/pdf2jpg,v 1.7 2024/11/06 22:44:59 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/pdf2jpg,v 1.8 2025/02/04 05:10:00 bruce Exp $
 # Source: https://askubuntu.com/questions/100994/convert-pdf-to-image
 
-if [ $# -eq 0 ]; then
+# --------------------
+export cgDPI=${cDPI:-600}
+export cgWidth=${cgWidth:-1920}
+export cgHeight=${cgHeight:-1080}
+export cgFill=${cgFill:-black}
+
+# --------------------
+if [[ $# -eq 0 ]]; then
     cat <<EOF | more
 Usage:
     pdf2jpg Input.pdf
@@ -11,8 +18,8 @@ Description
     Input.pdf file will be converted to one image per page. The images
     are put in the current directory. Named: page-NN.jpg.
 
-    Also page-NN-fit.jpg files are created, using cgWidth and
-    cgHeight values.
+    If page-fit file exists, then page-NN-fit.jpg files are created,
+    using cgWidth and cgHeight values.
 
     Note: the page files are only generated if Input.pdf is newer than
     the page files.
@@ -29,29 +36,30 @@ EOF
     exit 1
 fi
 
+# ========================================
 gpInFile=$1
-export cgDPI=${cDPI:-600}
-export cgWidth=${cgWidth:-1920}
-export cgHeight=${cgHeight:-1080}
-export cgFill=${cgFill:-black}
 
-if [ ! -r $gpFile ]; then
-    echo "Error: Could not read $gpFile"
+if [[ ! -r $gpInFile ]]; then
+    echo "Error: Could not read $gpInFile"
     exit 1
 fi
 
-if [ ! -f page-01.jpg -o $gpInFile -nt page-01.jpg ]; then
+if [[ ! -f page-01.jpg || $gpInFile -nt page-01.jpg ]]; then
     echo "gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cgDPI -sOutputFile='page-%02d.jpg' $gpInFile"
     gs -dNOPAUSE -dBATCH -sDEVICE=jpeg -r$cgDPI -sOutputFile='page-%02d.jpg' $gpInFile
 fi
 
 # Resize, preserve aspect ratio, put black boarders to fill
-if [ ! -r page-01.jpg ]; then
+if [[ ! -r page-01.jpg ]]; then
     echo "Error: Could not find input page files."
     exit 1
 fi
 
-if [ $gpInFile -nt page-01-fit.jpg ]; then
+if [[ ! -f page-fit ]]; then
+    exit 0
+fi
+
+if [[ $gpInFile -nt page-01-fit.jpg ]]; then
     for i in page-[0-9]*.jpg; do
         echo "Generating: ${i%.jpg}-fill.jpg"
         convert $i -quality 90% -scale ${cgWidth}x${cgHeight} -background $cgFill -gravity center -extent ${cgWidth}x${cgHeight} ${i%.jpg}-fit.jpg
