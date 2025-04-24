@@ -79,6 +79,7 @@ See the SEE ALSO section for the required programs.
     '**** ' - will be replaced with <h4> (similarly for 5 and 6 *)
     '{.*}' - will be replaced with <cite>.*</cite>
     '[TBD.*] - will be replaced with <span class="tbd">[TBD.*]</span>
+    '[TK.*] - will be replaced with <span class="tbd">[TK.*]</span>
 
 =head1 OPTIONS
 
@@ -258,6 +259,7 @@ EOF
 cat <<\EOF >$cPreFixPl
     while (<>) {
         s/\[TBD([^]]*])/<span class="tbd">[TBD$1<\/span>/;
+        s/\[TK([^]]*])/<span class="tbd">[TK$1<\/span>/;
         print $_;
     }
 EOF

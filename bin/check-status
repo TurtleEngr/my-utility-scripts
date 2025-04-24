@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/check-status,v 1.15 2023/05/21 01:10:33 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/check-status,v 1.16 2025/03/20 22:11:26 bruce Exp $
 
 # ========================================
 # Functions
@@ -29,10 +29,11 @@ CLI Usage for ip/port check:
         check-status 1 ip port
 
 CLI Usage for file check:
-        check-status 2 N
+        check-status 2 foo bar N
 
         N=1, return: head -n 1 /var/local/check-mail.tmp
         N=2, return: grep "Subject: " /var/local/rsnapshot-monitor.tmp | head -n 1
+        N=3, return: "OK" if file $cFile3 exists
 
 Output 1 "ip":
         If IP PORT connected, output "OK"
@@ -165,6 +166,11 @@ fGetStatus() {
                 2)
                     if [ -r $cFile2 ]; then
                         tResult=$(grep 'Subject: ' $cFile2 | head -n 1)
+                    fi
+                    ;;
+                3)
+                    if [ -f $cFile3 ]; then
+                        tResult="OK"
                     fi
                     ;;
             esac
@@ -343,6 +349,17 @@ testGetStatus() {
     tMsg='Subject: asimov backup OK'
     echo "$tMsg" >$cFile2
     assertEquals "line=$LINENO" "$tMsg" "$(fGetStatus 2 ip port 2)"
+
+    # -----
+    tMsg='OK'
+    cFile3=/home/bruce/bin/check-status
+    assertEquals "line=$LINENO" "$tMsg" "$(fGetStatus 2 ip port 3)"
+
+    # -----
+    tMsg='OK'
+    cFile3=/home/bruce/bin/check-statusXX
+    assertNotEquals "line=$LINENO" "$tMsg" "$(fGetStatus 2 ip port 3)"
+
 } # testGetStatus
 
 # --------------------
@@ -546,6 +563,11 @@ export pFile=""
 
 export cFile1=/var/local/check-mail.tmp
 export cFile2=/var/local/rsnapshot-monitor.tmp
+
+# Note: these will always fail
+export cFile3=/home/bruce/bc/home.cvs/mounted
+export cFile3=/home/bruce/bc/tmp/mounted
+
 export cHost=asimov
 
 export tResult=""
