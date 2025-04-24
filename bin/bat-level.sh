@@ -4,7 +4,7 @@ set -u
 # ========================================
 # Config
 
-export cMin=${cMin:-15}
+export cMin=${cMin:-16}
 export cMax=${cMax:-95}
 export cMinSay=${cMinSay:-"The battery is below ${cMin}%. Plug it in."}
 export cMaxSay=${cMaxSay:-"The battery is above ${cMax}%. Unplug it."}
@@ -102,19 +102,22 @@ fLog() {
     fi
     if [[ $tL -le $cMin && "$tS" = "Discharging" && $tPlugIn -eq 0 ]]; then
         wall "$HOSTNAME's battery is at $tL%. Plug it in."
+        touch $cInFile
+        rm $cOutFile >/dev/null 2>&1
         if [[ -x $cSay ]]; then
             $cSay "$HOSTNAME's battery is low."
         fi
-        touch $cInFile
-        rm $cOutFile >/dev/null 2>&1
     fi
     if [[ $tL -ge $cMax && "$tS" = "Charging" && $tUnplug -eq 0 ]]; then
         wall "$HOSTNAME's Battery is at $tL%. Unplug it."
+        touch $cOutFile
+        rm $cInFile >/dev/null 2>&1
         if [[ -x $cSay ]]; then
             $cSay "$HOSTNAME's battery is at $tL%."
         fi
-        touch $cOutFile
-        rm $cInFile >/dev/null 2>&1
+    fi
+    if [[ $tL -gt $cMin && $tL -lt $cMax ]]; then
+        rm $cInFile $cOutFile >/dev/null 2>&1
     fi
 } # fLog
 
