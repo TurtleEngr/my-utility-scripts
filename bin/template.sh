@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.82 $ $Date: 2025/01/21 19:34:27 $ GMT
+# $Revision: 1.83 $ $Date: 2025/04/25 19:45:02 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -344,7 +344,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.82 $ $Date: 2025/01/21 19:34:27 $ GMT
+$Revision: 1.83 $ $Date: 2025/04/25 19:45:02 $ GMT
 
 =cut
 EOF
@@ -632,7 +632,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.82 $'
+cVer='$Revision: 1.83 $'
 fSetGlobals
 
 # -------------------
@@ -640,6 +640,11 @@ fSetGlobals
 if [[ $# -eq 0 ]]; then
     fError2 -m "Missing options." -l $LINENO
 fi
+# Or use this if the script expects stdin
+#if [[ -t 0 ]]; then
+#    fError2 -m "Missing input file redirect." -l $LINENO
+#fi
+
 while getopts :cn:t:hH:lT:vx tArg; do
     case $tArg in
         # Script arguments
