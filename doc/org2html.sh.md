@@ -8,14 +8,17 @@ Comvert FILE.org to FILE.html
 
 # SYNOPSIS
 
-    org2html.sh FILE.org FILE.html
-    org2html.sh -i FILE.org -o FILE.html
+    org2html.sh InFile.org [OutFile.html]
+    org2html.sh -i InFile.org [-o OutFile.html]
     org2html.sh [-h] [-H pStyle]
 
 # DESCRIPTION
 
 FILE.org will be converted to FILE.html. It has some fixes to the
 "pandoc" conversion.
+
+If the outputfile (FILE.html) is missing, then the InFile.org base
+name will be used for the html file.
 
 Before org2html.sh is run, all files in $Tmp are removed, unless
 env. var. gpDebug is set and not 0.
@@ -26,9 +29,11 @@ See the SEE ALSO section for the required programs.
 
     '+ ' - will be changed to <li>
     '- ' - will be regular paragraphs
+           Also blank lines separate paragraphs
     '**** ' - will be replaced with <h4> (similarly for 5 and 6 *)
     '{.*}' - will be replaced with <cite>.*</cite>
     '[TBD.*] - will be replaced with <span class="tbd">[TBD.*]</span>
+    '[TK.*] - will be replaced with <span class="tbd">[TK.*]</span>
 
 # OPTIONS
 

@@ -58,14 +58,17 @@ Comvert FILE.org to FILE.html
 
 =head1 SYNOPSIS
 
-    org2html.sh FILE.org FILE.html
-    org2html.sh -i FILE.org -o FILE.html
+    org2html.sh InFile.org [OutFile.html]
+    org2html.sh -i InFile.org [-o OutFile.html]
     org2html.sh [-h] [-H pStyle]
 
 =head1 DESCRIPTION
 
 FILE.org will be converted to FILE.html. It has some fixes to the
 "pandoc" conversion.
+
+If the outputfile (FILE.html) is missing, then the InFile.org base
+name will be used for the html file.
 
 Before org2html.sh is run, all files in $Tmp are removed, unless
 env. var. gpDebug is set and not 0.
@@ -76,6 +79,7 @@ See the SEE ALSO section for the required programs.
 
     '+ ' - will be changed to <li>
     '- ' - will be regular paragraphs
+           Also blank lines separate paragraphs
     '**** ' - will be replaced with <h4> (similarly for 5 and 6 *)
     '{.*}' - will be replaced with <cite>.*</cite>
     '[TBD.*] - will be replaced with <span class="tbd">[TBD.*]</span>
@@ -229,7 +233,10 @@ while getopts :i:o::hH: tArg; do
 done
 ((--OPTIND))
 shift $OPTIND
-if [ $# -ne 0 ]; then
+if [ $# -eq 1 ]; then
+    gpFileIn=$1
+fi
+if [ $# -eq 2 ]; then
     gpFileIn=$1
     gpFileOut=$2
 fi
@@ -237,13 +244,21 @@ while [ $# -ne 0 ]; do
     shift
 done
 
+if [[ -z "$gpFileIn" ]]; then
+    echo "Error: Missing input file."
+    fUsage usage
+    exit 1
+fi
+
 if [[ ! -r $gpFileIn ]]; then
     echo "Error: cannot read file: $gpFileIn"
+    fUsage usage
     exit 1
 fi
 
 if [[ -z "$gpFileOut" ]]; then
     gpFileOut=${gpFileIn%.*}.html
+    echo "Notice: Output to: $gpFileOut"
 fi
 
 # -------------------
