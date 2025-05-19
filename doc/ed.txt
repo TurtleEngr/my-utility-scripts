@@ -1,10 +1,16 @@
 ed - run emacs with personal options
 Usage
-    ed [-l] [-j] [-d File...]
+    ed [-l] [-j] [-d] File...
+    ed [-b] [-k] [-h] [-x]
 Options
     -l - Log. The default file is based the HOSNAME
     -j - Journal. The default file is defined in the cMyJournal variable
     -d - Date. Put datestamp in the first File.
+
+    -b - Run the emacs daemon, then exit
+    -k - Kill the emacs daemon, then exit
+    -x - debug ~/.emacs startup
+    -h - This help
     File - one or more files
 Description
     emacs will be found on the current system and it will be run in a

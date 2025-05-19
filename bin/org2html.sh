@@ -7,6 +7,7 @@ export Tmp=${Tmp:-"/tmp/$USER/$cName"}
 export cBin
 export gpFileIn=""
 export gpFileOut=""
+export gpSep=0
 export cTidyHtml="tidy -q -i -w 78 -asxhtml --break-before-br yes --indent-attributes yes --indent-spaces 2 --tidy-mark no --vertical-space no"
 
 # ========================================
@@ -58,14 +59,19 @@ Comvert FILE.org to FILE.html
 
 =head1 SYNOPSIS
 
-    org2html.sh FILE.org FILE.html
-    org2html.sh -i FILE.org -o FILE.html
+    org2html.sh [-s N] InFile.org [OutFile.html]
+    org2html.sh -i InFile.org [-o OutFile.html] [-s N] 
     org2html.sh [-h] [-H pStyle]
 
 =head1 DESCRIPTION
 
 FILE.org will be converted to FILE.html. It has some fixes to the
 "pandoc" conversion.
+
+If the outputfile (FILE.html) is missing, then the InFile.org base
+name will be used for the html file.
+
+The -s option can be used to put hr tags in the output.
 
 Before org2html.sh is run, all files in $Tmp are removed, unless
 env. var. gpDebug is set and not 0.
@@ -76,9 +82,11 @@ See the SEE ALSO section for the required programs.
 
     '+ ' - will be changed to <li>
     '- ' - will be regular paragraphs
+           Also blank lines separate paragraphs
     '**** ' - will be replaced with <h4> (similarly for 5 and 6 *)
     '{.*}' - will be replaced with <cite>.*</cite>
     '[TBD.*] - will be replaced with <span class="tbd">[TBD.*]</span>
+    '[TK.*] - will be replaced with <span class="tbd">[TK.*]</span>
 
 =head1 OPTIONS
 
@@ -86,12 +94,17 @@ See the SEE ALSO section for the required programs.
 
 =item B<-i FILE.org>
 
-Input file.
+Input file. Required.
 
 =item B<-o FILE.html>
 
-Output file. If not specfied the extension will be removed from the
-input file and ".html" will be appended.
+Output file. Default, if not specfied the extension will be removed
+from the input file and ".html" will be appended.
+
+=item B<-s N>
+
+For N = 1 to 3, a hr tag will be put before heading levels N or lower.
+Default: 0
 
 =item B<-h>
 
@@ -202,11 +215,12 @@ if [ $# -eq 0 ]; then
     fUsage short
 fi
 
-while getopts :i:o::hH: tArg; do
+while getopts :i:o:s::hH: tArg; do
     case $tArg in
         # Script arguments
         i) gpFileIn="$OPTARG" ;;
         o) gpFileOut="$OPTARG" ;;
+        s) gpSep="$OPTARG" ;;
         # Common arguments
         h)
             fUsage long
@@ -228,7 +242,10 @@ while getopts :i:o::hH: tArg; do
 done
 ((--OPTIND))
 shift $OPTIND
-if [ $# -ne 0 ]; then
+if [ $# -eq 1 ]; then
+    gpFileIn=$1
+fi
+if [ $# -eq 2 ]; then
     gpFileIn=$1
     gpFileOut=$2
 fi
@@ -236,13 +253,21 @@ while [ $# -ne 0 ]; do
     shift
 done
 
+if [[ -z "$gpFileIn" ]]; then
+    echo "Error: Missing input file."
+    fUsage usage
+    exit 1
+fi
+
 if [[ ! -r $gpFileIn ]]; then
     echo "Error: cannot read file: $gpFileIn"
+    fUsage usage
     exit 1
 fi
 
 if [[ -z "$gpFileOut" ]]; then
     gpFileOut=${gpFileIn%.*}.html
+    echo "Notice: Output to: $gpFileOut"
 fi
 
 # -------------------
@@ -258,6 +283,7 @@ EOF
 cat <<\EOF >$cPreFixPl
     while (<>) {
         s/\[TBD([^]]*])/<span class="tbd">[TBD$1<\/span>/;
+        s/\[TK([^]]*])/<span class="tbd">[TK$1<\/span>/;
         print $_;
     }
 EOF
@@ -302,8 +328,15 @@ s;<cite><cite>;<cite>;g
 s;</cite></cite>;</cite>;g
 EOF
 
-## s;<h1;<hr><h1;g
-## s;<h2;<hr><h2;g
+if [[ $gpSep -ge 3 ]]; then
+    echo 's;<h3;<hr><h3;g' >>$cPostFix
+fi
+if [[ $gpSep -ge 2 ]]; then
+    echo 's;<h2;<hr><h2;g' >>$cPostFix
+fi
+if [[ $gpSep -ge 1 ]]; then
+    echo 's;<h1;<hr><h1;g' >>$cPostFix
+fi
 
 # --------------------
 # Functional section

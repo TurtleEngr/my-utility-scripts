@@ -1,0 +1,21 @@
+Usage:
+    pdf2jpg Input.pdf
+
+Description
+    Input.pdf file will be converted to one image per page. The images
+    are put in the current directory. Named: page-NN.jpg.
+
+    If page-fit file exists, then page-NN-fit.jpg files are created,
+    using cgWidth and cgHeight values.
+
+    Note: the page files are only generated if Input.pdf is newer than
+    the page files.
+
+EnvVar:
+    Set and export these env. var. to override the defaults.
+
+    cgDPI, default=600
+
+    cgWidth, default=1920
+    cgHeight, default=1080
+    cgFill, default=black

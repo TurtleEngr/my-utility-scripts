@@ -9,11 +9,17 @@ fUsage() {
     cat <<EOF
 ed - run emacs with personal options
 Usage
-    ed [-l] [-j] [-d File...]
+    ed [-l] [-j] [-d] File...
+    ed [-b] [-k] [-h] [-x]
 Options
     -l - Log. The default file is based the HOSNAME
     -j - Journal. The default file is defined in the cMyJournal variable
     -d - Date. Put datestamp in the first File.
+
+    -b - Run the emacs daemon, then exit
+    -k - Kill the emacs daemon, then exit
+    -x - debug ~/.emacs startup
+    -h - This help
     File - one or more files
 Description
     emacs will be found on the current system and it will be run in a
@@ -81,12 +87,18 @@ fSetDefaults() {
             gDefLog=~/tmp/$gHost.org
             ;;
     esac
-    
+
     if [[ -n "$CYGWIN" && -x /usr/bin/mintty ]]; then
         gEdit="mintty -s 80,40 --fs 10 emacs"
         gBG=1
     fi
-    
+
+    if [[ "$gEdit" = "emacs" ]]; then
+        if pgrep -f 'emacs --daemon' >/dev/null 2>&1; then
+            gEdit="emacsclient -c -a 'emacs'"
+        fi
+    fi
+
     if [[ -d ~/bc ]]; then
         gArchive=1
     fi
@@ -97,19 +109,38 @@ fGetOpts() {
     if [[ $# -eq 0 ]]; then
         fUsage
     fi
-    while getopts :ljd:h tArg; do
+    while getopts :ljd:bkhx tArg; do
         case $tArg in
             # Script arguments
-            l)  gpLogIt=1
+            l)
+                gpLogIt=1
                 gpDateIt=1
                 gFirstFile=$gDefLog
                 ;;
-            j)  gpJournalIt=1
+            j)
+                gpJournalIt=1
                 gpDateIt=1
                 gFirstFile=$cMyJournal
                 ;;
-            d) gpDateIt=1
+            d)
+                gpDateIt=1
                 gFirstFile="$OPTARG"
+                ;;
+            b)
+                if pgrep -f 'emacs --daemon' >/dev/null 2>&1; then
+                    echo "emacs daemon is already running."
+                    exit 0
+                fi
+                emacs --daemon &
+                exit $?
+                ;;
+            k)
+                if ! pgrep -f 'emacs --daemon' >/dev/null 2>&1; then
+                    echo "emacs daemon is already stopped."
+                    exit 0
+                fi
+                pkill -f 'emacs --daemon'
+                exit $?
                 ;;
 
             # Common arguments
@@ -117,11 +148,18 @@ fGetOpts() {
                 fUsage
                 exit 1
                 ;;
+            x)
+                echo "'emacs' --debug-init"
+                'emacs' --debug-init
+                exit $?
+                ;;
             # Problem arguments
-            :) echo "Value required for option: -$OPTARG"
-               exit 1
-               ;;
-            \?) echo "Unknown option: $OPTARG"
+            :)
+                echo "Value required for option: -$OPTARG"
+                exit 1
+                ;;
+            \?)
+                echo "Unknown option: $OPTARG"
                 exit 1
                 ;;
         esac
@@ -198,8 +236,8 @@ fDateFile() {
 fMount() {
     if [[ ! -d $cMyLogDir ]]; then
         echo 'Running: bcmnt -am'
-         if ! bcmnt -am; then
-             exit 1
+        if ! bcmnt -am; then
+            exit 1
         fi
     fi
     if [[ ! -d $cMyLogDir ]]; then
