@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
 export cCache cConf cInFile cLogFile cMax cMaxSay cMin cMinSay
-export cOutFile cPlotVal cSay
+export cOutFile cPlotHeight cPlotWidth cPlotVal cSay
 
 # ========================================
 # Functions
@@ -51,7 +51,9 @@ fConfig() {
         cSay=~/bin/say
     fi
 
-    cPlotVal=144
+    cPlotVal=300
+    cPlotWidth=700
+    cPlotHeight=400
 
     cCache=~/.cache/bat-level
     if [ ! -d $cCache ]; then
@@ -73,6 +75,8 @@ cMinSay="${cMinSay}"
 cMaxSay="${cMaxSay}"
 cSay=$cSay
 cPlotVal=$cPlotVal
+cPlotWidth=$cPlotWidth
+cPlotHeight=$cPlotHeight
 cCache=$cCache
 cLogFile=${cLogFile}
 cInFile=${cInFile}
@@ -151,13 +155,14 @@ fCron() {
 
 # --------------------------------
 fPlot() {
-    # For png file output, remove this scring "##png"
+    # For png file output, remove this string "##png"
 
     # Convert absolute sec to be hours from the first time in the file
     export tFirst tS
     tFirst=$('date' '+%s' --date='now - 24 hours')
     while read tS tV; do
         if [ $tS -lt $tFirst ]; then
+            # Only plot times for last 24 hours
             continue
         fi
         tS=$(echo "2 k $tS $tFirst - 3600.0 / f" | dc)
@@ -165,7 +170,7 @@ fPlot() {
     done <$cLogFile >$cCache/bat-level.tmp
 
     cat  <<EOF >$cCache/bat-level.plot
-set term x11 size 1000, 400
+set term x11 size $cPlotWidth, $cPlotHeight
 set title 'Battery Level'
 set xlabel 'Hours'
 set ylabel 'Percent'
