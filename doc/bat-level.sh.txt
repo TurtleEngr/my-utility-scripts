@@ -4,20 +4,29 @@ Usage
 Options
     -s short report
     -f full report
-    -l log values to $cLogFile
+    -l log values to /home/bruce/.cache/bat-level/bat-level.log
     -c output crontab file line needed to run once every 5 min.
        Adjust as needed.
-    -p plot the values in $cLogFile
+    -p plot the values in /home/bruce/.cache/bat-level/bat-level.log
     -h this help
+
+CronTab
+    */10 * * * * /home/bruce/bin/bat-level.sh -l
+
+    If run once a min for 24 hours 1440 cPlotVal/day
+    If run once every 5 min for 24 hours 288 cPlotVal/day
+    If run once every 10 min for 24 hours 144 cPlotVal/day
+
 Config
-    ~/.config/bat-level-rc - remove to reset to defaults
-cMin=15
+    /home/bruce/.cache/bat-level - location of the log files
+    /home/bruce/.config/bat-level-rc - remove to reset to defaults
+cMin=16
 cMax=95
-cMinSay="The battery is below 15%. Plug it in."
+cMinSay="The battery is below 16%. Plug it in."
 cMaxSay="The battery is above 95%. Unplug it."
 cSay=/usr/local/bin/say
-cPlotVal=288
-Tmp=/home/bruce/tmp
-cLogFile=/home/bruce/tmp/bat-level.log
-cInFile=/home/bruce/tmp/bat-level-in.tmp
-cOutFile=/home/bruce/tmp/bat-level-out.tmp
+cPlotVal=144
+cCache=/home/bruce/.cache/bat-level
+cLogFile=/home/bruce/.cache/bat-level/bat-level.log
+cInFile=/home/bruce/.cache/bat-level/bat-level-in.tmp
+cOutFile=/home/bruce/.cache/bat-level/bat-level-out.tmp

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --------------------------------
+# --------------------
 fUsage() {
     cat <<EOF
 change-log - log root changes to /etc/CHANGES.org
@@ -24,24 +24,34 @@ EOF
     exit 1
 } # fUsage
 
+# ====================
+if [ $# -eq 0 ]; then
+    fUsage
+fi
 if [[ "$1" = '-h' ]]; then
     fUsage
 fi
 
-if [[ "$USER" != "root" ]]; then
-    echo "Error: You must be root to use this."
-    fUsage
+gFile=/etc/CHANGES.org
+if [[ ! -f /etc/CHANGES.org ]]; then
+    gFile=~/CHANGES.org
 fi
 
+if [[ ! -w $gFile ]]; then
+    if [[ "$USER" != "root" ]]; then
+        echo "Error: You must be root to write to $gFile."
+        fUsage
+    fi
+fi
 
 if [[ "$1" = '-n' || "$1" = "-d" ]]; then
     shift 1
 else
-    'date' +'** %F_%T_%a' >>/etc/CHANGES.org
+    'date' +'** %F_%T_%a' >>$gFile
 fi
 
 if [ $# -eq 0 ]; then
     exit 0
 fi
 
-echo "$PWD $*" >>/etc/CHANGES.org
+echo "$PWD $*" >>$gFile
