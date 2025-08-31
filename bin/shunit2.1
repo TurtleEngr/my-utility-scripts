@@ -13,6 +13,10 @@
 # shUnit2 is a xUnit based unit test framework for Bourne shell scripts. It is
 # based on the popular JUnit unit testing framework for Java.
 #
+# Changes in "br" version.
+#     Added Esc to turn off color changes, to limit the amount of color text.
+#     Added env. var. SHUNIT_TRAP. If set to 'n' to disable exit traps.
+#
 # $() are not fully portable (POSIX != portable).
 #   shellcheck disable=SC2006
 # expr may be antiquated, but it is the only solution in some cases.
@@ -56,6 +60,10 @@ SHUNIT_CMD_TPUT=${SHUNIT_CMD_TPUT:-${__SHUNIT_CMD_TPUT}}
 
 # Enable color output. Options are 'never', 'always', or 'auto'.
 SHUNIT_COLOR=${SHUNIT_COLOR:-auto}
+
+# Enable exit trap?
+export SHUNIT_TRAP
+SHUNIT_TRAP=${SHUNIT_TRAP:-y}
 
 # Logging functions.
 _shunit_warn() {
@@ -1023,7 +1031,9 @@ _shunit_cleanup() {
 
     if ${__SHUNIT_BUILTIN} [ "${_shunit_name_}" != 'EXIT' ]; then
         # Handle all non-EXIT signals.
-        trap - 0 # Disable EXIT trap.
+        if [ $SHUNIT_TRAP = "y" ]; then
+            trap - 0 # Disable EXIT trap.
+        fi
         exit ${_shunit_signal_}
     elif ${__SHUNIT_BUILTIN} [ ${__shunit_reportGenerated} -eq ${SHUNIT_FALSE} ]; then
         _shunit_assertFail 'unknown failure encountered running a test'
@@ -1344,9 +1354,11 @@ if ! command mkdir "${SHUNIT_TMPDIR}"; then
 fi
 
 # Setup traps to clean up after ourselves.
-trap '_shunit_cleanup EXIT' 0
-trap '_shunit_cleanup INT' 2
-trap '_shunit_cleanup TERM' 15
+if [ $SHUNIT_TRAP = "y" ]; then
+    trap '_shunit_cleanup EXIT' 0
+    trap '_shunit_cleanup INT' 2
+    trap '_shunit_cleanup TERM' 15
+fi
 
 # Create phantom functions to work around issues with Cygwin.
 _shunit_mktempFunc

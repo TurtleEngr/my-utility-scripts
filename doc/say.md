@@ -24,6 +24,9 @@ If words are mispronounced, you can define substitutions in file
 You can change the festival voice. See file ~/.festivalrc in the FILES
 section.
 
+If "mesg" is set to 'n' say will not output audio, it will only echo
+the text.
+
 # OPTIONS
 
 - **-r**
@@ -130,6 +133,8 @@ are copying some very large files to another system.
 
 # SEE ALSO
 
+mesg
+
 ## Packages
 
 festival, festival-doc
@@ -173,4 +178,4 @@ Or archived at: https://archive.ph/wip/sVgg7
 # HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.11 $ $Date: 2024/11/22 16:42:44 $ GMT
+    $Revision: 1.12 $ $Date: 2025/05/29 17:13:30 $ GMT

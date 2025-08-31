@@ -15,6 +15,11 @@ Options
 Description
     emacs will be found on the current system and it will be run in a
     window or in the terminal window, depending on the system.
+
+    If emacs is run in the terminal window, then mesg will be set to
+    'n' when emacs is run. mesg will be set back to its previous
+    setting when emacs is done.
+
 Note:
     Old log files can be converted from txt to org format with: journal2org.sh
 
