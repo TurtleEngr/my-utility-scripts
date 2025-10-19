@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
 export cCache cConf cInFile cLogFile cMax cMaxSay cMin cMinSay
-export cOutFile cPlotHeight cPlotWidth cPlotVal cSay
+export cOutFile cPlotHours cPlotHeight cPlotWidth cPlotVal cSay
 
 # ========================================
 # Functions
@@ -51,6 +51,7 @@ fConfig() {
         cSay=~/bin/say
     fi
 
+    cPlotHours=24
     cPlotVal=300
     cPlotWidth=700
     cPlotHeight=400
@@ -73,11 +74,12 @@ cMin=${cMin}
 cMax=${cMax}
 cMinSay="${cMinSay}"
 cMaxSay="${cMaxSay}"
-cSay=$cSay
-cPlotVal=$cPlotVal
-cPlotWidth=$cPlotWidth
-cPlotHeight=$cPlotHeight
-cCache=$cCache
+cSay=${cSay}
+cPlotHours=${cPlotHours}
+cPlotVal=${cPlotVal}
+cPlotWidth=${cPlotWidth}
+cPlotHeight=${cPlotHeight}
+cCache=${cCache}
 cLogFile=${cLogFile}
 cInFile=${cInFile}
 cOutFile=${cOutFile}
@@ -155,14 +157,15 @@ fCron() {
 
 # --------------------------------
 fPlot() {
-    # For png file output, remove this string "##png"
+    export tFirst tS tHours
+    # For png file output, remove the string "##png"
 
     # Convert absolute sec to be hours from the first time in the file
-    export tFirst tS
-    tFirst=$('date' '+%s' --date='now - 24 hours')
+    tFirst=$('date' '+%s' --date="now - $cPlotHours hours")
+    
     while read tS tV; do
         if [ $tS -lt $tFirst ]; then
-            # Only plot times for last 24 hours
+            # Only plot times for last $cPlotHours
             continue
         fi
         tS=$(echo "2 k $tS $tFirst - 3600.0 / f" | dc)
@@ -176,15 +179,15 @@ set xlabel 'Hours'
 set ylabel 'Percent'
 set yr [0:100]
 set ytic 10
-set xr [0:24]
-set xtic 24
-set mxtics 24
+set xr [0:$cPlotHours]
+set xtic 2
+set mxtics 2
 set grid xtic ytics mxtics
-#plot '$cCache/bat-level.tmp' with linespoint
 ##png set term png
 ##png set output '$cCache/bat-level.png'
-#plot '$cCache/bat-level.tmp' with lines lw 3
-plot '$cCache/bat-level.tmp' with steps lw 3
+plot '$cCache/bat-level.tmp' with lines lw 3
+#plot '$cCache/bat-level.tmp' with steps lw 3
+#plot '$cCache/bat-level.tmp' with linespoint lw 3
 EOF
 
     gnuplot -p $cCache/bat-level.plot

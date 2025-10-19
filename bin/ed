@@ -12,7 +12,7 @@ Usage
     ed [-l] [-j] [-d] File...
     ed [-b] [-k] [-h] [-x]
 Options
-    -l - Log. The default file is based the HOSNAME
+    -l - Log. The default file is based the HOSTNAME
     -j - Journal. The default file is defined in the cMyJournal variable
     -d - Date. Put datestamp in the first File.
 
@@ -51,6 +51,7 @@ fGetHost() {
 fSetDefaults() {
     case $gHost in
         AN00608453 | AN00622379)
+            # Old: EFX
             gDefLog=~/tmp/e.tmp
             #       if [[ -f /usr/bin/emacs-w32.exe ]]; then
             #           # emacs-w32 does not load ~/.abbrev_defs
@@ -59,32 +60,57 @@ fSetDefaults() {
             #       fi
             ;;
         ec9)
+            # Old: EFX
             gDefLog=~/tmp/e.tmp
             ;;
         adric)
-            gDefLog=~/tmp/d.org
+            gDefLog=~/tmp/$gHost.org
+            #gDefLog=~/tmp/d.org
+            if [ -f ~/tmp/d.org ]; then
+                cp ~/tmp/d.org $gDefLog
+            fi
             gEdit=emacs
             gBG=1
             ;;
         asimov*)
-            gDefLog=~/tmp/a.org
+            gDefLog=~/tmp/$gHost.org
+            #gDefLog=~/tmp/a.org
+            if [ -f ~/tmp/a.org ]; then
+                cp ~/tmp/a.org $gDefLog
+            fi
             gEdit=emacs
             ;;
         plasma)
-            gDefLog=~/tmp/p.org
+            gDefLog=~/tmp/$gHost.org
+            #gDefLog=~/tmp/p.org
+            if [ -f ~/tmp/p.org ]; then
+                cp ~/tmp/p.org $gDefLog
+            fi
             gEdit=emacs
             gBG=1
             ;;
         mxtrance)
-            gDefLog=~/tmp/m.org
+            gDefLog=~/tmp/$gHost.org
+            #gDefLog=~/tmp/m.org
+            if [ -f ~/tmp/m.org ]; then
+                cp ~/tmp/m.org $gDefLog
+            fi
             gEdit=emacs
             gBG=1
             ;;
         windell5)
-            gDefLog=~/tmp/w.tmp
+            gDefLog=~/tmp/$gHost.org
+            #gDefLog=~/tmp/w.tmp
+            if [ -f ~/tmp/w.org ]; then
+                cp ~/tmp/w.org $gDefLog
+            fi
             ;;
         uucc-mac*)
-            gDefLog=~/tmp/u.org
+            gDefLog=~/tmp/uucc-mac.org
+            #gDefLog=~/tmp/u.org
+            if [ -f ~/tmp/u.org ]; then
+                cp ~/tmp/u.org $gDefLog
+            fi
             gEdit=emacs
             gBG=1
             ;;

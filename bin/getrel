@@ -135,7 +135,7 @@ getrel_onlan, GIT_CONFIG, HOME, USER
         home = /home/bruce/per-rel
         sym = /home/bruce/per-rel
  [opt]
-        exclude = --exclude=.svn --exclude=.git --exclude=CVS
+        exclude = --exclude=.svn --exclude=.git --exclude=CVS --exclude=cachefiles
         # -d
         dir = -rvptgoPl -f+_*/ -f-_*
         # -g
@@ -184,12 +184,12 @@ function fDefaultConfig() {
     export cRemoteUser=$USER
     export cLocalHome=/rel
     export cLocalSym=/rel
-    export cOptExclude='--exclude=.svn --exclude=.git --exclude=CVS --exclude=*~'
-    export cOpt_d='-rvptgoPl -f+_*/ -f-_*'
-    export cOpt_g='-vptgoPl'
+    export cOptExclude='--exclude=.svn --exclude=.git --exclude=CVS --exclude=*~ --exclude=cachefiles'
+    export cOpt_d='-CrvptgoPl -f+_*/ -f-_*'
+    export cOpt_g='-CvptgoPl'
     export cOpt_gnf='--ignore-existing'
     export cOpt_gf='--update'
-    export cOpt_u='-rvptgoPl'
+    export cOpt_u='-CrvptgoPl'
     export cOpt_unf='--ignore-existing'
     export cOpt_uf='--update'
 } # fDefaultConfig
