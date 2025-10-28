@@ -184,7 +184,7 @@ function fDefaultConfig() {
     export cRemoteUser=$USER
     export cLocalHome=/rel
     export cLocalSym=/rel
-    export cOptExclude='--exclude=.svn --exclude=.git --exclude=CVS --exclude=*~ --exclude=cachefiles'
+    export cOptExclude='--exclude=.svn --exclude=.git --exclude=CVS --exclude=cachefiles --exclude=*~'
     export cOpt_d='-CrvptgoPl -f+_*/ -f-_*'
     export cOpt_g='-CvptgoPl'
     export cOpt_gnf='--ignore-existing'

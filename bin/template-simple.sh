@@ -1,11 +1,17 @@
-#!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/vid-rename.sh,v 1.10 2025/10/20 18:28:06 bruce Exp $
+#!/usr/bin/env bash
 set -u
 
 # ========================================
 # Config
-export cName=vid-rename.sh
-export gpTZ=UTC
+
+# Std
+export cName=template-simple.sh
+export gpLog=0
+export gpDebug=${gpDebug:-0}
+export Tmp=${Tmp:-"/tmp/$USER/$cName"}
+export cBin
+
+# Dirs and other
 
 # ========================================
 # Functions
@@ -14,7 +20,7 @@ export gpTZ=UTC
 fUsage() {
     local pStyle="${1:-usage}"
     local tProg=""
-
+    
     case $pStyle in
         short | usage)
             tProg=pod2usage
@@ -40,7 +46,7 @@ fUsage() {
     if ! which ${tProg%% *} >/dev/null; then
         tProg=pod2text
     fi
-
+    
     cat <<EOF >/tmp/$cName.pod
 =pod
 
@@ -54,41 +60,19 @@ SHORT-DESCRIPTION
 
 =head1 SYNOPSIS
 
-    $cName [-h] - usage help
-    $cName [options] FILE.MP4...
-
-    Options:
-    [-u] - UTC time
-    [-p] - PST time
-    [-d] - PDT time
+    $cName [-o "Name=Value"] [-h] [-H pStyle] [-l] [-v] [-x] [-T pTest]
 
 =head1 DESCRIPTION
 
-From the exfi data in the file, rename the files to:
-
-    YYYY-MM-DD/
-        YYYY-MM-DD_HHMMSS-TZ_FILE.mp4
-    orig/
-        FILES
-
-The files will be renamed and moved. Links to the original files will
-be put in orig/ directory.
+Describe the script.
 
 =head1 OPTIONS
 
 =over 4
 
-=item B<-u>
+=item B<-o Name=Value>
 
-The HHMMSS will be UTC time. This is the default.
-
-=item B<-p>
-
-The HHMMSS will be PST time.
-
-=item B<-d>
-
-The HHMMSS will be PDT time.
+[This is a placeholder for user options.]
 
 =item B<-h>
 
@@ -136,19 +120,31 @@ EOF
 # ========================================
 # Main
 
+cBin=${0%/*}
+if [[ "$cBin" = "." ]]; then
+    cBin=$PWD
+fi
+cd $cBin >/dev/null 2>&1
+cBin=$PWD
+cd - >/dev/null 2>&1
+
 # -------------------
 # Get Args Section
 if [[ $# -eq 0 ]]; then
     fUsage usage
 fi
+# Or use this if the script expects stdin
+#if [[ -t 0 ]]; then
+#    fUsage usage
+#fi
 
-while getopts :dpuhH: tArg; do
+while getopts :cn:lhH: tArg; do
     case $tArg in
         # Script arguments
-        d) gpTZ=PDT ;;
-        p) gpTZ=PST ;;
-        u) gpTZ=UTC ;;
+        c) gpHostName=$(hostname) ;;
+        n) gpHostName="$OPTARG" ;;
         # Common arguments
+        l)  gpLog=1 ;;
         h)
             fUsage long
             ;;
@@ -156,59 +152,46 @@ while getopts :dpuhH: tArg; do
             fUsage $OPTARG
             ;;
         # Problem arguments
-        :)
-            echo "Error: Value required for option: -$OPTARG [$LINENO]"
+        :) echo "Error: Value required for option: -$OPTARG [$LINENO]"
+           fUsage usage
+        ;;
+        \?) echo "Error: Unknown option: $OPTARG [$LINENO]"
             fUsage usage
-            ;;
-        \?)
-            echo "Error: Unknown option: $OPTARG [$LINENO]"
-            fUsage usage
-            ;;
+        ;;
     esac
 done
 ((--OPTIND))
 shift $OPTIND
 if [[ $# -ne 0 ]]; then
     gpList="$*"
+    # or
+    ##echo "Error: Unknown option: $* [$LINENO]"
+    ##fUsage usage
 fi
 while [[ $# -ne 0 ]]; do
     shift
 done
 
 # --------------------
+if [[ $gpLog -ne 0 ]]; then
+    if grep -q TLocal1 /etc/rsyslog.d/* >/dev/null 2>&1; then
+        gpFacility=local1
+        # All script output will go to file: /var/log/apt/$cName.log
+        # For details see template.sh NOTES, Custom Script Logs
+    else
+        gpFacility=user
+        # All script output will go to file: /var/log/user.log
+    fi
+    exec 1> >(logger -s -t $cName -p $gpFacility.info) 2>&1
+fi
+
+# --------------------
 # Validate section
 
-if [[ -z "$gpList" ]]; then
-    echo "Error: Missing file or dir names [$LINENO]"
+if [[ "$USER" = "root" ]]; then
+    echo "Error: must not be root user $[LINENO]"
     fUsage usage
 fi
 
-for i in $gpList; do
-    if [[ ! -e $i ]]; then
-        echo "Error: $i does not exist [$LINENO]"
-        fUsage usage
-    fi
-done
-
 # --------------------
 # Functional section
-
-mkdir orig >/dev/null 2>&1
-
-for i in $gpList; do
-    echo $i | grep -qiE '\.mp4$|\.mp3$' >/dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-        echo "$i is not an a/v file"
-        continue
-    fi
-    ln -f $i orig/
-
-    case $gpTZ in
-        # -u
-        UTC) exiftool '-FileName<CreateDate' -d %Y-%m-%d/%Y-%m-%d_%H%M%S-UTC_${i%.*}.mp4 $i ;;
-        # -d
-        PDT) exiftool "-FileName<\${CreateDate;DateFmt(\"%Y-%m-%d/%Y-%m-%d_%H%M%S-PDT_${i%.*}.mp4\");\$_=ConvertTime(\$_,\"-07:00\")}" -api QuickTimeUTC $i ;;
-        # -p
-        PST) exiftool "-FileName<\${CreateDate;DateFmt(\"%Y-%m-%d/%Y-%m-%d_%H%M%S-PST_${i%.*}.mp4\");\$_=ConvertTime(\$_,\"-08:00\")}" -api QuickTimeUTC $i ;;
-    esac
-done
