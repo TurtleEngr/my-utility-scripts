@@ -1,11 +1,139 @@
-#!/bin/bash
-# Translate all file/dir names with special char to use '_'
-# Valid file/dir names [_-.a-zA-Z0-9]
+#!/usr/bin/env bash
+set -u
 
+export cName=trans-sp
+
+# ========================================
+# Functions
+
+# --------------------------------
+fUsage() {
+    local pStyle="${1:-usage}"
+    local tProg=""
+    
+    case $pStyle in
+        short | usage)
+            tProg=pod2usage
+            ;;
+        long | text)
+            tProg=pod2text
+            ;;
+        html)
+            tProg="pod2html --title=$cName"
+            ;;
+        md)
+            tProg=pod2markdown
+            ;;
+        man)
+            tProg=pod2man
+            ;;
+        *)
+            tProg=pod2text
+            ;;
+    esac
+
+    # Default to pod2text if tProg does not exist
+    if ! which ${tProg%% *} >/dev/null; then
+        tProg=pod2text
+    fi
+    
+    cat <<EOF >/tmp/$cName.pod
+=pod
+
+=for text ========================================
+
+=for html <hr/>
+
+=head1 NAME $cName
+
+Rename files to have "safe" and consistent names.
+
+=head1 SYNOPSIS
+
+    $cName [-c] [-a] [-f FILENAME...] [-L] [-h] [-H pStyle]
+
+=head1 DESCRIPTION
+
+Translate all file/dir names with special characters to use '_'
+Valid file/dir names [_-.a-zA-Z0-9].
+
+At least one option, -c, -a, or -f is required.
+
+The renamed files (old,new) are listed in: trans-sp_LOG.csv
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-a>
+
+Translate all files and dirs in current dir on down.
+
+=item B<-c>
+
+Only translate all files in current dir.
+
+=item B<-f FILENAME...>
+
+Translate only the listed files.
+
+=item B<-L>
+
+Translate uppercase in names to lowercase.
+
+=item B<-h>
+
+Output this "long" usage help. See "-H long"
+
+=item B<-H pStyle>
+
+pStyle is used to select the type of help and how it is formatted.
+
+Styles:
+
+    short|usage - Output short usage help as text.
+    long|text   - Output long usage help as text.
+    man         - Output long usage help as a man page.
+    html        - Output long usage help as html.
+    md          - Output long usage help as markdown.
+
+=back
+
+=for comment =head2 Globals
+=for comment =head1 RETURN VALUE
+=for comment =head1 ERRORS
+=for comment =head1 EXAMPLES
+=for comment =head1 ENVIRONMENT
+
+=head1 FILES
+
+trans-sp_LOG.csv
+
+=for comment =head1 SEE ALSO
+=for comment =head1 NOTES
+=for comment =head1 CAVEATS
+=for comment =head1 DIAGNOSTICS
+=for comment =head1 BUGS
+=for comment =head1 RESTRICTIONS
+=for comment =head1 AUTHOR
+
+=head1 HISTORY
+
+GPLv2 (c) Copyright
+
+=cut
+EOF
+    # shellcheck disable=SC2002
+    cat /tmp/$cName.pod | $tProg | less
+    exit 1
+} # fUsage
+
+# -------------------
 function fRename() {
     local pOld="$*"
     local tNew
     local tDup
+    declare -l tLower
 
     tNew=$(echo $pOld | perl -ne '
                 chomp;
@@ -34,72 +162,116 @@ function fRename() {
                 print $_;
         ')
 
-    if [ "$pOld" != "$tNew" ]; then
+    if [[ $gpLower -ne 0 ]]; then
+        tLower=$tNew
+        tNew=$tLower
+    fi
+
+    if [[ "$pOld" != "$tNew" ]]; then
         tDup=''
-        if [ -e $tNew ]; then
+        if [[ -e $tNew ]]; then
             tDup='\t"y"'
             echo "Collision: $tNew"
         fi
         echo mv "$pOld" $tNew
         mv --backup=numbered "$pOld" $tNew 2>&1
-        echo -e "\"$PWD\"\t\"${pOld}\"\t\"${tNew}\"${tDup}" >>$gLog
+        echo -e "\"$PWD\"\t\"${pOld}\"\t\"${tNew}\"${tDup}" >>$cLog
         touch $tNew
     fi
 } # fRename
 
-# ========================
-pgFileOnly=0
-if [ $# -eq 0 -o ".$1" = ".-h" ]; then
-    cat <<EOF
-Translate all file/dir names with special char to use '_'
-Valid file/dir names [_-.a-zA-Z0-9]
+# ========================================
+# Main
 
-Translate only files and dirs in current dir:
-        trans-sp -c
-
-Translate all files and dirs in current dir on down:
-        trans-sp -a
-
-Translate only the one file listed:
-        trans-sp -f FILENAME
-EOF
-    exit
+if [[ $# -eq 0 ]]; then
+    fUsage usage
 fi
 
-export gFirst=1
-if [ ".$1" = ".-c" ]; then
-    pgCurrentOnly=1
-elif [ ".$1" = ".-a" ]; then
-    pgCurrentOnly=0
-elif [ ".$1" = ".-A" ]; then
-    pgCurrentOnly=0
-    gFirst=0
-elif [ ".$1" = ".-f" ]; then
+# -------------------
+# Get Args Section
+
+export gpCurrentOnly=0
+export gpFileOnly=0
+export gpLog=1
+export gpList=''
+export gpLower=0
+    
+while getopts :aAcfLhH: tArg; do
+    case $tArg in
+        # Script arguments
+        a) gpCurrentOnly=0
+           gpFileOnly=0
+           ;;
+        A) gpLog=0
+           gpCurrentOnly=0
+           gpFileOnly=0
+           ;;
+        c) gpCurrentOnly=1
+           gpFileOnly=0
+           ;;
+        f) gpFileOnly=1
+           gpCurrentOnly=0
+           ;;
+        L) gpLower=1 ;;
+        # Common arguments
+        h)
+            fUsage long
+            ;;
+        H)
+            fUsage $OPTARG
+            ;;
+        # Problem arguments
+        :) echo "Error: Value required for option: -$OPTARG [$LINENO]"
+           fUsage usage
+        ;;
+        \?) echo "Error: Unknown option: $OPTARG [$LINENO]"
+            fUsage usage
+        ;;
+    esac
+done
+((--OPTIND))
+shift $OPTIND
+if [[ $# -ne 0 ]]; then
+    gpList="$*"
+fi
+while [[ $# -ne 0 ]]; do
     shift
-    pgFile="$*"
-    if [ -f "$pgFile" ]; then
-        pgFileOnly=1
-    else
-        echo "Error: could not find: $pgFile"
-        exit
+done
+
+# --------------------
+# Validate section
+
+gErr=0
+if [[ -n $gpList ]]; then
+    if [[ $gpFileOnly -ne 0 ]]; then
+        echo "Error: Unknown option: $* [$LINENO]"
+        Usage usage
     fi
-else
-    echo "Error: Unknown option: $*"
+    for f in $gpList; do
+        if  [[ ! -f $f ]]; then
+            echo "Error: Could not find file: $f [$LINENO]"
+            gErr=1
+        fi
+    done
+    if [[ $gErr -ne 0 ]]; then
+        exit 1
+    fi
+fi
+
+if [[ $gpLog -eq 1 ]]; then
+    export cLog=$PWD/trans-sp_LOG.csv
+    date '+%F %H:%M:%S' >>$cLog
+    echo -e '"Directory"\t"OldName"\t"NewName"\t"Collision"' >>$cLog
+fi
+
+if [[ $gpFileOnly -ne 0 ]]; then
+    for f in $gpList; do
+        fRename "$f"
+    done
     exit
 fi
 
-export gLog
-if [ $gFirst -eq 1 ]; then
-    export gLog=$PWD/trans-sp_LOG.csv
-    date '+%F %H:%M:%S' >>$gLog
-    echo -e '"Directory"\t"OldName"\t"NewName"\t"Collision"' >>$gLog
-fi
-
-if [ $pgFileOnly -ne 0 ]; then
-    fRename "$pgFile"
-    exit
-fi
-
+# Process files in the current dir
 for f in *; do
     case "$f" in
         *~) continue ;;
@@ -115,10 +287,13 @@ for f in *; do
     fRename "$f"
 done
 
-if [ $pgCurrentOnly -ne 0 ]; then
+if [[ $gpCurrentOnly -ne 0 ]]; then
+    echo "See: ${cLog##*/}"
     exit
 fi
 
+# Recursively process dirs (-a option)
+# shellcheck disable=SC2044,SC2035
 for d in $(find * -prune -type d); do
     case "$d" in
         CVS) continue ;;
@@ -131,6 +306,6 @@ for d in $(find * -prune -type d); do
     trans-sp -A
 done
 
-if [ $gFirst -eq 1 ]; then
-    echo "See: ${gLog##*/}"
+if [[ $gpLog -eq 1 ]]; then
+    echo "See: ${cLog##*/}"
 fi
