@@ -1,50 +1,14 @@
 #!/usr/bin/env bash
 set -u
-
-# ========================================
-# Config
-
-export cMin=${cMin:-16}
-export cMax=${cMax:-95}
-export cMinSay=${cMinSay:-"The battery is below ${cMin}%. Plug it in."}
-export cMaxSay=${cMaxSay:-"The battery is above ${cMax}%. Unplug it."}
-export cSay=${cSay:-/usr/local/bin/say}
-
-# If run once a min for 24 hours 1440 vals/day
-# If run once every 5 min for 24 hours 288 vals/day
-export cPlotVal=288
-
-export Tmp=${Tmp:-~/tmp}
-
-export cLogFile=${cLogFile:-$Tmp/bat-level.log}
-export cInFile=${cInFile:-$Tmp/bat-level-in.tmp}
-export cOutFile=${cOutFile:-$Tmp/bat-level-out.tmp}
-
-export cConf=~/.config/bat-level-rc
-if [[ -f $cConf ]]; then
-    . $cConf
-else
-    cat <<EOF >$cConf
-cMin=${cMin}
-cMax=${cMax}
-cMinSay="${cMinSay}"
-cMaxSay="${cMaxSay}"
-cSay=/usr/local/bin/say
-cPlotVal=288
-Tmp=${Tmp:-~/tmp}
-cLogFile=${cLogFile}
-cInFile=${cInFile}
-cOutFile=${cOutFile}
-EOF
-    chmod a+rx $cConf
-fi
+export cCache cConf cInFile cLogFile cMax cMaxSay cMin cMinSay
+export cOutFile cPlotHours cPlotHeight cPlotWidth cPlotVal cSay
 
 # ========================================
 # Functions
 
 # --------------------------------
 fUsage() {
-    cat <<\EOF
+    cat <<EOF
 bat-level.sh - Report battery levels
 Usage
     bat-level.sh [-s] [-f] [-l] [-c] [-p] [-h]
@@ -56,14 +20,77 @@ Options
        Adjust as needed.
     -p plot the values in $cLogFile
     -h this help
+
+CronTab
+    */10 * * * * $HOME/bin/bat-level.sh -l
+
+    If run once a min for 24 hours 1440 cPlotVal/day
+    If run once every 5 min for 24 hours 288 cPlotVal/day
+    If run once every 10 min for 24 hours 144 cPlotVal/day
+
 Config
-    ~/.config/bat-level-rc - remove to reset to defaults
+    $cCache - location of the log files
+    $cConf - remove to reset to defaults
 EOF
     if [[ -r $cConf ]]; then
         cat $cConf
     fi
     exit 1
 } # fUsage
+
+# --------------------------------
+fConfig() {
+    # Defaults
+
+    cMin=16
+    cMax=95
+    cMinSay="The battery is below ${cMin}%. Plug it in."
+    cMaxSay="The battery is above ${cMax}%. Unplug it."
+    cSay=/usr/local/bin/say
+    if [ ! -x $cSay ]; then
+        cSay=~/bin/say
+    fi
+
+    cPlotHours=24
+    cPlotVal=300
+    cPlotWidth=700
+    cPlotHeight=400
+
+    cCache=~/.cache/bat-level
+    if [ ! -d $cCache ]; then
+        mkdir -p $cCache
+    fi
+    cLogFile=$cCache/bat-level.log
+    cInFile=$cCache/bat-level-in.tmp
+    cOutFile=$cCache/bat-level-out.tmp
+
+    # Config for this computer
+    cConf=~/.config/bat-level-rc
+    if [[ -f $cConf ]]; then
+        . $cConf
+    else
+        cat <<EOF >$cConf
+cMin=${cMin}
+cMax=${cMax}
+cMinSay="${cMinSay}"
+cMaxSay="${cMaxSay}"
+cSay=${cSay}
+cPlotHours=${cPlotHours}
+cPlotVal=${cPlotVal}
+cPlotWidth=${cPlotWidth}
+cPlotHeight=${cPlotHeight}
+cCache=${cCache}
+cLogFile=${cLogFile}
+cInFile=${cInFile}
+cOutFile=${cOutFile}
+EOF
+        chmod a+rx $cConf
+    fi
+
+    if [ ! -x ]; then
+        cSay=/dev/null
+    fi
+} # fConfig
 
 # --------------------------------
 fFull() {
@@ -130,55 +157,53 @@ fCron() {
 
 # --------------------------------
 fPlot() {
-    # For png file output, remove this scring "##png"
+    export tFirst tS tHours
+    # For png file output, remove the string "##png"
 
-    # Convert absolute sec to be minutes from the first time in the file
-    tFirst=$(head -n 1 $cLogFile)
-    tFirst=${tFirst% *}
-#    tLast=$(tail -n 1 $cLogFile)
-#    tLast=${tLast% *}
+    # Convert absolute sec to be hours from the first time in the file
+    tFirst=$('date' '+%s' --date="now - $cPlotHours hours")
+    
     while read tS tV; do
-        tS=$((tS - tFirst))
-        tS=$((tS / 60))
+        if [ $tS -lt $tFirst ]; then
+            # Only plot times for last $cPlotHours
+            continue
+        fi
+        tS=$(echo "2 k $tS $tFirst - 3600.0 / f" | dc)
         echo $tS $tV
-    done <$cLogFile >/var/tmp/bat-level.tmp
+    done <$cLogFile >$cCache/bat-level.tmp
 
-    cat  <<EOF >/var/tmp/bat-level.plot
-set term x11 size 1000, 400
+    cat  <<EOF >$cCache/bat-level.plot
+set term x11 size $cPlotWidth, $cPlotHeight
 set title 'Battery Level'
-set xlabel 'Minutes'
+set xlabel 'Hours'
 set ylabel 'Percent'
 set yr [0:100]
 set ytic 10
-set xtic 240
-set mxtics 4
+set xr [0:$cPlotHours]
+set xtic 2
+set mxtics 2
 set grid xtic ytics mxtics
-#plot '/var/tmp/bat-level.tmp' with linespoint
 ##png set term png
-##png set output '/var/tmp/bat-level.png'
-#plot '/var/tmp/bat-level.tmp' with lines lw 3
-plot '/var/tmp/bat-level.tmp' with steps lw 3
+##png set output '$cCache/bat-level.png'
+plot '$cCache/bat-level.tmp' with lines lw 3
+#plot '$cCache/bat-level.tmp' with steps lw 3
+#plot '$cCache/bat-level.tmp' with linespoint lw 3
 EOF
 
-    gnuplot -p /var/tmp/bat-level.plot
-    ##png gnuplot /var/tmp/bat-level.plot
-    ##png eog /var/tmp/bat-level.png
+    gnuplot -p $cCache/bat-level.plot
+    ##png gnuplot $cCache/bat-level.plot
+    ##png eog $cCache/bat-level.png
 } # fPlot
 
 # ========================================
 # Main
 
-if [[ ! -d Tmp ]]; then
-    mkdir -p $Tmp
-fi
+fConfig
 
 # -------------------
 # Get Args Section
 
 if [[ $# -eq 0 ]]; then
-    fShort
-    fLog
-    echo
     fUsage
 fi
 
@@ -191,9 +216,7 @@ while getopts :cflsph tArg; do
         p) fPlot ;;
         s) fShort ;;
         # Common arguments
-        h)
-            fUsage
-            ;;
+        h) fUsage ;;
         # Problem arguments
         :) echo "Value required for option: -$OPTARG"
            exit 1

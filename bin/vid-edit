@@ -62,6 +62,8 @@ The current versions are: 18.12,  19.12, 20.04, 20.12, 21
 The AppImage program files will be found at:
 /rel/archive/software/ThirdParty/kdenlive/ (or /usr/local/bin/)
 
+If -v flatpak, the /usr/local/bin/kdenlive-flatpak will be run.
+
 =item B<-h>
 
 This help.
@@ -193,7 +195,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.42 $ $Date: 2024/08/10 18:30:05 $ GMT
+$Revision: 1.44 $ $Date: 2025/10/25 21:48:54 $ GMT
 
 =cut
 EOF
@@ -311,6 +313,7 @@ function fKLVer() {
         22.04) tUse=kdenlive-22.04.2-x86_x64.AppImage ;;
         22.12) tUse=kdenlive-22.12.1-x86_64.AppImage ;;
         23.04) tUse=kdenlive-23.04.3-x86_64.AppImage ;;
+        25.08) tUse=kdenlive-flatpak ;;
         *)
             tUse=kdenlive
             fLog warning "No version available, using: kdenlive." $LINENO
@@ -413,7 +416,7 @@ while getopts :bclv:hLVx tArg; do
     case $tArg in
         b) gpBatch=1 ;;
         c) gpCVS=0 ;;
-        l) gpVer=cLatestVer ;;
+        l) gpVer=$cLatestVer ;;
         v) gpVer=$OPTARG ;;
 
         h) fUsage long ;;
@@ -426,22 +429,28 @@ while getopts :bclv:hLVx tArg; do
 done
 let tOptInd=OPTIND-1
 shift $tOptInd
-if [ $# -eq 1 ]; then
+if [[ $# -eq 1 ]]; then
     gpKdenFile="$1"
-else
+    shift
+fi
+if [[ $# -ne 0 ]]; then
     fError "Unknown options: $*" $LINENO
 fi
 
 # -------------------
 # Validate Options Section
 
-# gpKdenFile is defined, check file, and get version
+# if gpKdenFile is defined, check file, and get version
 export gFileVer
 fFileCheck
 
 # Get KdenLive version, based on file's version
 export gKLProg
-fKLVer
+if [[ "$gpVer" = "flatpak" ]]; then
+    gKLProg=$cKLBin/kdenlive-flatpak
+else
+   fKLVer
+fi
 
 # if -c option not used, cvs related checks
 fCVSCheck

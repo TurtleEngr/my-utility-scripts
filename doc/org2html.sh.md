@@ -8,8 +8,8 @@ Comvert FILE.org to FILE.html
 
 # SYNOPSIS
 
-    org2html.sh InFile.org [OutFile.html]
-    org2html.sh -i InFile.org [-o OutFile.html]
+    org2html.sh [-s N] InFile.org [OutFile.html]
+    org2html.sh -i InFile.org [-o OutFile.html] [-s N] 
     org2html.sh [-h] [-H pStyle]
 
 # DESCRIPTION
@@ -19,6 +19,8 @@ FILE.org will be converted to FILE.html. It has some fixes to the
 
 If the outputfile (FILE.html) is missing, then the InFile.org base
 name will be used for the html file.
+
+The -s option can be used to put hr tags in the output.
 
 Before org2html.sh is run, all files in $Tmp are removed, unless
 env. var. gpDebug is set and not 0.
@@ -39,12 +41,17 @@ See the SEE ALSO section for the required programs.
 
 - **-i FILE.org**
 
-    Input file.
+    Input file. Required.
 
 - **-o FILE.html**
 
-    Output file. If not specfied the extension will be removed from the
-    input file and ".html" will be appended.
+    Output file. Default, if not specfied the extension will be removed
+    from the input file and ".html" will be appended.
+
+- **-s N**
+
+    For N = 1 to 3, a hr tag will be put before heading levels N or lower.
+    Default: 0
 
 - **-h**
 

@@ -31,6 +31,9 @@ If words are mispronounced, you can define substitutions in file
 You can change the festival voice. See file ~/.festivalrc in the FILES
 section.
 
+If "mesg" is set to 'n' say will not output audio, it will only echo
+the text.
+
 =head1 OPTIONS
 
 =over 4
@@ -151,6 +154,8 @@ Temporay file with all replacement words.
 
 =head1 SEE ALSO
 
+mesg
+
 =head2 Packages
 
 festival, festival-doc
@@ -204,7 +209,7 @@ Or archived at: https://archive.ph/wip/sVgg7
 =head1 HISTORY
 
     GPLv3 (c) Copyright 2023
-    $Revision: 1.16 $ $Date: 2024/11/12 15:30:45 $ GMT
+    $Revision: 1.17 $ $Date: 2025/05/29 17:09:02 $ GMT
 
 =cut
 EOF
@@ -247,7 +252,12 @@ function fCreateSedReplaceScript() {
 
 # --------------------
 fSay() {
-    sed -f ~/.cache/say/say.sed | festival --tts
+    if mesg >/dev/null; then
+        sed -f ~/.cache/say/say.sed | festival --tts
+    else
+        echo "mesg is n, so quiet"
+        cat
+    fi
 } # fSay
 
 # --------------------

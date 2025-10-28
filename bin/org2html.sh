@@ -7,6 +7,7 @@ export Tmp=${Tmp:-"/tmp/$USER/$cName"}
 export cBin
 export gpFileIn=""
 export gpFileOut=""
+export gpSep=0
 export cTidyHtml="tidy -q -i -w 78 -asxhtml --break-before-br yes --indent-attributes yes --indent-spaces 2 --tidy-mark no --vertical-space no"
 
 # ========================================
@@ -58,8 +59,8 @@ Comvert FILE.org to FILE.html
 
 =head1 SYNOPSIS
 
-    org2html.sh InFile.org [OutFile.html]
-    org2html.sh -i InFile.org [-o OutFile.html]
+    org2html.sh [-s N] InFile.org [OutFile.html]
+    org2html.sh -i InFile.org [-o OutFile.html] [-s N] 
     org2html.sh [-h] [-H pStyle]
 
 =head1 DESCRIPTION
@@ -69,6 +70,8 @@ FILE.org will be converted to FILE.html. It has some fixes to the
 
 If the outputfile (FILE.html) is missing, then the InFile.org base
 name will be used for the html file.
+
+The -s option can be used to put hr tags in the output.
 
 Before org2html.sh is run, all files in $Tmp are removed, unless
 env. var. gpDebug is set and not 0.
@@ -91,12 +94,17 @@ See the SEE ALSO section for the required programs.
 
 =item B<-i FILE.org>
 
-Input file.
+Input file. Required.
 
 =item B<-o FILE.html>
 
-Output file. If not specfied the extension will be removed from the
-input file and ".html" will be appended.
+Output file. Default, if not specfied the extension will be removed
+from the input file and ".html" will be appended.
+
+=item B<-s N>
+
+For N = 1 to 3, a hr tag will be put before heading levels N or lower.
+Default: 0
 
 =item B<-h>
 
@@ -207,11 +215,12 @@ if [ $# -eq 0 ]; then
     fUsage short
 fi
 
-while getopts :i:o::hH: tArg; do
+while getopts :i:o:s::hH: tArg; do
     case $tArg in
         # Script arguments
         i) gpFileIn="$OPTARG" ;;
         o) gpFileOut="$OPTARG" ;;
+        s) gpSep="$OPTARG" ;;
         # Common arguments
         h)
             fUsage long
@@ -268,7 +277,7 @@ cat <<\EOF >$cPreFix
 s/^ *- /\n\n/g
 s;^\*\*\*\* \(.*\);\n<h4>\1</h4>\n;
 s;^\*\*\*\*\* \(.*\);\n<h5>\1</h5>\n;
-s;\*\*\*\*\*\* \(.*\);\n<h6>\1</h6>\n;
+s;^\*\*\*\*\*\* \(.*\);\n<h6>\1</h6>\n;
 EOF
 
 cat <<\EOF >$cPreFixPl
@@ -319,8 +328,15 @@ s;<cite><cite>;<cite>;g
 s;</cite></cite>;</cite>;g
 EOF
 
-## s;<h1;<hr><h1;g
-## s;<h2;<hr><h2;g
+if [[ $gpSep -ge 3 ]]; then
+    echo 's;<h3;<hr><h3;g' >>$cPostFix
+fi
+if [[ $gpSep -ge 2 ]]; then
+    echo 's;<h2;<hr><h2;g' >>$cPostFix
+fi
+if [[ $gpSep -ge 1 ]]; then
+    echo 's;<h1;<hr><h1;g' >>$cPostFix
+fi
 
 # --------------------
 # Functional section

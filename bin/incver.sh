@@ -51,7 +51,7 @@ Increment version number in a version file
 
 =head1 SYNOPSIS
 
-    inver.sh [-M -m -p] [-s pChar] [-h] [-H pStyle] [[-f] FILE]
+    inver.sh [-M -m -p] [-s pChar] [-h] [-H pStyle] [-f FILE]
 
 =head1 DESCRIPTION
 
@@ -118,7 +118,7 @@ Styles:
 
 GPLv2 (c) Copyright
 
-$Revision: 1.4 $ $Date: 2025/01/10 01:43:51 $ GMT
+$Revision: 1.5 $ $Date: 2025/06/01 01:12:24 $ GMT
 
 =cut
 EOF
