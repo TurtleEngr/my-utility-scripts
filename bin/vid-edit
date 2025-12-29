@@ -195,7 +195,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.44 $ $Date: 2025/10/25 21:48:54 $ GMT
+$Revision: 1.45 $ $Date: 2025/12/09 05:37:29 $ GMT
 
 =cut
 EOF
@@ -447,7 +447,14 @@ fFileCheck
 # Get KdenLive version, based on file's version
 export gKLProg
 if [[ "$gpVer" = "flatpak" ]]; then
-    gKLProg=$cKLBin/kdenlive-flatpak
+    gKLProg=$cKLBin/kdenlive.flatpak
+    if [[ ! -f  $gKLProg ]]; then
+        gKLProg=$cKLBin/kdenlive-flatpak
+    fi
+    if [[ ! -f  $gKLProg ]]; then
+        echo "Error: could not find: $gKLProg [$LINENO]"
+        exit 1
+    fi
 else
    fKLVer
 fi

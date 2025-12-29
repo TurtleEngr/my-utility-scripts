@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/cvs-collapse.sh,v $
-# $Revision: 1.13 $ $Date: 2023/05/21 01:10:34 $ GMT
+# $Revision: 1.14 $ $Date: 2025/11/30 16:42:00 $ GMT
 
 set -u
 export cgCacheDir
@@ -294,7 +294,7 @@ TurtleEngr
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.13 $ $Date: 2023/05/21 01:10:34 $ GMT
+$Revision: 1.14 $ $Date: 2025/11/30 16:42:00 $ GMT
 
 =cut
 EOF
@@ -833,7 +833,7 @@ cCurDir=$PWD
 
 # -------------------
 # Define cBin, location of common scripts (pick one)
-tBin=home
+tBin=this
 case $tBin in
     current)
         cBin=$PWD
@@ -859,7 +859,7 @@ cName=cvs-collapse.sh
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.13 $'
+cVer='$Revision: 1.14 $'
 fSetGlobals
 
 # -------------------

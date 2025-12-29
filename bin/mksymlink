@@ -20,15 +20,6 @@ fUsage() {
         html)
             fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
             ;;
-        int)
-            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long
-            ;;
-        int-html)
-            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
-            ;;
-        int-md)
-            fComUsage -i -f $cBin/$cName -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
-            ;;
         *)
             fComUsage -f $cBin/$cName -s short
             ;;
@@ -144,9 +135,6 @@ Styles:
         man         - Output long usage help as a man page.
         html        - Output long usage help as html.
         md          - Output long usage help as markdown.
-        int         - Also output internal documentation as text.
-        int-html    - Also output internal documentation as html.
-        int-md      - Also output internal documentation as markdown.
 
 =item B<-v>
 
@@ -164,7 +152,7 @@ Or you can set gpDebug before running the script.
 
 Only show what would be done, when using the other options.
 
-See: fLog and fLog2 (Internal documentation)
+See: fLog and fLog2
 
 =item B<-T pTest>
 
@@ -286,37 +274,12 @@ GPLv3 (c) Copyright 2022
 
 =cut
 EOF
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head1 mksymlink Internal Documentation
-
-=internal-head3 fUsage pStyle
-
-This function selects the type of help output. See -h and -H options.
-
-=internal-head2 Script Global Variables
-
-=internal-cut
-EOF
 } # fUsage
 
 # --------------------------------
 fCleanUp() {
     fComCleanUp
     exit
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head2 Script Functions
-
-=internal-head3 fCleanUp
-
-Calls fComCleanUp.
-
-=internal-cut
-EOF
 } # fCleanUp
 
 # -------------------
@@ -336,20 +299,6 @@ fSetGlobals() {
     # Define the Required and the Optional progs, space separated
     fComCheckDeps "awk" "pod2man"
     return
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fSetGlobals
-
-Calls fComSetGlobals to set globals used by bash-com.inc.
-
-Set initial values for all of the other globals use by this
-script. The ones that begin with "gp" can usually be overridden by
-setting them before the script is run.
-
-=internal-cut
-EOF
 } # fSetGlobals
 
 # -------------------
@@ -358,14 +307,6 @@ fValidate() {
         fError "One of -s, -r, or -c needs to be used." $LINENO
     fi
     return
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fValidate
-
-=internal-cut
-EOF
 } # fValidate
 
 fSymlinkExists() {
@@ -584,24 +525,6 @@ testUsage() {
     assertContains "$LINENO md.2" "$tResult" '# HISTORY'
 
     #-----
-    tResult=$(fUsage int 2>&1)
-    assertContains "$LINENO internal.1" "$tResult" 'Template Use'
-    assertContains "$LINENO internal.2" "$tResult" 'fComSetGlobals'
-
-    #-----
-    tResult=$(fUsage int-html 2>&1)
-    assertContains "$LINENO int-html.1" "$tResult" '<a href="#Template-Use">Template Use</a>'
-    assertContains "$LINENO int-html.2" "$tResult" '<h3 id="fComSetGlobals">fComSetGlobals</h3>'
-    assertContains "$LINENO int-html.3" "$tResult" 'Internal Doc</title>'
-    assertContains "$LINENO int-html.4" "$tResult" '<h3 id="testComUsage">testComUsage</h3>'
-
-    #-----
-    tResult=$(fUsage int-md 2>&1)
-    assertContains "$LINENO int-md.1" "$tResult" '## Template Use'
-    assertContains "$LINENO int-md.2" "$tResult" '### fComSetGlobals'
-    assertContains "$LINENO int-md.3" "$tResult" '### testComUsage'
-
-    #-----
     # When calling cmd, unset gpTest to prevent infinite loop
     gpTest=""
     tResult=$($cBin/mksymlink 2>&1)
@@ -610,17 +533,6 @@ testUsage() {
     assertContains "$LINENO cmd-call $tResult" "$tResult" "mksymlink ["
 
     return 0
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 testUsage
-
-Test fUsage. Verify the different output styles work. See also testComUsage
-in bash-com.test.
-
-=internal-cut
-EOF
 } # testUsage
 
 # --------------------------------
@@ -892,16 +804,6 @@ fRunTests() {
     # shellcheck disable=SC1091
     . /usr/local/bin/shunit2.1 -- $gpTest
     exit $?
-
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fRunTests
-
-Run unit tests for this script.
-
-=internal-cut
-EOF
 } # fRunTests
 
 # ========================================
@@ -922,7 +824,7 @@ export cCurDir=$PWD
 # -------------------
 # Define cBin, location of common scripts (pick one)
 export cBin
-tBin=home
+tBin=this
 case $tBin in
     current)
         cBin=$PWD

@@ -320,10 +320,12 @@ if [[ $gBG -ne 0 ]]; then
     $gEdit $gFirstFile $gpList &
 else
     tMesg='n'
-    if mesg >/dev/null; then
+    if which mesg >/dev/null; then
         tMesg='y'
         mesg n
     fi
     $gEdit $gFirstFile $gpList
-    mesg $tMesg
+    if which mesg >/dev/null; then
+        mesg $tMesg
+    fi
 fi

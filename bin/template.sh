@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.83 $ $Date: 2025/04/25 19:45:02 $ GMT
+# $Revision: 1.84 $ $Date: 2025/11/30 16:42:00 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -344,7 +344,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.83 $ $Date: 2025/04/25 19:45:02 $ GMT
+$Revision: 1.84 $ $Date: 2025/11/30 16:42:00 $ GMT
 
 =cut
 EOF
@@ -607,7 +607,7 @@ cCurDir=$PWD
 
 # -------------------
 # Define cBin, location of common scripts (pick one)
-tBin=home
+tBin=this
 case $tBin in
     current)
         cBin=$PWD
@@ -632,7 +632,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.83 $'
+cVer='$Revision: 1.84 $'
 fSetGlobals
 
 # -------------------
