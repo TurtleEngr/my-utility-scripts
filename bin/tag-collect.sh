@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/tag-collect.sh,v $
-# $Revision: 1.16 $ $Date: 2023/05/21 01:10:35 $ GMT
+# $Revision: 1.17 $ $Date: 2025/11/30 16:42:00 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -18,7 +18,7 @@ cCurDir=$PWD
 
 # -------------------
 # Define cBin, location of common scripts (pick one)
-tBin=home
+tBin=this
 case $tBin in
     current)
         cBin=$PWD
@@ -273,7 +273,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.16 $ $Date: 2023/05/21 01:10:35 $ GMT
+$Revision: 1.17 $ $Date: 2025/11/30 16:42:00 $ GMT
 
 =cut
 EOF
@@ -705,7 +705,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.16 $'
+cVer='$Revision: 1.17 $'
 fSetGlobals
 
 # -------------------

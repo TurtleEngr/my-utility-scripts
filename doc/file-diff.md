@@ -1,0 +1,96 @@
+<div>
+    <hr/>
+</div>
+
+# NAME $cName
+
+If files are the same, after removing unimportant differences, return 0.
+
+# SYNOPSIS
+
+    $cName [Options] [-h] [-H pStyle] [-v] [-x] [-T pName]
+
+Options:
+
+- -a - Select all options, s, n, c, k, d
+- -s - rm spaces
+- -n - rm newlines
+- -c - rm comments
+- -k - rm CVS keywords
+- -d - rm dates
+
+# DESCRIPTION
+
+If files are the same, after removing unimportant differences, return 0.
+
+The options -s, -n, -c, -k, and -d determine what is text is removed
+from the files before doing a diff. If there are no options, then it
+is a plain diff.
+
+# OPTIONS
+
+- **-a**
+
+    Select all options, -s, -n, -c, -k, -d
+
+- **-s**
+
+    rm spaces
+
+- **-n**
+
+    rm newlines
+
+- **-c**
+
+    rm comments
+
+- **-k**
+
+    rm CVS keywords
+
+- **-d**
+
+    rm dates
+
+- **-h**
+
+    Output this "long" usage help. See "-H long"
+
+- **-H pStyle**
+
+    pStyle is used to select the type of help and how it is formatted.
+
+    Styles:
+
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+
+- **-v**
+
+    Verbose mode. Mainlye show the diff output.
+
+- **-x**
+
+    List the temp files that are filtered before doing the diff.
+
+- **-T pName**
+
+    Not implemented.
+
+    all - run all tests
+
+    list - list test names
+
+gpDebug, Tmp
+
+# SEE ALSO
+
+diff
+
+# HISTORY
+
+GPLv2 (c) Copyright
