@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.test,v $
-# $Revision: 1.14 $ $Date: 2025/01/21 19:34:27 $ GMT
+# $Revision: 1.15 $ $Date: 2026/02/10 20:38:35 $ GMT
 
 # --------------------------------
 fComBashTestUsage() {
@@ -62,7 +62,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.14 $ $Date: 2025/01/21 19:34:27 $ GMT
+$Revision: 1.15 $ $Date: 2026/02/10 20:38:35 $ GMT
 
 =cut
 EOF
@@ -92,7 +92,7 @@ oneTimeSetUp() {
     fComSetGlobals
 
     echo "sudo chmod a+r /var/log/user.log /var/log/app/bash-com.test.log"
-    
+
     sudo touch /var/log/user.log /var/log/app/bash-com.test.log
     sudo chmod a+rwx /var/log/app/
     sudo chmod a+rw /var/log/user.log /var/log/app/bash-com.test.log

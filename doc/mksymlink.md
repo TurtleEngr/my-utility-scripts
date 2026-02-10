@@ -97,9 +97,6 @@ needed.
             man         - Output long usage help as a man page.
             html        - Output long usage help as html.
             md          - Output long usage help as markdown.
-            int         - Also output internal documentation as text.
-            int-html    - Also output internal documentation as html.
-            int-md      - Also output internal documentation as markdown.
 
 - **-v**
 
@@ -117,7 +114,7 @@ needed.
 
     Only show what would be done, when using the other options.
 
-    See: fLog and fLog2 (Internal documentation)
+    See: fLog and fLog2
 
 - **-T pTest**
 

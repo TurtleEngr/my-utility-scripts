@@ -69,7 +69,7 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.7 $ $Date: 2024/11/09 20:12:17 $ GMT
+$Revision: 1.8 $ $Date: 2026/02/10 20:38:36 $ GMT
 
 <div>
     <hr/>
@@ -153,7 +153,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.7 $'
+           cVer='$Revision: 1.8 $'
 
 ### Documentation Format
 
@@ -248,11 +248,13 @@ This is like fLog, but the arguments can be in any order.
 
 See fLog. See also global gpFacility
 
-### fError2 -m pMsg \[-l $LINENO\] \[-e pErr\] \[-i\]
+### fError2 -m pMsg \[-c\] \[-l $LINENO\] \[-e pErr\] \[-i\]
 
 This will call: fLog2 -p crit -m "pMsg" -l pLine -e pErr
 
 If no -i, then "fUsage short", will be called.
+
+if -c, then function will return err, and not exit.
 
 ### fTimeoutFunction pSec "pCmd \[args...\]"
 
@@ -291,7 +293,7 @@ shunit2.1
 
 # HISTORY
 
-$Revision: 1.7 $ $Date: 2024/11/09 20:12:17 $ GMT
+$Revision: 1.8 $ $Date: 2026/02/10 20:38:36 $ GMT
 
 ## Test bash-com.inc
 
@@ -324,6 +326,11 @@ Test fLog and fLog2.
 ### testSysLog
 
 Test fLog and fLog2, and verify messages are in a syslog file.
+
+### testSysLog
+
+Test fLog and fLog2, and verify messages are in a syslog file created by
+rsyslog rule for local1. See template.sh NOTES, Custom Script Logs.
 
 ### testErrorLog
 

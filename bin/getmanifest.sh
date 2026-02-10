@@ -1,11 +1,11 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.28 2024/11/26 21:23:08 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.29 2026/02/10 20:38:35 bruce Exp $
 
 # --------------------
 fUsage() {
     local pStyle="$1"
     local tProg=""
-    
+
     case $pStyle in
         short | usage)
             tProg=pod2usage
@@ -36,7 +36,7 @@ fUsage() {
     fi
     cat $cBin/$cName | $tProg | more
     exit 1
-    
+
     cat <<\EOF >/dev/null
 =pod
 
@@ -138,13 +138,13 @@ your system. It is easier to create a list of tags you want to
 
   # Remove the tags you don't want.
   edit /tmp/include-tag.txt
-  
+
   # This removes duplicates so the include-tag.txt list will be in the
   # report.
   cat /tmp/getmanifext-tag.txt /tmp/include-tag.txt | \
     sort | uniq -u >/tmp/exclude-tag.txt
-    
-  getmanifest -e /tmp/exclude-tag.txt -n /tmp/manifext.xml 
+
+  getmanifest -e /tmp/exclude-tag.txt -n /tmp/manifext.xml
 
 Now you can include /tmp/manifext.xml with your defect report.
 
@@ -195,7 +195,7 @@ was run with install, remove, or upgrade.
 
 GPLv2 (c) Copyright
 
-$Revision: 1.28 $ $Date: 2024/11/26 21:23:08 $ GMT
+$Revision: 1.29 $ $Date: 2026/02/10 20:38:35 $ GMT
 
 =cut
 EOF
@@ -519,7 +519,7 @@ fLinux() {
 export cName=getmanifest.sh
 export cOS=$(uname -s)
 
-export cVer='$Revision: 1.28 $'
+export cVer='$Revision: 1.29 $'
 cVer=${cVer#\$Revision: }
 cVer=${cVer% \$}
 
@@ -544,9 +544,10 @@ export gCheckExclude=0
 while getopts :n:e:hH: tArg; do
     case $tArg in
         # Script arguments
-        e) pgExcludeFile="$OPTARG"
-           gCheckExclude=1
-           ;;
+        e)
+            pgExcludeFile="$OPTARG"
+            gCheckExclude=1
+            ;;
         n) pgLogFile="$OPTARG" ;;
         # Common arguments
         h)
@@ -556,12 +557,14 @@ while getopts :n:e:hH: tArg; do
             fUsage $OPTARG
             ;;
         # Problem arguments
-        :) echo "Error: Value required for option: -$OPTARG"
-           fUsage usage
-        ;;
-        \?) echo "Error: Unknown option: $OPTARG"
+        :)
+            echo "Error: Value required for option: -$OPTARG"
             fUsage usage
-        ;;
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG"
+            fUsage usage
+            ;;
     esac
 done
 ((--OPTIND))

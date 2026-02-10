@@ -80,7 +80,7 @@ For more help, see the Globals section in fUsage.
     cBin - directory where the script is executing from
     cVer - current version. For example, if using CVS:
            # shellcheck disable=SC2016
-           cVer='$Revision: 1.8 $'
+           cVer='$Revision: 1.9 $'
 
 ### Documentation Format
 
@@ -175,11 +175,13 @@ This is like fLog, but the arguments can be in any order.
 
 See fLog. See also global gpFacility
 
-### fError2 -m pMsg \[-l $LINENO\] \[-e pErr\] \[-i\]
+### fError2 -m pMsg \[-c\] \[-l $LINENO\] \[-e pErr\] \[-i\]
 
 This will call: fLog2 -p crit -m "pMsg" -l pLine -e pErr
 
 If no -i, then "fUsage short", will be called.
+
+if -c, then function will return err, and not exit.
 
 ### fTimeoutFunction pSec "pCmd \[args...\]"
 
@@ -222,6 +224,11 @@ Test fLog and fLog2.
 ### testSysLog
 
 Test fLog and fLog2, and verify messages are in a syslog file.
+
+### testSysLog
+
+Test fLog and fLog2, and verify messages are in a syslog file created by
+rsyslog rule for local1. See template.sh NOTES, Custom Script Logs.
 
 ### testErrorLog
 
