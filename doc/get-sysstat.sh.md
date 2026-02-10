@@ -1,0 +1,56 @@
+<div>
+    <hr/>
+</div>
+
+# NAME $cName
+
+SHORT-DESCRIPTION
+
+# SYNOPSIS
+
+    $cName [-g] [-s] [-h] [-H pStyle]
+
+# DESCRIPTION
+
+Copy this script on the $cSarHost. Run this on your local system
+with the -g option.
+
+On the $cSarHost this script will be run with the -s option. That will
+create the summary file: $cSarSummary Then that file will be
+downloaded to $cSarLocal
+
+In your browser go to: $cSarChart and upload $cSarLocal/sar.txt
+
+# OPTIONS
+
+- **-g**
+
+    Get the sar summary file $cSarSummary from $cSarHost
+
+    $cSarSummary is downloaded to $cSarLocal
+
+- **-s**
+
+    This is run on $cSarHost to collect all the sar values in $cSarDir
+
+    The summary is put in $cSarSummary
+
+- **-h**
+
+    Output this "long" usage help. See "-H long"
+
+- **-H pStyle**
+
+    pStyle is used to select the type of help and how it is formatted.
+
+    Styles:
+
+        short|usage - Output short usage help as text.
+        long|text   - Output long usage help as text.
+        man         - Output long usage help as a man page.
+        html        - Output long usage help as html.
+        md          - Output long usage help as markdown.
+
+# HISTORY
+
+GPLv2 (c) Copyright

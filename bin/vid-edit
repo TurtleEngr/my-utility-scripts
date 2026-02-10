@@ -195,7 +195,7 @@ kdenlive file's version.
 
 =head1 HISTORY
 
-$Revision: 1.45 $ $Date: 2025/12/09 05:37:29 $ GMT
+$Revision: 1.46 $ $Date: 2026/02/07 19:19:10 $ GMT
 
 =cut
 EOF
@@ -313,7 +313,7 @@ function fKLVer() {
         22.04) tUse=kdenlive-22.04.2-x86_x64.AppImage ;;
         22.12) tUse=kdenlive-22.12.1-x86_64.AppImage ;;
         23.04) tUse=kdenlive-23.04.3-x86_64.AppImage ;;
-        25.08) tUse=kdenlive-flatpak ;;
+        25.08) tUse=kdenlive.flatpak ;;
         *)
             tUse=kdenlive
             fLog warning "No version available, using: kdenlive." $LINENO
@@ -449,7 +449,7 @@ export gKLProg
 if [[ "$gpVer" = "flatpak" ]]; then
     gKLProg=$cKLBin/kdenlive.flatpak
     if [[ ! -f  $gKLProg ]]; then
-        gKLProg=$cKLBin/kdenlive-flatpak
+        gKLProg=$cKLBin/kdenlive.flatpak
     fi
     if [[ ! -f  $gKLProg ]]; then
         echo "Error: could not find: $gKLProg [$LINENO]"

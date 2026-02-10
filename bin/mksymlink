@@ -394,7 +394,7 @@ fRestore() {
 
         ln -sf $tSrc $tDst
         if [ ! -L $tDst ]; then
-            fError2 -m "Problem creating $tDst link" -l "$LINENO:$tLine"
+            fError2 -c -m "Problem creating $tDst link" -l "$LINENO:$tLine"
         fi
     done
     return 0

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.84 $ $Date: 2025/11/30 16:42:00 $ GMT
+# $Revision: 1.86 $ $Date: 2026/01/13 18:20:40 $ GMT
 
 export gpHostName gpTag
 set -u
@@ -344,7 +344,7 @@ NAME
 
 GPLv3 (c) Copyright 2021 by COMPANY
 
-$Revision: 1.84 $ $Date: 2025/11/30 16:42:00 $ GMT
+$Revision: 1.86 $ $Date: 2026/01/13 18:20:40 $ GMT
 
 =cut
 EOF
@@ -591,7 +591,7 @@ EOF
 # ========================================
 # Main
 
-cName=template.sh
+export cName=${BASH_SOURCE##*/}
 
 # -------------------
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -609,21 +609,11 @@ cCurDir=$PWD
 # Define cBin, location of common scripts (pick one)
 tBin=this
 case $tBin in
-    current)
-        cBin=$PWD
-        ;;
+    current) cBin=$PWD ;;
     home) cBin=~/bin ;;
     local) cBin=/usr/local/bin ;;
     system) cBin=/usr/bin ;;
-    this)
-        cBin=${0%/*}
-        if [[ "$cBin" = "." ]]; then
-            cBin=$PWD
-        fi
-        cd $cBin
-        cBin=$PWD
-        cd $cCurDir
-        ;;
+    this) cBin=${BASH_SOURCE%/*} ;;
 esac
 
 . $cBin/bash-com.inc
@@ -632,7 +622,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.84 $'
+cVer='$Revision: 1.86 $'
 fSetGlobals
 
 # -------------------
@@ -690,7 +680,8 @@ fi
 
 if [[ $gpLog -ne 0 ]]; then
     gpFacility=local1
-    exec 1> >(logger -s -t $cName -p $gpFacility.info) 2>&1
+    exec 1> >(logger -s -t $cName -p $gpFacility.info)
+    exec 2> >(logger -s -t $cName -p $gpFacility.warning)
 fi
 
 # -------------------
