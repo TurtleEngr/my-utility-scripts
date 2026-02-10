@@ -8,7 +8,7 @@ Increment version number in a version file
 
 # SYNOPSIS
 
-    inver.sh [-M -m -p] [-s pChar] [-h] [-H pStyle] [[-f] FILE]
+    inver.sh [-M -m -p] [-s pChar] [-h] [-H pStyle] [-f FILE]
 
 # DESCRIPTION
 
@@ -57,4 +57,4 @@ First initialize the version of FILE to have 3 numbers, e.g. 1.0.0
 
 GPLv2 (c) Copyright
 
-$Revision: 1.3 $ $Date: 2025/01/21 02:13:08 $ GMT
+$Revision: 1.4 $ $Date: 2026/02/10 20:38:38 $ GMT

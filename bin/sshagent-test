@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: sshagent-test,v 1.13 2024/11/22 20:28:18 bruce Exp $
+# $Id: sshagent-test,v 1.14 2026/02/10 20:38:36 bruce Exp $
 set -u
 
 # Var prefix key
@@ -27,7 +27,7 @@ fUsageTest() {
     local pStyle=$1
     local tProg=""
 
-        case $pStyle in
+    case $pStyle in
         short | usage)
             tProg=pod2usage
             ;;
@@ -194,7 +194,7 @@ TurtleEngr
 
 =head1 HISTORY
 
-$Revision: 1.13 $ $Date: 2024/11/22 20:28:18 $ GMT
+$Revision: 1.14 $ $Date: 2026/02/10 20:38:36 $ GMT
 
 =cut
 EOF

@@ -3,7 +3,7 @@ Usage
     ed [-l] [-j] [-d] File...
     ed [-b] [-k] [-h] [-x]
 Options
-    -l - Log. The default file is based the HOSNAME
+    -l - Log. The default file is based the HOSTNAME
     -j - Journal. The default file is defined in the cMyJournal variable
     -d - Date. Put datestamp in the first File.
 

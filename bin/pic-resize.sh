@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/pic-resize.sh,v 1.5 2025/04/24 05:46:45 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/pic-resize.sh,v 1.6 2026/02/10 20:38:36 bruce Exp $
 n
 set -u
 export cName=pic-resize.sh
@@ -11,7 +11,7 @@ export cName=pic-resize.sh
 fUsage() {
     local pStyle="${1:-usage}"
     local tProg=""
-    
+
     case $pStyle in
         short | usage)
             tProg=pod2usage
@@ -37,7 +37,7 @@ fUsage() {
     if ! which ${tProg%% *} >/dev/null; then
         tProg=pod2text
     fi
-    
+
     cat <<EOF >/tmp/$cName.pod
 =pod
 
@@ -157,14 +157,16 @@ while getopts :r:s:d:c:hH: tArg; do
             fUsage $OPTARG
             ;;
         # Problem arguments
-        :) echo "Error: Value required for option: -$OPTARG"
-           fUsage usage
-           exit 1
-        ;;
-        \?) echo "Error: Unknown option: $OPTARG"
+        :)
+            echo "Error: Value required for option: -$OPTARG"
             fUsage usage
             exit 1
-        ;;
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG"
+            fUsage usage
+            exit 1
+            ;;
     esac
 done
 ((--OPTIND))

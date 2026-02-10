@@ -90,13 +90,13 @@ your system. It is easier to create a list of tags you want to
 
     # Remove the tags you don't want.
     edit /tmp/include-tag.txt
-    
+
     # This removes duplicates so the include-tag.txt list will be in the
     # report.
     cat /tmp/getmanifext-tag.txt /tmp/include-tag.txt | \
       sort | uniq -u >/tmp/exclude-tag.txt
-      
-    getmanifest -e /tmp/exclude-tag.txt -n /tmp/manifext.xml 
+
+    getmanifest -e /tmp/exclude-tag.txt -n /tmp/manifext.xml
 
 Now you can include /tmp/manifext.xml with your defect report.
 
@@ -133,4 +133,4 @@ was run with install, remove, or upgrade.
 
 GPLv2 (c) Copyright
 
-$Revision: 1.3 $ $Date: 2025/01/10 01:42:04 $ GMT
+$Revision: 1.4 $ $Date: 2026/02/10 20:38:37 $ GMT

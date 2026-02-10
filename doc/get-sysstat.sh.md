@@ -4,7 +4,7 @@
 
 # NAME $cName
 
-SHORT-DESCRIPTION
+Get a graphable summary of the sysstat sar files from my webserver.
 
 # SYNOPSIS
 

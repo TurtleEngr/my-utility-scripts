@@ -46,6 +46,8 @@ one.  On exit, be sure to add any new files.
     The AppImage program files will be found at:
     /rel/archive/software/ThirdParty/kdenlive/ (or /usr/local/bin/)
 
+    If -v flatpak, the /usr/local/bin/kdenlive-flatpak will be run.
+
 - **-h**
 
     This help.
@@ -175,4 +177,4 @@ kdenlive file's version.
 
 # HISTORY
 
-$Revision: 1.17 $ $Date: 2024/11/09 20:12:20 $ GMT
+$Revision: 1.18 $ $Date: 2026/02/10 20:38:40 $ GMT

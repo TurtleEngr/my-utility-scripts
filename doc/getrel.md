@@ -117,7 +117,7 @@ getrel\_onlan, GIT\_CONFIG, HOME, USER
            home = /home/bruce/per-rel
            sym = /home/bruce/per-rel
     [opt]
-           exclude = --exclude=.svn --exclude=.git --exclude=CVS
+           exclude = --exclude=.svn --exclude=.git --exclude=CVS --exclude=cachefiles
            # -d
            dir = -rvptgoPl -f+_*/ -f-_*
            # -g

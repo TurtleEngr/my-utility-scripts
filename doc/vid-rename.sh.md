@@ -9,9 +9,7 @@ SHORT-DESCRIPTION
 # SYNOPSIS
 
     $cName [-h] - usage help
-    $cName FILE... - Rename all FILES with exif data.
-    $cName DIR - Rename all files with exif data in DIR.
-    $cName . - Rename all files with exif data in current dir.
+    $cName [options] FILE.MP4...
 
     Options:
     [-u] - UTC time
@@ -23,10 +21,12 @@ SHORT-DESCRIPTION
 From the exfi data in the file, rename the files to:
 
     YYYY-MM-DD/
-        YYYY-MM-DD_HHMMSS_TZ.mp4
+        YYYY-MM-DD_HHMMSS-TZ_FILE.mp4
+    orig/
+        FILES
 
-The files will be renamed and moved. So backup or "ln" the files
-before running this.
+The files will be renamed and moved. Links to the original files will
+be put in orig/ directory.
 
 # OPTIONS
 
