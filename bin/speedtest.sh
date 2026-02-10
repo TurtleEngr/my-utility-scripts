@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/speedtest.sh,v 1.7 2023/03/25 22:21:42 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/speedtest.sh,v 1.8 2026/01/02 14:48:31 bruce Exp $
 
 # This despends on: SpeedTest
 # Source: https://github.com/taganaka/SpeedTest
@@ -13,11 +13,27 @@ if [ ! -x /usr/local/bin/SpeedTest ]; then
 fi
 
 # ----------
-export cMaxDown=55
-export cMaxUp=10
-
-export cMinDown=50
-export cMinUp=9
+tIP=$(getmyip)
+case tIP in
+    107.220.116.250)
+        export cMaxDown=350
+        export cMaxUp=350
+        export cMinDown=290
+        export cMinUp=290
+        ;;
+    69.27.191.137)
+        export cMaxDown=50
+        export cMaxUp=25
+        export cMinDown=40
+        export cMinUp=20
+        ;;
+    *)
+        export cMaxDown=350
+        export cMaxUp=350
+        export cMinDown=290
+        export cMinUp=290
+        ;;
+esac
 
 export cOutput=/tmp/speedtest.log
 if [ $(whoami) = "root" ]; then
@@ -40,7 +56,7 @@ if [ $pRun -eq 1 ]; then
     echo '# --------------------' >>$cOutput
     echo -n '# ' >>$cOutput
     date >>$cOutput
-    timeout 5m SpeedTest --output text >>$cOutput
+    timeout 4m SpeedTest --output text >>$cOutput
 fi
 
 export tDone=1
@@ -51,7 +67,7 @@ if ! grep -q UPLOAD_SPEED $cOutput; then
     tDone=0
 fi
 if [ $tDone -ne 1 ]; then
-    echo SpeedTest timedout after 5 min. So no results available.
+    echo SpeedTest timedout after 3 min. So no results available.
     exit 1
 fi
 

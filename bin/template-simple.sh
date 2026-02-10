@@ -5,11 +5,11 @@ set -u
 # Config
 
 # Std
-export cName=template-simple.sh
+export cName=${BASH_SOURCE##*/}
 export gpLog=0
 export gpDebug=${gpDebug:-0}
 export Tmp=${Tmp:-"/tmp/$USER/$cName"}
-export cBin
+export cBin=${BASH_SOURCE%/*}
 
 # Dirs and other
 
@@ -120,14 +120,6 @@ EOF
 # ========================================
 # Main
 
-cBin=${0%/*}
-if [[ "$cBin" = "." ]]; then
-    cBin=$PWD
-fi
-cd $cBin >/dev/null 2>&1
-cBin=$PWD
-cd - >/dev/null 2>&1
-
 # -------------------
 # Get Args Section
 if [[ $# -eq 0 ]]; then
@@ -182,7 +174,8 @@ if [[ $gpLog -ne 0 ]]; then
         gpFacility=user
         # All script output will go to file: /var/log/user.log
     fi
-    exec 1> >(logger -s -t $cName -p $gpFacility.info) 2>&1
+    exec 1> >(logger -s -t $cName -p $gpFacility.info)
+    exec 2> >(logger -s -t $cName -p $gpFacility.warning)
 fi
 
 # --------------------

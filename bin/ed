@@ -80,6 +80,11 @@ fSetDefaults() {
             fi
             gEdit=emacs
             ;;
+        dolphin)
+            gDefLog=~/tmp/$gHost.org
+            gEdit=emacs
+            gBG=1
+            ;;
         plasma)
             gDefLog=~/tmp/$gHost.org
             #gDefLog=~/tmp/p.org

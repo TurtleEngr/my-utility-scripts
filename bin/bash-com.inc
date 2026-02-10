@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.inc,v $
-# $Revision: 1.20 $ $Date: 2025/01/21 02:10:44 $ GMT
+# $Revision: 1.21 $ $Date: 2026/01/16 07:06:23 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -94,7 +94,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.20 $'
+        cVer='$Revision: 1.21 $'
 
 =internal-head3 Documentation Format
 
@@ -168,7 +168,7 @@ fComSetGlobals() {
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.20 $'
+    #cVer='$Revision: 1.21 $'
 
     if [[ "$cVer" != "${cVer#*' '}" ]]; then
         cVer=${cVer#*' '}
@@ -669,21 +669,23 @@ EOF
 
 # --------------------------------
 fError2() {
-    local pMsg="Error"
-    local pLine="."
+    local pContinue=0
     local pErr=1
     local pInt=0
+    local pLine="."
+    local pMsg="Error"
 
     local OPTIND=1
     local OPTARG
     local tArg
 
-    while getopts :m:l:e:i tArg; do
+    while getopts :ce:il:m: tArg; do
         case $tArg in
-            m) pMsg="${OPTARG}" ;;
-            l) pLine="${OPTARG}" ;;
+            c) pContinue=1 ;;
             e) pErr="${OPTARG}" ;;
             i) pInt=1 ;;
+            l) pLine="${OPTARG}" ;;
+            m) pMsg="${OPTARG}" ;;
             :) echo "Internal: Value required for option: -$OPTARG [$LINENO]" ;;
             \?) echo "Internal: Unknown option: $OPTARG [$LINENO]" ;;
         esac
@@ -704,17 +706,21 @@ fError2() {
     if [[ $pInt -eq 0 ]]; then
         fUsage usage
     fi
-    exit 1
-    return
+    if [[ $pContinue -eq 0 ]]; then
+        exit 1
+    fi
+    return 1
 
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fError2 -m pMsg [-l $LINENO] [-e pErr] [-i]
+=internal-head3 fError2 -m pMsg [-c] [-l $LINENO] [-e pErr] [-i]
 
 This will call: fLog2 -p crit -m "pMsg" -l pLine -e pErr
 
 If no -i, then "fUsage short", will be called.
+
+if -c, then function will return err, and not exit.
 
 =internal-cut
 EOF

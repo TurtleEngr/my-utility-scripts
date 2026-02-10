@@ -1,9 +1,9 @@
 #!/bin/bash -x
-# $Id: init-sys-ver,v 1.10 2024/11/09 20:12:17 bruce Exp $
+# $Id: init-sys-ver,v 1.12 2026/01/18 01:44:59 bruce Exp $
 # Use this script the first time a server is setup.  It will put the
 # most common config and other server files under version control.
 
-# Tuned for MX Linux distribution
+# Tuned for MX Linux and Debian distributions
 
 cd /
 if [ ! -d CVS ]; then
@@ -11,10 +11,16 @@ if [ ! -d CVS ]; then
     exit 1
 fi
 
-echo >>/etc/CHANGES.org
+date >>/etc/CHANGES.org
+echo "Running init-sys-ver" >>/etc/CHANGES.org
 
 # First level
 cvs add etc
+if [[ ! -d /etc/CVS ]]; then
+    echo "Error: /etc not added"
+    exit 1
+fi
+
 cvs add usr
 cvs add var
 
@@ -112,8 +118,27 @@ cvs add $(find * -prune -type f)
 
 cd /var
 cvs add log spool
-#cd /var/spool
-#cvs add $(find * -prune -type f)
+cd /var/spool
+cvs add $(find * -prune -type d | grep -v CVS)
+cd /var/spool/anacron
+cvs add $(find * -prune -type f)
+cd /var/spool/cron
+cvs add $(find * -prune -type d | grep -v CVS)
+
+if [[ -d /etc/fail2ban ]]; then
+    cd /etc
+    cvs add fail2ban
+    cd /etc/fail2ban
+    cvs add $(find * -prune | grep -v CVS)
+    cd /etc/fail2ban/action.d
+    cvs add $(find * -prune | grep -v CVS)
+    cd /etc/fail2ban/fail2ban.d
+    cvs add $(find * -prune | grep -v CVS)
+    cd /etc/fail2ban/filter.d
+    cvs add $(find * -prune | grep -v CVS)
+    cd /etc/fail2ban/jail.d
+    cvs add $(find * -prune | grep -v CVS)
+fi
 
 #wgetrc
 #speech-dispatcher
