@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.29 2026/02/10 20:38:35 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/getmanifest.sh,v 1.31 2026/02/21 19:49:30 bruce Exp $
 
 # --------------------
 fUsage() {
@@ -195,7 +195,7 @@ was run with install, remove, or upgrade.
 
 GPLv2 (c) Copyright
 
-$Revision: 1.29 $ $Date: 2026/02/10 20:38:35 $ GMT
+$Revision: 1.31 $ $Date: 2026/02/21 19:49:30 $ GMT
 
 =cut
 EOF
@@ -390,6 +390,19 @@ fOSRel() {
     if which lsb_release >/dev/null 2>&1; then
         fCmd OSRelVer4 'lsb_release -a'
     fi
+
+    if which systemd-notify >/dev/null 2>&1; then
+        fCmd OSRel6 'systemd-notify --booted; echo $?'
+    fi
+
+    # x11 - DISPLAY=:0
+    # wayland - WAYLAND_DISPLAY=
+    fCmd OSRel7 "env | grep DISPLAY"
+
+    # kde desktop?
+    fCmd OSRel8 "env | grep XDG_CURRENT_DESKTOP"
+    
+    # sudo -u $SUDO_USER env
 } # fOSRel
 
 # --------------------
@@ -491,6 +504,7 @@ fLinuxCommon() {
     fCmd Partition 'cat /proc/partitions' /proc/partitions
     fCmd Mount 'cat /proc/mounts' /proc/mounts
     fCmd DiskSize 'df -m'
+    fCmd DiskInfo 'blkid'
 
     fCmd Network '/sbin/ifconfig | egrep "eth|inet addr" | grep -v 127.0.0.1'
     fCmd KernelVer 'uname -r'
@@ -519,7 +533,7 @@ fLinux() {
 export cName=getmanifest.sh
 export cOS=$(uname -s)
 
-export cVer='$Revision: 1.29 $'
+export cVer='$Revision: 1.31 $'
 cVer=${cVer#\$Revision: }
 cVer=${cVer% \$}
 
