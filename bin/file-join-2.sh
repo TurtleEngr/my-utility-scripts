@@ -123,34 +123,23 @@ Turn on debug and verbose mode. Currently nothing extra is output with
 
 =head1 EXAMPLES
 
-=head2 Input Files
+=head2 Example 1
 
-Example input file: foo/bar/readme.html
+Input file: foo/bar/readme.html
 
     line1
     line2
 
-Example input file: foo/readme.html
+Input file: foo/readme.html
 
     line3
     line4
 
-Example input file: foo/example/file2.txt
-
-    line5
-    line6
-
-Example input file: foo/doc/file3.txt
-
-    line7
-    line8
-
-=head2 Command
+Command:
 
     file-join-2.sh -s '--' -o file2.txt foo/bar/readme.html foo/readme.html
-    file-join-2.sh -s '**' -o file2.org foo/example/file2.txt foo/doc/file3.txt
 
-=head2 Output file2.txt
+Output file2.txt:
 
     -- file-split: foo/bar/readme.html
         line1
@@ -159,7 +148,23 @@ Example input file: foo/doc/file3.txt
         line3
         line4
 
-=head2 Output file22.org
+=head2 Example 2
+
+Input file: foo/example/file2.txt
+
+    line5
+    line6
+
+Input file: foo/doc/file3.txt
+
+    line7
+    line8
+
+Command:
+
+    file-join-2.sh -s '**' -o file2.org foo/example/file2.txt foo/doc/file3.txt
+
+Output file2.org
 
     ** file-split: foo/example/file2.txt
         line5
@@ -167,6 +172,21 @@ Example input file: foo/doc/file3.txt
     ** file-split: foo/doc/file3.txt
         line7
         line8
+
+=head2 Example3
+
+Using the file /tmp/file-split.list to join files that were split with
+file-split-2.sh
+
+Command using defaults:
+
+    file-join-2.sh $(cat /tmp/file-split.list)
+
+Output:
+
+file-join-out.txt will be created with the list of file names in
+/tmp/file-split.list. The file-split: lines will be prefixed with the
+default '--'
 
 =for comment =head1 ENVIRONMENT
 =for comment =head1 FILES
@@ -176,7 +196,11 @@ Example input file: foo/doc/file3.txt
 file-split-2.sh, file-split, file-join
 
 =for comment =head1 NOTES
-=for comment =head1 CAVEATS
+
+=head1 CAVEATS
+
+The OutFile will be overwritten each time file-join-2.sh is run.
+
 =for comment =head1 DIAGNOSTICS
 =for comment =head1 BUGS
 =for comment =head1 RESTRICTIONS

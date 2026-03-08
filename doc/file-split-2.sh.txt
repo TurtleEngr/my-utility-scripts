@@ -16,6 +16,8 @@ DESCRIPTION
 
     See EXAMPLE section for sample files and commands.
 
+    This list of files will be saved in file /tmp/file-split.list
+
 OPTIONS
     -s 'Sep'
         The split command prefix characters.
@@ -42,8 +44,8 @@ OPTIONS
         with -x.
 
 EXAMPLES
-  Input Files
-    Example input file: file1.txt
+  Example 1
+    Input file: file1.txt
 
         --  file-split: foo/bar/readme.html
         line1
@@ -52,7 +54,24 @@ EXAMPLES
         line3
         line4
 
-    Example input file: file2.org
+    Command:
+
+        file-split-2.sh -s '--' file1.txt
+
+    Output:
+
+        foo/bar/readme.html
+            line1
+            line2
+        foo/readme.html
+            line3
+            line4
+        /tmp/file-split.list
+            foo/bar/readme.html
+            foo/readme.html
+
+  Example 2
+    Input file: file2.org
 
         ** file-split: foo/example/file2.txt
         line5
@@ -61,29 +80,32 @@ EXAMPLES
         line7
         line8
 
-  Command
-        file-split-2.sh -s '--' file1.txt
+    Command:
+
         file-split-2.sh -s '**' file2.org
 
-  Output Dirs/Files
-        foo/bar/readme.html
-            line1
-            line2
-        foo/readme.html
-            line3
-            line4
+    Output:
+
         foo/example/file2.txt
             line5
             line6
         foo/doc/file3.txt
             line7
             line8
+        /tmp/file-split.list
+            foo/example/file2.txt
+            foo/doc/file3.txt
 
 SEE ALSO
     file-join-2.sh, file-split, file-join
 
     All text before the first "file-split:" line will be ignored. So if you
     use file-join-2.sh that text will be missing.
+
+    The files defined by file-split lines will be overwritten.
+
+    The file /tmp/file-split.list will be overwritten each time
+    file-split-2.sh is run, so save it somewhere else if needed.
 
 HISTORY
     GPLv2 (c) Copyright
