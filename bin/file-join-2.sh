@@ -265,7 +265,7 @@ done
 
 for i in $gpList; do
     if [[ ! -r $i ]]; then
-        echo "Error: Could not find or read file: $i $((LINENO))"
+        echo "Error: Could not find or read file: $i [$LINENO]"
         exit 1
     fi
 done
@@ -276,16 +276,16 @@ done
 rm $gpOutFile 2>/dev/null
 touch $gpOutFile
 if [[ ! -w $gpOutFile ]]; then
-    echo "Error: Problem creating $gpOutFile $((LINENO))"
+    echo "Error: Problem creating $gpOutFile [$LINENO]"
     exit 1
 fi
 
 if [[ $gpVerbose -ne 0 ]]; then
-    echo "Creating: $gpOutFile $((LINENO))"
+    echo "Creating: $gpOutFile [$LINENO]"
 fi
 for i in $gpList; do
     if [[ $gpVerbose -ne 0 ]]; then
-        echo "Adding file: $i $((LINENO))"
+        echo "Adding file: $i [$LINENO]"
     fi
     echo "$gpSep file-split: $i" >>$gpOutFile
     cat $i >>$gpOutFile
