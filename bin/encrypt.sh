@@ -23,4 +23,4 @@ for i in $gpFileList; do
     echo "Encrypting: $i"
     gpg -z 6 -a --pgp8 $cKeyList --encrypt-files $i
 done
-say -r done
+##say -r done

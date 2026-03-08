@@ -1,15 +1,20 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/vid-gen-download,v 1.7 2023/08/10 00:43:06 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/vid-gen-download,v 1.8 2026/03/08 00:27:39 bruce Exp $
+# Source: https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#release-files
+# /rel/archive/software/ThirdParty/youtube-dl/
+
 # https://www.reddit.com/r/DataHoarder/comments/aa0b1z/how_to_download_pornhub_videos_with_high_speed/
 
-pURL=$1
-#cProg=youtube-dl
+pUrl=$1
+##cProg=youtube-dl
 cProg=yt-dlp
 
-$cProg --external-downloader aria2c --external-downloader-args "-c -j 5 -x 10 --summary-interval=0" $pURL
+##$cProg --external-downloader aria2c --external-downloader-args "-c -j 5 -x 10 --summary-interval=0" $pURL
 
+$cProg $pUrl
 trans-sp -c
-for i in *-ph*.mp4; do
-    touch $i
-    mv -iv $i ${i%%-ph*.mp4}.mp4
-done
+
+##for i in *-ph*.mp4; do
+##    touch $i
+##    mv -iv $i ${i%%-ph*.mp4}.mp4
+##done
