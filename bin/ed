@@ -80,7 +80,7 @@ fSetDefaults() {
             fi
             gEdit=emacs
             ;;
-        dolphin)
+        dolphin | jupiter)
             gDefLog=~/tmp/$gHost.org
             gEdit=emacs
             gBG=1
