@@ -71,6 +71,8 @@ line will be put in file "directory/file"
 
 See EXAMPLE section for sample files and commands.
 
+This list of files will be saved in file /tmp/file-split.list
+
 =head1 OPTIONS
 
 =over 4
@@ -115,9 +117,9 @@ Turn on debug and verbose mode. Currently nothing extra is output with
 
 =head1 EXAMPLES
 
-=head2 Input Files
+=head2 Example 1
 
-Example input file: file1.txt
+Input file: file1.txt
 
     --  file-split: foo/bar/readme.html
     line1
@@ -126,7 +128,25 @@ Example input file: file1.txt
     line3
     line4
 
-Example input file: file2.org
+Command:
+
+    file-split-2.sh -s '--' file1.txt
+
+Output:
+
+    foo/bar/readme.html
+        line1
+        line2
+    foo/readme.html
+        line3
+        line4
+    /tmp/file-split.list
+        foo/bar/readme.html
+        foo/readme.html
+
+=head2 Example 2
+
+Input file: file2.org
 
     ** file-split: foo/example/file2.txt
     line5
@@ -135,25 +155,21 @@ Example input file: file2.org
     line7
     line8
 
-=head2 Command
+Command:
 
-    file-split-2.sh -s '--' file1.txt
     file-split-2.sh -s '**' file2.org
 
-=head2 Output Dirs/Files
+Output:
 
-    foo/bar/readme.html
-        line1
-        line2
-    foo/readme.html
-        line3
-        line4
     foo/example/file2.txt
         line5
         line6
     foo/doc/file3.txt
         line7
         line8
+    /tmp/file-split.list
+        foo/example/file2.txt
+        foo/doc/file3.txt
 
 =for comment =head1 ENVIRONMENT
 =for comment =head1 FILES
@@ -167,6 +183,11 @@ file-join-2.sh, file-split, file-join
 
 All text before the first "file-split:" line will be ignored. So if
 you use file-join-2.sh that text will be missing.
+
+The files defined by file-split lines will be overwritten.
+
+The file /tmp/file-split.list will be overwritten each time
+file-split-2.sh is run, so save it somewhere else if needed.
 
 =for comment =head1 DIAGNOSTICS
 =for comment =head1 BUGS
@@ -234,7 +255,11 @@ done
 
 for i in $gpList; do
     if [[ ! -r $i ]]; then
-        echo "Error: Could not find or read file: $i $((LINENO))"
+        echo "Error: Could not find or read file: $i [$LINENO]"
+        exit 1
+    fi
+    if ! grep -q 'file-split:'$i; then
+        echo "Error: No 'file-split:' lines found in: $i [$LINENO]"
         exit 1
     fi
 done
