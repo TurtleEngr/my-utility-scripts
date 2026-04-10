@@ -2,6 +2,12 @@
 # $Source: /repo/per-bruce.cvs/bin/ed,v $
 
 # ========================================
+# Personal configs
+export cMyLogDir=~/bc/tmp/ver/doc/mylogs
+export cMyJournal=~/bc/tmp/ver/doc/quest/journal.txt
+export cMyToDo=~/profile/plan.org
+
+# ========================================
 # Functions
 
 # --------------------------------
@@ -9,12 +15,13 @@ fUsage() {
     cat <<EOF
 ed - run emacs with personal options
 Usage
-    ed [-l] [-j] [-d] File...
+    ed [-l] [-j] [-t] [-d] File...
     ed [-b] [-k] [-h] [-x]
 Options
-    -l - Log. The default file is based the HOSTNAME
-    -j - Journal. The default file is defined in the cMyJournal variable
-    -d - Date. Put datestamp in the first File.
+    -l - Log. File is based the HOSTNAME. Put in $cMyLogDir
+    -j - Journal. Edit file: $cMyJournal
+    -t - ToDo. Edit file: $cMyToDo
+    -d - Date. Put datestamp in the first File
 
     -b - Run the emacs daemon, then exit
     -k - Kill the emacs daemon, then exit
@@ -40,6 +47,7 @@ EOF
 fGetHost() {
     gHost=$HOSTNAME
     if [[ -x /etc/inst-env.sh ]]; then
+        BaseHost=$HOATNAME
         . /etc/inst-env.sh
         if [[ "$BaseHost" = "ec9" && "$USER" = "bxr55" ]]; then
             gHost=ec9
@@ -145,26 +153,40 @@ fGetOpts() {
     if [[ $# -eq 0 ]]; then
         fUsage
     fi
-    while getopts :ljd:bkhx tArg; do
+    while getopts :ljtd:bkhx tArg; do
         case $tArg in
             # Script arguments
             l)
                 gpLogIt=1
                 gpDateIt=1
                 gFirstFile=$gDefLog
+                gpJournalIt=0
+                gpToDoIt=0
                 ;;
             j)
                 gpJournalIt=1
                 gpDateIt=1
                 gFirstFile=$cMyJournal
+                gpLogIt=0
+                gpToDoIt=0
+                ;;
+            t)
+                gpToDoIt=1
+                gFirstFile=$cMyToDo
+                gpLogIt=0
+                gpJournalIt=0
+                gpDateIt=0
                 ;;
             d)
                 gpDateIt=1
                 gFirstFile="$OPTARG"
+                gpToDoIt=0
+                gpLogIt=0
+                gpJournalIt=0
                 ;;
             b)
                 if pgrep -f 'emacs --daemon' >/dev/null 2>&1; then
-                    echo "emacs daemon is already running."
+                    echo "emacs daemon is already running. [$LINENO]"
                     exit 0
                 fi
                 emacs --daemon &
@@ -172,7 +194,7 @@ fGetOpts() {
                 ;;
             k)
                 if ! pgrep -f 'emacs --daemon' >/dev/null 2>&1; then
-                    echo "emacs daemon is already stopped."
+                    echo "emacs daemon is already stopped. [$LINENO]"
                     exit 0
                 fi
                 pkill -f 'emacs --daemon'
@@ -185,17 +207,17 @@ fGetOpts() {
                 exit 1
                 ;;
             x)
-                echo "'emacs' --debug-init"
+                echo "'emacs' --debug-init [$LINENO]"
                 'emacs' --debug-init
                 exit $?
                 ;;
             # Problem arguments
             :)
-                echo "Value required for option: -$OPTARG"
+                echo "Value required for option: -$OPTARG [$LINENO]"
                 exit 1
                 ;;
             \?)
-                echo "Unknown option: $OPTARG"
+                echo "Unknown option: $OPTARG [$LINENO]"
                 exit 1
                 ;;
         esac
@@ -222,7 +244,7 @@ fLogFile() {
         fi
         fMount
     fi
-    echo "Archiving: $gFirstFile"
+    echo "Archiving: $gFirstFile [$LINENO]"
     cd $cMyLogDir
     if ! cvs update; then
         cd - >/dev/null 2>&1
@@ -240,7 +262,7 @@ fLogFile() {
 # --------------------------------
 fJournalFile() {
     if [[ $gArchive -eq 0 ]]; then
-        echo "Could not find: $gFirstFile"
+        echo "Could not find: $gFirstFile [$LINENO]"
         exit 1
     fi
     fMount
@@ -254,7 +276,7 @@ fJournalFile() {
         exit 1
     fi
     cd - >/dev/null 2>&1
-    echo "Editing: $gFirstFile"
+    echo "Editing: $gFirstFile [$LINENO]"
 } # fJournalFile
 
 # --------------------------------
@@ -269,34 +291,38 @@ fDateFile() {
 } # fDateFile
 
 # --------------------------------
+fToDoFile() {
+    if [[ ! -f $cMyToDo ]]; then
+        echo "Error: missing ToDo file: $cMyToDo [$LINENO]"
+        exit 1
+    fi
+} # fToDoFile
+
+# --------------------------------
 fMount() {
     if [[ ! -d $cMyLogDir ]]; then
-        echo 'Running: bcmnt -am'
+        echo 'Running: bcmnt -am [$LINENO]'
         if ! bcmnt -am; then
             exit 1
         fi
     fi
     if [[ ! -d $cMyLogDir ]]; then
-        echo "Error: could not find: $cMyLogDir"
+        echo "Error: could not find: $cMyLogDir [$LINENO]"
         exit 1
     fi
     if [[ ! -f $gFirstFile ]]; then
-        echo "Error: could not find: $gFirstFile"
+        echo "Error: could not find: $gFirstFile [$LINENO]"
         exit 1
     fi
 } # fMount
 
 # ========================================
-# Personal configs
-export cMyLogDir=/home/bruce/bc/tmp/ver/doc/mylogs
-export cMyJournal=/home/bruce/bc/tmp/ver/doc/quest/journal.txt
-
 # Globals
 export gHost=$HOSTNAME
 
 export gArchive=0
 export gBG=0
-export gDefLog=""
+export gDefLog=~/tmp/$gHost.org
 export gEdit='emacs -nw --color=never'
 export gFirstFile=""
 
@@ -304,6 +330,7 @@ export gpDateIt=0
 export gpJournalIt=0
 export gpLogIt=0
 export gpList=""
+export gpToDoIt=0
 
 fGetHost
 fSetDefaults
@@ -315,6 +342,10 @@ fi
 
 if [[ $gpJournalIt -ne 0 ]]; then
     fJournalFile
+fi
+
+if [[ $gpToDoIt -ne 0 ]]; then
+    fToDoFile
 fi
 
 if [[ $gpDateIt -ne 0 ]]; then

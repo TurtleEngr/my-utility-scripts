@@ -168,7 +168,7 @@ done
 if [[ $gpLog -ne 0 ]]; then
     if grep -q TLocal1 /etc/rsyslog.d/* >/dev/null 2>&1; then
         gpFacility=local1
-        # All script output will go to file: /var/log/apt/$cName.log
+        # All script output will go to file: /var/log/app/$cName.log
         # For details see template.sh NOTES, Custom Script Logs
     else
         gpFacility=user
