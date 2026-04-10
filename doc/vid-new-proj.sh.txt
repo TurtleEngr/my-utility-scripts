@@ -1,0 +1,56 @@
+========================================
+NAME $cName
+    Create a new video project.
+
+SYNOPSIS
+        $cName -n ProjName [-t TopDir] [-e ExternalDir] [-r CVSRootDir]
+               [-h] [-H pStyle]
+        Defaults:
+        -t TopDir = $gpTopDir
+        -e ExternalDir = $gpExtRepo
+        -r CVSRootDir = $gpRefCvsRoot
+
+DESCRIPTION
+    Create a new project (-n ProjName) in -t TopDir. The files will be
+    archive at -e ExternalDir. Reference dir -r CVSRootDir will be used to
+    creating the new project.
+
+OPTIONS
+    -n ProjName
+        Name of the new project. Required option.
+
+    -t TopDir
+        Top directory for the project. Default: $gpTopDir
+
+    -e ExternalDir
+        Top external directory for the cvs and raw files. Default:
+        $gpExtRepo
+
+    -r CVSRootDir
+        Reference CVSRoot directory that will be copied to create the new
+        project. Default: $gpRefCvsRoot
+
+    -h  Output this "long" usage help. See "-H long"
+
+    -H pStyle
+        pStyle is used to select the type of help and how it is formatted.
+
+        Styles:
+
+            short|usage - Output short usage help as text.
+            long|text   - Output long usage help as text.
+            man         - Output long usage help as a man page.
+            html        - Output long usage help as html.
+            md          - Output long usage help as markdown.
+
+SEE ALSO
+    vid-restore-proj.sh
+
+NOTES
+    -e ExternalDir is usually a mounted drive.
+
+HISTORY
+    \$Revision: 1.3 $ \$Date: 2026/04/10 18:43:59 $ GMT
+
+    GPLv2 (c) Copyright
+

@@ -258,7 +258,7 @@ for i in $gpList; do
         echo "Error: Could not find or read file: $i [$LINENO]"
         exit 1
     fi
-    if ! grep -q 'file-split:'$i; then
+    if ! grep -q 'file-split:' $i; then
         echo "Error: No 'file-split:' lines found in: $i [$LINENO]"
         exit 1
     fi

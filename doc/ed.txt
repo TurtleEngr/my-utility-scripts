@@ -1,11 +1,12 @@
 ed - run emacs with personal options
 Usage
-    ed [-l] [-j] [-d] File...
+    ed [-l] [-j] [-t] [-d] File...
     ed [-b] [-k] [-h] [-x]
 Options
-    -l - Log. The default file is based the HOSTNAME
-    -j - Journal. The default file is defined in the cMyJournal variable
-    -d - Date. Put datestamp in the first File.
+    -l - Log. File is based the HOSTNAME. Put in /home/bruce/bc/tmp/ver/doc/mylogs
+    -j - Journal. Edit file: /home/bruce/bc/tmp/ver/doc/quest/journal.txt
+    -t - ToDo. Edit file: /home/bruce/profile/plan.org
+    -d - Date. Put datestamp in the first File
 
     -b - Run the emacs daemon, then exit
     -k - Kill the emacs daemon, then exit
