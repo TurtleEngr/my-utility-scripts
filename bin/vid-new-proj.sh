@@ -144,7 +144,7 @@ vid-restore-proj.sh
 
 =head1 HISTORY
 
-\$Revision: 1.8 $  \$Date: 2026/04/10 18:42:41 $ GMT
+\$Revision: 1.9 $  \$Date: 2026/04/10 18:58:59 $ GMT
 
 GPLv2 (c) Copyright
 
@@ -206,6 +206,7 @@ fi
 
 if [[ -z "$gpNew" ]]; then
     echo "Error: -n ProjName is required [$LINENO]"
+    fUsage usage
 fi
 
 if [[ ! -d $gpTopDir ]]; then
