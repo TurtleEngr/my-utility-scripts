@@ -6,6 +6,7 @@ set -u
 # Std
 export cName=vid-restore-proj.sh
 export gpProjName=""
+export gErr=0
 
 # Default dirs
 # -t
@@ -141,7 +142,7 @@ vid-new-proj.sh
 
 =head1 HISTORY
 
-\$Revision: 1.2 $  \$Date: 2026/04/10 18:42:42 $ GMT
+\$Revision: 1.3 $  \$Date: 2026/04/10 18:58:59 $ GMT
 
 GPLv2 (c) Copyright
 
@@ -204,6 +205,7 @@ fi
 
 if [[ -z "$gpProjName" ]]; then
     echo "Error: -n ProjName is required [$LINENO]"
+    fUsage usage
 fi
 
 if [[ ! -d $gpTopDir ]]; then
@@ -236,11 +238,15 @@ fi
 mkdir -p $gpTopDir/$gpProjName
 cd $gpTopDir/$gpProjName
 CVSROOT=$gCvsRoot
-for i in $gCvsRoot; do
-    cvs co $i
+for i in $gCvsRoot/*; do
+    tDir=${i#$gCvsRoot/}
+    if ! cvs co $tDir; then
+        echo "Error: checking out: $gCvsRoot/$i [$LINENO]"
+        gErr=1
+    fi
     if [ ! -d $i ]; then
         echo "Error: Problem checking out: $gCvsRoot/$i [$LINENO]"
-        fUsage
+        gErr=1
     fi
 done
 
@@ -257,3 +263,4 @@ fi
 if [ ! -L raw ]; then
     echo "Warning: raw dir is probably not setup. [$LINENO]"
 fi
+exit $gErr
