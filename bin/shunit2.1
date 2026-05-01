@@ -1031,7 +1031,7 @@ _shunit_cleanup() {
 
     if ${__SHUNIT_BUILTIN} [ "${_shunit_name_}" != 'EXIT' ]; then
         # Handle all non-EXIT signals.
-        if [ $SHUNIT_TRAP = "y" ]; then
+        if [[ $SHUNIT_TRAP = "y" ]]; then
             trap - 0 # Disable EXIT trap.
         fi
         exit ${_shunit_signal_}
@@ -1354,7 +1354,7 @@ if ! command mkdir "${SHUNIT_TMPDIR}"; then
 fi
 
 # Setup traps to clean up after ourselves.
-if [ $SHUNIT_TRAP = "y" ]; then
+if [[ $SHUNIT_TRAP = "y" ]]; then
     trap '_shunit_cleanup EXIT' 0
     trap '_shunit_cleanup INT' 2
     trap '_shunit_cleanup TERM' 15

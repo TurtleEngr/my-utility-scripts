@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+# $Source: /repo/per-bruce.cvs/bin/vid-tag,v $
+ $Revision: 1.1 $ $Date: 2026/05/01 19:46:15 $ GMT
+
+# Naming Convention
+# gpVar - command line parameters. These can override gcVars with same
+#         base name.
+# gcVar - config vars that are read from a config file.
+# gVar  - global variables. Should be few. Use functions to reduce these.
+# cVar  - These are global config vars, fixed values for the script.
+# pVar  - a positional variable passed into a function (local).
+# tVar  - a local variable used in a function.
+# fFunction  - a function unique to this script
+# fComFunction - Most functions in bash-com.inc begin with fCom
+
+set -u
+
+export cVer=1.2.2
+export cExampleFile
+export cOutputDir
+
+declare -lx gpEventId
+export gFile
+export gFileDate
+export gFileDateFull
+export gFileDateLong
+export gFileDateShort
+export gFileDateTouch
+export gpCaption
+export gpConfLocal
+export gpCopyright
+export gpDebug
+export gpEventCity
+export gpEventExtra
+export gpEventFileList
+export gpEventKeyword
+export gpEventTitle
+export gpFilePat
+export gpNameLong
+export gpNameShort
+export gpNoExec
+export gpTitlePat
+
+# ========================================
+# Main
+
+export cName=${BASH_SOURCE##*/}
+
+# Save original command line for fExample.  Done before any parsing so
+# the example file shows exactly what the user typed.
+export gpCmdLine="$cName $*"
+
+# -------------------
+# Set cCurDir because PWD may be unset under cron.
+if [[ -z "$PWD" ]]; then
+    PWD=$(pwd)
+fi
+cCurDir=$PWD
+
+# -------------------
+# Locate the directory that contains this script (and bash-com.inc).
+
+#tBin=home
+tBin=this
+case $tBin in
+    this)    cBin=${BASH_SOURCE%/*} ;;
+    current) cBin=$cCurDir ;;
+    home)    cBin=$HOME/bin ;;
+    local)   cBin=/usr/local/bin ;;
+    system)  cBin=/usr/bin ;;
+esac
+
+if [[ ! -e $cBin/bash-com.inc ]]; then
+    echo "Error: could not find $cBin/bash-com.inc (Change cBin setting in script.) [$LINENO]"
+    exit 1
+fi
+if [[ ! -x $cBin/bash-com.inc ]]; then
+    chmod a+rx $cBin/bash-com.inc
+fi
+source $cBin/bash-com.inc
+
+if [[ ! -e $cBin/vid-tag.inc ]]; then
+    echo "Error: could not find $cBin/vid-tag.inc (Change cBin setting in script.) [$LINENO]"
+    exit 1
+fi
+if [[ ! -x $cBin/vid-tag.inc ]]; then
+    chmod a+rx $cBin/vid-tag.inc
+fi
+source $cBin/vid-tag.inc
+
+# -------------------
+# Configuration Section
+
+fSetGlobals
+
+# -------------------
+# Get Args Section
+
+if [[ $# -eq 0 ]]; then
+    fUsage usage
+fi
+
+# Pre-scan: extract -e so that fLoadConf uses the right event tag
+# even when it was supplied on the command line.
+fPreScanOpts "$@"
+
+# Load config file.
+# fPreScanOpts has already set gpEventId from -e (if given) so that
+# fLoadConf can resolve the correct INI section.
+fLoadConf
+
+# Full command-line parse – overrides any value read from conf files.
+fGetOpt "$@"
+
+# -------------------
+# Validate Args Section. Save if OK
+
+fValidate
+
+fSaveConf
+
+# -------------------
+# Build vid-tag-example.txt (preview of renames + metadata).
+# Runs in both -n (dummy) and full-execute modes so the user always
+# has a record of the planned changes.
+fExample
+
+# -------------------
+# No-execute / dry-run exit.
+
+if [[ $gpNoExec -ne 0 ]]; then
+    fLog -p notice \
+        -m "No-execute (-n) set. Review $gpConfLocal and rerun without -n." \
+        -l $LINENO
+    fCleanUp
+fi
+
+# -------------------
+# Write Section
+
+fCreateOutputDir
+if [[ ! -d "$cOutputDir" ]]; then
+    fError -m "Cannot create $cOutputDir" -l $LINENO
+fi
+
+cd $cOutputDir >/dev/null 2>&1
+for gFile in $gpEventFileList; do
+    fProcessFile "$gFile"
+done
+cd - >/dev/null 2>&1
+
+# -------------------
+# CleanUp Section
+
+fLog -p notice -m "Done." -l $LINENO
+fCleanUp

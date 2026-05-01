@@ -1,9 +1,22 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.inc,v $
-# $Revision: 1.21 $ $Date: 2026/01/16 07:06:23 $ GMT
+# $Revision: 1.27 $ $Date: 2026/04/29 22:38:35 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
+export gpTopDir gpConfGlobal gpConfLocal gpConfProj
+export gpAuto gpYesNo gpMaxLoop gResponse gMenuTitle
+
+# Naming Convention
+# gpVar - command line parameters. These can override gcVars with same
+#         base name.
+# gcVar - config vars that are read from a config file.
+# gVar - global variables. Should be few. Use functions to reduce these.
+# cVar - These are global config vars, fixed values for the script.
+# pVar - a positional variable passed into a function (local).
+# tVar - a local variable used in a function.
+# fFunction - a function unique to this script
+# fComFunction - Most functions in bash-com.inc begin with fCom
 
 # --------------------------------
 fBashComInternalDoc() {
@@ -94,7 +107,21 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.21 $'
+        cVer='$Revision: 1.27 $'
+
+ gpTopDir     - top dir for config and project files
+               default: ~/.config/$cName
+ gpConfGlobal - -g config file
+               default: ~/.config/$cName/$cName.conf
+ gpConfLocal  - -l config file
+               default: ./.$cName.conf
+ gpConfProj   - -L config file
+               default: $gpTopDir/${cName}-proj.conf}
+ gpAuto      - if 1, fComYesNo uses gpYesNo instead of prompting
+ gpYesNo     - "y" or "n", used by fComYesNo when gpAuto=1
+ gpMaxLoop   - max prompt iterations for fComSelect/fComMenu
+ gResponse   - last response captured by fComSelect/fComYesNo/fComGetConfig
+ gMenuTitle  - last title used by fComMenu
 
 =internal-head3 Documentation Format
 
@@ -168,7 +195,7 @@ fComSetGlobals() {
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.21 $'
+    #cVer='$Revision: 1.27 $'
 
     if [[ "$cVer" != "${cVer#*' '}" ]]; then
         cVer=${cVer#*' '}
@@ -181,7 +208,7 @@ fComSetGlobals() {
     if [[ ! -d $Tmp ]]; then
         mkdir -p $Tmp 2>/dev/null
         if [[ ! -d $Tmp ]]; then
-            fError2 -m "Could not find directory $Tmp (\$Tmp)." -l $LINENO
+            fError -m "Could not find directory $Tmp (\$Tmp)." -l $LINENO
         fi
     fi
 
@@ -204,6 +231,24 @@ fComSetGlobals() {
     trap fCleanUp 1 2 3 4 5 6 7 8 10 11 12 13 14 15
 
     # -------------------
+    # Config file locations (used by -g, -l, -L options of
+    # fComGetConfig / fComSetConfig / fComUnsetConfig)
+    gpTopDir=${gpTopDir:-$PWD}
+    gpConfGlobal=${gpConfGlobal:-$HOME/.config/$cName.conf}
+    gpConfLocal=${gpConfLocal:-./.$cName.conf}
+    gpConfProj=${gpConfProj:-$gpTopDir/${cName}-proj.conf}
+
+    # -------------------
+    # Defaults for fComSelect, fComYesNo, fComMenu
+    gpAuto=${gpAuto:-0}
+    gpYesNo=${gpYesNo:-""}
+    gpMaxLoop=${gpMaxLoop:-30}
+
+    # -------------------
+    # fComGetConfig output globals
+    gResponse=""
+
+    # -------------------
     gpTest=${gpTest:-""}
     return 0
 
@@ -216,6 +261,13 @@ Set initial values for all of the globals use by this script. The ones
 that begin with "gp" can usually be overridden by setting them before
 the script is run.
 
+This also sets the default config file locations:
+
+ gpTopDir     - default: ~/.config/$cName
+ gpConfGlobal - -g target, default: ~/.config/$cName/$cName.conf
+ gpConfLocal  - -l target, default: ./.$cName.conf
+ gpConfProj   - -L target, default: $gpTopDir/.proj/$cName.conf
+
 =internal-cut
 EOF
 } # fComSetGlobals
@@ -227,7 +279,7 @@ fComCleanUp() {
     if [[ $gpDebug -eq 0 ]]; then
         'rm' -f ${cTmpF}*.tmp 2>/dev/null
     fi
-    ##fLog notice "Done" $LINENO 9900
+    ##fLog2 notice "Done" $LINENO 9900
     exit $gErr
 
     cat <<EOF >/dev/null
@@ -267,12 +319,12 @@ fComCheckDeps() {
     done
 
     if [[ $tErr -eq 2 ]]; then
-        fError2 -m "Missing one or more required programs." -l $LINENO
+        fError -m "Missing one or more required programs." -l $LINENO
     fi
     if [[ $tErr -eq 1 ]]; then
-        fLog2 -p warning -m "Missing some some optional programs." -l $LINENO
+        fLog -p warning -m "Missing some some optional programs." -l $LINENO
     fi
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
@@ -307,7 +359,7 @@ fComInternalDoc() {
                         }
                 '
     fi
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
@@ -349,13 +401,13 @@ fComUsage() {
                 pInt=1
                 pAll='-a'
                 ;;
-            :) fError2 -i -m "fComUsage: Value required for option: -$OPTARG" -l $LINENO ;;
-            \?) fError2 -i "fComUsage: Unknown option: $OPTARG" -l $LINENO ;;
+            :) fError -i -m "fComUsage: Value required for option: -$OPTARG" -l $LINENO ;;
+            \?) fError -i "fComUsage: Unknown option: $OPTARG" -l $LINENO ;;
         esac
     done
     shift $((OPTIND - 1))
     if [[ $# -ne 0 ]]; then
-        fError2 -i -m "fComUsage: Unknown option: $*" -l $LINENO
+        fError -i -m "fComUsage: Unknown option: $*" -l $LINENO
     fi
     while [[ $# -ne 0 ]]; do
         shift
@@ -393,18 +445,18 @@ fComUsage() {
     # Validate
     pFileList=$pFileList
     if [[ -z "$pFileList" ]]; then
-        fError2 -i -m "fComUsage missing pFileList" -l $LINENO
+        fError -i -m "fComUsage missing pFileList" -l $LINENO
     fi
     for tFile in $pFileList; do
         if [[ -r $tFile ]]; then
             tFileList="$tFileList $tFile"
         else
-            fError2 -i -m "fComUsage cannot read: $tFile" -l $LINENO
+            fError -i -m "fComUsage cannot read: $tFile" -l $LINENO
         fi
     done
     tFileList=$tFileList
     if [[ -z "$tFileList" ]]; then
-        fError2 -i -m "fComUsage missing a valid pFileList" -l $LINENO
+        fError -i -m "fComUsage missing a valid pFileList" -l $LINENO
     fi
 
     if [[ $pInt -eq 0 ]]; then
@@ -469,6 +521,7 @@ fFmtLog() {
     local pMsg="$2"
     local pLine=$3
     local pErr=${4:-''}
+    local pForce=${5:-0}
 
     local tDebugLevel
     local tLevel
@@ -480,14 +533,40 @@ fFmtLog() {
     gpFacility=${gpFacility:-user}
     gpVerbose=${gpVerbose:-0}
     gpDebug=${gpDebug:-0}
-
     tLevel=$pLevel
 
+    # Normalize level names (folded in from gitproj-com.inc fComFmtLog)
+    case $pLevel in
+        emerg | emergency)
+            pLevel=emerg
+            tLevel=$pLevel
+            ;;
+        alert) : ;;
+        crit | critical)
+            pLevel=crit
+            tLevel=$pLevel
+            ;;
+        err | error)
+            pLevel=err
+            tLevel=$pLevel
+            ;;
+        warning | warn)
+            pLevel=warning
+            tLevel=$pLevel
+            ;;
+        notice | info | debug | debug-*) : ;;
+        *)
+            pMsg="Internal: (Unknown level: $pLevel) $pMsg"
+            pLevel=err
+            tLevel=$pLevel
+            ;;
+    esac
+
     # Check debug
-    if [[ $gpDebug -eq 0 ]] && [[ "${pLevel%-*}" = "debug" ]]; then
+    if [[ $gpDebug -eq 0 && "${pLevel%-*}" = "debug" ]]; then
         return
     fi
-    if [[ $gpDebug -ne 0 ]] && [[ "${pLevel%%-*}" != "$pLevel" ]]; then
+    if [[ $gpDebug -ne 0 && "${pLevel%%-*}" != "$pLevel" ]]; then
         tDebugLevel=${pLevel##*-}
         if [[ $tDebugLevel -gt $gpDebug ]]; then
             return
@@ -495,12 +574,14 @@ fFmtLog() {
         tLevel=debug
     fi
 
-    # Check verbose
-    if [[ $gpVerbose -eq 0 && ("$pLevel" = "notice" || "$pLevel" = "info") ]]; then
-        return
-    fi
-    if [[ $gpVerbose -eq 1 && "$pLevel" = "info" ]]; then
-        return
+    # Check verbose (skipped if pForce)
+    if [[ $pForce -eq 0 ]]; then
+        if [[ $gpVerbose -eq 0 && ("$pLevel" = "notice" || "$pLevel" = "info") ]]; then
+            return
+        fi
+        if [[ $gpVerbose -eq 1 && "$pLevel" = "info" ]]; then
+            return
+        fi
     fi
 
     # LineNo format
@@ -521,22 +602,25 @@ fFmtLog() {
     else
         logger -s -t $cName -p $gpFacility.$tLevel "$pLevel: $pMsg $tLine$tErr"
     fi
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fFmtLog pLevel "pMsg" pLine pErr
+=internal-head3 fFmtLog pLevel "pMsg" pLine pErr [pForce]
 
 This function formats and outputs a consistent log message output.
-See: fLog, fLog2, fError, and fError2.
+See: fLog2, fLog, fError2, and fError.
+
+If pForce is non-zero the gpVerbose check is skipped (the message is
+output regardless of gpVerbose). Debug-level checks still apply.
 
 =internal-cut
 EOF
 } # fFmtLog
 
 # ------------------
-fLog() {
+fLog2() {
     local pLevel="alert"
     local pMsg="Missing message"
     local pLine=""
@@ -573,67 +657,75 @@ fLog() {
     esac
 
     fFmtLog $pLevel "$pMsg" $pLine "$pErr"
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fLog pLevel "pMsg" [$LINENO] [pErr]
+=internal-head3 fLog2 pLevel "pMsg" [$LINENO] [pErr]
 
 pLevel - emerg alert crit err warning notice info debug debug-N
 
 See Globals: gpLog, gpFacility, gpVerbose, gpDebug
 
-=internal-head4 fLog Examples:
+=internal-head4 fLog2 Examples:
 
- fLog warning "Missing awk" $LINENO 8
- fLog notice "Output only if -v" $LINENO 8
- fLog info "Output only if -vv" $LINENO 8
- fLog debug "Output only if $gpDebug > 0" $LINENO
- fLog debug-3 "Output only if $gpDebug > 0 and $gpDebug <= 3" $LINENO
+ fLog2 warning "Missing awk" $LINENO 8
+ fLog2 notice "Output only if -v" $LINENO 8
+ fLog2 info "Output only if -vv" $LINENO 8
+ fLog2 debug "Output only if $gpDebug > 0" $LINENO
+ fLog2 debug-3 "Output only if $gpDebug > 0 and $gpDebug <= 3" $LINENO
 
 =internal-cut
 EOF
-} # fLog
+} # fLog2
 
 # --------------------------------
-fError() {
+fError2() {
     # Usage:
-    #     fError pMsg [pLine [pErr]]
+    #     fError2 pMsg [pLine [pErr]]
     # Print the error message.  Then call fCleanUp, and exit
 
     local pMsg="$1"
     local pLine=$2
     local pErr=$3
 
-    fLog crit "$pMsg" ${pLine:-.} ${pErr:-1}
+    fLog2 crit "$pMsg" ${pLine:-.} ${pErr:-1}
     fUsage short
-    return
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fError "pMsg" [$LINENO] [pErr]
+=internal-head3 fError2 "pMsg" [$LINENO] [pErr]
 
-This will call: fLog crit "pMsg" pLine pErr
+This will call: fLog2 crit "pMsg" pLine pErr
 
 Then it will call "fUsage short", which will exit after fCleanUp.
 
 =internal-cut
 EOF
-} # fError
+} # fError2
 
 # ------------------
-fLog2() {
-    local pLevel="info"
+fLog() {
+    # If no options passed, fall back to fLog2 (positional style)
+    if [[ $# -eq 0 || "${1:0:1}" != "-" ]]; then
+        fLog2 "$@"
+        return
+    fi
+
+    local pLevel="notice"
     local pMsg=""
     local pLine=""
     local pErr=""
+    local pInt=0
+    local pForce=0
 
     local OPTARG=1
     local OPTIND
     local tArg
-    while getopts :m:p:l:e: tArg; do
+    while getopts :m:p:l:e:if tArg; do
         case $tArg in
             m) pMsg="${OPTARG}" ;;
             l) pLine="${OPTARG}" ;;
@@ -642,6 +734,8 @@ fLog2() {
                 pErr="${OPTARG}"
                 gErr="${OPTARG}"
                 ;;
+            i) pInt=1 ;;
+            f) pForce=1 ;;
             :) echo "Internal: Value required for option: -$OPTARG [$LINENO]" ;;
             \?) echo "Internal: Unknown option: $OPTARG [$LINENO]" ;;
         esac
@@ -651,24 +745,38 @@ fLog2() {
         shift
     done
 
-    fFmtLog $pLevel "$pMsg" $pLine $pErr
-    return
+    if [[ $pInt -eq 1 ]]; then
+        pMsg="Internal: $pMsg"
+    fi
+
+    fFmtLog $pLevel "$pMsg" $pLine "$pErr" $pForce
+    return 0
 
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fLog2 -m pMsg [-p pLevel] [-l $LINENO] [-e pErr]
+=internal-head3 fLog -m pMsg [-p pLevel] [-l $LINENO] [-e pErr] [-i] [-f]
 
-This is like fLog, but the arguments can be in any order.
+This is like fLog2, but the arguments can be in any order.
 
-See fLog. See also global gpFacility
+ -i adds an "Internal: " prefix to pMsg
+ -f forces output regardless of gpVerbose level
+    (debug-level rules still apply)
+
+See fLog2. See also global gpFacility
 
 =internal-cut
 EOF
-} # fLog2
+} # fLog
 
 # --------------------------------
-fError2() {
+fError() {
+    # If no options passed, fall back to fError2 (positional style)
+    if [[ $# -eq 0 || "${1:0:1}" != "-" ]]; then
+        fError2 "$@"
+        return
+    fi
+
     local pContinue=0
     local pErr=1
     local pInt=0
@@ -679,13 +787,14 @@ fError2() {
     local OPTARG
     local tArg
 
-    while getopts :ce:il:m: tArg; do
+    while getopts :ce:il:m:n tArg; do
         case $tArg in
             c) pContinue=1 ;;
             e) pErr="${OPTARG}" ;;
             i) pInt=1 ;;
             l) pLine="${OPTARG}" ;;
             m) pMsg="${OPTARG}" ;;
+            n) pContinue=1 ;;
             :) echo "Internal: Value required for option: -$OPTARG [$LINENO]" ;;
             \?) echo "Internal: Unknown option: $OPTARG [$LINENO]" ;;
         esac
@@ -702,34 +811,50 @@ fError2() {
     if [[ $pInt -eq 1 ]]; then
         pMsg="Internal: $pMsg"
     fi
-    fLog2 -p crit -l $pLine -e $pErr -m "$pMsg"
+
+    # If -c or -n: log at "err" so the script can continue, and return
+    if [[ $pContinue -eq 1 ]]; then
+        fLog -p err -l $pLine -e $pErr -m "$pMsg"
+        if [[ $pInt -eq 1 || $gpDebug -ge 2 ]]; then
+            fComStackTrace
+        fi
+        return 1
+    fi
+
+    fLog -p crit -l $pLine -e $pErr -m "$pMsg"
+    if [[ $pInt -eq 1 || $gpDebug -ge 2 ]]; then
+        fComStackTrace
+    fi
     if [[ $pInt -eq 0 ]]; then
         fUsage usage
     fi
-    if [[ $pContinue -eq 0 ]]; then
-        exit 1
-    fi
-    return 1
+    exit 1
 
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fError2 -m pMsg [-c] [-l $LINENO] [-e pErr] [-i]
+=internal-head3 fError -m pMsg [-c|-n] [-l $LINENO] [-e pErr] [-i]
 
-This will call: fLog2 -p crit -m "pMsg" -l pLine -e pErr
+Log pMsg at "crit" level (or "err" with -c/-n) and exit (unless -c/-n).
 
-If no -i, then "fUsage short", will be called.
+ -c, -n  do not exit; log at "err" instead of "crit", then return 1
+ -i      prepend "Internal: " to pMsg, and call fComStackTrace
+ -l      LINENO of the caller
+ -e      error code (sets gErr)
 
-if -c, then function will return err, and not exit.
+If gpDebug >= 2, fComStackTrace is also called.
+
+If neither -c, -n nor -i are given, "fUsage usage" is called before
+exiting.
 
 =internal-cut
 EOF
-} # fError2
+} # fError
 
 # --------------------------------
 fTimeoutFunction() {
     # Number of seconds
-    declare -i pTimeout
+    local -i pTimeout
     # Cmd including args
     local pCmd
 
@@ -747,7 +872,8 @@ fTimeoutFunction() {
         ) &
         wait $tChild
     )
-    return
+    return 0
+
     cat <<EOF >/dev/null
 =internal-pod
 
@@ -760,3 +886,654 @@ https://stackoverflow.com/questions/9954794/execute-a-shell-function-with-timeou
 =internal-cut
 EOF
 } # fTimeoutFunction
+
+# ------------------
+fComStackTrace() {
+    local i
+    local tSrc
+    local tLine
+    local tName
+    local tOutput
+
+    # Credit: https://gist.github.com/ahendrix/7030300
+    if [[ ${#FUNCNAME[@]} -le 2 ]]; then
+        return 0
+    fi
+
+    if [[ ${gpLog:-0} -ne 0 ]]; then
+        tOutput="logger -s -t ${cName:-fComStackTrace} -p ${gpFacility:-user}.debug"
+    else
+        tOutput="cat"
+    fi
+
+    tSrc=${BASH_SOURCE[0]}
+    tSrc=${tSrc##*/}
+    tLine=${BASH_LINENO[0]}
+    tName="${FUNCNAME[1]}()"
+    echo "Stack trace at: ${tSrc}:${tLine} ${tName}" | $tOutput
+    for ((i = 1; i < ${#FUNCNAME[@]} - 1; i++)); do
+        tSrc=${BASH_SOURCE[$i + 1]}
+        tSrc=${tSrc##*/}
+        tLine=${BASH_LINENO[$i]}
+        tName="${FUNCNAME[$i]}()"
+        echo " $i: ${tSrc}:${tLine} ${tName}" | $tOutput
+    done
+
+    return 0
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComStackTrace
+
+Output a stack trace of bash functions, showing source file, line, and
+function name. If gpLog is set, the trace is sent to syslog at debug level.
+
+=internal-cut
+EOF
+} # fComStackTrace
+
+# --------------------
+fComSelect() {
+    PS3="$1"
+    local pList="$2"
+    local pHelp="$3"
+    local tResponse
+    local tStatus=1
+    local tMaxLoop=${gpMaxLoop:-30}
+
+    # Loop until a valid selection, or QUIT
+    select tResponse in QUIT HELP $pList; do
+        ((--tMaxLoop))
+        if [[ $tMaxLoop -le 0 ]]; then
+            fLog -p warning -m "Too many responses." -l $LINENO
+            tResponse="QUIT"
+            break
+        fi
+        echo
+        case $tResponse in
+            QUIT)
+                fLog -p warning -m "Quitting." -l $LINENO
+                break
+                ;;
+            HELP)
+                echo 1>&2
+                echo "$pHelp" 1>&2
+                echo 1>&2
+                continue
+                ;;
+        esac
+        if [[ -n "$tResponse" ]]; then
+            tStatus=0
+            break
+        fi
+        if [[ -z "$tResponse" ]]; then
+            fLog -p warning -m "Invalid selection" -l $LINENO
+            continue
+        fi
+    done
+
+    PS3=""
+    gResponse=$tResponse
+    return $tStatus
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComSelect pPrompt pList pHelp
+
+Use bash "select" to prompt the user from pList. The list is always
+prefixed with QUIT and HELP. The selected response is stored in
+gResponse.
+
+Returns 0 on a valid selection, 1 on QUIT or too many invalid
+responses (gpMaxLoop).
+
+=internal-cut
+EOF
+} # fComSelect
+
+# ------------------
+fComYesNo() {
+    local pPrompt="$1"
+    local -l tResult
+
+    if [[ ${gpAuto:-0} -ne 0 ]]; then
+        if [[ "$gpYesNo" = "y" ]]; then
+            gResponse="y"
+            return 0
+        fi
+        if [[ "$gpYesNo" = "n" ]]; then
+            gResponse="n"
+            return 1
+        fi
+        gResponse="n"
+        return 1
+    fi
+    echo -n "$pPrompt [y/n]? "
+    read -r tResult
+    if [[ "${tResult::1}" = "y" ]]; then
+        gResponse="y"
+        return 0
+    fi
+    gResponse="n"
+    return 1
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComYesNo pPrompt
+
+If gpAuto is non-zero, gpYesNo determines the answer (no prompt).
+
+ gpYesNo = "y" - set gResponse to "y", return 0
+ gpYesNo = "n" - set gResponse to "n", return 1
+ anything else - same as "n"
+
+If gpAuto is 0, output pPrompt and read the response. A response that
+starts with "y" returns 0, anything else returns 1. gResponse is set
+either way.
+
+=internal-cut
+EOF
+} # fComYesNo
+
+# ------------------
+fComMenu() {
+    local pTitle=$1
+    local pMenu=$2
+    local pActn=$3
+    declare -x gMenuTitle
+    local -a tMenu
+    local tMaxLoop=${gpMaxLoop:-30}
+    local tActn
+    local tSize
+    local tItem
+    local tPrompt
+    local tSelect
+    local tSelected
+    local tCmd
+    local tFun
+    local tIFS
+
+    tSize=$(eval echo "\${#${pMenu}[@]}")
+    ((--tSize))
+    tPrompt="$(eval echo $(echo \${${pMenu}[0]}))"
+    while true; do
+        ((--tMaxLoop))
+        if [[ $tMaxLoop -le 0 ]]; then
+            fLog -p warning -m "Too many responses." -l $LINENO
+            break
+        fi
+        gMenuTitle=$pTitle
+        tSelected=$(echo $pTitle | sed 's/{[^}]*} //g')
+        echo
+        echo "Current selections:"
+        tIFS="$IFS"
+        IFS=';'
+        printf '\t%s\n' $tSelected
+        IFS="$tIFS"
+        for ((tItem = 1; tItem <= tSize; tItem++)); do
+            tMenu[$tItem]="$(eval echo $(echo \${${pMenu}[$tItem]}))"
+            echo -e "  $tItem)\n      ${tMenu[$tItem]}" |
+                sed 's/{[^}]*} //g' | fmt -t
+        done
+        echo -n "$tPrompt "
+        read tSelect
+        if [[ $gpDebug -ne 0 ]]; then
+            echo "$tSelect"
+        fi
+        if [[ -z "$tSelect" ]]; then
+            continue
+        fi
+        if ! echo "$tSelect" | grep -q '[0-9]'; then
+            continue
+        fi
+        if [[ $tSelect -lt 1 || $tSelect -gt $tSize ]]; then
+            continue
+        fi
+        tActn="$(eval echo $(echo \${${pActn}[$tSelect]}))"
+        if [[ -z "$tActn" ]]; then
+            fError -c -i -m "Problem with action" -l $LINENO
+            continue
+        fi
+        tCmd=${tActn%% *}
+        tFun=${tActn#* }
+        case $tCmd in
+            help)
+                fComMenuHelp $pActn
+                tMaxLoop=${gpMaxLoop:-30}
+                ;;
+            func)
+                eval $tFun
+                tMaxLoop=${gpMaxLoop:-30}
+                ;;
+            menu)
+                fComMenu "${pTitle};${tMenu[$tSelect]}" ${tFun}
+                tMaxLoop=${gpMaxLoop:-30}
+                ;;
+            back)
+                return 0
+                ;;
+            *)
+                echo
+                fError -c -i -m "Problem with action" -l $LINENO
+                ;;
+        esac
+        continue
+    done
+    return 1
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComMenu pTitle pMenuArrayName pActnArrayName
+
+A bash-driven hierarchical menu. pMenuArrayName names an array whose
+[0] element is the prompt and whose [1..N] elements are the menu
+items. pActnArrayName names a parallel array whose [0] element is help
+text and whose [1..N] elements are actions.
+
+Each action is a string of the form "command [args]". Supported commands:
+
+ help          - call fComMenuHelp passing pActnArrayName
+ func pFn ...  - eval pFn with args; \$gMenuTitle holds the breadcrumb trail
+ menu pM pA    - recurse into fComMenu with pM and pA
+ back          - return to the calling menu
+
+The breadcrumb trail is built from each selected item's text. Text
+matching '{...}' is removed when displayed; the bracketed text can be
+parsed by callers from \$gMenuTitle.
+
+=internal-cut
+EOF
+} # fComMenu
+
+# ------------------
+fComMenuHelp() {
+    local pHelp=$1
+    local tHelp
+
+    tHelp="$(eval echo -e "$(echo -e "\${${pHelp}[0]}")")"
+    echo
+    echo '--------------------'
+    echo -e "$tHelp" | fmt -t | grep .
+    echo '--------------------'
+
+    return 0
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComMenuHelp pActnArrayName
+
+Output element [0] of the action array (the help text for the menu),
+framed by separator lines.
+
+=internal-cut
+EOF
+} # fComMenuHelp
+
+# --------------------
+fComAllMustBeReadable() {
+    local pDir=${1:-$PWD}
+    local tFound
+
+    tFound=$(find $pDir -type d \! -executable -print 2>/dev/null)
+    if [[ -n "$tFound" ]]; then
+        fError -c -m "All directories must be executable, under $pDir" -l $LINENO
+        return 1
+    fi
+
+    tFound=$(find $pDir \! -readable -print 2>/dev/null)
+    if [[ -n "$tFound" ]]; then
+        fError -c -m "All directories and files must be readable, under $pDir" -l $LINENO
+        return 1
+    fi
+
+    return 0
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComAllMustBeReadable [pDir]
+
+Verify every directory under pDir is executable and every file is
+readable. pDir defaults to \$PWD. Returns 0 on success, 1 if any item
+is missing the required permission.
+
+=internal-cut
+EOF
+} # fComAllMustBeReadable
+
+# --------------------------------
+fComCheckConfFile() {
+    # Internal helper: ensure a config file exists, creating it (and
+    # its parent directory) if missing. Returns 0 on success, 1 on
+    # failure. Used by fComSetConfig / fComGetConfig / fComUnsetConfig
+    # for the -g, -l, -L options. Style mirrors the -f branch in
+    # fComSetConfig.
+    local pFile=$1
+
+    if [[ -f $pFile ]]; then
+        return 0
+    fi
+    fLog -p warning -m "Could not find $pFile, it will be created" -l $LINENO
+    mkdir -p "${pFile%/*}" 2>/dev/null
+    touch $pFile 2>/dev/null
+    if [[ ! -f $pFile ]]; then
+        fError -c -m "Could not create $pFile" -l $LINENO
+        return 1
+    fi
+    return 0
+} # fComCheckConfFile
+
+# --------------------------------
+fComSetConfig() {
+    local pScope=""
+    local pType=""
+    local -l pKey=""
+    local pValue=""
+    local pAdd=""
+
+    local OPTIND=1
+    local OPTARG
+    local tArg
+    while getopts :abf:gik:lLv: tArg; do
+        # shellcheck disable=SC2213,SC2220
+        case $tArg in
+            f)
+                if ! fComCheckConfFile ${OPTARG}; then
+                    return 1
+                fi
+                ;;
+            g)
+                if ! fComCheckConfFile $gpConfGlobal; then
+                    return 1
+                fi
+                ;;
+            l)
+                if ! fComCheckConfFile $gpConfLocal; then
+                    return 1
+                fi
+                ;;
+            L)
+                if ! fComCheckConfFile $gpConfProj; then
+                    return 1
+                fi
+                ;;
+        esac
+        case $tArg in
+            a) pAdd="--add" ;;
+            b) pType="--bool" ;;
+            f) pScope="--file ${OPTARG}" ;;
+            g) pScope="--file $gpConfGlobal" ;;
+            i) pType="--int" ;;
+            k) pKey="${OPTARG}" ;;
+            l) pScope="--file $gpConfLocal" ;;
+            L) pScope="--file $gpConfProj" ;;
+            v) pValue="${OPTARG}" ;;
+            :)
+                fError -c -i -m "fComSetConfig: Value required for option: $OPTARG" -l $LINENO
+                return 1
+                ;;
+            \?)
+                fError -c -i -m "fComSetConfig: Unknown option: $OPTARG" -l $LINENO
+                return 1
+                ;;
+        esac
+    done
+    if [[ -z "$pKey" ]]; then
+        fError -c -i -m "fComSetConfig: missing key" -l $LINENO
+        return 1
+    fi
+    if [[ -z "$pValue" ]]; then
+        fError -c -i -m "fComSetConfig: missing value for $pKey" -l $LINENO
+        return 1
+    fi
+    if [[ -z "$pScope" ]]; then
+        # Default to the local config file
+        if ! fComCheckConfFile $gpConfLocal; then
+            return 1
+        fi
+        pScope="--file $gpConfLocal"
+    fi
+
+    # shellcheck disable=SC2086
+    git config $pScope $pAdd $pType $pKey "$pValue"
+    return $?
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComSetConfig -k pKey -v pValue [-g|-l|-L|-f pFile] [-b|-i] [-a]
+
+Set a key/value pair in a config file. Uses "git config --file" so the
+file format is INI-style. The target file is created (with its parent
+directory) if it does not exist.
+
+Only one of -g, -l, -L, -f is used (last wins). If none, -l is the default.
+
+ -k pKey   - required, the key (lowercased)
+ -v pValue - required, the value
+ -g        - write to gpConfGlobal (default ~/.config/\$cName/\$cName.conf)
+ -l        - write to gpConfLocal  (default ./.\$cName.conf)
+ -L        - write to gpConfProj   (default \$gpTopDir/.proj/\$cName.conf)
+ -f pFile  - write to pFile
+ -b        - normalize value as boolean (true/false)
+ -i        - normalize value as integer with k/m/g suffix
+ -a        - --add (allow multiple values for the same key)
+
+Returns 0 on success, 1 on failure.
+
+=internal-cut
+EOF
+} # fComSetConfig
+
+# --------------------------------
+fComGetConfig() {
+    local pScope=""
+    local pType=""
+    local -l pKey=""
+    local pDefault=""
+    local pFilter=""
+    local pExitOnError=0
+    local tExit="-c"
+
+    # Globals set by fComGetConfig
+    gResponse=""
+
+    local OPTIND=1
+    local OPTARG
+    local tArg
+    while getopts :bd:ef:gik:lLv: tArg; do
+        # shellcheck disable=SC2213,SC2220
+        case $tArg in
+            f)
+                if ! fComCheckConfFile ${OPTARG}; then
+                    return 1
+                fi
+                ;;
+            g)
+                if ! fComCheckConfFile $gpConfGlobal; then
+                    return 1
+                fi
+                ;;
+            l)
+                if ! fComCheckConfFile $gpConfLocal; then
+                    return 1
+                fi
+                ;;
+            L)
+                if ! fComCheckConfFile $gpConfProj; then
+                    return 1
+                fi
+                ;;
+        esac
+        case $tArg in
+            b) pType="--bool" ;;
+            d) pDefault="${OPTARG}" ;;
+            e)
+                pExitOnError=1
+                tExit=""
+                ;;
+            f) pScope="--file ${OPTARG}" ;;
+            g) pScope="--file $gpConfGlobal" ;;
+            i) pType="--int" ;;
+            k) pKey="${OPTARG}" ;;
+            l) pScope="--file $gpConfLocal" ;;
+            L) pScope="--file $gpConfProj" ;;
+            v) pFilter="${OPTARG}" ;;
+            :)
+                fError $tExit -i -m "fComGetConfig: Value required for option: $OPTARG" -l $LINENO
+                return 1
+                ;;
+            \?)
+                fError $tExit -i -m "fComGetConfig: Unknown option: $OPTARG" -l $LINENO
+                return 1
+                ;;
+        esac
+    done
+    if [[ -z "$pKey" ]]; then
+        fError $tExit -i -m "fComGetConfig: missing key" -l $LINENO
+        return 1
+    fi
+
+    # shellcheck disable=SC2086
+    gResponse=$(git config --get --includes $pScope $pType $pKey $pFilter 2>/dev/null)
+    if [[ -z "$gResponse" ]]; then
+        gResponse="$pDefault"
+    fi
+    echo $gResponse
+
+    if [[ $pExitOnError -eq 0 ]]; then
+        return 0
+    fi
+
+    # ----------
+    if [[ -z "$gResponse" ]]; then
+        fError -m "Unexpected: $pKey is not defined!" -l $LINENO
+    fi
+
+    if [[ -n "$pDefault" && "$gResponse" = "$pDefault" ]]; then
+        fError -m "Unexpected: $pKey should not be set to: $gResponse" -l $LINENO
+    fi
+
+    if [[ "$gResponse" = "TBD" || "$gResponse" = "not-defined" ]]; then
+        fError -m "Unexpected: $pKey should not be set to: $gResponse" -l $LINENO
+    fi
+    return 0
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComGetConfig -k pKey [-g|-l|-L|-f pFile] [-b|-i] [-d pDefault] [-e] [-v pFilter]
+
+Get the value of pKey from a config file. The value is echoed and also
+stored in gResponse.
+
+Only one of -g, -l, -L, -f is used (last wins). If none, all the config
+files git config knows about are searched.
+
+The selected config file (-g/-l/-L) is created if it does not exist
+(see fComSetConfig's -f style).
+
+ -k pKey      - required, the key (lowercased)
+ -g           - gpConfGlobal
+ -l           - gpConfLocal
+ -L           - gpConfProj
+ -f pFile     - pFile
+ -b           - normalize as boolean
+ -i           - normalize as integer
+ -d pDefault  - if not found, return pDefault and set origin to "default"
+ -e           - exit script if not found, equal to pDefault, or "TBD"/"not-defined"
+ -v pFilter   - value-pattern filter, used when a key has multiple values
+
+Returns 0 on success (even if not found, when -e is not given).
+
+=internal-cut
+EOF
+} # fComGetConfig
+
+# --------------------------------
+fComUnsetConfig() {
+    local pScope=""
+    local -l pKey=""
+    local pAll="--unset"
+
+    local OPTIND=1
+    local OPTARG
+    local tArg
+
+    while getopts :af:gk:lL tArg; do
+        # shellcheck disable=SC2213,SC2220
+        case $tArg in
+            f)
+                if ! fComCheckConfFile ${OPTARG}; then
+                    return 1
+                fi
+                ;;
+            g)
+                if ! fComCheckConfFile $gpConfGlobal; then
+                    return 1
+                fi
+                ;;
+            l)
+                if ! fComCheckConfFile $gpConfLocal; then
+                    return 1
+                fi
+                ;;
+            L)
+                if ! fComCheckConfFile $gpConfProj; then
+                    return 1
+                fi
+                ;;
+        esac
+        case $tArg in
+            a) pAll="--unset-all" ;;
+            f) pScope="--file ${OPTARG}" ;;
+            g) pScope="--file $gpConfGlobal" ;;
+            k) pKey="${OPTARG}" ;;
+            l) pScope="--file $gpConfLocal" ;;
+            L) pScope="--file $gpConfProj" ;;
+            :)
+                fError -c -i -m "fComUnsetConfig: Value required for option: $OPTARG" -l $LINENO
+                return 1
+                ;;
+            \?)
+                fError -c -i -m "fComUnsetConfig: Unknown option: $OPTARG" -l $LINENO
+                return 1
+                ;;
+        esac
+    done
+
+    if [[ -z "$pKey" ]]; then
+        fError -c -i -m "fComUnsetConfig: missing key" -l $LINENO
+        return 1
+    fi
+    if [[ -z "$pScope" ]]; then
+        if ! fComCheckConfFile $gpConfLocal; then
+            return 1
+        fi
+        pScope="--file $gpConfLocal"
+    fi
+
+    # shellcheck disable=SC2086
+    git config $pAll $pScope $pKey
+    return $?
+
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fComUnsetConfig -k pKey [-g|-l|-L|-f pFile] [-a]
+
+Unset pKey in the selected config file. With -a, unset all values for
+pKey (when -a is not given and the key has multiple values, git config
+returns an error).
+
+The selected config file (-g/-l/-L) is created if it does not exist
+(see fComSetConfig's -f style); -f also auto-creates.
+
+=internal-cut
+EOF
+} # fComUnsetConfig

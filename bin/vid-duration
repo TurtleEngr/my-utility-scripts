@@ -3,7 +3,17 @@
 if [ $# -eq 0 ]; then
     cat <<EOF
 Usage
-        vid-duration *.mp4 *.mp3
+    vid-duration *.mp4 *.mp3
+Output
+    duration.txt
+
+Collect all duration.txt files in all dirs below current dir.
+
+for i in $(find * -name duration.txt); do
+    echo;
+    echo ${i%/duration.txt};
+    cat $i;
+done >files.txt
 EOF
     exit 1
 fi

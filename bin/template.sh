@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.86 $ $Date: 2026/01/13 18:20:40 $ GMT
+# $Revision: 1.90 $ $Date: 2026/04/29 22:38:35 $ GMT
 
-export gpHostName gpTag
+# Naming Convention
+# gpVar - command line parameters. These can override gcVars with same
+#         base name.
+# gcVar - config vars that are read from a config file.
+# gVar - global variables. Should be few. Use functions to reduce these.
+# cVar - These are global config vars, fixed values for the script.
+# pVar - a positional variable passed into a function (local).
+# tVar - a local variable used in a function.
+# fFunction - a function unique to this script
+# fComFunction - Most functions in bash-com.inc begin with fCom
+
 set -u
+export gpHostName gpTag
 
 # ========================================
 # Script Functions
@@ -107,7 +118,7 @@ level "warning" and higher.
 Set the gpDebug level. Add 1 for each -x.
 Or you can set gpDebug before running the script.
 
-See: fLog and fLog2 (Internal documentation)
+See: fLog (Internal documentation)
 
 =item B<-T "pTest">
 
@@ -221,6 +232,28 @@ log message will be output, otherwise it is skipped.
 
 See -x
 
+=item B<gpTopDir, gpConfGlobal, gpConfLocal, gpConfProj>
+
+Config file locations used by fComSetConfig, fComGetConfig, and
+fComUnsetConfig (-g, -l, -L options). Defaults are set in
+fComSetGlobals; override before calling fSetGlobals to change them:
+
+ gpTopDir     - default: ~/.config/$cName
+ gpConfGlobal - -g target, default: ~/.config/$cName/$cName.conf
+ gpConfLocal  - -l target, default: ./.$cName.conf
+ gpConfProj   - -L target, default: $gpTopDir/${cName}-proj.conf}
+
+The selected file is auto-created (along with its parent directory)
+when written to, or when -g/-l/-L is used and the file is missing.
+
+=item B<gpAuto, gpYesNo, gpMaxLoop>
+
+Used by fComYesNo, fComSelect, fComMenu.
+
+If gpAuto is non-zero, fComYesNo answers from gpYesNo ("y" or "n")
+without prompting. gpMaxLoop caps how many times fComSelect/fComMenu
+will retry on invalid input (default 30).
+
 =back
 
 =head1 RETURN VALUE
@@ -244,7 +277,8 @@ following log message format:
 
 See Globals section for details.
 
-HOME, USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
+HOME, USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug,
+gpTopDir, gpConfGlobal, gpConfLocal, gpConfProj, gpAuto, gpYesNo, gpMaxLoop
 
 =for comment =head1 FILES
 
@@ -342,9 +376,9 @@ NAME
 
 =head1 HISTORY
 
-GPLv3 (c) Copyright 2021 by COMPANY
+GPLv2 (c) Copyright
 
-$Revision: 1.86 $ $Date: 2026/01/13 18:20:40 $ GMT
+$Revision: 1.90 $ $Date: 2026/04/29 22:38:35 $ GMT
 
 =cut
 EOF
@@ -565,7 +599,7 @@ fRunTests() {
     if [[ "$gpTest" = "all" ]]; then
         gpTest=""
         # shellcheck disable=SC1091
-        . /usr/local/bin/shunit2.1
+        source /usr/local/bin/shunit2.1
         exit $?
     fi
     if [[ "$gpTest" = "com" ]]; then
@@ -574,7 +608,7 @@ fRunTests() {
         exit $?
     fi
     # shellcheck disable=SC1091
-    . /usr/local/bin/shunit2.1 -- $gpTest
+    source /usr/local/bin/shunit2.1 -- $gpTest
     exit $?
 
     cat <<EOF >/dev/null
@@ -616,13 +650,13 @@ case $tBin in
     this) cBin=${BASH_SOURCE%/*} ;;
 esac
 
-. $cBin/bash-com.inc
+source $cBin/bash-com.inc
 
 # -------------------
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.86 $'
+cVer='$Revision: 1.90 $'
 fSetGlobals
 
 # -------------------
@@ -712,7 +746,7 @@ timeout 5 awk -f $cTmp1 >$cTmp2
 tList=""
 for i in $(seq 2 40); do
     if [[ -e "File$i" ]]; then
-        fLog2 -m "Found File$i"
+        fLog -m "Found File$i"
         tList="$tList File$i"
     fi
 done >>$cTmp2
