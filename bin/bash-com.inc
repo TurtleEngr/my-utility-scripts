@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.inc,v $
-# $Revision: 1.27 $ $Date: 2026/04/29 22:38:35 $ GMT
+# $Revision: 1.29 $ $Date: 2026/05/02 15:44:54 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -107,7 +107,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.27 $'
+        cVer='$Revision: 1.29 $'
 
  gpTopDir     - top dir for config and project files
                default: ~/.config/$cName
@@ -195,7 +195,7 @@ fComSetGlobals() {
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.27 $'
+    #cVer='$Revision: 1.29 $'
 
     if [[ "$cVer" != "${cVer#*' '}" ]]; then
         cVer=${cVer#*' '}
@@ -255,7 +255,7 @@ fComSetGlobals() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComSetGlobals
+=internal-head2 fComSetGlobals
 
 Set initial values for all of the globals use by this script. The ones
 that begin with "gp" can usually be overridden by setting them before
@@ -285,7 +285,7 @@ fComCleanUp() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fCleanUp
+=internal-head2 fCleanUp
 
 Called when script ends (see trap) to remove temporary files.
 Except if gpDebug != 0, then tmp files are not removed.
@@ -329,7 +329,7 @@ fComCheckDeps() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComCheckDeps "pRequired List" "pOptional List"
+=internal-head2 fComCheckDeps "pRequired List" "pOptional List"
 
 Check for required and optional programs or scripts used by this script.
 If any required programs are missing, exit the script.
@@ -364,7 +364,7 @@ fComInternalDoc() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComInternalDoc [-a]
+=internal-head2 fComInternalDoc [-a]
 
 This function collects all of the "internal-pod" documentation from
 stdin and it outputs to stdout.
@@ -463,6 +463,7 @@ fComUsage() {
         if [[ "$pStyle" = "html" ]]; then
             # shellcheck disable=SC2002
             cat $pFileList | $tProg --title="$pTitle" | $tTidy
+            rm pod2htmd.tmp >/dev/null 2>&1
         else
             if [[ "$pStyle" = "short" ]]; then
                 # shellcheck disable=SC2002
@@ -489,7 +490,7 @@ fComUsage() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComUsage -f pFileList -s pStyle [-t pTitle] [-i] [-a]
+=internal-head2 fComUsage -f pFileList -s pStyle [-t pTitle] [-i] [-a]
 
 =internal-over 4
 
@@ -607,7 +608,7 @@ fFmtLog() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fFmtLog pLevel "pMsg" pLine pErr [pForce]
+=internal-head2 fFmtLog pLevel "pMsg" pLine pErr [pForce]
 
 This function formats and outputs a consistent log message output.
 See: fLog2, fLog, fError2, and fError.
@@ -662,7 +663,7 @@ fLog2() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fLog2 pLevel "pMsg" [$LINENO] [pErr]
+=internal-head2 fLog2 pLevel "pMsg" [$LINENO] [pErr]
 
 pLevel - emerg alert crit err warning notice info debug debug-N
 
@@ -697,7 +698,7 @@ fError2() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fError2 "pMsg" [$LINENO] [pErr]
+=internal-head2 fError2 "pMsg" [$LINENO] [pErr]
 
 This will call: fLog2 crit "pMsg" pLine pErr
 
@@ -755,7 +756,7 @@ fLog() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fLog -m pMsg [-p pLevel] [-l $LINENO] [-e pErr] [-i] [-f]
+=internal-head2 fLog -m pMsg [-p pLevel] [-l $LINENO] [-e pErr] [-i] [-f]
 
 This is like fLog2, but the arguments can be in any order.
 
@@ -833,7 +834,7 @@ fError() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fError -m pMsg [-c|-n] [-l $LINENO] [-e pErr] [-i]
+=internal-head2 fError -m pMsg [-c|-n] [-l $LINENO] [-e pErr] [-i]
 
 Log pMsg at "crit" level (or "err" with -c/-n) and exit (unless -c/-n).
 
@@ -877,7 +878,7 @@ fTimeoutFunction() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fTimeoutFunction pSec "pCmd [args...]"
+=internal-head2 fTimeoutFunction pSec "pCmd [args...]"
 
 Algorithm idea came from:
 
@@ -924,7 +925,7 @@ fComStackTrace() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComStackTrace
+=internal-head2 fComStackTrace
 
 Output a stack trace of bash functions, showing source file, line, and
 function name. If gpLog is set, the trace is sent to syslog at debug level.
@@ -980,7 +981,7 @@ fComSelect() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComSelect pPrompt pList pHelp
+=internal-head2 fComSelect pPrompt pList pHelp
 
 Use bash "select" to prompt the user from pList. The list is always
 prefixed with QUIT and HELP. The selected response is stored in
@@ -1022,7 +1023,7 @@ fComYesNo() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComYesNo pPrompt
+=internal-head2 fComYesNo pPrompt
 
 If gpAuto is non-zero, gpYesNo determines the answer (no prompt).
 
@@ -1127,7 +1128,7 @@ fComMenu() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComMenu pTitle pMenuArrayName pActnArrayName
+=internal-head2 fComMenu pTitle pMenuArrayName pActnArrayName
 
 A bash-driven hierarchical menu. pMenuArrayName names an array whose
 [0] element is the prompt and whose [1..N] elements are the menu
@@ -1165,7 +1166,7 @@ fComMenuHelp() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComMenuHelp pActnArrayName
+=internal-head2 fComMenuHelp pActnArrayName
 
 Output element [0] of the action array (the help text for the menu),
 framed by separator lines.
@@ -1196,7 +1197,7 @@ fComAllMustBeReadable() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComAllMustBeReadable [pDir]
+=internal-head2 fComAllMustBeReadable [pDir]
 
 Verify every directory under pDir is executable and every file is
 readable. pDir defaults to \$PWD. Returns 0 on success, 1 if any item
@@ -1306,7 +1307,7 @@ fComSetConfig() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComSetConfig -k pKey -v pValue [-g|-l|-L|-f pFile] [-b|-i] [-a]
+=internal-head2 fComSetConfig -k pKey -v pValue [-g|-l|-L|-f pFile] [-b|-i] [-a]
 
 Set a key/value pair in a config file. Uses "git config --file" so the
 file format is INI-style. The target file is created (with its parent
@@ -1427,7 +1428,7 @@ fComGetConfig() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComGetConfig -k pKey [-g|-l|-L|-f pFile] [-b|-i] [-d pDefault] [-e] [-v pFilter]
+=internal-head2 fComGetConfig -k pKey [-g|-l|-L|-f pFile] [-b|-i] [-d pDefault] [-e] [-v pFilter]
 
 Get the value of pKey from a config file. The value is echoed and also
 stored in gResponse.
@@ -1525,7 +1526,7 @@ fComUnsetConfig() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComUnsetConfig -k pKey [-g|-l|-L|-f pFile] [-a]
+=internal-head2 fComUnsetConfig -k pKey [-g|-l|-L|-f pFile] [-a]
 
 Unset pKey in the selected config file. With -a, unset all values for
 pKey (when -a is not given and the key has multiple values, git config

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.90 $ $Date: 2026/04/29 22:38:35 $ GMT
+# $Revision: 1.92 $ $Date: 2026/05/04 19:55:15 $ GMT
 
 # Naming Convention
 # gpVar - command line parameters. These can override gcVars with same
@@ -12,6 +12,9 @@
 # tVar - a local variable used in a function.
 # fFunction - a function unique to this script
 # fComFunction - Most functions in bash-com.inc begin with fCom
+
+# POD Syntax
+# https://web.archive.org/web/20260502155348/https://perldoc.perl.org/perlpod
 
 set -u
 export gpHostName gpTag
@@ -372,13 +375,13 @@ To verify the script is internally OK, run: SCRIPTNAME -T all
 
 =for comment =head1 AUTHOR
 
-NAME
+=for comment NAME
 
 =head1 HISTORY
 
 GPLv2 (c) Copyright
 
-$Revision: 1.90 $ $Date: 2026/04/29 22:38:35 $ GMT
+$Revision: 1.92 $ $Date: 2026/05/04 19:55:15 $ GMT
 
 =cut
 EOF
@@ -387,7 +390,22 @@ EOF
 
 =internal-head1 SCRIPTNAME Internal Documentation
 
-=internal-head3 fUsage pStyle
+Why is POD used for usage help and internal documentation?  It has
+been around much longer than markdown, it is a simplier markup than
+markdown, is is computer language independent, and there are a lot of
+programs that will convert POD to other formats.  (See: pod2html,
+pod2man, pod2markdown, pod2pdf, pod2text, pod2usage, podchecker,
+podselect)
+
+If you use the head1 headings in the order shown here, the pod2man
+will create great man pages. Comment out sections and text that is not
+needed with "=for comment " before the text.
+
+"=internal-" is put before sections that are only for internal
+documentation.  Function fBashComInternalDoc in bash-com.inc will
+replace"=internal-" with "=", then pass the text to the POD tools.
+
+=internal-head2 fUsage pStyle
 
 This function selects the type of help output. See -h and -H options.
 
@@ -407,7 +425,7 @@ fCleanUp() {
 
 =internal-head2 Script Functions
 
-=internal-head3 fCleanUp
+=internal-head2 fCleanUp
 
 Calls fComCleanUp.
 
@@ -430,7 +448,7 @@ fSetGlobals() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fSetGlobals
+=internal-head2 fSetGlobals
 
 Calls fComSetGlobals to set globals used by bash-com.inc.
 
@@ -452,7 +470,7 @@ fValidateHostName() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fValidateHostName
+=internal-head2 fValidateHostName
 
 Exit if missing.
 
@@ -614,7 +632,7 @@ fRunTests() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fRunTests
+=internal-head2 fRunTests
 
 Run unit tests for this script.
 
@@ -656,7 +674,7 @@ source $cBin/bash-com.inc
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.90 $'
+cVer='$Revision: 1.92 $'
 fSetGlobals
 
 # -------------------

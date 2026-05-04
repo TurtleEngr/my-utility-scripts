@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/vid-tag,v $
- $Revision: 1.1 $ $Date: 2026/05/01 19:46:15 $ GMT
+ $Revision: 1.2 $ $Date: 2026/05/02 15:44:54 $ GMT
 
 # Naming Convention
 # gpVar - command line parameters. These can override gcVars with same
@@ -15,23 +15,26 @@
 
 set -u
 
-export cVer=1.2.2
+export cVer=1.3
+export cBin
 export cExampleFile
 export cOutputDir
 
-declare -lx gpEventId
+# Internal globals
 export gFile
 export gFileDate
 export gFileDateFull
 export gFileDateLong
 export gFileDateShort
 export gFileDateTouch
+
+# External globals (set externally or by cmd line options)
+declare -lx gpEventId
 export gpCaption
 export gpConfLocal
 export gpCopyright
 export gpDebug
 export gpEventCity
-export gpEventExtra
 export gpEventFileList
 export gpEventKeyword
 export gpEventTitle
@@ -39,7 +42,18 @@ export gpFilePat
 export gpNameLong
 export gpNameShort
 export gpNoExec
+export gpTimeZone
 export gpTitlePat
+
+# Captured command line for the example file.  Set in vid-tag main.
+export gpCmdLine
+
+# Per-file collection arrays used by fExample.  Indexed by gExampleIdx.
+declare -ag gExampleOrigNames
+declare -ag gExampleNewNames
+declare -ag gExampleTitles
+declare -ag gExampleCreateDates
+declare -ig gExampleIdx
 
 # ========================================
 # Main
@@ -104,6 +118,13 @@ fi
 # even when it was supplied on the command line.
 fPreScanOpts "$@"
 
+# Detach the [vid-tag "extra"] section before any git-config based I/O.
+# fLoadExtras populates gExtraMap from $gpConfLocal and strips the
+# section from the file so fLoadConf / fSaveConf can use git config
+# without choking on dotted file-name keys.  fSaveExtras (below)
+# re-attaches the section at the end of the run.
+fLoadExtras
+
 # Load config file.
 # fPreScanOpts has already set gpEventId from -e (if given) so that
 # fLoadConf can resolve the correct INI section.
@@ -118,6 +139,9 @@ fGetOpt "$@"
 fValidate
 
 fSaveConf
+
+# Restore the [vid-tag "extra"] section that fLoadExtras detached.
+fSaveExtras
 
 # -------------------
 # Build vid-tag-example.txt (preview of renames + metadata).

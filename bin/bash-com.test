@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.test,v $
-# $Revision: 1.19 $ $Date: 2026/04/28 05:02:51 $ GMT
+# $Revision: 1.20 $ $Date: 2026/05/02 15:44:54 $ GMT
 
 # --------------------------------
 fComBashTestUsage() {
@@ -62,7 +62,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.19 $ $Date: 2026/04/28 05:02:51 $ GMT
+$Revision: 1.20 $ $Date: 2026/05/02 15:44:54 $ GMT
 
 =cut
 EOF
@@ -1276,7 +1276,7 @@ fComRunTests() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fComRunTests
+=internal-head2 fComRunTests
 
 Run unit tests for the common functions.
 

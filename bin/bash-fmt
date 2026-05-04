@@ -4,7 +4,7 @@
 function fUsage() {
     cat <<\EOF | more 1>&2
 Usage:
-    bash-fmt <pInFile >pOutFile
+    bash-fmt - <pInFile >pOutFile
         or
     bash-fmt pFile...
         or
@@ -34,7 +34,7 @@ To use as a "git clean filter":
 
 To format all *.sh files
 
-    bash-fmt *.sh
+    bash-fmt *.sh *.inc
 EOF
     exit 1
 } # fUsage
@@ -43,21 +43,21 @@ EOF
 function fProcess() {
     local pFile="$1"
 
-    cat $pFile >$cInFile
+    if [ "$pFile" = "-" ]; then
+        cat >$cInFile
+    else
+        cat $pFile >$cInFile
+    fi
 
-    head -n 2 <$cInFile | grep -q '#!/bin/bash' &>/dev/null
+    head -n 2 <$cInFile | grep -Eq '#!/bin/bash|#!/usr/bin/env bash' &>/dev/null
     if [ $? -ne 0 ]; then
-        head -n 2 <$cInFile | grep -q '#!/usr/bin/env bash' &>/dev/null
-        if [ $? -ne 0 ]; then
-            cat <$cInFile
-            echo "Warning: Not a bash file [$LINENO]" 1>&2
-            return 1
-        fi
+        echo "Warning: Not a bash file [$LINENO]" 1>&2
     fi
 
     bash -n <$cInFile &>/dev/null
     if [ $? -ne 0 ]; then
         echo "Error: bash script has syntax errors [$LINENO]" 1>&2
+        gErr=1
         return 1
     fi
 
@@ -67,60 +67,60 @@ function fProcess() {
         'shfmt' -i 4 -ci >$cOutFile 2>/dev/null
     if [ $? -ne 0 ]; then
         echo "Error: shfmt errors [$LINENO]" 1>&2
+        gErr=1
         return 1
     fi
 
     # Is the formatted file empty?
     if [ ! -s $cOutFile ]; then
         echo "Error: shfmt errors [$LINENO]" 1>&2
+        gErr=1
         return 1
     fi
 
     # All OK so output the formatted file
-    if [ -n "$pFile" ]; then
-        cat <$cOutFile >$pFile
-    else
+    if [ "$pFile" = "-" ]; then
         cat <$cOutFile
+    else
+        cat <$cOutFile >$pFile
     fi
     return 0
 } # fProcess
 
 # ========================================
+# Main
 
-pFileList=""
-if [ $# -ne 0 ]; then
-    if [ -f $1 ]; then
-        pFileList=$*
-    else
-        fUsage
-    fi
-fi
+gErr=0
+export cInFile=/tmp/in-$$.tmp
+export cOutFile=/tmp/out-$$.tmp
 
-# --------------------
 if ! which shfmt &>/dev/null; then
     echo "Error: missing shfmt [$LINENO]" 1>&2
     exit 1
 fi
-if [ -n "$pFile" ]; then
-    for i in $pFileList; do
-        if [ ! -w $i ]; then
-            echo "Error: Not writable: \"$i\" [$LINENO]" 1>&2
+
+if [ $# -eq 0 ]; then
+        fUsage
+fi
+
+
+# --------------------
+if [ -f $1 ]; then
+    pFileList="$*"
+    for tFile in $pFileList; do
+        if [ ! -w $tFile ]; then
+            echo "Error: Not writable: $tFile [$LINENO]" 1>&2
             exit 1
         fi
     done
-fi
 
-cInFile=/tmp/in-$$.tmp
-cOutFile=/tmp/out-$$.tmp
-
-if [ -n "$pFileList" ]; then
-    for pFile in $pFileList; do
-        fProcess $pFile
+    for tFile in $pFileList; do
+        fProcess $tFile
     done
 else
-    fProcess
+    fProcess -
 fi
 
 rm -f $cInFile $cOutFile &>/dev/null
 
-exit 0
+exit $gErr
