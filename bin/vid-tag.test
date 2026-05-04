@@ -1,0 +1,2625 @@
+#!/usr/bin/env bash
+# $Source: /repo/per-bruce.cvs/bin/vid-tag.test,v $
+# $Revision: 1.2 $ $Date: 2026/05/02 15:44:54 $ GMT
+set -u
+
+export cVer=1.3
+
+# --------------------------------
+fUsageTest() {
+    # Quick help, run this:
+    # vid-tag -h
+
+    local pStyle="${1:-usage}"
+
+    case $pStyle in
+        short | usage | man | long | text | md)
+            fComUsage -f $cBin/$cName -s $pStyle
+            ;;
+        html)
+            fComUsage -f $cBin/$cName -s $pStyle -t "$cName Usage"
+            ;;
+        *)
+            fComUsage -f $cBin/$cName -s short
+            ;;
+    esac
+    exit 1
+
+    # POD Syntax: https://perldoc.perl.org/perlpod
+    # shellcheck disable=SC2317
+    cat <<EOF >/dev/null
+=pod
+
+=for text ========================================
+
+=for html <hr/>
+
+=head1 NAME vid-tag.test
+
+Test vid-tag
+
+=head1 SYNOPSIS
+
+    vid-tag.test [-h] [-h pStyle]
+    vid-tag.test -T list [-v] [-d]
+    vid-tag.test -T all [-v] [-d]
+    vid-tag.test -T fast [-v] [-d]
+    vid-tag.test -T cli [-v] [-d]
+    vid-tag.test -T not-cli [-v] [-d]
+    vid-tag.test -T com [-v] [-d]
+    vid-tag.test -T "pTest pTest..." [-v] [-d]
+
+=head1 DESCRIPTION
+
+Run unit and integration tests against vid-tag and vid-tag.inc.
+
+The test data archive C<vid-tag-test-input.zip> must exist in the
+current directory; it is unzipped during oneTimeSetUp and supplies
+three video files plus a sample C<vid-tag.conf>.
+
+The number in the asssert messages (ASSERT:282 msg), is the line
+number for assert test that failed.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-T "pTest">
+
+Run the unit test functions in this script.
+
+"B<-T all>" runs all functions that begin with "test".
+
+"B<-T fast>" runs all functions that do not have Slow in their name".
+
+"B<-T cli>" runs all functions that begin with "testCli".
+
+"B<-T not-cli>" runs all functions that begin with "test", but not
+"testCli".
+
+"B<-T list>" lists all test function names.
+
+"B<-T com>" runs all tests for bash-com.inc.
+
+=back
+
+=head1 RETURN VALUE
+
+0 on success; non-zero on error.
+
+=head1 ERRORS
+
+Look for the assert errors.
+
+If you have not unzipped vid-tag-test-input.zip in the current
+directory you will see these assert errors: "Missing test files" or
+"expected test files"
+
+=head1 FILES
+
+    vid-tag
+    vid-tag.inc
+    vid-tag.test - this file
+    vid-tag-test-input.zip - input files
+    bash-com.inc
+    bash-com.test
+    shunit2.1
+
+=head1 SEE ALSO
+
+Required programs: bash, exiftool, git-config, ffmpeg, sed
+
+=head1 AUTHOR
+
+Turtle Engineer
+
+=head1 HISTORY
+
+GPLv2 (c) Copyright
+
+cVer=1.3
+
+=cut
+EOF
+} # fUsageTest
+
+# -------------------
+fSetTestGlobals() {
+    fComSetGlobals
+    fComCheckDeps "bash exiftool git ffmpeg sed" "cat"
+    return 0
+} # fSetTestGlobals
+
+# -------------------
+fStripLine() {
+    # Remove the trailing " [NNN]" or "[NNN](NN)" line-number marker
+    # that fLog/fError appends, so tests can match message text
+    # without depending on vid-tag.inc or bash-com.inc line numbers.
+    sed -E 's/ \[[0-9]+\]//; s/\([0-9]+\)$//'
+} # fStripLine
+
+# ========================================
+# Tests
+
+# --------------------------------
+oneTimeSetUp() {
+    # gpTest=''
+    echo $gpTest | grep -q 'testCli.*()' >/dev/null 2>&1
+    if [[ $? -eq 0 ]]; then
+        if [[ ! -f vid-tag-test-input.zip ]]; then
+            fLog -p err -m "Missing: vid-tag-test-input.zip" -l $LINENO
+            fUsageTest
+        fi
+        unzip -o vid-tag-test-input.zip >/dev/null
+    fi
+
+    if [[ -f vid-tag.conf ]]; then
+        cp vid-tag.conf vid-tag.conf.sav
+    fi
+
+    # Create default vid-tag.conf
+    cat <<EOF >vid-tag.conf
+[vid-tag "com"]
+	caption = This photo or video may be downloaded and used freely for non-commercial purposes or by bona fide media services, provided that the photographer and ProbonoPhoto are credited whenever it is used. (https://www.probonophoto.org/Who-We-Are/Bruce-Rafnel). The photographer retains copyright to this image. This is a CC-NC-BY-4.0 license: https://creativecommons.org/licenses/by-nc/4.0/
+	copyright = Copyright Bruce Rafnel 2026
+	file-pat = %d_%e_%p_%f
+	name-long = Bruce Rafnel
+	name-short = BAR
+	title-pat = %D, %c, %E, by %P.
+[vid-tag "testevent"]
+	city = Redwood City
+	title = This is a test title
+	keyword = PBP,Protest
+EOF
+
+    # Save a pristine copy of the conf so setUp can restore it before
+    # every test that mutates ./vid-tag.conf.
+    if [[ -f vid-tag.conf ]]; then
+        cp vid-tag.conf vid-tag.conf.original
+    fi
+
+    return 0
+} # oneTimeSetUp
+
+# --------------------------------
+oneTimeTearDown() {
+    rm -f vid-tag.conf.original 2>/dev/null
+    if [[ -f vid-tag.conf.sav ]]; then
+        mv -f vid-tag.conf.sav vid-tag.conf 
+    fi
+
+    return 0
+} # oneTimeTearDown
+
+# --------------------------------
+setUp() {
+    # Restore conf for each test (so tests run in any order)
+    if [[ -f vid-tag.conf.original ]]; then
+        cp vid-tag.conf.original vid-tag.conf
+    fi
+
+    # The test script's BASH_SOURCE name is "vid-tag.test", so without
+    # overriding cName the function-level tests would write conf
+    # sections with keys like vid-tag.test.com.caption (yielding the
+    # wrong section header).  Force cName to match what the real
+    # ./vid-tag script uses so fLoadConf / fSaveConf produce
+    # [vid-tag "com"] / [vid-tag "<event>"] sections.
+    cName="vid-tag"
+
+    # Reset the gp* globals that fLoadConf / fApplyPattern / fValidate
+    # read.  Match the defaults in fSetGlobals.
+    gpEventId=""
+    gpEventCity="TBD"
+    gpEventTitle="TBD"
+    gpEventKeyword="TBD"
+    gpEventFileList=""
+    gpCaption="Copyright TERMS"
+    gpCopyright="Copyright NAME YYYY"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+    gpNameLong="TBD"
+    gpNameShort="TBD"
+    gpTimeZone=""
+    gpNoExec=0
+    gpVerbose=0
+    gpDebug=0
+
+    # Per-file extras (replaces the old single-string gpEventExtra)
+    declare -gA gExtraMap=()
+    gExtraSection=""
+
+    # Per-file globals
+    gFile=""
+    gFileDate=""
+    gFileDateFull=""
+    gFileDateLong=""
+    gFileDateShort=""
+    gFileDateTouch=""
+
+    # Output dir constant (set by fSetGlobals normally)
+    cOutputDir="output"
+    cExampleFile="vid-tag-example.txt"
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # setUp
+
+# --------------------------------
+tearDown() {
+    if [[ -d ./output ]]; then
+        rm -rf ./output
+    fi
+    return 0
+} # tearDown
+
+# ========================================
+# CLI tests (test ./vid-tag binary)
+# ========================================
+
+# --------------------------------
+testCliUsage() {
+    local tResult
+
+    #-----
+    tResult=$($cBin/vid-tag 2>&1)
+    assertContains "$LINENO no-args usage" "$tResult" "Usage:"
+
+    #-----
+    tResult=$($cBin/vid-tag -H short 2>&1)
+    assertContains "$LINENO short 1" "$tResult" "NAME vid-tag"
+    assertContains "$LINENO short 2" "$tResult" "SYNOPSIS"
+    assertContains "$LINENO short 3" "$tResult" "DESCRIPTION"
+
+    #-----
+    tResult=$($cBin/vid-tag -H long 2>&1)
+    assertContains "$LINENO long.1" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO long.2" "$tResult" "HISTORY"
+
+    #-----
+    tResult=$($cBin/vid-tag -H man 2>&1)
+    assertContains "$LINENO man.1" "$tResult" '.IX Header "DESCRIPTION"'
+    assertContains "$LINENO man.2" "$tResult" '.IX Header "HISTORY"'
+
+    #-----
+    tResult=$($cBin/vid-tag -H html 2>&1)
+    assertContains "$LINENO html.1" "$tResult" '<a href="#DESCRIPTION">DESCRIPTION</a>'
+    assertContains "$LINENO html.2" "$tResult" '<h1 id="HISTORY">HISTORY</h1>'
+    assertContains "$LINENO html.3" "$tResult" "<title>vid-tag Usage</title>"
+
+    #-----
+    tResult=$($cBin/vid-tag -H md 2>&1)
+    assertContains "$LINENO md.1" "$tResult" '# DESCRIPTION'
+    assertContains "$LINENO md.2" "$tResult" '# HISTORY'
+
+    #-----
+    tResult=$($cBin/vid-tag -h 2>&1)
+    assertContains "$LINENO -h.1" "$tResult" "DESCRIPTION"
+    assertContains "$LINENO -h.2" "$tResult" "OPTIONS"
+
+    return 0
+} # testCliUsage
+
+# --------------------------------
+testCliVersion() {
+    local tResult
+
+    tResult=$($cBin/vid-tag -V 2>&1)
+    assertContains "$LINENO -V version" "$tResult" "vid-tag version:"
+    return 0
+} # testCliVersion
+
+# --------------------------------
+testCliMissingArgs() {
+    local tResult
+
+    # vid-tag with no args at all → "Missing required options."
+    tResult=$($cBin/vid-tag 2>&1)
+    assertContains "$LINENO no-args" "$tResult" "Usage:"
+    return 0
+} # testCliMissingArgs
+
+# --------------------------------
+testCliMissingEventId() {
+    local tResult
+
+    # -n alone (no -e) → "Missing pEventId"
+    tResult=$($cBin/vid-tag -n 2>&1)
+    assertContains "$LINENO no-e" "$tResult" "Missing pEventId"
+    return 0
+} # testCliMissingEventId
+
+# --------------------------------
+testCliUnknownOption() {
+    local tResult
+
+    tResult=$($cBin/vid-tag -e testevent -Z 2>&1)
+    assertContains "$LINENO unknown-opt" "$tResult" "Unknown option"
+    return 0
+} # testCliUnknownOption
+
+# --------------------------------
+testCliMissingOptArg() {
+    local tResult
+
+    # -c without value → "Value required"
+    tResult=$($cBin/vid-tag -e testevent -c 2>&1)
+    assertContains "$LINENO no-value-c" "$tResult" "Value required"
+    return 0
+} # testCliMissingOptArg
+
+# --------------------------------
+testCliNoExec() {
+    local tResult
+
+    # -n + existing testevent conf (from oneTimeSetUp) → dry run
+    tResult=$($cBin/vid-tag -v -n -e testevent 2>&1)
+    assertContains "$LINENO no-exec msg" "$tResult" "No-execute"
+    assertContains "$LINENO no-exec conf" "$tResult" "vid-tag.conf"
+
+    # output dir must NOT have been created
+    assertFalse "$LINENO no output dir" "[ -d ./output ]"
+    return 0
+} # testCliNoExec
+
+# --------------------------------
+testCliNoExecCreatesNewConf() {
+    local tResult
+
+    # Remove the conf so we can verify fresh-create behavior
+    rm -f ./vid-tag.conf
+
+    tResult=$($cBin/vid-tag -n -e brandnew 2>&1)
+
+    # Conf should now exist
+    assertTrue "$LINENO conf created" "[ -f ./vid-tag.conf ]"
+
+    # Conf should have a [vid-tag "com"] section and a brandnew section
+    grep -q '\[vid-tag "com"\]'      ./vid-tag.conf
+    assertTrue "$LINENO com section"  "[ $? -eq 0 ]"
+
+    grep -q '\[vid-tag "brandnew"\]' ./vid-tag.conf
+    assertTrue "$LINENO new section"  "[ $? -eq 0 ]"
+    return 0
+} # testCliNoExecCreatesNewConf
+
+# --------------------------------
+testCliEventLowercase() {
+    local tResult
+
+    rm -f ./vid-tag.conf
+
+    # gpEventId is "declare -lx", so MixedCase should become mixedcase
+    tResult=$($cBin/vid-tag -n -e MixedCASE 2>&1)
+
+    grep -q '\[vid-tag "mixedcase"\]' ./vid-tag.conf
+    assertTrue "$LINENO lowercased" "[ $? -eq 0 ]"
+
+    grep -q '\[vid-tag "MixedCASE"\]' ./vid-tag.conf
+    assertFalse "$LINENO not original case" "[ $? -eq 0 ]"
+    return 0
+} # testCliEventLowercase
+
+# --------------------------------
+testCliEventSpaceUnderscore() {
+    rm -f ./vid-tag.conf
+
+    # Spaces in -e are converted to underscores
+    $cBin/vid-tag -n -e "two words" >/dev/null 2>&1
+
+    grep -q '\[vid-tag "two_words"\]' ./vid-tag.conf
+    assertTrue "$LINENO space->underscore" "[ $? -eq 0 ]"
+    return 0
+} # testCliEventSpaceUnderscore
+
+# --------------------------------
+testCliCity() {
+    $cBin/vid-tag -n -e testevent -c "Sample City" >/dev/null 2>&1
+
+    grep -q 'city = Sample City' ./vid-tag.conf
+    assertTrue "$LINENO city saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliCity
+
+# --------------------------------
+testCliCaption() {
+    $cBin/vid-tag -n -e testevent -C "My test caption" >/dev/null 2>&1
+
+    grep -q 'caption = My test caption' ./vid-tag.conf
+    assertTrue "$LINENO caption saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliCaption
+
+# --------------------------------
+testCliCopyright() {
+    $cBin/vid-tag -n -e testevent -R "Copyright Foo Bar 2030" >/dev/null 2>&1
+
+    grep -q 'copyright = Copyright Foo Bar 2030' ./vid-tag.conf
+    assertTrue "$LINENO copyright saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliCopyright
+
+# --------------------------------
+testCliEventTitle() {
+    $cBin/vid-tag -n -e testevent -E "Long Event Description" >/dev/null 2>&1
+
+    grep -q 'title = Long Event Description' ./vid-tag.conf
+    assertTrue "$LINENO event title saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliEventTitle
+
+# --------------------------------
+testCliKeyword() {
+    $cBin/vid-tag -n -e testevent -k "kw1,kw2,kw3" >/dev/null 2>&1
+
+    grep -q 'keyword = kw1,kw2,kw3' ./vid-tag.conf
+    assertTrue "$LINENO keyword saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliKeyword
+
+# --------------------------------
+testCliShortName() {
+    $cBin/vid-tag -n -e testevent -p ZZZ >/dev/null 2>&1
+
+    grep -q 'name-short = ZZZ' ./vid-tag.conf
+    assertTrue "$LINENO short name saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliShortName
+
+# --------------------------------
+testCliLongName() {
+    $cBin/vid-tag -n -e testevent -P "Some Photographer" >/dev/null 2>&1
+
+    grep -q 'name-long = Some Photographer' ./vid-tag.conf
+    assertTrue "$LINENO long name saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliLongName
+
+# --------------------------------
+testCliFilePattern() {
+    $cBin/vid-tag -n -e testevent -f '%d-%e-%f' >/dev/null 2>&1
+
+    grep -q 'file-pat = %d-%e-%f' ./vid-tag.conf
+    assertTrue "$LINENO file-pat saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliFilePattern
+
+# --------------------------------
+testCliBadFilePattern() {
+    local tResult
+
+    # File pattern without any %tokens → fError "missing % options"
+    tResult=$($cBin/vid-tag -n -e testevent -f "no-tokens-here" 2>&1)
+    assertContains "$LINENO bad file-pat" "$tResult" "missing % options"
+    return 0
+} # testCliBadFilePattern
+
+# --------------------------------
+testCliTitlePattern() {
+    $cBin/vid-tag -n -e testevent -t '%D %E by %P' >/dev/null 2>&1
+
+    grep -q 'title-pat = %D %E by %P' ./vid-tag.conf
+    assertTrue "$LINENO title-pat saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliTitlePattern
+
+# --------------------------------
+testCliBadTitlePattern() {
+    local tResult
+
+    tResult=$($cBin/vid-tag -n -e testevent -t "no tokens" 2>&1)
+    assertContains "$LINENO bad title-pat" "$tResult" "missing % options"
+    return 0
+} # testCliBadTitlePattern
+
+# --------------------------------
+testCliTimeZone() {
+    # -z value should land in the event section as "time-zone = <value>"
+    $cBin/vid-tag -n -e testevent -z "utc-1" >/dev/null 2>&1
+
+    grep -q 'time-zone = utc-1' ./vid-tag.conf
+    assertTrue "$LINENO time-zone saved" "[ $? -eq 0 ]"
+    return 0
+} # testCliTimeZone
+
+# --------------------------------
+testCliTimeZoneVariants() {
+    # All documented format variants should be accepted by fValidate
+    # and round-trip through the conf file.
+    local tTz
+
+    for tTz in "UTC-1" "UTC+8" "UTC-5:30" "UTC+3:45" "utc-12" "local"; do
+        $cBin/vid-tag -n -e testevent -z "$tTz" >/dev/null 2>&1
+        grep -qF "time-zone = $tTz" ./vid-tag.conf
+        assertTrue "$LINENO $tTz saved" "[ $? -eq 0 ]"
+    done
+    return 0
+} # testCliTimeZoneVariants
+
+# --------------------------------
+testCliBadTimeZone() {
+    local tResult
+
+    # An unparseable TimeZone should fError out of fValidate
+    tResult=$($cBin/vid-tag -n -e testevent -z "garbage" 2>&1)
+    assertContains "$LINENO bad tz" "$tResult" "Invalid TimeZone"
+    return 0
+} # testCliBadTimeZone
+
+# --------------------------------
+testCliFileNotFound() {
+    local tResult
+
+    # Without -n, fValidate does check files; missing file → fatal
+    tResult=$($cBin/vid-tag -e testevent /no/such/file.mp4 2>&1)
+    assertContains "$LINENO missing file" "$tResult" "File not found"
+    return 0
+} # testCliFileNotFound
+
+# --------------------------------
+testCliVerboseLevels() {
+    local tDefault
+    local tV
+    local tVV
+
+    # Default verbose: only warning+. The notice "No-execute" message
+    # should NOT appear.
+    tDefault=$($cBin/vid-tag -n -e testevent 2>&1)
+    # "No-execute" is at notice level, not visible by default
+    if echo "$tDefault" | grep -q "No-execute"; then
+        fail "$LINENO default level should NOT show notice"
+    fi
+
+    # -v: notice and above. "No-execute" SHOULD appear.
+    tV=$($cBin/vid-tag -v -n -e testevent 2>&1)
+    assertContains "$LINENO -v shows notice" "$tV" "No-execute"
+
+    # -vv: info and above. "Saving local config" SHOULD appear.
+    tVV=$($cBin/vid-tag -vv -n -e testevent 2>&1)
+    assertContains "$LINENO -vv shows info" "$tVV" "Saving local config"
+    return 0
+} # testCliVerboseLevels
+
+# --------------------------------
+testCliReadsExistingConf() {
+    local tResult
+
+    # The unzipped vid-tag.conf has a [vid-tag "testevent"] section with
+    # title="This is a test title", city="Redwood City", and the [com]
+    # section with name-short=BAR, name-long="Bruce Rafnel".
+    # Running -n -e testevent should round-trip these values back to the
+    # conf without losing them.
+    $cBin/vid-tag -n -e testevent >/dev/null 2>&1
+
+    grep -q 'name-short = BAR' ./vid-tag.conf
+    assertTrue "$LINENO BAR preserved" "[ $? -eq 0 ]"
+
+    grep -q 'name-long = Bruce Rafnel' ./vid-tag.conf
+    assertTrue "$LINENO Bruce Rafnel preserved" "[ $? -eq 0 ]"
+
+    grep -q 'city = Redwood City' ./vid-tag.conf
+    assertTrue "$LINENO Redwood City preserved" "[ $? -eq 0 ]"
+
+    grep -q 'title = This is a test title' ./vid-tag.conf
+    assertTrue "$LINENO title preserved" "[ $? -eq 0 ]"
+
+    grep -q 'keyword = PBP,Protest' ./vid-tag.conf
+    assertTrue "$LINENO keyword preserved" "[ $? -eq 0 ]"
+    return 0
+} # testCliReadsExistingConf
+
+# --------------------------------
+testCliCmdLineOverridesConf() {
+    # The conf has city="Redwood City"; -c overrides it
+    $cBin/vid-tag -n -e testevent -c "OVERRIDE City" >/dev/null 2>&1
+
+    grep -q 'city = OVERRIDE City' ./vid-tag.conf
+    assertTrue "$LINENO override city" "[ $? -eq 0 ]"
+
+    grep -q 'city = Redwood City' ./vid-tag.conf
+    assertFalse "$LINENO old city gone" "[ $? -eq 0 ]"
+    return 0
+} # testCliCmdLineOverridesConf
+
+# --------------------------------
+testCliTimeZoneFromConf() {
+    # Integration test: with TimeZone defined in vid-tag.conf, the
+    # generated vid-tag-example.txt must show CreateDate values that
+    # have been converted from the configured TimeZone to local time,
+    # and the new file name must use the converted date.
+    #
+    # Per the spec example:
+    #   gpTimeZone="utc-1"
+    #   "2026-05-02 01:00:00" -> "2026-05-01 17:00:00" (in PDT)
+    #
+    # MVI_0107.MP4 has CreateDate 2016:11:21 00:20:59.  Interpreting
+    # that as utc-1 (one hour AHEAD of UTC) yields 2016:11:20 23:20:59
+    # UTC, which on the test host (TZ pinned to America/Los_Angeles,
+    # PST in November = UTC-8) becomes 2016:11:20 15:20:59.
+    local tResult
+    local tSavedTZ="${TZ-}"
+
+    if [[ ! -f MVI_0107.MP4 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    # Pin the host TZ so the converted result is deterministic.
+    export TZ="America/Los_Angeles"
+
+    # ---- Build a vid-tag.conf with time-zone set on the event ----
+    cat > vid-tag.conf <<'CONF'
+[vid-tag "com"]
+	caption = Test caption
+	copyright = Copyright Test 2026
+	file-pat = %d_%e_%p_%f
+	name-long = Test Photog
+	name-short = TP
+	title-pat = %D, %c, %E, by %P.
+[vid-tag "tzevent"]
+	city = Testville
+	keyword = tz,test
+	title = TZ Test Event
+	time-zone = utc-1
+CONF
+
+    # ---- Run in -n mode against MVI_0107 to drive fExample ----
+    rm -f vid-tag-example.txt
+    rm -rf ./output
+    tResult=$($cBin/vid-tag -n -e tzevent MVI_0107.MP4 2>&1)
+    assertTrue "$LINENO example file created" "[ -f vid-tag-example.txt ]"
+
+    # ---- vid-tag-example.txt must show the converted CreateDate ----
+    grep -q 'Create Date = 2016:11:20 15:20:59' vid-tag-example.txt
+    assertTrue "$LINENO example shows converted cdate" "[ $? -eq 0 ]"
+
+    # ---- The new filename uses the converted date prefix ----
+    grep -q 'MVI_0107.MP4 -> output/2016-11-20_tzevent_TP_MVI_0107.MP4' \
+        vid-tag-example.txt
+    assertTrue "$LINENO example shows converted name" "[ $? -eq 0 ]"
+
+    # ---- The unconverted date must NOT appear ----
+    grep -q 'Create Date = 2016:11:21 00:20:59' vid-tag-example.txt
+    assertFalse "$LINENO original cdate not present" "[ $? -eq 0 ]"
+
+    # ---- time-zone setting round-trips back to the conf ----
+    grep -q 'time-zone = utc-1' vid-tag.conf
+    assertTrue "$LINENO time-zone preserved" "[ $? -eq 0 ]"
+
+    # ---- Sanity: with -z local on the cmd line, override the conf ----
+    rm -f vid-tag-example.txt
+    $cBin/vid-tag -n -e tzevent -z local MVI_0107.MP4 >/dev/null 2>&1
+    grep -q 'Create Date = 2016:11:21 00:20:59' vid-tag-example.txt
+    assertTrue "$LINENO local override no conversion" "[ $? -eq 0 ]"
+
+    if [[ -n "$tSavedTZ" ]]; then
+        export TZ="$tSavedTZ"
+    else
+        unset TZ
+    fi
+    return 0
+} # testCliTimeZoneFromConfSlow
+
+# --------------------------------
+testCliTimeZoneExif() {
+    # Full-pipeline test: run vid-tag (without -n) against MVI_0107.MP4
+    # with TimeZone=utc-1 and verify that ALL seven date/time exif fields
+    # in the output file plus the filesystem mtime carry the converted
+    # local time, and that the output filename uses the converted date.
+    #
+    # MVI_0107 CreateDate: 2016:11:21 00:20:59 (utc-1 = UTC+1)
+    #   → 2016-11-20 23:20:59 UTC → PST (UTC-8 in Nov): 2016:11:20 15:20:59
+    local tExif
+    local tFile
+    local tSavedTZ="${TZ-}"
+    local tResult
+
+    if [[ ! -f MVI_0107.MP4 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    export TZ="America/Los_Angeles"
+
+    cat > vid-tag.conf <<'CONF'
+[vid-tag "com"]
+	caption = Test caption
+	copyright = Copyright Test 2026
+	file-pat = %d_%e_%p_%f
+	name-long = Test Photog
+	name-short = TP
+	title-pat = %D, %c, %E, by %P.
+[vid-tag "tzevent"]
+	city = Testville
+	keyword = tz,test
+	title = TZ Test Event
+	time-zone = utc-1
+CONF
+
+    rm -rf ./output
+    tResult=$($cBin/vid-tag -vv -e tzevent MVI_0107.MP4 2>&1)
+    if [[ $? -ne 0 ]]; then
+        fail "$LINENO vid-tag run failed: $tResult"
+        if [[ -n "$tSavedTZ" ]]; then export TZ="$tSavedTZ"; else unset TZ; fi
+        return 0
+    fi
+
+    tFile="./output/2016-11-20_tzevent_TP_MVI_0107.MP4"
+    assertTrue "$LINENO output file exists" "[ -f $tFile ]"
+    if [[ ! -f "$tFile" ]]; then
+        if [[ -n "$tSavedTZ" ]]; then export TZ="$tSavedTZ"; else unset TZ; fi
+        return 0
+    fi
+
+    tExif=$(exiftool "$tFile" 2>&1)
+
+    # ----- All seven date fields must show the converted local time -----
+    assertContains "$LINENO DateTimeOriginal" "$tExif" \
+        "Date/Time Original              : 2016:11:20 15:20:59"
+    assertContains "$LINENO CreateDate" "$tExif" \
+        "Create Date                     : 2016:11:20 15:20:59"
+    assertContains "$LINENO ModifyDate" "$tExif" \
+        "Modify Date                     : 2016:11:20 15:20:59"
+    assertContains "$LINENO TrackCreateDate" "$tExif" \
+        "Track Create Date               : 2016:11:20 15:20:59"
+    assertContains "$LINENO TrackModifyDate" "$tExif" \
+        "Track Modify Date               : 2016:11:20 15:20:59"
+    assertContains "$LINENO MediaCreateDate" "$tExif" \
+        "Media Create Date               : 2016:11:20 15:20:59"
+    assertContains "$LINENO MediaModifyDate" "$tExif" \
+        "Media Modify Date               : 2016:11:20 15:20:59"
+
+    # ----- touch log confirms the mtime command used the converted time.
+    #       (File Modification Date/Time in exiftool reflects the host's
+    #       system TZ and is therefore not asserted here directly.) -----
+    assertContains "$LINENO touch log" "$tResult" \
+        'touch -d "2016-11-20 15:20:59" "2016-11-20_tzevent_TP_MVI_0107.MP4"'
+
+    if [[ -n "$tSavedTZ" ]]; then
+        export TZ="$tSavedTZ"
+    else
+        unset TZ
+    fi
+    return 0
+} # testCliTimeZoneExifSlow
+
+# ========================================
+# Full-pipeline CLI tests
+#
+# These tests run $cBin/vid-tag end-to-end on the three video files that
+# come out of vid-tag-test-input.zip:
+#
+#     MVI_0107.MP4   270 MiB   Canon VIXIA HF R40,  CreateDate 2016:11:21 00:20:59
+#     MVI_0110.MP4   114 MiB   Canon VIXIA HF R40,  CreateDate 2016:11:21 00:29:11
+#     MVI_0746.MP4   4.2 GB    Canon VIXIA HF R800, CreateDate 2026:03:01 19:57:49
+#
+# Each test does its own run because tearDown wipes ./output/ between
+# tests.  The MVI_0746.MP4 run includes ffmpeg-splitting a 23-minute
+# 4.2 GB file into three 10-minute parts; expect the full-run tests
+# to take a long time on a real machine.
+#
+# All asserts ignore the trailing " [NNN]" line-number markers via
+# fStripLine; date asserts use only the date+time portion of exiftool
+# output (no timezone) so they are portable across hosts.
+# ========================================
+
+# --------------------------------
+fHelperRunFullPipeline() {
+    # Wipe any previous output, then run $cBin/vid-tag with all three test
+    # input files at -vv (info-level).  Stdout/stderr are stripped of
+    # line-number markers and echoed back to the caller.
+    if [[ ! -f MVI_0107.MP4 ]]; then
+        return 1
+    fi
+
+    rm -rf ./output 2>/dev/null
+    $cBin/vid-tag -vv -e testevent \
+        MVI_0107.MP4 MVI_0110.MP4 MVI_0746.MP4 2>&1 | fStripLine
+} # fHelperRunFullPipeline
+
+# --------------------------------
+testCliFullRunStdoutSlow() {
+    # Run vid-tag against all three test-input files and verify the
+    # expected log messages appear on stdout (which fLog routes to
+    # stderr - merged here with 2>&1).
+    local tResult
+
+    echo -e "\tfHelperRunFullPipeline"
+    tResult=$(fHelperRunFullPipeline)
+    if [[ $? -ne 0 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    # ----- Conf save / output dir creation -----
+    assertContains "$LINENO save conf"   "$tResult" \
+        "Saving local config: ./vid-tag.conf (tag=testevent)"
+    assertContains "$LINENO output dir"  "$tResult" \
+        "Created output dir: output"
+
+    # ----- Copy phase: one Copy line per input file -----
+    assertContains "$LINENO copy 0107"   "$tResult" \
+        "Copy: MVI_0107.MP4 -> output/MVI_0107.MP4"
+    assertContains "$LINENO copy 0110"   "$tResult" \
+        "Copy: MVI_0110.MP4 -> output/MVI_0110.MP4"
+    assertContains "$LINENO copy 0746"   "$tResult" \
+        "Copy: MVI_0746.MP4 -> output/MVI_0746.MP4"
+
+    # ----- Processing announcement per file -----
+    assertContains "$LINENO proc 0107"   "$tResult" \
+        "Processing: MVI_0107.MP4"
+    assertContains "$LINENO proc 0110"   "$tResult" \
+        "Processing: MVI_0110.MP4"
+    assertContains "$LINENO proc 0746"   "$tResult" \
+        "Processing: MVI_0746.MP4"
+
+    # ----- Rename: input -> dated/event/photog/file pattern -----
+    assertContains "$LINENO rename 0107" "$tResult" \
+        "Rename: MVI_0107.MP4 -> 2016-11-21_testevent_BAR_MVI_0107.MP4"
+    assertContains "$LINENO rename 0110" "$tResult" \
+        "Rename: MVI_0110.MP4 -> 2016-11-21_testevent_BAR_MVI_0110.MP4"
+    assertContains "$LINENO rename 0746" "$tResult" \
+        "Rename: MVI_0746.MP4 -> 2026-03-01_testevent_BAR_MVI_0746.MP4"
+
+    # ----- exiftool command-line tag values come from the conf -----
+    assertContains "$LINENO set" "$tResult" \
+        "Set new meta values"
+
+    # ----- exiftool reports "1 image files updated" for each processed file -----
+    assertContains "$LINENO 1 file updated" "$tResult" \
+        "1 image files updated"
+
+    # ----- touch -t with the exif CreateDate (HHMM.SS, no timezone) -----
+    assertContains "$LINENO touch 0107" "$tResult" \
+        'touch -d "2016-11-21 00:20:59" "2016-11-21_testevent_BAR_MVI_0107.MP4"'
+    assertContains "$LINENO touch 0110" "$tResult" \
+        'touch -d "2016-11-21 00:29:11" "2016-11-21_testevent_BAR_MVI_0110.MP4"'
+    assertContains "$LINENO touch 0746" "$tResult" \
+        'touch -d "2026-03-01 19:57:49" "2026-03-01_testevent_BAR_MVI_0746.MP4"'
+
+    # ----- Splitting: only MVI_0746.MP4 is > 10 minutes (23:45) -----
+    assertContains "$LINENO split"        "$tResult" \
+        "Split 2026-03-01_testevent_BAR_MVI_0746.MP4 into 10min parts"
+    assertContains "$LINENO copy exif"    "$tResult" \
+        "Copy the exif data from original"
+
+    # The TagsFromFile invocations - one per split part
+    assertContains "$LINENO tags 00 part" "$tResult" \
+        "exiftool -TagsFromFile 2026-03-01_testevent_BAR_MVI_0746.MP4 -all:all 2026-03-01_testevent_BAR_MVI_0746-00.mp4"
+
+    assertContains "$LINENO tags 01 part" "$tResult" \
+        "exiftool -TagsFromFile 2026-03-01_testevent_BAR_MVI_0746.MP4 -all:all 2026-03-01_testevent_BAR_MVI_0746-01.mp4"
+
+    assertContains "$LINENO tags 02 part" "$tResult" \
+        "exiftool -TagsFromFile 2026-03-01_testevent_BAR_MVI_0746.MP4 -all:all 2026-03-01_testevent_BAR_MVI_0746-02.mp4"
+
+    # The touch - one per split part
+    assertContains "$LINENO touch 00 part" "$tResult" \
+        'touch -d "2026-03-01 19:57:49" 2026-03-01_testevent_BAR_MVI_0746-00.mp4'
+
+    assertContains "$LINENO touch 01 part" "$tResult" \
+        'touch -d "2026-03-01 20:07:49" 2026-03-01_testevent_BAR_MVI_0746-01.mp4'
+
+    assertContains "$LINENO touch 02 part" "$tResult" \
+        'touch -d "2026-03-01 20:17:49" 2026-03-01_testevent_BAR_MVI_0746-02.mp4'
+
+    # ----- Final notice -----
+    assertContains "$LINENO done" "$tResult" "Done."
+
+    # ----- The two short files must NOT be split (under 10 min) -----
+    if echo "$tResult" | grep -q "Split.*MVI_0107"; then
+        fail "$LINENO MVI_0107 should not be split (only 1:36 long)"
+    fi
+    if echo "$tResult" | grep -q "Split.*MVI_0110"; then
+        fail "$LINENO MVI_0110 should not be split (only 0:41 long)"
+    fi
+    return 0
+} # testCliFullRunStdoutSlow
+
+# --------------------------------
+testCliFullRunOutputFilesSlow() {
+    # Run vid-tag and verify all expected files end up in ./output/
+    # with the expected (dated/event/photog/file pattern) names.
+
+    echo -e "\tfHelperRunFullPipeline"
+    fHelperRunFullPipeline >/dev/null
+    if [[ $? -ne 0 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+    
+    # ----- The renamed primary files -----
+    assertTrue "$LINENO 0107 exists" \
+        "[ -f ./output/2016-11-21_testevent_BAR_MVI_0107.MP4 ]"
+    assertTrue "$LINENO 0110 exists" \
+        "[ -f ./output/2016-11-21_testevent_BAR_MVI_0110.MP4 ]"
+    assertTrue "$LINENO 0746 exists" \
+        "[ -f ./output/2026-03-01_testevent_BAR_MVI_0746.MP4 ]"
+
+    # ----- The 4.2GB / 23:45 file is split into three 10-min parts -----
+    assertTrue "$LINENO 0746-00 exists" \
+        "[ -f ./output/2026-03-01_testevent_BAR_MVI_0746-00.mp4 ]"
+    assertTrue "$LINENO 0746-01 exists" \
+        "[ -f ./output/2026-03-01_testevent_BAR_MVI_0746-01.mp4 ]"
+    assertTrue "$LINENO 0746-02 exists" \
+        "[ -f ./output/2026-03-01_testevent_BAR_MVI_0746-02.mp4 ]"
+
+    # ----- The original (un-renamed) names must NOT remain in ./output/ -----
+    assertFalse "$LINENO no orig 0107" \
+        "[ -f ./output/MVI_0107.MP4 ]"
+    assertFalse "$LINENO no orig 0110" \
+        "[ -f ./output/MVI_0110.MP4 ]"
+    assertFalse "$LINENO no orig 0746" \
+        "[ -f ./output/MVI_0746.MP4 ]"
+
+    # ----- exiftool's "_original" backup files are removed by vid-tag -----
+    if ls ./output/*_original 2>/dev/null | grep -q .; then
+        fail "$LINENO _original backups not cleaned up"
+    fi
+
+    # ----- The two short files (MVI_0107 / MVI_0110) must NOT be split -----
+    if ls ./output/2016-11-21_testevent_BAR_MVI_0107-*.mp4 2>/dev/null | grep -q .; then
+        fail "$LINENO MVI_0107 should not be split"
+    fi
+    if ls ./output/2016-11-21_testevent_BAR_MVI_0110-*.mp4 2>/dev/null | grep -q .; then
+        fail "$LINENO MVI_0110 should not be split"
+    fi
+    return 0
+} # testCliFullRunOutputFilesSlow
+
+# --------------------------------
+testCliFullRunExifSlow() {
+    # Verify the exif tags written to the renamed MVI_0107 output file.
+    local tExif
+    local tFile
+    local tMeta
+    local tPart
+    local tValue
+
+    echo -e "\tfHelperRunFullPipeline"
+    fHelperRunFullPipeline >/dev/null
+    if [[ $? -ne 0 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    echo -e "\tMVI_0107.MP4" 1>&2
+    
+    tFile="./output/2016-11-21_testevent_BAR_MVI_0107.MP4"
+    assertTrue "$LINENO file exists" "[ -f $tFile ]"
+
+    tExif=$(exiftool "$tFile" 2>&1)
+
+    # ----- Tags written by vid-tag (from the testevent / com config) -----
+    assertContains "$LINENO Title"      "$tExif" \
+        "Title                           : 2016-11-21 Mon, Redwood City, This is a test title, by Bruce Rafnel."
+    assertContains "$LINENO Caption"    "$tExif" \
+        "Caption                         : This photo or video may be downloaded and used freely"
+    assertContains "$LINENO Description" "$tExif" \
+        "Description                     : This photo or video may be downloaded and used freely"
+    assertContains "$LINENO ImageDesc"  "$tExif" \
+        "Image Description               : This photo or video may be downloaded and used freely"
+    assertContains "$LINENO Caption CC" "$tExif" \
+        "https://creativecommons.org/licenses/by-nc/4.0/"
+    assertContains "$LINENO Keywords"   "$tExif" \
+        "Keywords                        : PBP,Protest"
+    assertContains "$LINENO Copyright"  "$tExif" \
+        "Copyright                       : Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Artist"     "$tExif" \
+        "Artist                          : Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Author"     "$tExif" \
+        "Author                          : Bruce Rafnel"
+
+    # ----- Original exif dates from the source must be preserved -----
+    assertContains "$LINENO DateTimeOriginal" "$tExif" \
+        "Date/Time Original              : 2016:11:21 00:20:58"
+    assertContains "$LINENO CreateDate" "$tExif" \
+        "Create Date                     : 2016:11:21 00:20:59"
+    assertContains "$LINENO ModifyDate" "$tExif" \
+        "Modify Date                     : 2016:11:21 00:20:59"
+
+    # ----- File-system mtime aligned with the exif CreateDate.
+    #       Match only date+time, not timezone (timezone varies by host). -----
+    assertContains "$LINENO File mod date" "$tExif" \
+        "File Modification Date/Time     : 2016:11:21 00:20:59"
+
+    # ----- Original camera info is preserved (not overwritten) -----
+    assertContains "$LINENO Camera Model" "$tExif" \
+        "Camera Model Name               : Canon VIXIA HF R40"
+    assertContains "$LINENO Make"        "$tExif" \
+        "Make                            : Canon"
+
+    # --------------------------------
+    echo -e "\tMVI0110.MP4" 1>&2
+    # Verify the exif tags written to the renamed MVI_0110 output file.
+    # Same camera as 0107 but a different per-file CreateDate.
+
+    tFile="./output/2016-11-21_testevent_BAR_MVI_0110.MP4"
+    assertTrue "$LINENO file exists" "[ -f $tFile ]"
+
+    tExif=$(exiftool "$tFile" 2>&1)
+
+    # ----- Tags written by vid-tag -----
+    assertContains "$LINENO Title"      "$tExif" \
+        "Title                           : 2016-11-21 Mon, Redwood City, This is a test title, by Bruce Rafnel."
+    assertContains "$LINENO Caption"    "$tExif" \
+        "Caption                         : This photo or video may be downloaded and used freely"
+    assertContains "$LINENO Caption CC" "$tExif" \
+        "https://creativecommons.org/licenses/by-nc/4.0/"
+    assertContains "$LINENO Keywords"   "$tExif" \
+        "Keywords                        : PBP,Protest"
+    assertContains "$LINENO Copyright"  "$tExif" \
+        "Copyright                       : Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Artist"     "$tExif" \
+        "Artist                          : Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Author"     "$tExif" \
+        "Author                          : Bruce Rafnel"
+
+    # ----- Original exif dates from the source must be preserved -----
+    assertContains "$LINENO DateTimeOriginal" "$tExif" \
+        "Date/Time Original              : 2016:11:21 00:29:10"
+    assertContains "$LINENO CreateDate" "$tExif" \
+        "Create Date                     : 2016:11:21 00:29:11"
+    assertContains "$LINENO ModifyDate" "$tExif" \
+        "Modify Date                     : 2016:11:21 00:29:11"
+
+    # --------------------------------
+    echo -e "\tMVI_0746.MP4" 1>&2
+    # Verify the exif tags written to the renamed MVI_0746 output file
+    # (the 4.2GB master, before splitting).
+
+    tFile="./output/2026-03-01_testevent_BAR_MVI_0746.MP4"
+    assertTrue "$LINENO file exists" "[ -f $tFile ]"
+
+    tExif=$(exiftool "$tFile" 2>&1)
+
+    # ----- Tags written by vid-tag.  Note Sun (Mar 1, 2026 was a Sunday). -----
+    assertContains "$LINENO Title"      "$tExif" \
+        "Title                           : 2026-03-01 Sun, Redwood City, This is a test title, by Bruce Rafnel."
+    assertContains "$LINENO Caption"    "$tExif" \
+        "Caption                         : This photo or video may be downloaded and used freely"
+    assertContains "$LINENO Caption CC" "$tExif" \
+        "https://creativecommons.org/licenses/by-nc/4.0/"
+    assertContains "$LINENO Keywords"   "$tExif" \
+        "Keywords                        : PBP,Protest"
+    assertContains "$LINENO Copyright"  "$tExif" \
+        "Copyright                       : Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Artist"     "$tExif" \
+        "Artist                          : Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Author"     "$tExif" \
+        "Author                          : Bruce Rafnel"
+
+    # ----- Original exif dates from the source must be preserved -----
+    assertContains "$LINENO DateTimeOriginal" "$tExif" \
+        "Date/Time Original              : 2026:03:01 11:57:48"
+    assertContains "$LINENO CreateDate" "$tExif" \
+        "Create Date                     : 2026:03:01 19:57:49"
+    assertContains "$LINENO ModifyDate" "$tExif" \
+        "Modify Date                     : 2026:03:01 19:57:49"
+
+    # ----- File-system mtime -----
+    assertContains "$LINENO File mod date" "$tExif" \
+        "File Modification Date/Time     : 2026:03:01 19:57:49"
+
+    # ----- Original camera info preserved (different camera from 0107/0110) -----
+    assertContains "$LINENO Camera Model" "$tExif" \
+        "Camera Model Name               : Canon VIXIA HF R800"
+    assertContains "$LINENO Make"        "$tExif" \
+        "Make                            : Canon"
+
+    # --------------------------------
+    echo -en "\tsplit " 1>&2
+    # Verify the exif tags on the three 10-minute split parts.  Each
+    # part has metadata copied from the parent via -TagsFromFile, but
+    # excluding FileName, Title/Caption/Copyright/Artist/Author/Keywords
+    # (those come from the per-part tag-set), all "*date*" fields
+    # (preserved from the split itself), and MakerNotes.
+    #
+    # Note that exiftool's -TagsFromFile then fills the kept tags
+    # (Title, Caption, etc.) FROM the parent, so the per-part files
+    # end up carrying the same vid-tag-written values as the parent.
+
+    for tPart in 00 01 02; do
+        echo -en "$tPart " 1>&2
+        tFile="./output/2026-03-01_testevent_BAR_MVI_0746-${tPart}.mp4"
+        assertTrue "$LINENO part $tPart exists" "[ -f $tFile ]"
+        if [[ ! -f $tFile ]]; then
+            continue
+        fi
+
+        tExif=$(exiftool "$tFile" 2>&1)
+
+        # Title/Caption/Keywords/Copyright/Artist/Author copied from parent.
+        tMeta=$(echo "$tExif" | grep '^Title ')
+        assertContains "$LINENO part $tPart Title" "$tMeta" "Title "
+        assertContains "$LINENO part $tPart Title" "$tMeta" \
+                       " : 2026-03-01 Sun, Redwood City, This is a test title, by Bruce Rafnel."
+        tMeta=$(echo "$tExif" | grep '^Caption ')
+        assertContains "$LINENO part $tPart Caption" "$tMeta" "Caption "
+        assertContains "$LINENO part $tPart Caption" "$tMeta" \
+                       " : This photo or video may be downloaded and used freely"
+        
+        tMeta=$(echo "$tExif" | grep '^Keywords ')
+        assertContains "$LINENO part $tPart Keywords" "$tMeta" "Keywords"
+        assertContains "$LINENO part $tPart Keywords" "$tMeta" \
+                       " : PBP,Protest"
+        
+        tMeta=$(echo "$tExif" | grep '^Copyright ')
+        assertContains "$LINENO part $tPart Copyright" "$tMeta" "Copyright "
+        assertContains "$LINENO part $tPart Copyright" "$tMeta" \
+                       " : Copyright Bruce Rafnel 2026"
+        
+        tMeta=$(echo "$tExif" | grep '^Artist ')
+        assertContains "$LINENO part $tPart Artist" "$tMeta" "Artist "
+        assertContains "$LINENO part $tPart Artist" "$tMeta" \
+                       " : Copyright Bruce Rafnel 2026"
+
+        tMeta=$(echo "$tExif" | grep '^Author ')
+        assertContains "$LINENO part $tPart Author" "$tMeta" "Author "
+        assertContains "$LINENO part $tPart Author" "$tMeta" \
+                       " : Bruce Rafnel"
+    done
+    echo -e " " 1>&2
+
+    return 0
+} # testCliFullRunExifSlow
+
+# ========================================
+# Function-level tests (vid-tag.inc)
+# ========================================
+
+# --------------------------------
+testInitialConfig() {
+    # Verify the test environment is sane.  setUp forces cName="vid-tag"
+    # so the function-level conf tests build the right section names.
+    assertEquals "$LINENO cName"      "vid-tag"      "$cName"
+    assertNotNull "$LINENO cBin"      "$cBin"
+    assertTrue   "$LINENO cBin dir"     "[ -d $cBin ]"
+    assertTrue   "$LINENO vid-tag"      "[ -x $cBin/vid-tag ]"
+    assertTrue   "$LINENO vid-tag.inc"  "[ -f $cBin/vid-tag.inc ]"
+    assertTrue   "$LINENO bash-com.inc" "[ -f $cBin/bash-com.inc ]"
+    assertTrue   "$LINENO missing MVI_0107.MP4"  "[ -f MVI_0107.MP4 ]"
+    assertTrue   "$LINENO missing MVI_0110.MP4"  "[ -f MVI_0110.MP4 ]"
+    assertTrue   "$LINENO missing MVI_0746.MP4"  "[ -f MVI_0746.MP4 ]"
+    assertTrue   "$LINENO user conf"   "[ -f vid-tag.conf.sav ]"
+    assertTrue   "$LINENO test conf"   "[ -f vid-tag.conf.original ]"
+    return 0
+} # testInitialConfig
+
+# --------------------------------
+testConvertDate() {
+    fConvertDate "2024:06:15 10:30:00"
+
+    assertEquals "$LINENO short" "2024-06-15"          "$gFileDateShort"
+    assertEquals "$LINENO long"  "2024-06-15 Sat"      "$gFileDateLong"
+    assertEquals "$LINENO full"  "2024-06-15_10:30:00" "$gFileDateFull"
+    assertEquals "$LINENO touch" "202406151030.00"     "$gFileDateTouch"
+    return 0
+} # testConvertDate
+
+# --------------------------------
+testConvertDate_TestFiles() {
+    # Replicate the dates that fReadFileDate would produce for the three
+    # test-input files.  Exiftool CreateDates per the input spec:
+    #   MVI_0107.MP4  2016:11:21 00:20:59  (Mon)
+    #   MVI_0110.MP4  2016:11:21 00:29:11  (Mon)
+    #   MVI_0746.MP4  2026:03:01 19:57:49  (Sun)
+
+    # MVI_0107.MP4
+    fConvertDate "2016:11:21 00:20:59"
+    assertEquals "$LINENO 0107 short" "2016-11-21"          "$gFileDateShort"
+    assertEquals "$LINENO 0107 long"  "2016-11-21 Mon"      "$gFileDateLong"
+    assertEquals "$LINENO 0107 touch" "201611210020.59"     "$gFileDateTouch"
+
+    # MVI_0110.MP4
+    fConvertDate "2016:11:21 00:29:11"
+    assertEquals "$LINENO 0110 short" "2016-11-21"          "$gFileDateShort"
+    assertEquals "$LINENO 0110 touch" "201611210029.11"     "$gFileDateTouch"
+
+    # MVI_0746.MP4
+    fConvertDate "2026:03:01 19:57:49"
+    assertEquals "$LINENO 0746 short" "2026-03-01"          "$gFileDateShort"
+    assertEquals "$LINENO 0746 long"  "2026-03-01 Sun"      "$gFileDateLong"
+    assertEquals "$LINENO 0746 touch" "202603011957.49"     "$gFileDateTouch"
+    return 0
+} # testConvertDate_TestFiles
+
+# --------------------------------
+testConvertTimeZone_NoConversion() {
+    # When gpTimeZone is empty or "local", the input must be returned
+    # verbatim with no shelling out to date(1).
+    local tResult
+
+    gpTimeZone=""
+    tResult=$(fConvertTimeZone "2026:05:02 01:00:00")
+    assertEquals "$LINENO empty"     "2026:05:02 01:00:00" "$tResult"
+
+    gpTimeZone="local"
+    tResult=$(fConvertTimeZone "2026:05:02 01:00:00")
+    assertEquals "$LINENO local"     "2026:05:02 01:00:00" "$tResult"
+
+    # Round-trip a zero-padded date too
+    gpTimeZone=""
+    tResult=$(fConvertTimeZone "2016:11:21 00:20:59")
+    assertEquals "$LINENO 0107"      "2016:11:21 00:20:59" "$tResult"
+    return 0
+} # testConvertTimeZone_NoConversion
+
+# --------------------------------
+testConvertTimeZone_Convert() {
+    # Reproduce the spec example exactly:
+    #   gpTimeZone="utc-1"
+    #   input  "2026-05-02 01:00:00" (in UTC-1, i.e. one hour AHEAD of UTC)
+    #   output "2026-05-01 17:00:00" (in PDT, UTC-7)
+    # Pin TZ for portability across hosts.
+    local tResult
+    local tSavedTZ="${TZ-}"
+
+    export TZ="America/Los_Angeles"
+
+    gpTimeZone="utc-1"
+    tResult=$(fConvertTimeZone "2026:05:02 01:00:00")
+    assertEquals "$LINENO spec example" "2026:05:01 17:00:00" "$tResult"
+
+    # Same input, uppercase prefix.
+    gpTimeZone="UTC-1"
+    tResult=$(fConvertTimeZone "2026:05:02 01:00:00")
+    assertEquals "$LINENO uppercase"    "2026:05:01 17:00:00" "$tResult"
+
+    # MVI_0107-style date.  CreateDate "2016:11:21 00:20:59" interpreted
+    # as utc-1 (UTC+1) is "2016:11:20 23:20:59 UTC" -> PST (UTC-8 in Nov)
+    # is "2016:11:20 15:20:59".
+    gpTimeZone="utc-1"
+    tResult=$(fConvertTimeZone "2016:11:21 00:20:59")
+    assertEquals "$LINENO 0107 utc-1"   "2016:11:20 15:20:59" "$tResult"
+
+    # Restore env TZ
+    if [[ -n "$tSavedTZ" ]]; then
+        export TZ="$tSavedTZ"
+    else
+        unset TZ
+    fi
+    return 0
+} # testConvertTimeZone_Convert
+
+# --------------------------------
+testConvertTimeZone_FormatVariants() {
+    # Exercise every documented format variant: UTC+H, UTC-H, UTC+H:MM,
+    # UTC-H:MM, with both UTC and utc.
+    local tResult
+    local tSavedTZ="${TZ-}"
+
+    export TZ="America/Los_Angeles"
+
+    # UTC+H (zone H hours BEHIND UTC).  utc+8 = UTC-08:00.
+    # 2026-05-02 12:00:00 utc+8 = 2026-05-02 20:00:00 UTC = 13:00 PDT
+    gpTimeZone="utc+8"
+    tResult=$(fConvertTimeZone "2026:05:02 12:00:00")
+    assertEquals "$LINENO utc+8"     "2026:05:02 13:00:00" "$tResult"
+
+    # UTC-H:MM (5:30 ahead of UTC).
+    # 2026-05-02 01:00:00 UTC-5:30 = 2026-05-01 19:30:00 UTC = 12:30 PDT
+    gpTimeZone="UTC-5:30"
+    tResult=$(fConvertTimeZone "2026:05:02 01:00:00")
+    assertEquals "$LINENO UTC-5:30"  "2026:05:01 12:30:00" "$tResult"
+
+    # UTC+H:MM (3:45 behind UTC).
+    # 2026-05-02 12:00:00 UTC+3:45 = 2026-05-02 15:45:00 UTC = 08:45 PDT
+    gpTimeZone="UTC+3:45"
+    tResult=$(fConvertTimeZone "2026:05:02 12:00:00")
+    assertEquals "$LINENO UTC+3:45"  "2026:05:02 08:45:00" "$tResult"
+
+    # Two-digit H, no minutes.
+    # 2026-05-02 12:00:00 utc-12 = 2026-05-02 00:00:00 UTC = 2026-05-01 17:00 PDT
+    gpTimeZone="utc-12"
+    tResult=$(fConvertTimeZone "2026:05:02 12:00:00")
+    assertEquals "$LINENO utc-12"    "2026:05:01 17:00:00" "$tResult"
+
+    if [[ -n "$tSavedTZ" ]]; then
+        export TZ="$tSavedTZ"
+    else
+        unset TZ
+    fi
+    return 0
+} # testConvertTimeZone_FormatVariants
+
+# --------------------------------
+testConvertTimeZone_BadFormat() {
+    # Anything that is not empty, "local", or matches UTC[+-]H[:MM]
+    # should trigger fError.  Capture in a subshell because fError exits.
+    local tResult
+
+    gpTimeZone="garbage"
+    tResult=$( (fConvertTimeZone "2026:05:02 01:00:00") 2>&1 )
+    assertContains "$LINENO garbage"   "$tResult" "Invalid TimeZone"
+
+    gpTimeZone="UTC"
+    tResult=$( (fConvertTimeZone "2026:05:02 01:00:00") 2>&1 )
+    assertContains "$LINENO no-offset" "$tResult" "Invalid TimeZone"
+
+    gpTimeZone="UTC1"
+    tResult=$( (fConvertTimeZone "2026:05:02 01:00:00") 2>&1 )
+    assertContains "$LINENO no-sign"   "$tResult" "Invalid TimeZone"
+
+    # Single-digit minutes are not valid
+    gpTimeZone="UTC-1:5"
+    tResult=$( (fConvertTimeZone "2026:05:02 01:00:00") 2>&1 )
+    assertContains "$LINENO bad-mins"  "$tResult" "Invalid TimeZone"
+    return 0
+} # testConvertTimeZone_BadFormat
+
+# --------------------------------
+testReadFileDate_TimeZone() {
+    # fReadFileDate is the integration point that calls fConvertTimeZone
+    # before fConvertDate.  Verify gFileDate (and the gFileDate* outputs
+    # of fConvertDate) reflect the converted local time when gpTimeZone
+    # is set, and the original exiftool value when gpTimeZone is empty.
+    local tSavedTZ="${TZ-}"
+
+    if [[ ! -f MVI_0107.MP4 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    export TZ="America/Los_Angeles"
+
+    # ---- Baseline: no conversion ----
+    gpTimeZone=""
+    fReadFileDate "MVI_0107.MP4"
+    assertEquals "$LINENO baseline gFileDate"  "2016:11:21 00:20:59" "$gFileDate"
+    assertEquals "$LINENO baseline short"      "2016-11-21"          "$gFileDateShort"
+
+    # ---- With conversion: utc-1 shifts MVI_0107 back by 9 hours ----
+    gpTimeZone="utc-1"
+    fReadFileDate "MVI_0107.MP4"
+    assertEquals "$LINENO tz gFileDate" "2016:11:20 15:20:59" "$gFileDate"
+    assertEquals "$LINENO tz short"     "2016-11-20"          "$gFileDateShort"
+    assertEquals "$LINENO tz long"      "2016-11-20 Sun"      "$gFileDateLong"
+    assertEquals "$LINENO tz full"      "2016-11-20_15:20:59" "$gFileDateFull"
+    assertEquals "$LINENO tz touch"     "201611201520.59"     "$gFileDateTouch"
+
+    if [[ -n "$tSavedTZ" ]]; then
+        export TZ="$tSavedTZ"
+    else
+        unset TZ
+    fi
+    return 0
+} # testReadFileDate_TimeZone
+
+# --------------------------------
+testApplyPattern() {
+    local tResult
+
+    # Set up the globals fApplyPattern reads
+    gFileDateShort="2024-06-15"
+    gFileDateLong="2024-06-15 Sat"
+    gFileDateFull="2024-06-15_10:30:00"
+    gpEventId="summer_camp"
+    gpEventTitle="Summer Camp 2024"
+    gpNameShort="JD"
+    gpNameLong="Jane Doe"
+    gpEventCity="Springfield"
+
+    #-----
+    tResult=$(fApplyPattern '%d_%e_%p_%f' 'clip001.mp4')
+    assertEquals "$LINENO file-pat" \
+        "2024-06-15_summer_camp_JD_clip001.mp4" "$tResult"
+
+    #-----
+    tResult=$(fApplyPattern '%D, %c, %E, by %P.' 'clip001.mp4')
+    assertEquals "$LINENO title-pat" \
+        "2024-06-15 Sat, Springfield, Summer Camp 2024, by Jane Doe." "$tResult"
+
+    #-----
+    # %T expands to gFileDateFull
+    tResult=$(fApplyPattern '%T' 'x.mp4')
+    assertEquals "$LINENO %T" "2024-06-15_10:30:00" "$tResult"
+
+    # Empty pattern → empty string
+    tResult=$(fApplyPattern '' 'x.mp4')
+    assertEquals "$LINENO empty" "" "$tResult"
+
+    # Pattern with no tokens passes through unchanged
+    tResult=$(fApplyPattern 'literal-text' 'x.mp4')
+    assertEquals "$LINENO literal" "literal-text" "$tResult"
+    return 0
+} # testApplyPattern
+
+# --------------------------------
+testApplyPattern_AllTokens() {
+    local tResult
+
+    gFileDateShort="2026-03-01"
+    gFileDateLong="2026-03-01 Sun"
+    gFileDateFull="2026-03-01_19:57:49"
+    gpEventId="testevent"
+    gpEventTitle="This is a test title"
+    gpNameShort="BAR"
+    gpNameLong="Bruce Rafnel"
+    gpEventCity="Redwood City"
+
+    # Reproduce the %D, %c, %E, by %P. title pattern from the conf
+    tResult=$(fApplyPattern '%D, %c, %E, by %P.' 'MVI_0746.MP4')
+    assertEquals "$LINENO 0746 title" \
+        "2026-03-01 Sun, Redwood City, This is a test title, by Bruce Rafnel." \
+        "$tResult"
+
+    # Reproduce the %d_%e_%p_%f file-name pattern
+    tResult=$(fApplyPattern '%d_%e_%p_%f' 'MVI_0746.MP4')
+    assertEquals "$LINENO 0746 file" \
+        "2026-03-01_testevent_BAR_MVI_0746.MP4" "$tResult"
+    return 0
+} # testApplyPattern_AllTokens
+
+# --------------------------------
+testLoadConf() {
+    local tConf
+
+    tConf="$cTmp1"
+
+    # Write a minimal config in git-config INI format
+    # shellcheck disable=SC2317
+    cat >"$tConf" <<'CONF'
+[vid-tag "com"]
+    caption    = Test Caption
+    copyright  = Copyright NAME YYYY
+    file-pat   = %d_%e_%p_%f
+    title-pat  = %D, %c, %E, by %P.
+    name-long  = Test Photographer
+    name-short = TP
+[vid-tag "test_event"]
+    title   = Test Event Title
+    city    = Test Village
+    keyword = PBP,Protest
+CONF
+
+    # Point gpConfLocal at our temp file, set the event id, and reload
+    gpConfLocal="$tConf"
+    gpEventId="test_event"
+    fLoadConf
+
+    assertEquals "$LINENO caption"    "Test Caption"        "$gpCaption"
+    assertEquals "$LINENO copyright"  "Copyright NAME YYYY" "$gpCopyright"
+    assertEquals "$LINENO name-long"  "Test Photographer"   "$gpNameLong"
+    assertEquals "$LINENO name-short" "TP"                  "$gpNameShort"
+    assertEquals "$LINENO file-pat"   "%d_%e_%p_%f"         "$gpFilePat"
+    assertEquals "$LINENO title-pat"  "%D, %c, %E, by %P."  "$gpTitlePat"
+    assertEquals "$LINENO event-title" "Test Event Title"   "$gpEventTitle"
+    assertEquals "$LINENO city"       "Test Village"        "$gpEventCity"
+    assertEquals "$LINENO keyword"    "PBP,Protest"         "$gpEventKeyword"
+
+    # Restore
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadConf
+
+# --------------------------------
+testLoadConf_MissingFile() {
+    # When gpConfLocal points at a non-existent file, fLoadConf should
+    # log info and return 0 without error.
+    gpConfLocal="$Tmp/no-such-conf.conf"
+    rm -f "$gpConfLocal"
+    gpEventId="testevent"
+
+    fLoadConf
+    assertTrue "$LINENO missing rc" "[ $? -eq 0 ]"
+
+    # Restore
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadConf_MissingFile
+
+# --------------------------------
+testLoadConf_NoEventId() {
+    local tResult
+
+    # Empty gpEventId → warning, return 0 (no values modified)
+    gpEventId=""
+    tResult=$(fLoadConf 2>&1)
+    assertContains "$LINENO empty msg" "$tResult" "gpEventId not set"
+
+    return 0
+} # testLoadConf_NoEventId
+
+# --------------------------------
+testLoadConf_EventNotInConf() {
+    local tConf
+    local tResult
+
+    tConf="$cTmp1"
+
+    # Conf exists, but does not contain a section for our event id
+    cat >"$tConf" <<'CONF'
+[vid-tag "com"]
+    caption = Some Caption
+[vid-tag "other_event"]
+    title = Some Title
+CONF
+
+    gpConfLocal="$tConf"
+    gpEventId="missing_event"
+
+    # fError is called → exit; capture output in a subshell
+    tResult=$( (fLoadConf) 2>&1 )
+    assertContains "$LINENO not-found" "$tResult" "not found, it will be added"
+
+    # Restore
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadConf_EventNotInConf
+
+# --------------------------------
+testSaveConf() {
+    local tConf
+
+    tConf="$cTmp1"
+    rm -f "$tConf"
+
+    gpConfLocal="$tConf"
+    gpEventId="saveconftest"
+    gpCaption="Saved Caption"
+    gpCopyright="Saved (c) 2030"
+    gpFilePat="%d_%e_%f"
+    gpTitlePat="%D %E by %P"
+    gpNameLong="Saver Name"
+    gpNameShort="SN"
+    gpEventTitle="Saved Title"
+    gpEventCity="Saved City"
+    gpEventKeyword="kw1,kw2"
+    gpEventFileList="some.mp4 other.mp4"
+
+    fSaveConf >/dev/null 2>&1
+
+    assertTrue "$LINENO conf created" "[ -f $tConf ]"
+
+    grep -q '\[vid-tag "com"\]'             "$tConf"
+    assertTrue "$LINENO com section"        "[ $? -eq 0 ]"
+
+    grep -q '\[vid-tag "saveconftest"\]'    "$tConf"
+    assertTrue "$LINENO event section"      "[ $? -eq 0 ]"
+
+    grep -q 'caption = Saved Caption'       "$tConf"
+    assertTrue "$LINENO caption"            "[ $? -eq 0 ]"
+
+    grep -q 'copyright = Saved (c) 2030'    "$tConf"
+    assertTrue "$LINENO copyright"          "[ $? -eq 0 ]"
+
+    grep -q 'file-pat = %d_%e_%f'           "$tConf"
+    assertTrue "$LINENO file-pat"           "[ $? -eq 0 ]"
+
+    grep -q 'name-long = Saver Name'        "$tConf"
+    assertTrue "$LINENO name-long"          "[ $? -eq 0 ]"
+
+    grep -q 'name-short = SN'               "$tConf"
+    assertTrue "$LINENO name-short"         "[ $? -eq 0 ]"
+
+    grep -q 'title = Saved Title'           "$tConf"
+    assertTrue "$LINENO event-title"        "[ $? -eq 0 ]"
+
+    grep -q 'city = Saved City'             "$tConf"
+    assertTrue "$LINENO city"               "[ $? -eq 0 ]"
+
+    grep -q 'keyword = kw1,kw2'             "$tConf"
+    assertTrue "$LINENO keyword"            "[ $? -eq 0 ]"
+
+    # file-list is no longer written to the conf file (it is unused
+    # by the rest of the script and just clutters the file).
+    grep -q '^	file-list ='                "$tConf"
+    assertFalse "$LINENO no file-list"      "[ $? -eq 0 ]"
+
+    # The old per-event 'extra = ...' key is gone; per-file extras
+    # live in the [vid-tag "extra"] section, written by the user.
+    grep -q '^	extra ='                    "$tConf"
+    assertFalse "$LINENO no event extra"    "[ $? -eq 0 ]"
+
+    # Restore
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testSaveConf
+
+# --------------------------------
+testSaveConf_NoEventId() {
+    local tResult
+
+    gpConfLocal="$cTmp1"
+    gpEventId=""
+
+    # fSaveConf with no event id → fError → exit
+    tResult=$( (fSaveConf) 2>&1 )
+    assertContains "$LINENO no-id msg" "$tResult" "Cannot save local config"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testSaveConf_NoEventId
+
+# --------------------------------
+testLoadExtras() {
+    # A standard [vid-tag "extra"] section with three file → text
+    # entries should populate gExtraMap with exact-match keys.  The
+    # section is also stripped from the file in place so that later
+    # git-config based reads/writes don't choke on the dotted keys.
+    local tConf="$cTmp1"
+
+    cat > "$tConf" << 'EOF'
+[vid-tag "com"]
+	caption = Some caption
+[vid-tag "testevent"]
+	city = Redwood City
+[vid-tag "extra"]
+	MVI_0107.MP4 = Blocking diagram one
+	MVI_0110.MP4 = Blocking diagram two
+	MVI_0746.MP4 = Service fragment
+EOF
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=()
+    gExtraSection=""
+
+    fLoadExtras >/dev/null 2>&1
+
+    # Map populated with all three entries, exact-match keys.
+    assertEquals "$LINENO map size" "3" "${#gExtraMap[@]}"
+    assertEquals "$LINENO 0107"     "Blocking diagram one" \
+        "${gExtraMap[MVI_0107.MP4]:-}"
+    assertEquals "$LINENO 0110"     "Blocking diagram two" \
+        "${gExtraMap[MVI_0110.MP4]:-}"
+    assertEquals "$LINENO 0746"     "Service fragment" \
+        "${gExtraMap[MVI_0746.MP4]:-}"
+
+    # The detached section is held in gExtraSection.
+    assertContains "$LINENO section captured" "$gExtraSection" \
+        "MVI_0107.MP4 = Blocking diagram one"
+    assertContains "$LINENO section header"   "$gExtraSection" \
+        '[vid-tag "extra"]'
+
+    # The section was stripped from the file on disk.
+    grep -q '^\[vid-tag "extra"\]' "$tConf"
+    assertFalse "$LINENO section stripped"    "[ $? -eq 0 ]"
+
+    # Non-extra sections are untouched.
+    grep -q 'caption = Some caption' "$tConf"
+    assertTrue  "$LINENO com kept"            "[ $? -eq 0 ]"
+    grep -q 'city = Redwood City'    "$tConf"
+    assertTrue  "$LINENO event kept"          "[ $? -eq 0 ]"
+
+    # And critically: git config can now read the stripped file.
+    git config --file "$tConf" --get vid-tag.com.caption >/dev/null
+    assertTrue "$LINENO git config OK"        "[ $? -eq 0 ]"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadExtras
+
+# --------------------------------
+testLoadExtras_ExactMatch() {
+    # Match must be exact: case differences, partial matches, and
+    # extension changes must NOT match.
+    local tConf="$cTmp1"
+
+    cat > "$tConf" << 'EOF'
+[vid-tag "extra"]
+	MVI_0107.MP4 = One
+EOF
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=()
+    fLoadExtras >/dev/null 2>&1
+
+    # Exact key hits
+    assertEquals "$LINENO exact"   "One" "${gExtraMap[MVI_0107.MP4]:-}"
+
+    # Case mismatch on filename: NOT a match
+    assertEquals "$LINENO lowercase miss" "" "${gExtraMap[mvi_0107.mp4]:-}"
+    # Case mismatch on extension: NOT a match
+    assertEquals "$LINENO ext-case miss"  "" "${gExtraMap[MVI_0107.mp4]:-}"
+    # Partial: NOT a match
+    assertEquals "$LINENO partial miss"   "" "${gExtraMap[MVI_0107]:-}"
+    # Different file: NOT a match
+    assertEquals "$LINENO other miss"     "" "${gExtraMap[MVI_0108.MP4]:-}"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadExtras_ExactMatch
+
+# --------------------------------
+testLoadExtras_MissingFile() {
+    # No conf file → empty map, empty section, no error.
+    local tConf="$cTmp1.nope"
+    rm -f "$tConf"
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=( ["pre-existing"]="should be cleared" )
+    gExtraSection="should be cleared"
+
+    fLoadExtras >/dev/null 2>&1
+
+    assertEquals "$LINENO empty map"     "0"  "${#gExtraMap[@]}"
+    assertEquals "$LINENO empty section" ""   "$gExtraSection"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadExtras_MissingFile
+
+# --------------------------------
+testLoadExtras_NoSection() {
+    # Conf file exists but has no [vid-tag "extra"] section → empty
+    # map, empty section, file untouched.
+    local tConf="$cTmp1"
+
+    cat > "$tConf" << 'EOF'
+[vid-tag "com"]
+	caption = Just a caption
+EOF
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=( ["stale"]="value" )
+    gExtraSection="stale"
+
+    fLoadExtras >/dev/null 2>&1
+
+    assertEquals "$LINENO empty map"      "0" "${#gExtraMap[@]}"
+    assertEquals "$LINENO empty section"  ""  "$gExtraSection"
+
+    # Original file content unchanged (no section to strip).
+    grep -q 'caption = Just a caption' "$tConf"
+    assertTrue "$LINENO file untouched"   "[ $? -eq 0 ]"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadExtras_NoSection
+
+# --------------------------------
+testLoadExtras_SkipsCommentsAndBlanks() {
+    # Comment lines (# or ;) and blank lines inside the [extra]
+    # section must be skipped, not parsed as keys.
+    local tConf="$cTmp1"
+
+    cat > "$tConf" << 'EOF'
+[vid-tag "extra"]
+	# this is a comment
+	MVI_0107.MP4 = First entry
+
+	; another comment style
+	MVI_0110.MP4 = Second entry
+EOF
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=()
+    fLoadExtras >/dev/null 2>&1
+
+    assertEquals "$LINENO map size"  "2"             "${#gExtraMap[@]}"
+    assertEquals "$LINENO 0107"      "First entry"   "${gExtraMap[MVI_0107.MP4]:-}"
+    assertEquals "$LINENO 0110"      "Second entry"  "${gExtraMap[MVI_0110.MP4]:-}"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testLoadExtras_SkipsCommentsAndBlanks
+
+# --------------------------------
+testSaveExtras_RoundTrip() {
+    # The detach/reattach pattern must round-trip the [extra] section
+    # unchanged: load → strip → save → file regains the section.
+    local tConf="$cTmp1"
+
+    cat > "$tConf" << 'EOF'
+[vid-tag "com"]
+	caption = Hello
+[vid-tag "extra"]
+	MVI_0107.MP4 = One
+	MVI_0110.MP4 = Two
+EOF
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=()
+    gExtraSection=""
+
+    fLoadExtras >/dev/null 2>&1
+
+    # After load: file has no [extra] section.
+    grep -q '^\[vid-tag "extra"\]' "$tConf"
+    assertFalse "$LINENO stripped"   "[ $? -eq 0 ]"
+
+    fSaveExtras >/dev/null 2>&1
+
+    # After save: file has [extra] section back, with both entries.
+    grep -q '^\[vid-tag "extra"\]'              "$tConf"
+    assertTrue  "$LINENO header restored"       "[ $? -eq 0 ]"
+    grep -q 'MVI_0107.MP4 = One'                "$tConf"
+    assertTrue  "$LINENO 0107 restored"         "[ $? -eq 0 ]"
+    grep -q 'MVI_0110.MP4 = Two'                "$tConf"
+    assertTrue  "$LINENO 0110 restored"         "[ $? -eq 0 ]"
+
+    # Other sections also still present.
+    grep -q 'caption = Hello'                   "$tConf"
+    assertTrue  "$LINENO com kept"              "[ $? -eq 0 ]"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testSaveExtras_RoundTrip
+
+# --------------------------------
+testSaveExtras_RoundTripWithGitConfig() {
+    # Realistic flow: load → strip → fSaveConf writes new keys via git
+    # config → fSaveExtras reattaches.  The final file must be valid
+    # for both git-config and the awk parser (so a second fLoadExtras
+    # would see the same map).
+    local tConf="$cTmp1"
+
+    cat > "$tConf" << 'EOF'
+[vid-tag "com"]
+	caption = Old caption
+[vid-tag "extra"]
+	MVI_0107.MP4 = Blocking diagram one
+EOF
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=()
+    gExtraSection=""
+
+    # 1. detach
+    fLoadExtras >/dev/null 2>&1
+
+    # 2. write a new value via git config (would fail if [extra]
+    #    were still in the file)
+    fComSetConfig -l -k "vid-tag.com.caption" -v "New caption" >/dev/null 2>&1
+    assertEquals "$LINENO write OK" "0" "$?"
+
+    # 3. reattach
+    fSaveExtras >/dev/null 2>&1
+
+    # Final file: new caption AND [extra] back.
+    grep -q 'caption = New caption' "$tConf"
+    assertTrue  "$LINENO new caption"      "[ $? -eq 0 ]"
+    grep -q 'MVI_0107.MP4 = Blocking diagram one' "$tConf"
+    assertTrue  "$LINENO extra back"       "[ $? -eq 0 ]"
+
+    # Second load reads the same map.
+    declare -gA gExtraMap=()
+    gExtraSection=""
+    fLoadExtras >/dev/null 2>&1
+    assertEquals "$LINENO 2nd-load value"  "Blocking diagram one" \
+        "${gExtraMap[MVI_0107.MP4]:-}"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testSaveExtras_RoundTripWithGitConfig
+
+# --------------------------------
+testSaveExtras_NoSectionIsNoop() {
+    # When fLoadExtras found no section, fSaveExtras must not append
+    # anything (empty gExtraSection → no-op).
+    local tConf="$cTmp1"
+
+    cat > "$tConf" << 'EOF'
+[vid-tag "com"]
+	caption = Solo
+EOF
+    local tBefore
+    tBefore=$(cat "$tConf")
+
+    gpConfLocal="$tConf"
+    declare -gA gExtraMap=()
+    gExtraSection=""
+
+    fLoadExtras >/dev/null 2>&1
+    fSaveExtras >/dev/null 2>&1
+
+    local tAfter
+    tAfter=$(cat "$tConf")
+    assertEquals "$LINENO no-op" "$tBefore" "$tAfter"
+
+    gpConfLocal="./vid-tag.conf"
+    return 0
+} # testSaveExtras_NoSectionIsNoop
+
+# --------------------------------
+testExample_FileMatchedByExtras() {
+    # End-to-end (dry-run): drive fExample with gExtraMap entries
+    # keyed by the dummy file basename.  The matched file's title
+    # gets the extra appended; unmatched files don't.
+    local tFile="vid-tag-example.txt"
+    local tContent
+
+    rm -f "$tFile"
+
+    gpNoExec=1
+    gpEventId="testevent"
+    gpCaption="x"
+    gpCopyright="x"
+    gpNameLong="Photog"
+    gpNameShort="P"
+    gpEventCity="Town"
+    gpEventTitle="Event"
+    gpEventKeyword="kw"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+    gpCmdLine="vid-tag -n -e testevent"
+
+    declare -gA gExtraMap=( ["FILE.mp4"]="Insider note" )
+
+    fExample
+    tContent=$(cat "$tFile")
+
+    # Title ends with ". Insider note." for the matched file.
+    assertContains "$LINENO matched title" "$tContent" \
+        "Town, Event, by Photog. Insider note."
+
+    rm -f "$tFile"
+    return 0
+} # testExample_FileMatchedByExtras
+
+# --------------------------------
+testPreScanOpts() {
+    # -e with mixed case + space → lowercased + space-to-underscore
+    gpEventId=""
+    fPreScanOpts -e "Summer Camp"
+    assertEquals "$LINENO summer-camp" "summer_camp" "$gpEventId"
+
+    gpEventId=""
+    fPreScanOpts -v -d -e "MyEvent"
+    assertEquals "$LINENO myevent" "myevent" "$gpEventId"
+
+    # Other options are ignored by the pre-scan
+    gpEventId=""
+    fPreScanOpts foo -n -c "City" -e "evt1" -k "kw"
+    assertEquals "$LINENO ignores-others" "evt1" "$gpEventId"
+    
+    return 0
+} # testPreScanOpts
+
+# --------------------------------
+testPreScanOpts_Missing() {
+    local tResult
+
+    # No -e and no pre-set gpEventId → fError → exit
+    gpEventId=""
+    tResult=$( (fPreScanOpts -n -v -d) 2>&1 )
+    assertContains "$LINENO missing -e" "$tResult" "Missing pEventId"
+    return 0
+} # testPreScanOpts_Missing
+
+# --------------------------------
+testGetOpt() {
+    # Drive fGetOpt directly and verify each option lands in the right gp*
+    fGetOpt -e SomeEvent -c "Town" -C "Cap" -E "Long" -f "%d_%f" \
+            -k "k1,k2" -p "AB" -P "Alice B" -R "(c) 2030" \
+            -t "%D by %P" -z "utc-1" -n
+
+    assertEquals "$LINENO -e"  "someevent"   "$gpEventId"
+    assertEquals "$LINENO -c"  "Town"        "$gpEventCity"
+    assertEquals "$LINENO -C"  "Cap"         "$gpCaption"
+    assertEquals "$LINENO -E"  "Long"        "$gpEventTitle"
+    assertEquals "$LINENO -f"  "%d_%f"       "$gpFilePat"
+    assertEquals "$LINENO -k"  "k1,k2"       "$gpEventKeyword"
+    assertEquals "$LINENO -p"  "AB"          "$gpNameShort"
+    assertEquals "$LINENO -P"  "Alice B"     "$gpNameLong"
+    assertEquals "$LINENO -R"  "(c) 2030"    "$gpCopyright"
+    assertEquals "$LINENO -t"  "%D by %P"    "$gpTitlePat"
+    assertEquals "$LINENO -z"  "utc-1"       "$gpTimeZone"
+    assertEquals "$LINENO -n"  "1"           "$gpNoExec"
+    return 0
+} # testGetOpt
+
+# --------------------------------
+testGetOpt_FileList() {
+    # Trailing positional args become the gpEventFileList
+    fGetOpt -e evt fileA.mp4 fileB.mp4 fileC.mp4
+    assertEquals "$LINENO file-list" \
+        "fileA.mp4 fileB.mp4 fileC.mp4" "$gpEventFileList"
+    return 0
+} # testGetOpt_FileList
+
+# --------------------------------
+testValidate_OK() {
+    # All defaults plus -n so file existence is skipped
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+    gpNoExec=1
+    gpEventFileList=""
+
+    fValidate
+    assertTrue "$LINENO ok rc" "[ $? -eq 0 ]"
+    return 0
+} # testValidate_OK
+
+# --------------------------------
+testValidate_BadFilePat() {
+    local tResult
+
+    gpFilePat='no-tokens'
+    gpTitlePat='%D'
+    gpNoExec=1
+
+    tResult=$( (fValidate) 2>&1 )
+    assertContains "$LINENO bad-file-pat" "$tResult" "missing % options"
+    return 0
+} # testValidate_BadFilePat
+
+# --------------------------------
+testValidate_BadTitlePat() {
+    local tResult
+
+    gpFilePat='%d_%f'
+    gpTitlePat='no-tokens'
+    gpNoExec=1
+
+    tResult=$( (fValidate) 2>&1 )
+    assertContains "$LINENO bad-title-pat" "$tResult" "missing % options"
+    return 0
+} # testValidate_BadTitlePat
+
+# --------------------------------
+testValidate_NoFiles() {
+    local tResult
+
+    gpFilePat='%d_%f'
+    gpTitlePat='%D %P'
+    gpNoExec=0
+    gpEventFileList=""
+
+    tResult=$( (fValidate) 2>&1 )
+    assertContains "$LINENO no-files" "$tResult" "No input files given"
+    return 0
+} # testValidate_NoFiles
+
+# --------------------------------
+testValidate_MissingFile() {
+    local tResult
+
+    gpFilePat='%d_%f'
+    gpTitlePat='%D %P'
+    gpNoExec=0
+    gpEventFileList="/no/such/file.mp4"
+
+    tResult=$( (fValidate) 2>&1 )
+    assertContains "$LINENO missing-file" "$tResult" "File not found"
+    return 0
+} # testValidate_MissingFile
+
+# --------------------------------
+testValidate_FilesExist() {
+    local tResult
+    
+    # The unzipped test files should exist in the cwd
+    gpFilePat='%d_%f'
+    gpTitlePat='%D %P'
+    gpNoExec=0
+    gpEventFileList="MVI_0107.MP4 MVI_0110.MP4 MVI_0746.MP4"
+
+    tResult=$( (fValidate) 2>&1 )
+    assertTrue "$LINENO expected test files: $gpEventFileList" "[ $? -eq 0 ]"
+    return 0
+} # testValidate_FilesExist
+
+# --------------------------------
+testExample_NoExec() {
+    # When gpNoExec is set, fExample uses a dummy "FILE.mp4" entry with
+    # the current wall-clock CreateDate; no real files are touched.
+    local tFile="vid-tag-example.txt"
+    local tContent
+    local tToday
+
+    rm -f "$tFile"
+
+    # Set globals as if -n -e testevent had been parsed
+    gpNoExec=1
+    gpEventId="testevent"
+    gpCaption="Test Caption Body"
+    gpCopyright="Copyright Photog 2030"
+    gpNameLong="Some Photographer"
+    gpNameShort="SP"
+    gpEventCity="TestCity"
+    gpEventTitle="Test Event Title"
+    gpEventKeyword="kw1,kw2"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+    gpEventFileList=""
+    gpCmdLine="vid-tag -n -e testevent"
+
+    fExample
+
+    assertTrue "$LINENO file created"  "[ -f $tFile ]"
+
+    tContent=$(cat "$tFile")
+
+    # ----- Header sections -----
+    assertContains "$LINENO Command hdr"  "$tContent" "Command:"
+    assertContains "$LINENO Cmd line"     "$tContent" "vid-tag -n -e testevent"
+    assertContains "$LINENO Files hdr"    "$tContent" "Files:"
+    assertContains "$LINENO Exif hdr"     "$tContent" "Exif Changes:"
+
+    # ----- Dummy filename: "FILE.mp4" mapped via the file pattern -----
+    assertContains "$LINENO dummy in"     "$tContent" "FILE.mp4 -> output/"
+    assertContains "$LINENO dummy out"    "$tContent" "_testevent_SP_FILE.mp4"
+
+    # ----- Today's date should appear in Create Date -----
+    tToday=$('date' +%Y:%m:%d)
+    assertContains "$LINENO today"        "$tContent" "Create Date = $tToday"
+
+    # ----- Tag fields written from gp* values -----
+    assertContains "$LINENO Title"        "$tContent" "Title ="
+    assertContains "$LINENO TestCity"     "$tContent" "TestCity"
+    assertContains "$LINENO Author"       "$tContent" "Author = Some Photographer"
+    assertContains "$LINENO Artist"       "$tContent" "Artist = Copyright Photog 2030"
+    assertContains "$LINENO Copyright"    "$tContent" "Copyright = Copyright Photog 2030"
+    assertContains "$LINENO Keywords"     "$tContent" "Keywords = kw1,kw2"
+    assertContains "$LINENO Caption"      "$tContent" "Caption = Test Caption Body"
+    assertContains "$LINENO Description"  "$tContent" "Description = (see Caption)"
+    assertContains "$LINENO ImageDesc"    "$tContent" "Image Description = (see Caption)"
+    assertContains "$LINENO DateTimeOrig" "$tContent" "Date/Time Original = (see Create Date)"
+    assertContains "$LINENO ModifyDate"   "$tContent" "Modify Date = (see Create Date)"
+    assertContains "$LINENO TrackCreate"  "$tContent" "Track Create Date = (see Create Date)"
+    assertContains "$LINENO TrackModify"  "$tContent" "Track Modify Date = (see Create Date)"
+    assertContains "$LINENO MediaCreate"  "$tContent" "Media Create Date = (see Create Date)"
+    assertContains "$LINENO MediaModify"  "$tContent" "Media Modify Date = (see Create Date)"
+
+    # ----- Single dummy entry → exactly one mapping line -----
+    assertEquals "$LINENO 1 entry" "1" \
+        "$(grep -c 'FILE.mp4 -> output/' "$tFile")"
+    assertEquals "$LINENO idx"     "1" "$gExampleIdx"
+
+    rm -f "$tFile"
+    return 0
+} # testExample_NoExec
+
+# --------------------------------
+testExample_NoExecExtra() {
+    # When gExtraMap has an entry whose key matches the (dummy) input
+    # file basename, fExample appends " <value>." to the title.
+    # In dry-run mode the dummy basename is "FILE.mp4", so we set the
+    # corresponding map entry and verify the title.  Same rule as
+    # fProcessFile.
+    local tFile="vid-tag-example.txt"
+    local tContent
+
+    rm -f "$tFile"
+
+    gpNoExec=1
+    gpEventId="testevent"
+    gpCaption="x"
+    gpCopyright="x"
+    gpNameLong="x"
+    gpNameShort="x"
+    gpEventCity="x"
+    gpEventTitle="Base Title"
+    gpEventKeyword="x"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%E'
+    gpCmdLine="vid-tag -n -e testevent"
+
+    declare -gA gExtraMap=( ["FILE.mp4"]="More info" )
+
+    fExample
+    tContent=$(cat "$tFile")
+
+    assertContains "$LINENO extra appended" "$tContent" \
+        "Title = Base Title More info."
+
+    rm -f "$tFile"
+    return 0
+} # testExample_NoExecExtra
+
+# --------------------------------
+testExample_NoExecExtra_NoMatch() {
+    # When gExtraMap is empty (or the dummy basename isn't a key), the
+    # title is left exactly as %E without any append.
+    local tFile="vid-tag-example.txt"
+    local tContent
+
+    rm -f "$tFile"
+
+    gpNoExec=1
+    gpEventId="testevent"
+    gpCaption="x"
+    gpCopyright="x"
+    gpNameLong="x"
+    gpNameShort="x"
+    gpEventCity="x"
+    gpEventTitle="Base Title"
+    gpEventKeyword="x"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%E'
+    gpCmdLine="vid-tag -n -e testevent"
+
+    declare -gA gExtraMap=( ["OTHER.mp4"]="Should not show" )
+
+    fExample
+    tContent=$(cat "$tFile")
+
+    assertContains "$LINENO base title only" "$tContent" \
+        "Title = Base Title"
+    # Confirm the unmatched value did NOT leak into the title
+    if grep -q "Should not show" "$tFile"; then
+        fail "$LINENO unmatched extra leaked into title"
+    fi
+
+    rm -f "$tFile"
+    return 0
+} # testExample_NoExecExtra_NoMatch
+
+# --------------------------------
+testExample_RealFiles() {
+    # With gpNoExec=0 and the unzipped test inputs in place, fExample
+    # should read each file's exif CreateDate and emit one Files: line
+    # plus one Exif Changes block per input.
+    local tFile="vid-tag-example.txt"
+    local tContent
+
+    if [[ ! -f MVI_0107.MP4 || ! -f MVI_0110.MP4 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    rm -f "$tFile"
+
+    gpNoExec=0
+    gpEventId="testevent"
+    gpCaption="This photo or video may be downloaded and used freely"
+    gpCopyright="Copyright Bruce Rafnel 2026"
+    gpNameLong="Bruce Rafnel"
+    gpNameShort="BAR"
+    gpEventCity="Redwood City"
+    gpEventTitle="This is a test title"
+    gpEventKeyword="PBP,Protest"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+    gpEventFileList="MVI_0107.MP4 MVI_0110.MP4"
+    gpCmdLine="vid-tag -e testevent MVI_0107.MP4 MVI_0110.MP4"
+
+    fExample
+
+    assertTrue "$LINENO file created" "[ -f $tFile ]"
+
+    tContent=$(cat "$tFile")
+
+    # ----- Header lines -----
+    assertContains "$LINENO Command"  "$tContent" "Command:"
+    assertContains "$LINENO Cmd line" "$tContent" \
+        "vid-tag -e testevent MVI_0107.MP4 MVI_0110.MP4"
+
+    # ----- Files: section: rename mapping per input -----
+    assertContains "$LINENO 0107 rename" "$tContent" \
+        "MVI_0107.MP4 -> output/2016-11-21_testevent_BAR_MVI_0107.MP4"
+    assertContains "$LINENO 0110 rename" "$tContent" \
+        "MVI_0110.MP4 -> output/2016-11-21_testevent_BAR_MVI_0110.MP4"
+
+    # ----- Exif Changes blocks: one header + dated CreateDate per file -----
+    assertContains "$LINENO 0107 hdr" "$tContent" \
+        "2016-11-21_testevent_BAR_MVI_0107.MP4"
+    assertContains "$LINENO 0107 title" "$tContent" \
+        "Title = 2016-11-21 Mon, Redwood City, This is a test title, by Bruce Rafnel."
+    assertContains "$LINENO 0107 cdate" "$tContent" \
+        "Create Date = 2016:11:21 00:20:59"
+
+    assertContains "$LINENO 0110 hdr" "$tContent" \
+        "2016-11-21_testevent_BAR_MVI_0110.MP4"
+    assertContains "$LINENO 0110 title" "$tContent" \
+        "Title = 2016-11-21 Mon, Redwood City, This is a test title, by Bruce Rafnel."
+    assertContains "$LINENO 0110 cdate" "$tContent" \
+        "Create Date = 2016:11:21 00:29:11"
+
+    # ----- Tag fields shared across both files -----
+    assertContains "$LINENO Author"   "$tContent" "Author = Bruce Rafnel"
+    assertContains "$LINENO Artist"   "$tContent" "Artist = Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Copyright" "$tContent" "Copyright = Copyright Bruce Rafnel 2026"
+    assertContains "$LINENO Keywords" "$tContent" "Keywords = PBP,Protest"
+
+    # ----- Two collected entries → two rename lines, idx=2 -----
+    assertEquals "$LINENO 2 entries" "2" \
+        "$(grep -c '\->\ output/' "$tFile")"
+    assertEquals "$LINENO idx" "2" "$gExampleIdx"
+
+    rm -f "$tFile"
+    return 0
+} # testExample_RealFiles
+
+# --------------------------------
+testExampleCollectSplit_Short() {
+    # A file under 10 min must NOT produce any split entries.  Use
+    # MVI_0107.MP4 (1:36 long) and confirm gExampleIdx stays 0.
+    if [[ ! -f MVI_0107.MP4 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    gpEventId="testevent"
+    gpNameShort="BAR"
+    gpNameLong="Bruce Rafnel"
+    gpEventCity="Redwood City"
+    gpEventTitle="This is a test title"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+
+    gExampleOrigNames=()
+    gExampleNewNames=()
+    gExampleTitles=()
+    gExampleCreateDates=()
+    gExampleIdx=0
+
+    fReadFileDate "MVI_0107.MP4"
+    fExampleCollectSplit "MVI_0107.MP4" "MVI_0107.MP4" "$gFileDate"
+
+    assertEquals "$LINENO no split entries" "0" "$gExampleIdx"
+    return 0
+} # testExampleCollectSplit_Short
+
+# --------------------------------
+testExampleCollectSplit_Long() {
+    # MVI_0746.MP4 is 23:45; fProcessFile would split it into three
+    # 10-min parts.  fExampleCollectSplit must mirror that, appending
+    # three records with -00/-01/-02 names and CreateDates shifted by
+    # 0, 10, and 20 minutes from the parent.
+    local i
+    if [[ ! -f MVI_0746.MP4 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    gpEventId="testevent"
+    gpNameShort="BAR"
+    gpNameLong="Bruce Rafnel"
+    gpEventCity="Redwood City"
+    gpEventTitle="This is a test title"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+
+    gExampleOrigNames=()
+    gExampleNewNames=()
+    gExampleTitles=()
+    gExampleCreateDates=()
+    gExampleIdx=0
+
+    fReadFileDate "MVI_0746.MP4"
+    fExampleCollectSplit "MVI_0746.MP4" "MVI_0746.MP4" "$gFileDate"
+
+    # ----- Three split parts collected -----
+    assertEquals "$LINENO 3 split entries" "3" "$gExampleIdx"
+
+    # ----- Each part shares the parent's basename as origin -----
+    assertEquals "$LINENO 00 orig" "MVI_0746.MP4" "${gExampleOrigNames[0]}"
+    assertEquals "$LINENO 01 orig" "MVI_0746.MP4" "${gExampleOrigNames[1]}"
+    assertEquals "$LINENO 02 orig" "MVI_0746.MP4" "${gExampleOrigNames[2]}"
+
+    # ----- Part filenames use "-NN.mp4" (lowercase) -----
+    assertEquals "$LINENO 00 name" \
+        "2026-03-01_testevent_BAR_MVI_0746-00.mp4" "${gExampleNewNames[0]}"
+    assertEquals "$LINENO 01 name" \
+        "2026-03-01_testevent_BAR_MVI_0746-01.mp4" "${gExampleNewNames[1]}"
+    assertEquals "$LINENO 02 name" \
+        "2026-03-01_testevent_BAR_MVI_0746-02.mp4" "${gExampleNewNames[2]}"
+
+    # ----- CreateDate shifted by 0/10/20 min from 19:57:49 -----
+    assertEquals "$LINENO 00 cdate" \
+        "2026:03:01 19:57:49" "${gExampleCreateDates[0]}"
+    assertEquals "$LINENO 01 cdate" \
+        "2026:03:01 20:07:49" "${gExampleCreateDates[1]}"
+    assertEquals "$LINENO 02 cdate" \
+        "2026:03:01 20:17:49" "${gExampleCreateDates[2]}"
+
+    # ----- Title is inherited (same for all parts) -----
+    assertEquals "$LINENO 00 title" \
+        "${gExampleTitles[0]}" "${gExampleTitles[1]}"
+    assertEquals "$LINENO 01 title" \
+        "${gExampleTitles[1]}" "${gExampleTitles[2]}"
+    return 0
+} # testExampleCollectSplit_Long
+
+# --------------------------------
+testExample_RealFilesWithSplit() {
+    # End-to-end: fExample on MVI_0746.MP4 must write vid-tag-example.txt
+    # showing the parent rename plus one entry per split part with the
+    # right CreateDate offsets.
+    local tFile="vid-tag-example.txt"
+    local tContent
+
+    if [[ ! -f MVI_0746.MP4 ]]; then
+        fail "$LINENO Missing test files."
+        return 0
+    fi
+
+    rm -f "$tFile"
+
+    gpNoExec=0
+    gpEventId="testevent"
+    gpCaption="Test Caption Body"
+    gpCopyright="Copyright Bruce Rafnel 2026"
+    gpNameLong="Bruce Rafnel"
+    gpNameShort="BAR"
+    gpEventCity="Redwood City"
+    gpEventTitle="This is a test title"
+    gpEventKeyword="PBP,Protest"
+    gpFilePat='%d_%e_%p_%f'
+    gpTitlePat='%D, %c, %E, by %P.'
+    gpEventFileList="MVI_0746.MP4"
+    gpCmdLine="vid-tag -e testevent MVI_0746.MP4"
+
+    fExample
+
+    assertTrue "$LINENO file created" "[ -f $tFile ]"
+    tContent=$(cat "$tFile")
+
+    # ----- Files: parent rename plus one per split part -----
+    assertContains "$LINENO 0746 rename" "$tContent" \
+        "MVI_0746.MP4 -> output/2026-03-01_testevent_BAR_MVI_0746.MP4"
+    assertContains "$LINENO 0746 part 00" "$tContent" \
+        "MVI_0746.MP4 -> output/2026-03-01_testevent_BAR_MVI_0746-00.mp4"
+    assertContains "$LINENO 0746 part 01" "$tContent" \
+        "MVI_0746.MP4 -> output/2026-03-01_testevent_BAR_MVI_0746-01.mp4"
+    assertContains "$LINENO 0746 part 02" "$tContent" \
+        "MVI_0746.MP4 -> output/2026-03-01_testevent_BAR_MVI_0746-02.mp4"
+
+    # ----- Exif Changes block per part with shifted CreateDate -----
+    assertContains "$LINENO part 00 hdr"   "$tContent" \
+        "2026-03-01_testevent_BAR_MVI_0746-00.mp4"
+    assertContains "$LINENO part 00 cdate" "$tContent" \
+        "Create Date = 2026:03:01 19:57:49"
+
+    assertContains "$LINENO part 01 hdr"   "$tContent" \
+        "2026-03-01_testevent_BAR_MVI_0746-01.mp4"
+    assertContains "$LINENO part 01 cdate" "$tContent" \
+        "Create Date = 2026:03:01 20:07:49"
+
+    assertContains "$LINENO part 02 hdr"   "$tContent" \
+        "2026-03-01_testevent_BAR_MVI_0746-02.mp4"
+    assertContains "$LINENO part 02 cdate" "$tContent" \
+        "Create Date = 2026:03:01 20:17:49"
+
+    # ----- 1 parent + 3 split parts = 4 mapping lines, idx=4 -----
+    assertEquals "$LINENO 4 entries" "4" \
+        "$(grep -c '\->\ output/' "$tFile")"
+    assertEquals "$LINENO idx" "4" "$gExampleIdx"
+
+    rm -f "$tFile"
+    return 0
+} # testExample_RealFilesWithSplit
+
+# -------------------
+# This should be the last defined function
+fRunTests() {
+    local tShunit
+    
+    if [[ -r "$cBin/shunit2.1" ]]; then
+        tShunit="$cBin/shunit2.1"
+    else
+        tShunit="/usr/local/bin/shunit2.1"
+    fi
+    SHUNIT_COLOR=auto
+
+    case "$gpTest" in
+        list)
+            grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g; s/{//g'
+            exit 1
+            ;;
+        all)
+            gpTest=""
+            # shellcheck disable=SC1091,SC1090
+            source "$tShunit"
+            exit $?
+            ;;
+        com)
+            gpTest=""
+            $cBin/bash-com.test
+            exit $?
+            ;;
+        fast)
+            gpTest=$(grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g; s/{//g' | grep -v Slow)
+            # shellcheck disable=SC1091,SC1090
+            source "$tShunit" -- $gpTest
+            exit $?
+            ;;
+        cli)
+            gpTest=$(grep 'testCli.*()' $cBin/$cName | grep -v grep | sed 's/()//g; s/{//g')
+            # shellcheck disable=SC1091,SC1090
+            source "$tShunit" -- $gpTest
+            exit $?
+            ;;
+        not-cli)
+            gpTest=$(grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g; s/{//g' | grep -v testCli)
+            # shellcheck disable=SC1091,SC1090
+            source "$tShunit" -- $gpTest
+            exit $?
+            ;;
+        *)
+            # shellcheck disable=SC1091,SC1090
+            source "$tShunit" -- $gpTest
+            exit $?
+            ;;
+    esac
+    exit
+
+    # shellcheck disable=SC2317
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head3 fRunTests
+
+Run unit tests for this script using shunit2.1.
+
+=internal-cut
+EOF
+} # fRunTests
+
+# ========================================
+# Main
+
+export cName=${BASH_SOURCE##*/}
+
+# -------------------
+# Set cCurDir because PWD may be unset under cron.
+if [[ -z "$PWD" ]]; then
+    PWD=$(pwd)
+fi
+cCurDir=$PWD
+
+# -------------------
+# Locate the directory that contains this script (and bash-com.inc).
+#tBin=home
+tBin=this
+case $tBin in
+    this)    cBin=${BASH_SOURCE%/*} ;;
+    current) cBin=$PWD ;;
+    home)    cBin=~/bin ;;
+    local)   cBin=/usr/local/bin ;;
+    system)  cBin=/usr/bin ;;
+esac
+
+if [[ ! -x $cBin/bash-com.inc ]]; then
+    echo "Error: could not find $cBin/bash-com.inc (Change cBin setting in script.) [$LINENO]"
+    exit 1
+fi
+source $cBin/bash-com.inc
+
+if [[ ! -x $cBin/vid-tag.inc ]]; then
+    fLog -p err -m "Could not find $cBin/vid-tag.inc" -l $LINENO
+    fUsageTest
+fi
+source $cBin/vid-tag.inc
+
+# -------------------
+# Configuration Section
+
+# shellcheck disable=SC2016
+fSetTestGlobals
+
+# -------------------
+# Get Args Section
+
+if [[ $# -eq 0 ]]; then
+    fLog -p err -m "Missing options." -l $LINENO
+    fUsageTest
+fi
+
+while getopts :T:hH:lvVd tArg; do
+    case $tArg in
+        # Script arguments
+        T) gpTest="$OPTARG" ;;
+        # Common arguments
+        h) fUsageTest long;     exit 1 ;;
+        H) fUsageTest "$OPTARG"; exit 1 ;;
+        l) gpLog=1 ;;
+        v) ((++gpVerbose)) ;;
+        V) echo "vid-tag.test version: $cVer"
+           exit 0
+           ;;
+        d) ((++gpDebug)) ;;
+        # Problem arguments
+        :)  fLog -p err -m "Value required for option: -$OPTARG" -l $LINENO
+            fUsageTest
+            ;;
+        \?) fLog -p -m "Unknown option: $OPTARG" -l $LINENO
+            fUsageTest
+            ;;
+    esac
+done
+((--OPTIND))
+shift $OPTIND
+if [[ $# -ne 0 ]]; then
+    fLog -p err -m "Unknown options: $*" -l $LINENO
+    fUsageTest
+fi
+while [[ $# -ne 0 ]]; do
+    shift
+done
+
+# -------------------
+if [[ -n "$gpTest" ]]; then
+    fRunTests
+fi

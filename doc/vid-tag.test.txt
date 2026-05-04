@@ -1,0 +1,71 @@
+========================================
+NAME vid-tag.test
+    Test vid-tag
+
+SYNOPSIS
+        vid-tag.test [-h] [-h pStyle]
+        vid-tag.test -T list [-v] [-d]
+        vid-tag.test -T all [-v] [-d]
+        vid-tag.test -T fast [-v] [-d]
+        vid-tag.test -T cli [-v] [-d]
+        vid-tag.test -T not-cli [-v] [-d]
+        vid-tag.test -T com [-v] [-d]
+        vid-tag.test -T "pTest pTest..." [-v] [-d]
+
+DESCRIPTION
+    Run unit and integration tests against vid-tag and vid-tag.inc.
+
+    The test data archive "vid-tag-test-input.zip" must exist in the current
+    directory; it is unzipped during oneTimeSetUp and supplies three video
+    files plus a sample "vid-tag.conf".
+
+    The number in the asssert messages (ASSERT:282 msg), is the line number
+    for assert test that failed.
+
+OPTIONS
+    -T "pTest"
+        Run the unit test functions in this script.
+
+        "-T all" runs all functions that begin with "test".
+
+        "-T fast" runs all functions that do not have Slow in their name".
+
+        "-T cli" runs all functions that begin with "testCli".
+
+        "-T not-cli" runs all functions that begin with "test", but not
+        "testCli".
+
+        "-T list" lists all test function names.
+
+        "-T com" runs all tests for bash-com.inc.
+
+RETURN VALUE
+    0 on success; non-zero on error.
+
+ERRORS
+    Look for the assert errors.
+
+    If you have not unzipped vid-tag-test-input.zip in the current directory
+    you will see these assert errors: "Missing test files" or "expected test
+    files"
+
+FILES
+        vid-tag
+        vid-tag.inc
+        vid-tag.test - this file
+        vid-tag-test-input.zip - input files
+        bash-com.inc
+        bash-com.test
+        shunit2.1
+
+SEE ALSO
+    Required programs: bash, exiftool, git-config, ffmpeg, sed
+
+AUTHOR
+    Turtle Engineer
+
+HISTORY
+    GPLv2 (c) Copyright
+
+    cVer=1.2.2
+

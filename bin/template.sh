@@ -1,9 +1,23 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.86 $ $Date: 2026/01/13 18:20:40 $ GMT
+# $Revision: 1.92 $ $Date: 2026/05/04 19:55:15 $ GMT
 
-export gpHostName gpTag
+# Naming Convention
+# gpVar - command line parameters. These can override gcVars with same
+#         base name.
+# gcVar - config vars that are read from a config file.
+# gVar - global variables. Should be few. Use functions to reduce these.
+# cVar - These are global config vars, fixed values for the script.
+# pVar - a positional variable passed into a function (local).
+# tVar - a local variable used in a function.
+# fFunction - a function unique to this script
+# fComFunction - Most functions in bash-com.inc begin with fCom
+
+# POD Syntax
+# https://web.archive.org/web/20260502155348/https://perldoc.perl.org/perlpod
+
 set -u
+export gpHostName gpTag
 
 # ========================================
 # Script Functions
@@ -107,7 +121,7 @@ level "warning" and higher.
 Set the gpDebug level. Add 1 for each -x.
 Or you can set gpDebug before running the script.
 
-See: fLog and fLog2 (Internal documentation)
+See: fLog (Internal documentation)
 
 =item B<-T "pTest">
 
@@ -221,6 +235,28 @@ log message will be output, otherwise it is skipped.
 
 See -x
 
+=item B<gpTopDir, gpConfGlobal, gpConfLocal, gpConfProj>
+
+Config file locations used by fComSetConfig, fComGetConfig, and
+fComUnsetConfig (-g, -l, -L options). Defaults are set in
+fComSetGlobals; override before calling fSetGlobals to change them:
+
+ gpTopDir     - default: ~/.config/$cName
+ gpConfGlobal - -g target, default: ~/.config/$cName/$cName.conf
+ gpConfLocal  - -l target, default: ./.$cName.conf
+ gpConfProj   - -L target, default: $gpTopDir/${cName}-proj.conf}
+
+The selected file is auto-created (along with its parent directory)
+when written to, or when -g/-l/-L is used and the file is missing.
+
+=item B<gpAuto, gpYesNo, gpMaxLoop>
+
+Used by fComYesNo, fComSelect, fComMenu.
+
+If gpAuto is non-zero, fComYesNo answers from gpYesNo ("y" or "n")
+without prompting. gpMaxLoop caps how many times fComSelect/fComMenu
+will retry on invalid input (default 30).
+
 =back
 
 =head1 RETURN VALUE
@@ -244,7 +280,8 @@ following log message format:
 
 See Globals section for details.
 
-HOME, USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug
+HOME, USER, Tmp, gpLog, gpFacility, gpVerbose, gpDebug,
+gpTopDir, gpConfGlobal, gpConfLocal, gpConfProj, gpAuto, gpYesNo, gpMaxLoop
 
 =for comment =head1 FILES
 
@@ -338,13 +375,13 @@ To verify the script is internally OK, run: SCRIPTNAME -T all
 
 =for comment =head1 AUTHOR
 
-NAME
+=for comment NAME
 
 =head1 HISTORY
 
-GPLv3 (c) Copyright 2021 by COMPANY
+GPLv2 (c) Copyright
 
-$Revision: 1.86 $ $Date: 2026/01/13 18:20:40 $ GMT
+$Revision: 1.92 $ $Date: 2026/05/04 19:55:15 $ GMT
 
 =cut
 EOF
@@ -353,7 +390,22 @@ EOF
 
 =internal-head1 SCRIPTNAME Internal Documentation
 
-=internal-head3 fUsage pStyle
+Why is POD used for usage help and internal documentation?  It has
+been around much longer than markdown, it is a simplier markup than
+markdown, is is computer language independent, and there are a lot of
+programs that will convert POD to other formats.  (See: pod2html,
+pod2man, pod2markdown, pod2pdf, pod2text, pod2usage, podchecker,
+podselect)
+
+If you use the head1 headings in the order shown here, the pod2man
+will create great man pages. Comment out sections and text that is not
+needed with "=for comment " before the text.
+
+"=internal-" is put before sections that are only for internal
+documentation.  Function fBashComInternalDoc in bash-com.inc will
+replace"=internal-" with "=", then pass the text to the POD tools.
+
+=internal-head2 fUsage pStyle
 
 This function selects the type of help output. See -h and -H options.
 
@@ -373,7 +425,7 @@ fCleanUp() {
 
 =internal-head2 Script Functions
 
-=internal-head3 fCleanUp
+=internal-head2 fCleanUp
 
 Calls fComCleanUp.
 
@@ -396,7 +448,7 @@ fSetGlobals() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fSetGlobals
+=internal-head2 fSetGlobals
 
 Calls fComSetGlobals to set globals used by bash-com.inc.
 
@@ -418,7 +470,7 @@ fValidateHostName() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fValidateHostName
+=internal-head2 fValidateHostName
 
 Exit if missing.
 
@@ -565,7 +617,7 @@ fRunTests() {
     if [[ "$gpTest" = "all" ]]; then
         gpTest=""
         # shellcheck disable=SC1091
-        . /usr/local/bin/shunit2.1
+        source /usr/local/bin/shunit2.1
         exit $?
     fi
     if [[ "$gpTest" = "com" ]]; then
@@ -574,13 +626,13 @@ fRunTests() {
         exit $?
     fi
     # shellcheck disable=SC1091
-    . /usr/local/bin/shunit2.1 -- $gpTest
+    source /usr/local/bin/shunit2.1 -- $gpTest
     exit $?
 
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fRunTests
+=internal-head2 fRunTests
 
 Run unit tests for this script.
 
@@ -616,13 +668,13 @@ case $tBin in
     this) cBin=${BASH_SOURCE%/*} ;;
 esac
 
-. $cBin/bash-com.inc
+source $cBin/bash-com.inc
 
 # -------------------
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.86 $'
+cVer='$Revision: 1.92 $'
 fSetGlobals
 
 # -------------------
@@ -712,7 +764,7 @@ timeout 5 awk -f $cTmp1 >$cTmp2
 tList=""
 for i in $(seq 2 40); do
     if [[ -e "File$i" ]]; then
-        fLog2 -m "Found File$i"
+        fLog -m "Found File$i"
         tList="$tList File$i"
     fi
 done >>$cTmp2
