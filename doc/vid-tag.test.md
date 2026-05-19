@@ -36,9 +36,9 @@ number for assert test that failed.
 
     "**-T all**" runs all functions that begin with "test".
 
-    "**-T fast**" runs all functions that do not have Slow in their name".
+    "**-T fast**" runs all functions that do not have "Slow" in their name (~10sec)".
 
-    "**-T cli**" runs all functions that begin with "testCli".
+    "**-T cli**" runs all functions that begin with "testCli (~6min)".
 
     "**-T not-cli**" runs all functions that begin with "test", but not
     "testCli".
@@ -71,7 +71,7 @@ directory you will see these assert errors: "Missing test files" or
 
 # SEE ALSO
 
-Required programs: bash, exiftool, git-config, ffmpeg, sed
+Required programs: bash, exiftool, ffmpeg, sed
 
 # AUTHOR
 
@@ -81,4 +81,4 @@ Turtle Engineer
 
 GPLv2 (c) Copyright
 
-cVer=1.2.2
+cVer=2.3.2

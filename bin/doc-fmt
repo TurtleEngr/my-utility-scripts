@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/doc-fmt,v $
-# $Revision: 1.9 $ $Date: 2025/12/24 04:23:12 $ GMT
+# $Revision: 1.10 $ $Date: 2026/05/19 16:03:35 $ GMT
 
 set -u
 
@@ -129,7 +129,7 @@ To verify the script is internally OK, run: doc-fmt -T all
 
 GPLv3 (c) Copyright 2023
 
-$Revision: 1.9 $ $Date: 2025/12/24 04:23:12 $ GMT
+$Revision: 1.10 $ $Date: 2026/05/19 16:03:35 $ GMT
 
 =cut
 EOF
@@ -301,7 +301,7 @@ esac
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.9 $'
+cVer='$Revision: 1.10 $'
 fSetGlobals
 
 # -------------------
@@ -359,14 +359,14 @@ done
 
 for i in $gpFileList; do
     if [ $i -ot doc/$i.txt ]; then
-        fLog2 -p notice -m "\"$i\" docs are up-to-date" -l $LINENO
+        fLog -p notice -m "\"$i\" docs are up-to-date" -l $LINENO
         continue
     fi
 
     tGen=0
 
     if grep -qE '^=pod$|=head1 ' $i; then
-        fLog2 -p notice -m "Generating docs for \"$i\"" -l $LINENO
+        fLog -p notice -m "Generating docs for \"$i\"" -l $LINENO
         awk '/=pod/,/=cut/ {print $0}' <$i | pod2text >doc/$i.txt
         awk '/=pod/,/=cut/ {print $0}' <$i | pod2html --title="$i" >doc/$i.html
         awk '/=pod/,/=cut/ {print $0}' <$i | pod2markdown >doc/$i.md
@@ -375,7 +375,7 @@ for i in $gpFileList; do
     fi
 
     if grep -q '^=internal-pod$' $i; then
-        fLog2 -p notice -m "Generating internal docs for \"$i\"" -l $LINENO
+        fLog -p notice -m "Generating internal docs for \"$i\"" -l $LINENO
         ./$i -H int >doc/$i.int.txt
         ./$i -H int-html >doc/$i.int.html
         ./$i -H int-md >doc/$i.int.md
@@ -384,14 +384,14 @@ for i in $gpFileList; do
 
     if [ $tGen -eq 0 ]; then
         if grep -q ' getopts .*h' $i; then
-            fLog2 -p notice -m "Generating \"$i.txt\"" -l $LINENO
+            fLog -p notice -m "Generating \"$i.txt\"" -l $LINENO
             ./$i -h >doc/$i.txt
             tGen=1
         fi
     fi
 
     if [ $tGen -eq 0 ]; then
-        fLog2 -p warn -m "No docs for \"$i\"" -l $LINENO
+        fLog -p warn -m "No docs for \"$i\"" -l $LINENO
     fi
 done
 

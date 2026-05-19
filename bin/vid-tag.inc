@@ -1,6 +1,6 @@
 set -u
 
-export cVer=1.3
+export cVer=2.3.2
 export cBin
 export cExampleFile
 export cOutputDir
@@ -27,6 +27,7 @@ export gpFilePat
 export gpNameLong
 export gpNameShort
 export gpNoExec
+export gpThumb
 export gpTimeZone
 export gpTitlePat
 
@@ -40,15 +41,17 @@ declare -ag gExampleTitles
 declare -ag gExampleCreateDates
 declare -ig gExampleIdx
 
-# Per-file extra-title map populated by fLoadExtras from the
-# [vid-tag "extra"] section of $gpConfLocal.  Keys are file basenames
+# Per-file extra-title map populated by fLoadConf from "Extra[...]"
+# bash array assignments in $gpConfLocal.  Keys are file basenames
 # (exact, case-sensitive); values are the text appended to the EXIF
 # Title for matching files.
 declare -Ag gExtraMap
-# Raw text of the [vid-tag "extra"] block, captured by fLoadExtras
-# and re-emitted by fSaveExtras.  Used to round-trip the section
-# unchanged across git-config based reads/writes.
-export gExtraSection
+
+# Per-file thumbnail-time map populated by fLoadConf from "ThumbTime[...]"
+# bash array assignments in $gpConfLocal.  Keys are file basenames
+# (exact, case-sensitive); values are the timestamp (e.g. "00:02:43" or
+# "5:01") passed to ffmpeg -ss when extracting the thumbnail image.
+declare -Ag gThumbMap
 
 # ========================================
 # Script Functions
@@ -65,6 +68,15 @@ fUsage() {
             ;;
         html)
             fComUsage -f $cBin/$cName.inc -s $pStyle -t "$cName Usage"
+            ;;
+        int)
+            fComUsage -i -f $cBin/$cName.inc -f $cBin/$cName.test -f $cBin/bash-com.inc -f $cBin/bash-com.test -s long | more
+            ;;
+        int-html)
+            fComUsage -i -f $cBin/$cName.inc -f $cBin/$cName.test -f $cBin/bash-com.inc -f $cBin/bash-com.test -s html -t "$cName Internal Doc"
+            ;;
+        int-md)
+            fComUsage -i -f $cBin/$cName.inc -f $cBin/$cName.test -f $cBin/bash-com.inc -f $cBin/bash-com.test -s md
             ;;
         *)
             fComUsage -f $cBin/$cName.inc -s usage
@@ -83,71 +95,78 @@ fUsage() {
 
 =head1 NAME vid-tag
 
-Rename video files and set Title / Caption / Keywords metadata.
+Rename video files and set Title, Caption, and Keywords metadata.
+And generate thumbnails.
 
 =head1 SYNOPSIS
 
-First run. Create config file: ./vid-tag.conf
+First run. Create initial config file: F<./vid-tag.conf>
 
-    vid-tag -n -e "pEventId"
+    vid-tag -n -e "pEventId" [File1 File2 ...]
 
-Edit config files, and/or use these options to override config file.
+Edit vid-tag.conf file, and/or use these options to override, and
+define a new config file.
 
     vid-tag -e "pEventId" File1 [File2 ...]
         [-p "pInitials"] [-P "pName"] [-C "pCaption"] [-R "pCopyright"]
         [-E "pEventTitle"] [-c "pCity"] [-k "pKeyword"]
         [-f "pFilePattern"] [-t "pTitlePattern"]
-        [-z "pTimeZone"]
+        [-z "pTimeZone"] [-T]
         [-n] [-h] [-H pStyle] [-v] [-d]
 
 =head1 DESCRIPTION
 
 vid-tag renames one or more video files and writes Title, Caption, and
-Keywords metadata using B<exiftool>.  The file's B<Create Date> metadata
-is read and used to date-stamp the output file name, the output title,
-and the file-system mtime.
+Keywords metadata using the C<exiftool>.  The file's C<Create Date>
+metadata is read and used to date-time-stamp the output file, and all
+the timestamp metadata values.
 
-An example file, ./vid-tag-example.txt, will be created to show the
-changes to the file with the current settings. This is best used with
-the -n option and include all the files, so the time stamps will match
-what is in the files.
+Files are copied to the ./output/ directory, so the original files are
+not changed in any way.
 
-Files are copied to the ./output/ directory, so original files are
-not touched.
+Files (in ./output/) will be renamed using the pFilePattern. Then the
+EXIF values will be added to the renamed files.
 
-Files (in ./output/) will be renamed using fFilePattern and the exif
-values will be added.
+Because some hosting sites do not allow "large" files, large files,
+greater than 10 min, will be split into multiple 10 min parts. The
+EXIF time stamps for the split files will update for each 10 min part.
 
-Large files, greater than 10 min, will be split into multiple 10 min
-parts (because some hosting sites do not allow "large" files). The
-exif time stamps for the split files will update for each 10 min part.
+After each run an example file, F<./vid-tag-example.txt>, will be
+created to show the changes that are (or will be) made to the files
+with the current settings. This is best used with the -n option with
+all the files to be processed, the time stamps will then match what is
+in the files.
 
-Defaults are read in this order (each layer overrides the previous):
+If the timestamps for the files are "off" by a consistent amount
+the TimeZone (-z) config option can be used to adjust the times.
+
+The config options are read in the following order (each one
+overrides the previous values):
 
 =over 4
 
 =item Built-in script defaults.
 
-=item Local config: B<./vid-tag.conf> If the file does not exist it
-will be created, and updated with the latest default settings.
+=item Local config: F<./vid-tag.conf> If the file does not exist it
+will be created with the latest default settings.
 
 =item Command-line options will override all other settings.
 
 =back
 
 After all the values are set, the results are saved to
-B<./vid-tag.conf> so the next run needs only needs the -e option and
-the file list.
+F<./vid-tag.conf> so the next run will only need the -e option and the
+file list.
 
 =head2 QUICK START
+
+Getting and installing the tool and programs it requires.
 
 =head3 Install
 
 =over 4
 
-=item Download the latest packaged zip file, vid-tag-VER.zip
-
-=item The package can be found at:
+=item Download the latest packaged zip file, C<vid-tag-VER.zip> from
 
     https://moria.whyayh.com/rel/released/software/own/vid-tag/
 
@@ -161,24 +180,28 @@ Typical choices:
 
 Just make sure the install dir is in your PATH env. var.
 
+Install the required programs, see the SEE ALSO section. The script
+will verify the prgrams can be found, in $PATH, before continuing.
+
 =back
 
 =head3 First run of vid-tag
 
 =over 4
 
-=item cd to the directory with your video files. Copy the vid-tag.conf
-file from the install dir. This is optional. If missing a default
+=item cd to the directory with your video files (or the directory
+where you want ./output/ created).  Copy the F<vid-tag.conf> file from
+the install dir. This is optional. If the file is missing, a default
 version will be created.
 
     Run: vid-tag -n -e testevent
 
-=item That will create or update ./vid-tag.conf and vid-tag-example.txt
-files.
+=item That will create or update F<./vid-tag.conf> and
+F<vid-tag-example.txt> files.
 
-=item You can now edit the vid-tag.conf file, or use the command line
-options to update the file. Mainly you want to change "testevent" to a
-short ID that will be put in your renamed video files. See the -e
+=item You can now edit the F<vid-tag.conf> file, or use the command
+line options to update the file. You will want to change "testevent"
+to a short ID that will be put in your renamed video files. See the -e
 option.
 
 =back
@@ -193,13 +216,18 @@ pattern, and the -t option for how you can change the Title pattern.
 =item Use the -v option to see some progress information. Use -vv if
 you want to see more progress details.
 
-=item After each run, the vid-tag.conf file is updated with any
-changes, and the vid-tag-example.txt file will summarize how the files
-are modified.
+=item After each run, the F<vid-tag.conf> file is updated with any
+changes, and the F<vid-tag-example.txt> file will summarize how the
+files are modified.
 
 =item Between each run you should probably remove everything in the
-outputs/ directory. Or you can leave the files there and they will be
-skipped from any changes.
+./outputs/ directory. Or you can leave the files there and they will
+be skipped from any changes.
+
+=item Use the -z option if the file times are off by a consistent
+ammount, because you forgot to set the current time with your camera,
+or your camera uses UTC times and you want them adjusted to the local
+time.
 
 =back
 
@@ -209,92 +237,129 @@ skipped from any changes.
 
 =item B<-e "pEventId">
 
-Short event tag used in file names. It is also the Id used to access
-the specific event details. If the pEventId is not found in
-vid-tag.conf, then it will be added to vid-tag.conf.
-
-Pattern token: B<%e>.  Config key: C<event.tag>. Required: "pEventId"
+Short event tag used in file names.  If the pEventId is not found,
+then it will be added to F<./vid-tag.conf>.
 
 The value will be changed to lower-case and any spaces will be changed
 to '_'
 
+Pattern token: B<%e>.  Config var: C<Event>. Required: "pEventId"
+
 =item B<-E "pEventTitle">
 
-Long event name used in the title.  Pattern token: B<%E>.
-Config key: C<event.title>. Default: "Long event description."
+Long event name used in the title.
+
+Pattern token: B<%E>.  Config var: C<Title>. Default: "Long
+event description."
 
 =item B<-c "pCity">
 
-City name.  Pattern token: B<%c>.  Config key: C<event.city>. Default:
-"city name"
+City name.
+
+Pattern token: B<%c>.  Config var: C<City>. Default: "city name"
 
 =item B<-C "pCaption">
 
-Caption / description metadata.  Config key: C<com.caption>. Default:
-"Copyright TERMS"
+Caption / description metadata. Any "Pattern Tokens" will be replaced
+in pCaption.
+
+Config var: C<Caption>. Default: "Copyright %P %d"
 
 =item B<-p "pInitials">
 
-Photographer's initials / short name (no spaces).  Pattern token: B<%p>.
-Config key: C<com.name-short>.
+Photographer's initials / short name (no spaces).
+
+Pattern token: B<%p>.  Config var: C<NameShort>.
 
 =item B<-P "pName">
 
-Photographer's full name.  Pattern token: B<%P>.
-Config key: C<com.name-long>. Default: First Last
+Photographer's full name.
+
+Pattern token: B<%P>.  Config var: C<NameLong>. Default: First
+Last
 
 =item B<-R "pCopyright">
 
-Copyright stamp. Config key: C<com.copyright> Default: "Copyright NAME YYYY"
+Copyright stamp.  Any "Pattern Tokens" will be replaced in
+pCopyriight.
+
+Config var: C<Copyright> Default: "Copyright %P %d"
 
 =item B<-f "pFilePattern">
 
-Output file-name pattern.  Config key: C<com.file-pat>. Default:
-C<%d_%e_%p_%f>.
+Output file-name pattern.  Usually you will only use the lowercase
+pattern options, because they should not have any spaces or special
+characters in them. Also the script might fail if file names have
+spaces in them.
+
+Config var: C<FilePat>. Default: C<%d_%e_%p_%f>.
 
 =item B<-t "pTitlePattern">
 
-Title pattern. Config key: C<com.title-pat>. Default: C<%D, %c, %E, by %P.>
+Title pattern.  Usually you will use the uppercase pattern options,
+but the lowercase options can be used.
+
+Config var: C<TitlePat>. Default: C<%D, %c, %E, by %P.>
 
 =item B<-k "pKeyword">
 
-Comma-separated keyword list.  Config key: C<event.keyword>. Default:
-"PBP, event"
+Comma-separated keyword list.
+
+Config var: C<Keyword>. Default: "TBD"
 
 =item B<-z "pTimeZone">
 
-The TimeZone in which the input video files' B<CreateDate> values
-were recorded.  When set to a value other than C<local> (or empty),
-each file's CreateDate is converted from B<pTimeZone> to the host's
-local time before it is used for the output filename, the title's
-date tokens (B<%d>, B<%D>, B<%T>), the example file's "Create Date"
-display, and the filesystem mtime applied via C<touch>.
+Config var: C<TimeZone>.  Default: C<local> (no conversion).
 
-The on-disk exif B<Create Date> in the output file is left unchanged
-- only what vid-tag derives from it is shifted.
+When set to a value other than C<local>, each file's CreateDate is
+converted from B<pTimeZone> to the host's local time before it is used
+for the output filename, and all the other EXIF time settings.
 
 Pattern: C<UTC[+-]H> or C<UTC[+-]H:MM>.  The C<UTC> prefix is
-case-insensitive (C<utc-1> is accepted).  POSIX TZ sign semantics
-apply, so C<utc-1> represents a zone one hour B<ahead> of UTC.
-
-Config key: C<event.time-zone>.  Default: C<local> (no conversion).
+case-insensitive (C<utc-1> is accepted).
 
 Examples:
 
-    -z utc-1     # zone 1 hour ahead of UTC (e.g. CET in winter)
+    -z utc-1     # zone 1 hour ahead of UTC
     -z UTC+8     # zone 8 hours behind UTC
-    -z UTC-5:30  # zone 5h30m ahead of UTC (e.g. IST)
+    -z UTC-5:30  # zone 5h30m ahead of UTC
+    -z utc-8:03  # your PST time was off by 3 min.
     -z local     # explicit "no conversion"
+
+=item B<-T>
+
+Generate thumbnail images for each input video.
+
+Config var: C<Thumb>.  Default: C<no>
+
+The thumbnail is a JPG with the same base name as the renamed video
+file, extracted with ffmpeg from a single frame and then annotated
+text is put in the thumbnail.
+
+C<ThumbTime["FILE"]> in vid-tag.conf can be used to define the time
+for the image that will be extracted.  Otherwise 5 seconds will be
+used.  If the file has an C<Extra["FILE"]> title or a
+C<ThumbTime["FILE"]> entry, the thumbnail is annotated at the top-left
+with the Extra text, and the extract time will be put after the title.
+A second annotation in the right-center will shows "VIDEO-->".  If a
+file has been split, the number of video files will be put before the
+text. For example: "3 files VIDEO-->".
+
+The thumbnail's EXIF is copied from the video and its DateTimeOriginal
+/ CreateDate / ModifyDate / mtime are set to be one second before the
+video's CreateDate, so it will sort before the video file.
+
+Config var: C<Thumb>. Default: C<yes>.
 
 =item B<-n>
 
 No-execute / dry-run.  Validate inputs and create config file
-B<./vid-tag.conf>, but do not create output/, rename files, or modify
-metadata.
+F<./vid-tag.conf> and F<vid-tag-example.txt>, but do not create
+output/, rename files, or modify metadata.
 
 =item B<-h>
 
-Output this "long" usage help.  Same as C<-H long>.
+Output this "long" usage help.  This is the same as C<-H long>.
 
 =item B<-H pStyle>
 
@@ -305,14 +370,18 @@ Output usage in a specific style:
     man         - man page
     html        - HTML page
     md          - Markdown
+    
+    int         - Output internal documentation as text.
+    int-html    - Output internal documentation as html.
+    int-md      - Output internal documentation as markdown.
 
 =item B<-v>
 
 Verbose output.  Repeat for more detail (B<-vv>).
 
-    (default) - warning and above
-    -v        - notice and above
-    -vv       - info and above
+    (default) - warnings and errors only
+    -v        - notice, warnings, and errors
+    -vv       - info, notice, warnings, and errors
 
 =item B<-V>
 
@@ -321,8 +390,11 @@ Output the script's version.
 =item B<-d>
 
 Debug level. Default: 0
-Each -d increments the debug level. Log messages will be print
-if the debug level is greater than the log message's debug level.
+
+Each -d increments the debug level. Debug messages will be printed
+if the debug level is greater than the debug message's debug level.
+Note: there is very little debug output because the script is best
+tested with F<vid-tag.test>.
 
 =back
 
@@ -340,45 +412,38 @@ if the debug level is greater than the log message's debug level.
 
 =head2 Config File Format
 
-This is the config file (F<./vid-tag.conf>) format.
-The value of C<$gpEventId> is the primary key.
+This is the config file (F<./vid-tag.conf>) format.  The file is a
+B<bash include file>: each line is a bash variable assignment that is
+sourced by vid-tag at startup.
 
-    [vid-tag "com"]
-        file-pat   = %d_%e_%p_%f (pFilePatern)
-        title-pat  = %D, %c, %E, by %P. (pTitlePattern)
-        name-long  = Photographer Name (pName)
-        name-short = Initials (pInitial)
-        copyright  = pCopyright
-        caption    = pCaption
-    [vid-tag "pEventId"]
-        title      = Long Event Title (pEventTitle)
-        city       = pCity
-        keyword    = word, word (pKeyword)
-        time-zone  = UTC[+-]H[:MM] | local (pTimeZone) - optional
-    [vid-tag "extra"]
-        FILE1      = extra title text for FILE1 - optional
-        FILE2      = extra title text for FILE2 - optional
-        ...
+    Caption="..."                # pCaption          (-C)
+    Copyright="..."              # pCopyright        (-R)
+    FilePat="%d_%e_%p_%f"        # pFilePattern      (-f)
+    NameLong="..."               # pName             (-P)
+    NameShort="..."              # pInitials         (-p)
+    TitlePat="%D, %c, %E, by %P." # pTitlePattern    (-t)
+    Event="pEventId"             # pEventId          (-e)
+    City="..."                   # pCity             (-c)
+    Title="..."                  # pEventTitle       (-E)
+    Keyword="word, word"         # pKeyword          (-k)
+    TimeZone="UTC[+-]H[:MM]"     # pTimeZone         (-z)
+    Thumb="yes"                  # pThumb            (-T)
+    Extra["FILE1"]="extra title for FILE1"   # optional, per-file
+    Extra["FILE2"]="extra title for FILE2"   # ...
+    ThumbTime["FILE1"]="MM:SS or HH:MM:SS"   # optional, per-file
 
-The B<[vid-tag "extra"]> section is optional.  Each key is the exact
-basename of an input file (case-sensitive); the value is the text that
-will be appended to that file's EXIF Title.  Files without a matching
-key are unaffected.
+The syntax is verified with C<bash -n> before the file is sourced.
+Note: there should be no spaces around the '=' and all the values
+should be between quotes (single ' or double ").
 
-The append rule: a single space follows the title's trailing '.', then
-the section value, then a closing '.'.  Example: with title
-"S<2026-03-01 Sun, Redwood City, Service, by Bruce Rafnel.>" and
-B<extra> entry "Service fragment", the resulting Title is
-"S<2026-03-01 Sun, Redwood City, Service, by Bruce Rafnel. Service fragment.>".
+The B<Extra> entries are optional.  Each key is the exact name of an
+input file. The value is the text that will be appended to that file's
+EXIF Title. The Extra text will be put in the thumbnail if -T option.
+Files without a matching key are unaffected.
 
-The B<extra> keys typically contain '.' (e.g. "MVI_0107.MP4"), which
-B<git config> cannot parse.  For this reason, the section is read and
-written by an internal awk-based parser; it round-trips through
-C<vid-tag.conf> unchanged on every run.  Edit it by hand.
-
-time-zone - is optional.  Omit (or set to C<local>) to disable the
-CreateDate timezone conversion.  See the B<-z> option for the format
-and semantics.
+When vid-tag exits, it rewrites F<./vid-tag.conf> with the final
+effective values (defaults + previous conf + any command-line
+overrides), so the next run will only need the file list.
 
 =head1 RETURN VALUE
 
@@ -386,22 +451,37 @@ and semantics.
 
 =head1 ERRORS
 
-    + No input files given.
-    + exiftool is not installed or not on PATH.
-    + File not found: <filename>
+Processing will stop with any of these.
 
-Warnings (processing continues):
+    Missing one or more required programs.
+    Syntax error in vid-tag.conf
+    Value required for option: -?
+    Unknown option: ?
+    Directory ? is not writable.
+    Missing pEventId, see -e option.
+    -t pFilePat is missing % options
+    -t pTitlePat is missing % options
+    Invalid TimeZone: ? (expected UTC[+-]H[:MM] or 'local')
+    No input files given. Use -h for help.
+    File not found: ?
+    Failed to convert: '?' from TimeZone=?
 
-    + No CreateDate in <file>; using file mtime
-    + output/<file> already exists
-    + target exists, skipping: <old> -> <new>
-    + exiftool returned error on <file>
+=head2 Warnings
+
+Processing will continue.
+
+    Missing some some optional programs.
+    No CreateDate in ?; using file mtime.
+    output/? already exists, skipping.
+    ? not found in output/; skipping.
+    target exists, skipping: ? -> ?
+    exiftool returned error? on ?
 
 =for comment =head1 EXAMPLES
 
 =head1 ENVIRONMENT
 
-HOME, USER, Tmp, gpVerbose, gpDebug, gpConfLocal
+HOME, USER, PATH
 
 =head1 FILES
 
@@ -412,9 +492,6 @@ HOME, USER, Tmp, gpVerbose, gpDebug, gpConfLocal
     vid-tag.conf - sample config file describing tags for an event
     bash-com.inc - utility functions
     LICENSE      - GPLv2
-
-    ./vid-tag-example.txt - lists the changes to files
-    ./output/      - generated directory, with renamed copies of files
 
 =head2 Generated files
 
@@ -442,7 +519,7 @@ the testCli*Slow tests.
 
 Required: Linux OS (see CAVEATS for Windows and MacOS)
 
-Required: bash, exiftool, git config, ffmpeg, sed
+Required: bash, exiftool, ffmpeg, convert, sed
 
 Optional: vid-tag.test
 
@@ -452,34 +529,63 @@ All of this code is maintained at:
 
     https://github.com/TurtleEngr/vid-tag
 
-The releases are marked with vN.N tags.
+The releases are marked with vM.m.p tags.
+
+=head2 Standard version numbering scheme
+
+vM.m.p tags.
+
+M - major version number. The program may not work with previous
+versions of command line options or config files.
+
+m - minor version number. New features or bug fixes have been added.
+It will probably work with previous versions of command line options
+or config files, but new features might not work with earlier versions.
+
+p - patch version number. There have only been cosmetic changes. For
+example, typos, documentation changes, and there could be some minor
+bug fixes.
+
+Any time there is a new "Release," one of these numbers will be
+incremented.
+
+Also if you are looking at this on github, the "development" branch is
+for newer (maybe untested) versions (where the version number will
+likely be different from a released version). The "main" branch is
+where the official released code lives, with the vM.m.p tags.
 
 =head1 CAVEATS
 
 This script is mainly for Linux systems. However, if you have CygWin
 installed on your Windows PC, and you have install the Required
-packages (and set your PATH env.) this could work. For MacOS you'll
-probably want to install "brew" to get the Required programs.
+packages, defined in the SEE ALSO section, and set your PATH env.,
+this could work. For MacOS you'll probably want to install "brew" to
+get the Required programs.
 
-If you do get this running on Windows or MacOS, let me know, with an
-"issue" report, what you had to do to get it running. For example
-include programs needed, configuration directions, and any changes
-you made to the scripts.
+If you do get this running on Windows or MacOS, please let me know,
+with an "issue" report (label it with "enhancement" or
+"documentation"). What did you do to get it running? For example
+include other programs needed, configuration directions, and any
+changes you made to the scripts. If you know github, fork the vid-tag
+repo, add your changes, then send me a "pull" request, to the
+"develop" branch.
 
 =head1 DIAGNOSTICS
 
-This tool comes with a test script to verify vid-tag script is working
-OK.  Download these files:
+This tool comes with a test script to verify the vid-tag script is
+working OK.  Download these files from:
+https://moria.whyayh.com/rel/released/software/own/vid-tag/
+(the VER should match vid-tag's VER):
 
     vid-tag-test-VER.zip
-    vid-tag-test-input.zip (4.5G)
-
-from: https://moria.whyayh.com/rel/released/software/own/vid-tag/
+    vid-tag-test-input.zip (4.5G) - optional
 
 Unzip vid-tag-test-VER.zip to the install dir.
 
 Unzip vid-tag-test-input.zip to a "test" directory. In the test
-directory run vid-tag.test.
+directory run:
+
+    ./vid-tag.test -T all
 
 If you don't have space for the vid-tag-test-input.zip files, just use
 the "fast" test option for vid-tag.test. For example:
@@ -489,6 +595,9 @@ the "fast" test option for vid-tag.test. For example:
 =head1 BUGS
 
 Report bugs at: https://github.com/TurtleEngr/vid-tag/issues
+
+Always include the version number of the script you were using.  And
+include complete error messages you see.
 
 =for comment =head1 RESTRICTIONS
 
@@ -500,7 +609,7 @@ Turtle Engineer
 
 GPLv2 (c) Copyright (See LICENSE file for terms.)
 
-cVer=1.3
+cVer=2.3.2
 
 =cut
 
@@ -512,28 +621,42 @@ EOF
 
 =internal-head1 vid-tag Internal Documentation
 
-=internal-head3 fUsage pStyle
+=internal-head2 fUsage pStyle
 
 Select the type of help output. See -h and -H options.
 
-=internal-head2 CONFIG KEY TO VARIABLE MAP
+=internal-head3 Config Variable to Internal Variable Map
 
-These are internal variables.
+The conf file (F<./vid-tag.conf>) uses these top-level bash variables.
+fLoadConf assigns each to the corresponding internal C<gp*> global
+after sourcing the file.  The conf-file variable names are NEVER
+referenced directly anywhere else in the script.
 
-    Config key        Variable
-    ---------         --------
-    com.caption       gpCaption
-    com.copyright     gpCopyright
-    com.file-pat      gpFilePat
-    com.name-long     gpNameLong
-    com.name-short    gpNameShort
-    com.title-pat     gpTitlePat
-    event.tag         gpEventId
-    event.city        gpEventCity
-    event.keyword     gpEventKeyword
-    event.time-zone   gpTimeZone
-    event.title       gpEventTitle
-    extra.<FILE>      gExtraMap[<FILE>]   (per-file title append)
+    Conf-file var       Internal variable
+    -------------       -----------------
+    Caption             gpCaption
+    Copyright           gpCopyright
+    FilePat             gpFilePat
+    NameLong            gpNameLong
+    NameShort           gpNameShort
+    TitlePat            gpTitlePat
+    Event               gpEventId
+    City                gpEventCity
+    Keyword             gpEventKeyword
+    TimeZone            gpTimeZone
+    Title               gpEventTitle
+    Thumb               gpThumb              (yes/no)
+    Extra[<FILE>]       gExtraMap[<FILE>]    (per-file title append)
+    ThumbTime[<FILE>]   gThumbMap[<FILE>]    (per-file thumbnail seek time)
+
+=internal-head3 Per-file Extras
+
+The B<Extra> entries are stored as a bash associative array indexed
+by exact, case-sensitive file basenames (typically containing '.',
+e.g. "MVI_0107.MP4").  Because the conf file is a bash include, no
+special parser is needed: the C<Extra[FILE]=value> lines are simply
+sourced.  fLoadConf declares C<-A Extra> before sourcing so that
+indices are treated as associative keys.
 
 =internal-cut
 
@@ -550,7 +673,7 @@ fCleanUp() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fCleanUp
+=internal-head2 fCleanUp
 
 Calls fComCleanUp to remove temp files and exit cleanly.
 
@@ -563,13 +686,12 @@ fSetGlobals() {
     fComSetGlobals
 
     # -------------------
-    # Config file locations for fComGetConfig / fComSetConfig
+    # Local config file path (sourced as a bash include by fLoadConf)
     gpConfLocal="./vid-tag.conf"
 
     # -------------------
     # Output directory constant
     cOutputDir="output"
-    
     cExampleFile="vid-tag-example.txt"
 
     # -------------------
@@ -579,18 +701,35 @@ fSetGlobals() {
     # -------------------
     # Config-backed variables – hard-coded defaults.
     # Overridden in order: global conf → local conf → command line.
-    gpCaption=${gpCaption:-"Copyright TERMS"}
-    gpCopyright=${gpCopyright:-"Copyright NAME YYYY"}
+    gpCaption=${gpCaption:-"Copyright %P %d"}
+    gpCopyright=${gpCopyright:-"Copyright %P %d"}
     gpEventCity=${gpEventCity:-"TBD"}
     gpEventFileList=${gpEventFileList:-""}
     gpEventKeyword=${gpEventKeyword:-"TBD"}
     gpEventId=${gpEventId:-""}
-    gpEventTitle=${gpEventTitle:-"TBD"}
+    gpEventTitle=${gpEventTitle:-"Event Title"}
     gpFilePat=${gpFilePat:-'%d_%e_%p_%f'}
-    gpNameLong=${gpNameLong:-"TBD"}
+    gpNameLong=${gpNameLong:-"First Last"}
     gpNameShort=${gpNameShort:-"TBD"}
-    gpTimeZone=${gpTimeZone:-""}
+    gpThumb=${gpThumb:-"no"}
+    gpTimeZone=${gpTimeZone:-"local"}
     gpTitlePat=${gpTitlePat:-'%D, %c, %E, by %P.'}
+
+    # -------------------
+    # Thumbnail rendering constants (used by fMakeThumbnail and
+    # fThumbAddLabel).  cgThumbTimeDefault is the ffmpeg -ss value used
+    # when no ThumbTime is set for a file; the rest are convert(1)
+    # option strings inserted verbatim into the annotate command.
+    cgThumbBgColor="-undercolor black"
+    cgThumbColor="-fill white"
+    cgThumbFont="-font times-roman"
+    cgThumbGravity="-gravity northwest -annotate +50+50"
+    cgThumbMax="68"
+    cgThumbPre="5"
+    cgThumbSize="-pointsize 45"
+    cgThumbText="VIDEO-->"
+    cgThumbTextGravity="-gravity east -annotate +50+0"
+    cgThumbTimeDefault="00:00:05"
 
     # -------------------
     # Per-file globals populated by fReadFileDate / fConvertDate
@@ -611,14 +750,14 @@ fSetGlobals() {
     gExampleIdx=0
 
     # -------------------
-    # Per-file extras: populated by fLoadExtras, written back by
-    # fSaveExtras.  Map is reset here; section text starts empty.
+    # Per-file extras: populated by fLoadConf.  Reset to empty here so
+    # repeated calls (in tests) don't accumulate stale entries.
     gExtraMap=()
-    gExtraSection=""
+    gThumbMap=()
 
     # -------------------
     # Required and optional external programs
-    fComCheckDeps "bash exiftool git ffmpeg sed" "cat"
+    fComCheckDeps "bash exiftool ffmpeg convert sed" "cat"
 
     return
 
@@ -626,7 +765,7 @@ fSetGlobals() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fSetGlobals
+=internal-head2 fSetGlobals
 
 Calls fComSetGlobals, then sets all script-specific globals.
 
@@ -641,83 +780,195 @@ EOF
 
 # --------------------------------
 fLoadConf() {
-    # Read event-specific overrides from the local config file.
-    # The section prefix is the current value of gpEventId, which has
-    # already been set from the global conf (and possibly pre-scanned
-    # from the command line via -e).
-    local tId
+    # Source the local config file (bash include format).  If the file
+    # does not exist, call fSaveConf to create it with the current
+    # default values.
+    #
+    # The conf file uses these top-level bash variables:
+    # Caption, Copyright, FilePat, NameLong, NameShort, TitlePat,
+    # Event, City Title, Keyword, TimeZone
+    # Extra[...] (optional, per-file)
+    #
+    # After sourcing, the values are assigned to the corresponding
+    # internal gp* variables; the conf-file variables themselves are
+    # NOT used directly elsewhere in the script.
+    local tKey
 
     if [[ ! -f "$gpConfLocal" ]]; then
-        fLog -p info -m "Local config not found: $gpConfLocal" -l $LINENO
+        fLog -p info \
+            -m "Local config not found: $gpConfLocal - creating with defaults" \
+            -l $LINENO
+        fSaveConf
         return 0
     fi
 
-    if [[ "$gpEventId" = "tbd" || -z "$gpEventId" ]]; then
-        fError -m "gpEventId not set; cannot read local config sections." -l $LINENO
+    # Syntax check before sourcing
+    if ! bash -n "$gpConfLocal"; then
+        fError -m "Syntax error in $gpConfLocal" -l $LINENO
     fi
 
-    gpCaption=$(      fComGetConfig -l -k "$cName.com.caption"    -d "$gpCaption")
-    gpCopyright=$(    fComGetConfig -l -k "$cName.com.copyright"  -d "$gpCopyright")
-    gpFilePat=$(      fComGetConfig -l -k "$cName.com.file-pat"   -d "$gpFilePat")
-    gpNameLong=$(     fComGetConfig -l -k "$cName.com.name-long"  -d "$gpNameLong")
-    gpNameShort=$(    fComGetConfig -l -k "$cName.com.name-short" -d "$gpNameShort")
-    
-    gpTitlePat=$(     fComGetConfig -l -k "$cName.com.title-pat" -d "$gpTitlePat")
+    # Declare the Extra associative array before sourcing so
+    # "Extra[KEY]=VALUE" lines in the conf produce an associative (not
+    # indexed) array.  Same for ThumbTime.
+    local -A Extra=()
+    local -A ThumbTime=()
+    local Caption=""
+    local Copyright=""
+    local FilePat=""
+    local NameLong=""
+    local NameShort=""
+    local TitlePat=""
+    local Event=""
+    local City=""
+    local Title=""
+    local Keyword=""
+    local TimeZone=""
+    local Thumb=""
 
-    # event.tag is the canonical source for gpEventId in local conf
-    tId=$(fComGetConfig -l -k "$cName.$gpEventId.title")
-    if [[ -z "$tId" ]]; then
-        fLog -p warn -m "Event $gpEventId not found, it will be added to $gpConfLocal" -l $LINENO
-    fi
+    # shellcheck disable=SC1090
+    source "$gpConfLocal"
 
-    gpEventTitle=$(   fComGetConfig -l -k "$cName.$gpEventId.title"     -d "$gpEventTitle")
-    gpEventCity=$(    fComGetConfig -l -k "$cName.$gpEventId.city"      -d "$gpEventCity")
-    gpEventKeyword=$( fComGetConfig -l -k "$cName.$gpEventId.keyword"   -d "$gpEventKeyword")
-    gpTimeZone=$(     fComGetConfig -l -k "$cName.$gpEventId.time-zone" -d "$gpTimeZone")
+    # Assign conf-file variables to internal gp* variables.  An empty
+    # conf value falls back to the current gp* value (which holds the
+    # default set by fSetGlobals).
+    gpCaption=${Caption:-$gpCaption}
+    gpCopyright=${Copyright:-$gpCopyright}
+    gpFilePat=${FilePat:-$gpFilePat}
+    gpNameLong=${NameLong:-$gpNameLong}
+    gpNameShort=${NameShort:-$gpNameShort}
+    gpTitlePat=${TitlePat:-$gpTitlePat}
+    gpEventId=${Event:-$gpEventId}
+    gpEventCity=${City:-$gpEventCity}
+    gpEventTitle=${Title:-$gpEventTitle}
+    gpEventKeyword=${Keyword:-$gpEventKeyword}
+    gpTimeZone=${TimeZone:-$gpTimeZone}
+    gpThumb=${Thumb:-$gpThumb}
 
+    # Per-file extras: copy Extra associative array into gExtraMap.
+    gExtraMap=()
+    for tKey in "${!Extra[@]}"; do
+        gExtraMap["$tKey"]="${Extra[$tKey]}"
+    done
+
+    # Per-file thumb times: copy ThumbTime associative array into gThumbMap.
+    gThumbMap=()
+    for tKey in "${!ThumbTime[@]}"; do
+        gThumbMap["$tKey"]="${ThumbTime[$tKey]}"
+    done
+
+    # Normalise event id (spaces -> underscores, lower-cased by
+    # the gpEventId declare -l attribute).
     gpEventId="${gpEventId// /_}"
+
+    fLog -p info \
+        -m "Loaded config: $gpConfLocal (event=$gpEventId, extras=${#gExtraMap[@]}, thumbs=${#gThumbMap[@]})" \
+        -l $LINENO
     return 0
 
     # shellcheck disable=SC2317
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fLoadLocalConf
+=internal-head2 fLoadConf
 
-Reads the local config file (gpConfLocal, default ./vid-tag.conf) using
-fComGetConfig -l.  The section prefix is the current gpEventId value.
+Source the local config file (gpConfLocal, default F<./vid-tag.conf>).
+The file is a bash include with top-level variable assignments:
 
-If the file is absent, or gpEventId is not yet known, the function
-returns silently with a warning.
+    Caption="..."
+    Copyright="..."
+    FilePat="..."
+    NameLong="..."
+    NameShort="..."
+    TitlePat="..."
+    Event="..."
+    City="..."
+    Title="..."
+    Keyword="..."
+    TimeZone="..."
+    Extra["FILE.mp4"]="extra title"      (optional, repeat per file)
+
+Steps:
+
+=internal-over 4
+
+=internal-item 1. If the file does not exist, call fSaveConf to
+create it with the current default values, then return.
+
+=internal-item 2. Verify the syntax with C<bash -n>; on error, fError
+exits the script.
+
+=internal-item 3. Source the file inside a function scope (so the
+conf-file variables are local), then assign each to the corresponding
+gp* internal variable.  Empty conf values leave the gp* value at the
+default set by fSetGlobals.
+
+=internal-item 4. Copy the C<Extra> associative array into gExtraMap.
+
+=internal-back
+
+The conf-file variables are NEVER used directly elsewhere - only the
+gp* / gExtraMap globals.  This isolates the conf-file naming from the
+rest of the script.
 
 =internal-cut
 EOF
 } # fLoadConf
 
 # --------------------------------
+fEscConf() {
+    # Escape a string for safe inclusion inside a bash double-quoted
+    # string literal: backslash, double-quote, dollar, and backtick.
+
+    local tStr="$1"
+
+    tStr="${tStr//\\/\\\\}"
+    tStr="${tStr//\"/\\\"}"
+    tStr="${tStr//\$/\\\$}"
+    tStr="${tStr//\`/\\\`}"
+    printf '%s' "$tStr"
+    return 0
+} # fEscConf
+
+# --------------------------------
 fSaveConf() {
-    # Write the current values to the local config file under the
-    # [$gpEventId ...] section.
+    # Write the current values of all gp* / gExtraMap globals to the
+    # local config file in bash-include format.  See fLoadConf for the
+    # format description.
 
-    if [[ -z "$gpEventId" ]]; then
-        fError -m "Cannot save local config: gpEventId is not set." -l $LINENO
-    fi
+    local tKey
 
-    fLog -p info -m "Saving local config: $gpConfLocal (tag=$gpEventId)" -l $LINENO
-    fComSetConfig -l -k "$cName.com.caption"     -v "$gpCaption"
-    fComSetConfig -l -k "$cName.com.copyright"   -v "$gpCopyright"
-    fComSetConfig -l -k "$cName.com.file-pat"    -v "$gpFilePat"
-    fComSetConfig -l -k "$cName.com.name-long"   -v "$gpNameLong"
-    fComSetConfig -l -k "$cName.com.name-short"  -v "$gpNameShort"
-    fComSetConfig -l -k "$cName.com.title-pat"   -v "$gpTitlePat"
+    fLog -p info -m "Saving local config: $gpConfLocal (event=$gpEventId)" -l $LINENO
 
-    fComSetConfig -l -k "$cName.$gpEventId.title"     -v "$gpEventTitle"
-    fComSetConfig -l -k "$cName.$gpEventId.city"      -v "$gpEventCity"
-    fComSetConfig -l -k "$cName.$gpEventId.keyword"   -v "$gpEventKeyword"
-
-    if [[ -n "$gpTimeZone" ]]; then
-       fComSetConfig -l -k "$cName.$gpEventId.time-zone" -v "$gpTimeZone"
-    fi
+    {
+        echo "# vid-tag local config (bash include format)"
+        echo "# Generated by vid-tag $cVer"
+        echo ""
+        echo "Caption=\"$(fEscConf "$gpCaption")\""
+        echo "Copyright=\"$(fEscConf "$gpCopyright")\""
+        echo "FilePat=\"$(fEscConf "$gpFilePat")\""
+        echo "NameLong=\"$(fEscConf "$gpNameLong")\""
+        echo "NameShort=\"$(fEscConf "$gpNameShort")\""
+        echo "TitlePat=\"$(fEscConf "$gpTitlePat")\""
+        echo "Event=\"$(fEscConf "$gpEventId")\""
+        echo "City=\"$(fEscConf "$gpEventCity")\""
+        echo "Title=\"$(fEscConf "$gpEventTitle")\""
+        echo "Keyword=\"$(fEscConf "$gpEventKeyword")\""
+        echo "TimeZone=\"$(fEscConf "$gpTimeZone")\""
+        echo "Thumb=\"$(fEscConf "$gpThumb")\""
+        # Per-file extras - skipped if gExtraMap is empty.
+        if [[ ${#gExtraMap[@]} -gt 0 ]]; then
+            # Sort keys for deterministic output (helpful for diff/round-trip).
+            for tKey in $(printf '%s\n' "${!gExtraMap[@]}" | sort); do
+                echo "Extra[\"$(fEscConf "$tKey")\"]=\"$(fEscConf "${gExtraMap[$tKey]}")\""
+            done
+        fi
+        # Per-file thumb times - skipped if gThumbMap is empty.
+        if [[ ${#gThumbMap[@]} -gt 0 ]]; then
+            for tKey in $(printf '%s\n' "${!gThumbMap[@]}" | sort); do
+                echo "ThumbTime[\"$(fEscConf "$tKey")\"]=\"$(fEscConf "${gThumbMap[$tKey]}")\""
+            done
+        fi
+    } > "$gpConfLocal"
 
     return 0
 
@@ -725,218 +976,23 @@ fSaveConf() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fSaveLocalConf
+=internal-head2 fSaveConf
 
-Writes the current effective values of all gp* config variables to the
-local config file (gpConfLocal) under the [$gpEventId ...] sections,
-using fComSetConfig -l.
+Write the current effective values of all gp* config variables and
+gExtraMap entries to the local config file (gpConfLocal) in
+bash-include format (see fLoadConf for the format description).
 
-Called when -s is present on the command line.
+This function replaces the entire conf file; sourcing the file
+produced by fSaveConf must round-trip back to the same gp* /
+gExtraMap values.
+
+Values are escaped via fEscConf so backslashes, double quotes,
+dollar signs, and backticks in any field do not break the bash
+syntax of the written file.
 
 =internal-cut
 EOF
 } # fSaveConf
-
-# --------------------------------
-fLoadExtras() {
-    # Read the [vid-tag "extra"] section from $gpConfLocal and populate
-    # the gExtraMap associative array (keyed by exact, case-sensitive
-    # file basename).  Also save the raw section text in gExtraSection
-    # and STRIP the section from $gpConfLocal so subsequent git-config
-    # based reads/writes (fComGetConfig / fComSetConfig) don't choke on
-    # keys that contain '.' (e.g. "MVI_0107.MP4").
-    #
-    # Round-trip is completed by fSaveExtras which appends the saved
-    # section back to $gpConfLocal at the end of the run.
-    local tLine tKey tValue tTmp
-
-    gExtraMap=()
-    gExtraSection=""
-
-    if [[ ! -f "$gpConfLocal" ]]; then
-        return 0
-    fi
-
-    # Capture the section text verbatim (header + body lines).
-    gExtraSection=$(awk '
-        /^[[:space:]]*\[[[:space:]]*vid-tag[[:space:]]+"extra"[[:space:]]*\]/ {
-            in_sec=1; print; next
-        }
-        /^[[:space:]]*\[/ { in_sec=0 }
-        in_sec { print }
-    ' "$gpConfLocal")
-
-    if [[ -z "$gExtraSection" ]]; then
-        return 0
-    fi
-
-    # Parse "key = value" lines into the map.  Skip the header,
-    # blank lines, and '#' / ';' comments.
-    while IFS= read -r tLine; do
-        [[ "$tLine" =~ ^[[:space:]]*\[ ]] && continue
-        [[ "$tLine" =~ ^[[:space:]]*$ ]]  && continue
-        [[ "$tLine" =~ ^[[:space:]]*[\#\;] ]] && continue
-        if [[ "$tLine" =~ ^[[:space:]]*([^=[:space:]][^=]*[^=[:space:]]|[^=[:space:]])[[:space:]]*=[[:space:]]*(.*)$ ]]; then
-            tKey="${BASH_REMATCH[1]}"
-            tValue="${BASH_REMATCH[2]}"
-            # Trim trailing whitespace from value
-            tValue="${tValue%"${tValue##*[![:space:]]}"}"
-            gExtraMap["$tKey"]="$tValue"
-        fi
-    done <<< "$gExtraSection"
-
-    # Strip the [vid-tag "extra"] section from the file in place so
-    # the rest of the run can use git config without errors.
-    tTmp="${gpConfLocal}.vt$$"
-    awk '
-        /^[[:space:]]*\[[[:space:]]*vid-tag[[:space:]]+"extra"[[:space:]]*\]/ {
-            in_sec=1; next
-        }
-        /^[[:space:]]*\[/ { in_sec=0 }
-        !in_sec { print }
-    ' "$gpConfLocal" > "$tTmp" && mv "$tTmp" "$gpConfLocal"
-
-    fLog -p info -m "Loaded ${#gExtraMap[@]} extra entries from $gpConfLocal" -l $LINENO
-    return 0
-
-    # shellcheck disable=SC2317
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fLoadExtras
-
-Read the [vid-tag "extra"] section from gpConfLocal into the
-gExtraMap associative array.  Each "FILENAME = text" line becomes
-gExtraMap["FILENAME"]="text".  Match against command-line file
-basenames is exact and case-sensitive.
-
-Side effects:
-
-=internal-over 4
-
-=internal-item gExtraMap is reset and populated.
-
-=internal-item gExtraSection holds the original section text
-(header + body) so fSaveExtras can re-emit it unchanged.
-
-=internal-item The [vid-tag "extra"] section is removed from
-gpConfLocal in place.  This is required because git config (used
-by fComGetConfig / fComSetConfig) refuses to parse a file whose
-keys contain '.', and typical filenames such as "MVI_0107.MP4"
-have dotted extensions.
-
-=internal-back
-
-If gpConfLocal does not exist, the function returns silently
-with an empty map and empty section.
-
-=internal-cut
-EOF
-} # fLoadExtras
-
-# --------------------------------
-fSaveExtras() {
-    # Re-attach the [vid-tag "extra"] section to $gpConfLocal.  The
-    # text is whatever fLoadExtras captured at the start of the run,
-    # so the section round-trips unchanged regardless of any other
-    # writes to the file.
-    if [[ -z "$gExtraSection" ]]; then
-        return 0
-    fi
-    if [[ ! -f "$gpConfLocal" ]]; then
-        return 0
-    fi
-
-    # Make sure the file ends with a newline before appending.
-    if [[ -s "$gpConfLocal" && $(tail -c1 "$gpConfLocal" | wc -l) -eq 0 ]]; then
-        echo >> "$gpConfLocal"
-    fi
-    printf '%s\n' "$gExtraSection" >> "$gpConfLocal"
-    return 0
-
-    # shellcheck disable=SC2317
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fSaveExtras
-
-Append the saved gExtraSection (captured by fLoadExtras) back to
-gpConfLocal.  Called once at the end of the script run, after
-fSaveConf has finished writing the git-config-managed sections.
-
-If gExtraSection is empty (no [vid-tag "extra"] section was
-present at load time, or the run started with no conf file), this
-function is a no-op.
-
-=internal-cut
-EOF
-} # fSaveExtras
-
-# --------------------------------
-fPreScanOpts() {
-    # First-pass option scan: extract only -e (event tag)
-    # before loading the local config file.  The full getopts parse in
-    # Main will apply all options after the config files are loaded.
-
-    local OPTIND=1
-    local OPTARG
-    
-    while (( $# > 0 )); do
-        case "$1" in
-            -e)
-                gpEventId="${2// /_}"
-                return 0
-                ;;
-            -h)
-                fUsage long
-                exit 0
-                ;;
-            -H)
-                fUsage $2
-                exit 0
-                ;;
-            -V)
-                echo "vid-tag version: $cVer"
-                exit 0
-                ;;
-            -*)
-                # Unknown flag: skip it and its argument (if present)
-                shift
-                # If the next token isn't another flag, consume it too
-                if [[ "${1-}" != -* && -n "${1-}" ]]; then
-                    shift
-                fi
-                ;;
-            *)
-                shift
-                ;;
-        esac
-    done
-
-    if [[ -z "$gpEventId" ]]; then
-        fError -m "Missing pEventId, see required -e option." -l $LINENO
-    fi
-
-    if [[ ! -f "$gpConfLocal" ]]; then
-        fSaveLocalConf
-    fi
-    return 0
-
-    # shellcheck disable=SC2317
-    cat <<EOF >/dev/null
-=internal-pod
-
-=internal-head3 fPreScanOpts
-
-Scans command-line arguments for -e and -s before the config files are
-loaded.  This ensures that fLoadLocalConf uses the correct event tag
-even when -e is supplied on the command line.
-
-A full option parse is done later in Main after config loading.
-
-=internal-cut
-EOF
-} # fPreScanOpts
 
 # --------------------------------
 fGetOpt() {
@@ -944,7 +1000,7 @@ fGetOpt() {
     local OPTARG
     local tArg
 
-    while getopts :c:C:e:E:f:k:np:P:R:t:z:hH:vVd tArg; do
+    while getopts :c:C:e:E:f:k:np:P:R:t:Tz:hH:vVd tArg; do
         case $tArg in
             # Script arguments
             c) gpEventCity="$OPTARG" ;;
@@ -958,6 +1014,7 @@ fGetOpt() {
             P) gpNameLong="$OPTARG" ;;
             R) gpCopyright="$OPTARG" ;;
             t) gpTitlePat="$OPTARG" ;;
+            T) gpThumb="yes" ;;
             z) gpTimeZone="$OPTARG" ;;
             # Common arguments
             h) fUsage long ;;
@@ -990,6 +1047,12 @@ fValidate() {
         fError -m "Directory ${gpConfLocal%/*} is not writable." -l $LINENO
     fi
 
+    # gpEventId is required.  It may have come from the conf file
+    # (Event="...") or from the -e command-line option.
+    if [[ -z "$gpEventId" ]]; then
+        fError -m "Missing pEventId, see required -e option." -l $LINENO
+    fi
+
     if [[ "${gpFilePat#*%}" = "${gpFilePat}" ]]; then
         fError -m "-t pFilePat is missing % options" -l $LINENO
     fi
@@ -997,20 +1060,15 @@ fValidate() {
         fError -m "-t pTitlePat is missing % options" -l $LINENO
     fi
 
-    # TimeZone format check.  Empty or "local" means no conversion.
+    # TimeZone format check.  "local" means no conversion.
     # Valid format: "UTC[+-]H[:MM]" (case-insensitive on UTC).
-    if [[ -n "$gpTimeZone" && "$gpTimeZone" != "local" ]]; then
+    if [[ "$gpTimeZone" != "local" ]]; then
         if [[ ! "$gpTimeZone" =~ ^[Uu][Tt][Cc][+-][0-9]{1,2}(:[0-9]{2})?$ ]]; then
             fError -m "Invalid TimeZone: $gpTimeZone (expected UTC[+-]H[:MM] or 'local')" -l $LINENO
         fi
     fi
 
-    if [[ $gpNoExec -ne 0 ]]; then
-        # Don't check the files
-        return 0
-    fi
-
-    if [[ -z "$gpEventFileList" ]]; then
+    if [[ -z "$gpEventFileList" && $gpNoExec -eq 0 ]]; then
         fError -m "No input files given. Use -h for help." -l $LINENO
     fi
 
@@ -1025,7 +1083,7 @@ fValidate() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fValidate
+=internal-head2 fValidate
 
 Verify that at least one input file was given and that every file in
 gpEventFileList exists on disk.  Calls fError (fatal) on the first
@@ -1040,20 +1098,21 @@ fConvertTimeZone() {
     # Given an exiftool date string "YYYY:MM:DD HH:MM:SS", return the
     # same string converted from gpTimeZone to local time.
     #
-    # When gpTimeZone is empty or "local", the input is echoed back
-    # unchanged - the caller does not need to special-case the no-op.
+    # When gpTimeZone is "local", the input is echoed back unchanged -
+    # the caller does not need to special-case the no-op.
     #
     # The 'date' command's "TZ=..." date-string prefix is used so that
     # POSIX TZ semantics apply: e.g. gpTimeZone="utc-1" represents a
     # zone 1 hour AHEAD of UTC (just as TZ="UTC-1" does in the env).
     # The output is in the host's local time, in exiftool's format.
-    local pRaw="$1"
     
+    local pRaw="$1"
+
     local tDate
     local tFixed
     local tTime
 
-    if [[ -z "$gpTimeZone" || "$gpTimeZone" = "local" ]]; then
+    if [[ "$gpTimeZone" = "local" ]]; then
         echo "$pRaw"
         return 0
     fi
@@ -1084,7 +1143,7 @@ fConvertTimeZone() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fConvertTimeZone "YYYY:MM:DD HH:MM:SS"
+=internal-head2 fConvertTimeZone "YYYY:MM:DD HH:MM:SS"
 
 Convert the timestamp in pRaw from gpTimeZone to local time and echo it
 in the same exiftool format.
@@ -1124,7 +1183,7 @@ fConvertDate() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fConvertDate "YYYY:MM:DD HH:MM:SS"
+=internal-head2 fConvertDate "YYYY:MM:DD HH:MM:SS"
 
 Converts the exiftool CreateDate string into four gFileDate* globals:
 
@@ -1157,7 +1216,7 @@ fReadFileDate() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fReadFileDate pFile
+=internal-head2 fReadFileDate pFile
 
 Read the CreateDate metadata from pFile using exiftool and call
 fConvertDate to populate the gFileDate* globals.
@@ -1196,7 +1255,7 @@ fApplyPattern() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fApplyPattern pPattern pFile
+=internal-head2 fApplyPattern pPattern pFile
 
 Expand %-tokens within pPattern using the current gFileDate* and gp*
 globals.  The expanded string is echoed to stdout.
@@ -1244,7 +1303,7 @@ fCreateOutputDir() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fCreateOutputDir
+=internal-head2 fCreateOutputDir
 
 Creates cOutputDir (default: ./output/) if absent, then hard-links each
 file in gpEventFileList into it.
@@ -1285,7 +1344,7 @@ fExampleCollect() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fExampleCollect pBase pCreateDate
+=internal-head2 fExampleCollect pBase pCreateDate
 
 Append one record (original name, new name, title, CreateDate) to the
 gExample* arrays and bump gExampleIdx.
@@ -1377,7 +1436,7 @@ fExampleCollectSplit() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fExampleCollectSplit pBase pFile pCreateDate
+=internal-head2 fExampleCollectSplit pBase pFile pCreateDate
 
 If pFile is longer than 10 minutes, append one gExample* record per
 10-min segment that fProcessFile would create.  Part names use the
@@ -1456,15 +1515,20 @@ fExample() {
         done
         echo "Exif Changes:"
         for (( tIdx=0; tIdx < gExampleIdx; tIdx++ )); do
+            echo " "
             echo "${gExampleNewNames[$tIdx]}"
             echo "    Title = ${gExampleTitles[$tIdx]}"
+            echo " "
             echo "    Author = $gpNameLong"
             echo "    Artist = $gpCopyright"
             echo "    Copyright = $gpCopyright"
+            echo " "
             echo "    Keywords = $gpEventKeyword"
+            echo " "
             echo "    Caption = $gpCaption"
             echo "    Description = (see Caption)"
             echo "    Image Description = (see Caption)"
+            echo " "
             echo "    Create Date = ${gExampleCreateDates[$tIdx]}"
             echo "    Date/Time Original = (see Create Date)"
             echo "    Modify Date = (see Create Date)"
@@ -1482,9 +1546,9 @@ fExample() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fExample
+=internal-head2 fExample
 
-Build B<vid-tag-example.txt> in the current directory.  The file shows:
+Build F<vid-tag-example.txt> in the current directory.  The file shows:
 
 =internal-over 4
 
@@ -1499,7 +1563,7 @@ that vid-tag will write to each renamed file.
 =internal-back
 
 When gpNoExec is set, a single dummy entry is generated using
-B<FILE.mp4> as the input name and the current wall-clock time as the
+F<FILE.mp4> as the input name and the current wall-clock time as the
 CreateDate, so the user can preview their conf settings before
 supplying real files.  Otherwise each file in gpEventFileList is
 read via fReadFileDate to get its CreateDate.
@@ -1552,7 +1616,7 @@ fAddMin() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fAddMin "pTimestamp" pMinutes
+=internal-head2 fAddMin "pTimestamp" pMinutes
 
 Add pMinutes to a timestamp and echo the result in exiftool format
 "YYYY:MM:DD HH:MM:SS".
@@ -1569,6 +1633,189 @@ EOF
 } # fAddMin
 
 # --------------------------------
+fThumbAddLabel() {
+    # Annotate the thumbnail image pThumb with pText at gravity pGravity
+    # using the cgThumb* font/color/background constants.  The convert
+    # output is written to a temp file in the same directory and then
+    # renamed over pThumb.
+    #
+    # $1 = thumbnail image path
+    # $2 = text label
+    # $3 = convert "-gravity ... -annotate +X+Y" option string
+    local pThumb="$1"
+    local pText="$2"
+    local pGravity="$3"
+
+    local tTmp
+
+    tTmp="${pThumb%.*}.tmp.jpg"
+
+    fLog -p debug-1 \
+        -m "convert $pThumb $cgThumbSize $cgThumbFont $cgThumbColor $cgThumbBgColor $pGravity \"$pText\" $tTmp" \
+        -l $LINENO
+    # cgThumb* and pGravity are intentionally word-split so each
+    # "-flag value" pair becomes separate convert arguments.
+    # shellcheck disable=SC2086
+    convert "$pThumb" $cgThumbSize $cgThumbFont $cgThumbColor $cgThumbBgColor \
+        $pGravity "$pText" "$tTmp"
+    mv -f "$tTmp" "$pThumb"
+    return 0
+
+    # shellcheck disable=SC2317
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head2 fThumbAddLabel pThumb pText pGravity
+
+Add a single text annotation to pThumb using convert(1).  pGravity is
+the "-gravity ... -annotate +X+Y" option pair (e.g. cgThumbGravity for
+the Extra/Time label, cgThumbTextGravity for the VIDEO--> label).  The
+font / color / background / point-size are taken from the cgThumb*
+constants set by fSetGlobals.
+
+The output is written to a temp file and then moved over pThumb so the
+file is updated atomically.  Always returns 0; convert errors are not
+treated as fatal.
+
+=internal-cut
+EOF
+} # fThumbAddLabel
+
+# --------------------------------
+fMakeThumbnail() {
+    # Generate the thumbnail image for a renamed video file.  Called
+    # from fProcessFile after the rename + EXIF write, so $gFileDate is
+    # the (possibly timezone-converted) CreateDate of the source video.
+    # Must be called with CWD == ./output/ (same as fProcessFile).
+    #
+    # $1 = renamed video file in cOutputDir
+    # $2 = original basename (used for gExtraMap / gThumbMap lookup)
+    # $3 = number of split parts (1 = not split, >1 = split count)
+    local pRenamed="$1"
+    local pOrigBase="$2"
+    local -i pNumParts=$3
+
+    local tThumb
+    local tTime
+    local -i tHasTime
+    local tExtra
+    local tLabel
+    local tDate
+    local tTimeOnly
+    local tNorm
+    local tThumbDate
+    local tTouchDate
+
+    tThumb="${pRenamed%.*}.jpg"
+
+    # ----- Decide the ffmpeg seek time -----
+    if [[ -n "${gThumbMap[$pOrigBase]:-}" ]]; then
+        tTime="${gThumbMap[$pOrigBase]}"
+        tHasTime=1
+    else
+        tTime="$cgThumbTimeDefault"
+        tHasTime=0
+    fi
+
+    # ----- Extract the still image -----
+    if [[ -f "$tThumb" ]]; then
+        rm -f "$tThumb"
+    fi
+    fLog -p info -m "ffmpeg -ss $tTime -i $pRenamed -frames:v 1 $tThumb" -l $LINENO
+    ffmpeg -y -ss "$tTime" -i "$pRenamed" -frames:v 1 "$tThumb" >/dev/null 2>&1
+
+    # ----- Extra/Time label -----
+    # Per spec: skip this label only when there is no Extra AND no
+    # ThumbTime for this file.  Otherwise build "<extra> (<time>)" with
+    # either part possibly absent.
+    tExtra="${gExtraMap[$pOrigBase]:-}"
+    if [[ -n "$tExtra" || $tHasTime -ne 0 ]]; then
+        tLabel="${tExtra:0:$cgThumbMax}"
+        if [[ $tHasTime -ne 0 ]]; then
+            if [[ -n "$tLabel" ]]; then
+                tLabel="$tLabel ($tTime)"
+            else
+                tLabel="($tTime)"
+            fi
+        fi
+        fThumbAddLabel "$tThumb" "$tLabel" "$cgThumbGravity"
+    fi
+
+    # ----- VIDEO--> label (with split-count prefix when applicable) -----
+    if [[ $pNumParts -gt 1 ]]; then
+        tLabel="$pNumParts files $cgThumbText"
+    else
+        tLabel="$cgThumbText"
+    fi
+    fThumbAddLabel "$tThumb" "$tLabel" "$cgThumbTextGravity"
+
+    # ----- Copy EXIF from the video, with times 1 sec earlier -----
+    # gFileDate is exiftool format "YYYY:MM:DD HH:MM:SS".  date(1)
+    # accepts "YYYY-MM-DD HH:MM:SS" for arithmetic, so normalise the
+    # date colons before subtracting.  Use "$cgThumbPre second ago"
+    # rather than "- 1 second": the latter is parsed by GNU date(1) as
+    # a -01 UTC offset, not as subtraction.
+    tDate="${gFileDate%% *}"
+    tTimeOnly="${gFileDate##* }"
+    tNorm="${tDate//:/-} $tTimeOnly"
+    tThumbDate=$('date' -d "$tNorm $cgThumbPre second ago" +"%Y:%m:%d %H:%M:%S")
+    tTouchDate=$('date' -d "$tNorm $cgThumbPre second ago" +"%Y-%m-%d %H:%M:%S")
+
+    fLog -p info \
+        -m "exiftool -TagsFromFile $pRenamed -all:all -DateTimeOriginal=$tThumbDate ... $tThumb" \
+        -l $LINENO
+    exiftool -overwrite_original -TagsFromFile "$pRenamed" -all:all \
+        -DateTimeOriginal="$tThumbDate" \
+        -CreateDate="$tThumbDate" \
+        -ModifyDate="$tThumbDate" \
+        "$tThumb" >/dev/null 2>&1
+
+    fLog -p info -m "touch -d \"$tTouchDate\" $tThumb" -l $LINENO
+    touch -d "$tTouchDate" "$tThumb"
+
+    return 0
+
+    # shellcheck disable=SC2317
+    cat <<EOF >/dev/null
+=internal-pod
+
+=internal-head2 fMakeThumbnail pRenamed pOrigBase pNumParts
+
+Generate the thumbnail "\${pRenamed%.*}.jpg" for a renamed video file.
+Reads gThumbMap and gExtraMap (keyed by pOrigBase) and uses gFileDate
+(already timezone-converted by fReadFileDate) as the source for the
+thumbnail's date metadata.
+
+Steps:
+
+=internal-over 4
+
+=internal-item 1. Extract a single frame with ffmpeg -ss.  Time is
+gThumbMap[pOrigBase] when set, otherwise cgThumbTimeDefault.
+
+=internal-item 2. If an Extra title or a ThumbTime is defined for the
+file, annotate the thumb at cgThumbGravity with "<extra> (<time>)"
+(either part may be absent).  Extra text is truncated to cgThumbMax
+characters.
+
+=internal-item 3. Annotate the thumb at cgThumbTextGravity with the
+cgThumbText marker.  When pNumParts > 1 the text is prefixed with
+"<pNumParts> files ".
+
+=internal-item 4. Copy all compatible EXIF from pRenamed and set
+DateTimeOriginal / CreateDate / ModifyDate to one second before
+gFileDate.  Set the file mtime to the same value.
+
+=internal-back
+
+Returns 0; per-step errors (ffmpeg/convert/exiftool) are logged but
+not fatal.
+
+=internal-cut
+EOF
+} # fMakeThumbnail
+
+# --------------------------------
 fProcessFile() {
     # Rename + tag a single file.  Must be called with CWD == ./output/
     local pFile="$1"
@@ -1577,8 +1824,11 @@ fProcessFile() {
     local -i tM
     local -i tS
     local -i tIncMin
+    local -i tNumParts
     local tBase
+    local tCaption
     local tCmd
+    local tCopyright
     local tDate
     local tFile
     local tLength
@@ -1608,6 +1858,10 @@ fProcessFile() {
         tNewTitle="$tNewTitle ${gExtraMap[$tBase]}."
     fi
 
+    # Expand any pattern tokens in Caption and Copyright.
+    tCaption=$(   fApplyPattern "$gpCaption"   "$tBase")
+    tCopyright=$( fApplyPattern "$gpCopyright" "$tBase")
+
     # ----------
     # Collision guard before rename.
     if [[ "$tBase" != "$tNewName" && -e "$tNewName" ]]; then
@@ -1626,15 +1880,15 @@ fProcessFile() {
         -overwrite_original
         -FileName="$tNewName"
         -Title="$tNewTitle"
-        -Copyright="$gpCopyright"
-        -Artist="$gpCopyright"
+        -Copyright="$tCopyright"
+        -Artist="$tCopyright"
         -Author="$gpNameLong"
         -Keywords="$gpEventKeyword"
-        -Caption="$gpCaption"
-        -Description="$gpCaption"
-        -ImageDescription="$gpCaption"
+        -Caption="$tCaption"
+        -Description="$tCaption"
+        -ImageDescription="$tCaption"
     )
-    if [[ -n "$gpTimeZone" && "$gpTimeZone" != "local" ]]; then
+    if [[ "$gpTimeZone" != "local" ]]; then
         tCmd+=(
             -DateTimeOriginal="$gFileDate"
             -CreateDate="$gFileDate"
@@ -1670,6 +1924,22 @@ fProcessFile() {
     IFS=':' read -r tH tM tS <<< "$tLength"
     IFS=' '
     ((tMin = $tH * 60 + $tM))
+
+    # Compute the split-part count (1 = not split).  Used both for the
+    # thumbnail's "VIDEO-->" label prefix and the split-or-not branch.
+    tNumParts=1
+    if [[ $tMin -gt 10 ]]; then
+        tNumParts=$(( (tMin * 60 + 10#$tS + 599) / 600 ))
+    fi
+
+    # ----------
+    # Generate the thumbnail (when enabled).  Must happen after rename +
+    # EXIF write and before any split, so the thumbnail is named after
+    # the parent renamed file.
+    if [[ "$gpThumb" = "yes" ]]; then
+        fMakeThumbnail "$tNewName" "$tBase" "$tNumParts"
+    fi
+
     if [[ $tMin -le 10 ]]; then
         return 0
     fi
@@ -1715,7 +1985,7 @@ fProcessFile() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head3 fProcessFile pFile
+=internal-head2 fProcessFile pFile
 
 Process a single video file that has already been hard-linked into
 cOutputDir.  Must be called with the working directory set to cOutputDir.
@@ -1730,10 +2000,10 @@ applies fConvertTimeZone so gFileDate* globals hold local time.
 =internal-item 2. Expand file-name and title patterns (fApplyPattern).
 
 =internal-item 3. Run a single exiftool call to rename and set all
-metadata.  When gpTimeZone is active (non-empty and not "local"), the
-seven date/time exif fields (DateTimeOriginal, CreateDate, ModifyDate,
-TrackCreateDate, TrackModifyDate, MediaCreateDate, MediaModifyDate) are
-also written with the converted local time so the file metadata is
+metadata.  When gpTimeZone is active (not "local"), the seven
+date/time exif fields (DateTimeOriginal, CreateDate, ModifyDate,
+TrackCreateDate, TrackModifyDate, MediaCreateDate, MediaModifyDate)
+are also written with the converted local time so the file metadata is
 consistent with the renamed path.
 
 =internal-item 4. Set filesystem mtime to the converted CreateDate (touch).
