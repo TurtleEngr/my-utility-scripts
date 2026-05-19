@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/cvs-collapse.sh,v $
-# $Revision: 1.14 $ $Date: 2025/11/30 16:42:00 $ GMT
+# $Revision: 1.15 $ $Date: 2026/05/19 16:21:32 $ GMT
 
 set -u
 export cgCacheDir
@@ -294,7 +294,7 @@ TurtleEngr
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.14 $ $Date: 2025/11/30 16:42:00 $ GMT
+$Revision: 1.15 $ $Date: 2026/05/19 16:21:32 $ GMT
 
 =cut
 EOF
@@ -367,14 +367,14 @@ fProcessFile() {
     local pFile=$1
 
     if [ ! -f $pFile ]; then
-        fLog2 -p notice -m "Already rm $pFile" -l $LINENO
+        fLog -p notice -m "Already rm $pFile" -l $LINENO
         if [ $gpDebug -eq 0 ]; then
             echo "rm $pFile" >>COLLAPSED-README.txt
         fi
         return
     fi
 
-    fLog2 -p notice -m "rm $pFile" -l $LINENO
+    fLog -p notice -m "rm $pFile" -l $LINENO
     if [ $gpDebug -ne 0 ]; then
         return
     fi
@@ -445,13 +445,13 @@ fProcessCache() {
         return
     fi
 
-    fLog2 -p notice -m "Removing files in $tDirList" -l $LINENO
+    fLog -p notice -m "Removing files in $tDirList" -l $LINENO
     if [ $gpDebug -eq 0 ]; then
         echo "# Removed files in $tDirList" >>COLLAPSED-README.txt
     fi
     for tDir in $tDirList; do
         if [ $gpDebug -ne 0 ]; then
-            fLog2 -p notice -m "Removing files: $(find $tDir -type f)" -l $LINENO
+            fLog -p notice -m "Removing files: $(find $tDir -type f)" -l $LINENO
             continue
         fi
         find $tDir -type f -exec rm {} \;
@@ -859,7 +859,7 @@ cName=cvs-collapse.sh
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.14 $'
+cVer='$Revision: 1.15 $'
 fSetGlobals
 
 # -------------------

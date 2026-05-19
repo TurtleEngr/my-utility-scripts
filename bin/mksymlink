@@ -314,7 +314,7 @@ fSymlinkExists() {
         gLinkFile=.symlink
     fi
     if [ ! -f $gLinkFile ]; then
-        fLog2 -p warn -m "$gLinkFileOr is missing" -l $LINENO
+        fLog -p warn -m "$gLinkFileOr is missing" -l $LINENO
         exit 1
     fi
     return 0
@@ -325,15 +325,15 @@ fCheckValid() {
         return 1
     fi
     if [[ -z "$tSrc" || -z "$tDst" || -n "$tOther" ]]; then
-        fLog2 -p warn -m "Problem in $gLinkFileOr, expected 2 args" -l "$LINENO:$tLine"
+        fLog -p warn -m "Problem in $gLinkFileOr, expected 2 args" -l "$LINENO:$tLine"
         return 1
     fi
     if [[ -f $tDst || -d $tDst ]]; then
-        fLog2 -p warn -m "$tDst file or dir already exists" -l "$LINENO:$tLine"
+        fLog -p warn -m "$tDst file or dir already exists" -l "$LINENO:$tLine"
         return 1
     fi
     if [ ! -e $tSrc ]; then
-        fLog2 -p warn -m "$tSrc not found" -l "$LINENO:$tLine"
+        fLog -p warn -m "$tSrc not found" -l "$LINENO:$tLine"
         return 1
     fi
     return 0
@@ -346,11 +346,11 @@ fSave() {
     local tOther
 
     if [[ -z "$(find * -prune -type l)" ]]; then
-        fLog2 -p notice -m "There are no symlinks in this dir." -l $LINENO
+        fLog -p notice -m "There are no symlinks in this dir." -l $LINENO
     fi
 
     if [ -f $gLinkFile ]; then
-        fLog2 -p warn -m "$gLinkFile exists, saving before overwriting." -l $LINENO
+        fLog -p warn -m "$gLinkFile exists, saving before overwriting." -l $LINENO
         mv --backup=t $gLinkFile $gLinkFile.sav
     fi
 
@@ -360,16 +360,16 @@ fSave() {
             fError2 -i -m "Problem in $gLinkFileOr with line: $tSrc $tDst $tOther" -l $LINENO
         fi
         if [[ "${tSrc%*/}" != "$tSrc" && $gpForce -eq 0 ]]; then
-            fLog2 -p warn -m "Directory $tDst symlink will not be saved" -l $LINENO
+            fLog -p warn -m "Directory $tDst symlink will not be saved" -l $LINENO
             continue
         fi
         if [ ! -e $tDst ]; then
-            fLog2 -p warn -m "$tDst does not exist, skipping" -l $LINENO
+            fLog -p warn -m "$tDst does not exist, skipping" -l $LINENO
             continue
         fi
         echo $tSrc $tDst >>$gLinkFile
     done
-    fLog2 -p notice -m "Symlinks saved in: $gLinkFile" -l $LINENO
+    fLog -p notice -m "Symlinks saved in: $gLinkFile" -l $LINENO
     return
 } # fSave
 
@@ -388,7 +388,7 @@ fRestore() {
             continue
         fi
         if [[ -L $tDst && $gpForce -eq 0 ]]; then
-            fLog2 -p info -m "$tDst link already exists" -l "$LINENO:$tLine"
+            fLog -p info -m "$tDst link already exists" -l "$LINENO:$tLine"
             continue
         fi
 
@@ -415,7 +415,7 @@ fCheck() {
             continue
         fi
         if [[ ! -L $tDst ]]; then
-            fLog2 -p warn -m "$tDst link not found" -l "$LINENO:$tLine"
+            fLog -p warn -m "$tDst link not found" -l "$LINENO:$tLine"
             continue
         fi
     done
