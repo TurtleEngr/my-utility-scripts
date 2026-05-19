@@ -28,9 +28,10 @@ OPTIONS
 
         "-T all" runs all functions that begin with "test".
 
-        "-T fast" runs all functions that do not have Slow in their name".
+        "-T fast" runs all functions that do not have "Slow" in their name
+        (~10sec)".
 
-        "-T cli" runs all functions that begin with "testCli".
+        "-T cli" runs all functions that begin with "testCli (~6min)".
 
         "-T not-cli" runs all functions that begin with "test", but not
         "testCli".
@@ -59,7 +60,7 @@ FILES
         shunit2.1
 
 SEE ALSO
-    Required programs: bash, exiftool, git-config, ffmpeg, sed
+    Required programs: bash, exiftool, ffmpeg, sed
 
 AUTHOR
     Turtle Engineer
@@ -67,5 +68,5 @@ AUTHOR
 HISTORY
     GPLv2 (c) Copyright
 
-    cVer=1.2.2
+    cVer=2.3.2
 
