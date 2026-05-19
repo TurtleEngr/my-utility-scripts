@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/tag-collect.sh,v $
-# $Revision: 1.17 $ $Date: 2025/11/30 16:42:00 $ GMT
+# $Revision: 1.18 $ $Date: 2026/05/19 16:21:32 $ GMT
 
 # ========================================
 # Include common bash functions at $cBin/bash-com.inc But first we
@@ -273,7 +273,7 @@ output.
 
 GPLv3 (c) Copyright 2022
 
-$Revision: 1.17 $ $Date: 2025/11/30 16:42:00 $ GMT
+$Revision: 1.18 $ $Date: 2026/05/19 16:21:32 $ GMT
 
 =cut
 EOF
@@ -348,11 +348,11 @@ fValidate() {
 
     for tFile in $gpFileList; do
         if [ ! -f $tFile ]; then
-            fLog2 -p warn -m "File not found: $tFile" -l $LINENO
+            fLog -p warn -m "File not found: $tFile" -l $LINENO
             continue
         fi
         if ! grep -q '{.*}' $tFile; then
-            fLog2 -p warn -m "No tags found in: $tFile" -l $LINENO
+            fLog -p warn -m "No tags found in: $tFile" -l $LINENO
             continue
         fi
         tNewList="$tNewList $tFile"
@@ -414,7 +414,7 @@ fGetChunk() {
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        fLog2 -m "No files were generated for tag: $pTag" -p warn -l $LINENO
+        fLog -m "No files were generated for tag: $pTag" -p warn -l $LINENO
         echo
         return
     fi
@@ -431,7 +431,7 @@ fGetChunk() {
 
     'ls' ${cTmpF}-*.tmp >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-        fLog2 -m "No files were generated for tag: $pTag" -p warn -l $LINENO
+        fLog -m "No files were generated for tag: $pTag" -p warn -l $LINENO
         echo
         return
     fi
@@ -705,7 +705,7 @@ EOF
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.17 $'
+cVer='$Revision: 1.18 $'
 fSetGlobals
 
 # -------------------
