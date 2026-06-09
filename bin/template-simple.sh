@@ -20,7 +20,7 @@ export cBin=${BASH_SOURCE%/*}
 fUsage() {
     local pStyle="${1:-usage}"
     local tProg=""
-    
+
     case $pStyle in
         short | usage)
             tProg=pod2usage
@@ -46,7 +46,7 @@ fUsage() {
     if ! which ${tProg%% *} >/dev/null; then
         tProg=pod2text
     fi
-    
+
     cat <<EOF >/tmp/$cName.pod
 =pod
 
@@ -136,7 +136,7 @@ while getopts :cn:lhH: tArg; do
         c) gpHostName=$(hostname) ;;
         n) gpHostName="$OPTARG" ;;
         # Common arguments
-        l)  gpLog=1 ;;
+        l) gpLog=1 ;;
         h)
             fUsage long
             ;;
@@ -144,12 +144,14 @@ while getopts :cn:lhH: tArg; do
             fUsage $OPTARG
             ;;
         # Problem arguments
-        :) echo "Error: Value required for option: -$OPTARG [$LINENO]"
-           fUsage usage
-        ;;
-        \?) echo "Error: Unknown option: $OPTARG [$LINENO]"
+        :)
+            echo "Error: Value required for option: -$OPTARG [$LINENO]"
             fUsage usage
-        ;;
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG [$LINENO]"
+            fUsage usage
+            ;;
     esac
 done
 ((--OPTIND))
@@ -182,7 +184,7 @@ fi
 # Validate section
 
 if [[ "$USER" = "root" ]]; then
-    echo "Error: must not be root user $[LINENO]"
+    echo "Error: must not be root user [$LINENO]"
     fUsage usage
 fi
 

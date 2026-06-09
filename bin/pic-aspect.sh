@@ -213,7 +213,7 @@ EOF
 fValAspect() {
     local tX
     local tY
-    
+
     case $gpAspect in
         std) gpAspect=16:9 ;;
         tv) gpAspect=4:3 ;;
@@ -284,7 +284,7 @@ fCalcAspect() {
 fResize() {
     local tCall
     local t
-    
+
     for tIn in $gpList; do
         echo -e "\nProcessing: $tIn"
         tOut=${tIn%.*}-fit.jpg
@@ -370,7 +370,7 @@ for tIn in $gpList; do
         gErr=1
         continue
     fi
-    
+
     tOut=${tIn%.*}-fit.jpg
     if [[ -e $tOut ]]; then
         if [[ $gpForce -eq 0 ]]; then

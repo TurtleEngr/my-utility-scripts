@@ -8,8 +8,8 @@ Comvert FILE.org to FILE.html
 
 # SYNOPSIS
 
+    org2html.sh -i InFile.org [-o OutFile.html] [-s N] [-n] [-x]
     org2html.sh [-s N] InFile.org [OutFile.html]
-    org2html.sh -i InFile.org [-o OutFile.html] [-s N] 
     org2html.sh [-h] [-H pStyle]
 
 # DESCRIPTION
@@ -52,6 +52,14 @@ See the SEE ALSO section for the required programs.
 
     For N = 1 to 3, a hr tag will be put before heading levels N or lower.
     Default: 0
+
+- **-n**
+
+    Turn off certain features. For example, do not detect {} citations.
+
+- **-x**
+
+    Debug.
 
 - **-h**
 
