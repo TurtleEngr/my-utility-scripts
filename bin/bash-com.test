@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.test,v $
-# $Revision: 1.20 $ $Date: 2026/05/02 15:44:54 $ GMT
+# $Revision: 1.21 $ $Date: 2026/06/01 17:06:05 $ GMT
 
 # --------------------------------
 fComBashTestUsage() {
@@ -62,7 +62,7 @@ shunit2.1
 
 =head1 HISTORY
 
-$Revision: 1.20 $ $Date: 2026/05/02 15:44:54 $ GMT
+$Revision: 1.21 $ $Date: 2026/06/01 17:06:05 $ GMT
 
 =cut
 EOF
@@ -756,7 +756,6 @@ Calls:
 EOF
 } # testComFunctions
 
-
 # --------------------------------
 testComLogFallback() {
     local tResult
@@ -1172,7 +1171,7 @@ testComGetConfig() {
         fComSetConfig $tOpt -k script.testit.test-tbd-get -v "TBD"
 
         if [[ $gpDebug -ne 0 ]]; then
-           cat $gpConfLocal
+            cat $gpConfLocal
         fi
 
         tResult=$(fComGetConfig $tOpt -k script.testit.test-str-get)
@@ -1180,7 +1179,7 @@ testComGetConfig() {
 
         tResult=$(fComGetConfig $tOpt -k script.testit.test-str-get)
         assertEquals "$LINENO $tOpt str" "test a string" "$tResult"
-    
+
         fComGetConfig $tOpt -k script.testit.test-str-get >/dev/null
         assertEquals "$LINENO $tOpt str" "test a string" "$gResponse"
 
@@ -1192,7 +1191,7 @@ testComGetConfig() {
 
         tResult=$(fComGetConfig $tOpt -b -k script.testit.test-bool-get)
         assertEquals "$LINENO $tOpt bool" "true" "$tResult"
-    
+
         fComGetConfig $tOpt -b -k script.testit.test-bool-get >/dev/null
         assertEquals "$LINENO $tOpt bool" "true" "$gResponse"
 
@@ -1217,7 +1216,7 @@ testComGetConfig() {
         assertFalse "$LINENO -e TBD rc" "$?"
         assertContains "$LINENO -e TBD msg" "$tResult" "should not be set to: TBD"
     done
-    
+
     return 0
 
     cat <<EOF >/dev/null
@@ -1276,7 +1275,7 @@ fComRunTests() {
     cat <<EOF >/dev/null
 =internal-pod
 
-=internal-head2 fComRunTests
+=internal-head3 fComRunTests
 
 Run unit tests for the common functions.
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -u
 
 # Naming Convention
@@ -15,7 +15,7 @@ set -u
 # ========================================
 # Main
 
-export cVer=2.3.2
+export cVer=2.3.3
 export cName=${BASH_SOURCE##*/}
 
 # Save original command line for fExample.  Done before any parsing so
@@ -36,11 +36,11 @@ export cBin
 #tBin=home
 tBin=this
 case $tBin in
-    this)    cBin=${BASH_SOURCE%/*} ;;
+    this) cBin=${BASH_SOURCE%/*} ;;
     current) cBin=$cCurDir ;;
-    home)    cBin=$HOME/bin ;;
-    local)   cBin=/usr/local/bin ;;
-    system)  cBin=/usr/bin ;;
+    home) cBin=$HOME/bin ;;
+    local) cBin=/usr/local/bin ;;
+    system) cBin=/usr/bin ;;
 esac
 
 if [[ ! -e $cBin/bash-com.inc ]]; then
@@ -77,7 +77,8 @@ tPrev=""
 for tArg in "$@"; do
     case "$tArg" in
         -h) fUsage long ;;
-        -V) echo "vid-tag version: $cVer"
+        -V)
+            echo "vid-tag version: $cVer"
             exit 0
             ;;
     esac

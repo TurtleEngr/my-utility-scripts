@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.92 $ $Date: 2026/05/04 19:55:15 $ GMT
+# $Revision: 1.94 $ $Date: 2026/05/24 18:32:17 $ GMT
 
 # Naming Convention
 # gpVar - command line parameters. These can override gcVars with same
@@ -334,7 +334,7 @@ intersting services.
 
  $template TLocal0,"/var/log/config/%programname%.log"
  local0.*       -?TLocal0;PriSp
-  
+
  $template TLocal1,"/var/log/app/%programname%.log"
  local1.*       -?TLocal1;PriSp
 
@@ -381,7 +381,7 @@ To verify the script is internally OK, run: SCRIPTNAME -T all
 
 GPLv2 (c) Copyright
 
-$Revision: 1.92 $ $Date: 2026/05/04 19:55:15 $ GMT
+$Revision: 1.94 $ $Date: 2026/05/24 18:32:17 $ GMT
 
 =cut
 EOF
@@ -608,7 +608,7 @@ EOF
 fRunTests() {
     if [[ "$gpTest" = "list" ]]; then
         grep 'test.*()' $cBin/$cName | grep -v grep | sed 's/()//g'
-#        grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
+        #        grep 'test.*()' $cBin/bash-com.test | grep -v grep | sed 's/()//g'
         exit 1
     fi
     SHUNIT_COLOR=auto
@@ -674,7 +674,7 @@ source $cBin/bash-com.inc
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.92 $'
+cVer='$Revision: 1.94 $'
 fSetGlobals
 
 # -------------------

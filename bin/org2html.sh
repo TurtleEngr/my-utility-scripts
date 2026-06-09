@@ -8,6 +8,7 @@ export cBin
 export gpFileIn=""
 export gpFileOut=""
 export gpSep=0
+export gpNA=0
 export cTidyHtml="tidy -q -i -w 78 -asxhtml --break-before-br yes --indent-attributes yes --indent-spaces 2 --tidy-mark no --vertical-space no"
 
 # ========================================
@@ -17,7 +18,7 @@ export cTidyHtml="tidy -q -i -w 78 -asxhtml --break-before-br yes --indent-attri
 fUsage() {
     local pStyle="$1"
     local tProg=""
-    
+
     case $pStyle in
         short | usage)
             tProg=pod2usage
@@ -45,7 +46,8 @@ fUsage() {
     fi
     cat $cBin/$cName | $tProg | less
     exit 1
-    
+
+    # shellcheck disable=SC2317
     cat <<\EOF >/dev/null
 =pod
 
@@ -59,8 +61,8 @@ Comvert FILE.org to FILE.html
 
 =head1 SYNOPSIS
 
+    org2html.sh -i InFile.org [-o OutFile.html] [-s N] [-n] [-x]
     org2html.sh [-s N] InFile.org [OutFile.html]
-    org2html.sh -i InFile.org [-o OutFile.html] [-s N] 
     org2html.sh [-h] [-H pStyle]
 
 =head1 DESCRIPTION
@@ -105,6 +107,14 @@ from the input file and ".html" will be appended.
 
 For N = 1 to 3, a hr tag will be put before heading levels N or lower.
 Default: 0
+
+=item B<-n>
+
+Turn off certain features. For example, do not detect {} citations.
+
+=item B<-x>
+
+Debug.
 
 =item B<-h>
 
@@ -174,9 +184,9 @@ GPLv2 (c) Copyright
 
 =cut
 EOF
+    # shellcheck disable=SC2317
     exit 1
 } # fUsage
-
 
 # ========================================
 # Main
@@ -203,7 +213,6 @@ export cTmpF=$Tmp/file-$cPID
 cTmp1=${cTmpF}-part1.tmp
 cTmp2=${cTmpF}-part2.tmp
 cTmp3=${cTmpF}-part3.tmp
-cTmp4=${cTmpF}-part4.tmp
 cTmpErr=${cTmpF}-part3.err
 cPreFix=${cTmpF}-prefix.sed
 cPreFixPl=${cTmpF}-prefix.pl
@@ -215,29 +224,36 @@ if [ $# -eq 0 ]; then
     fUsage short
 fi
 
-while getopts :i:o:s::hH: tArg; do
+while getopts :i:o:s::nxhH: tArg; do
     case $tArg in
         # Script arguments
         i) gpFileIn="$OPTARG" ;;
+        n) gpNA=1 ;;
         o) gpFileOut="$OPTARG" ;;
         s) gpSep="$OPTARG" ;;
         # Common arguments
         h)
             fUsage long
+            # shellcheck disable=SC2317
             exit 1
             ;;
         H)
             fUsage $OPTARG
             ;;
+        x) ((++gpDebug)) ;;
         # Problem arguments
-        :) echo "Error: Value required for option: -$OPTARG"
-           fUsage usage
-           exit 1
-        ;;
-        \?) echo "Error: Unknown option: $OPTARG"
+        :)
+            echo "Error: Value required for option: -$OPTARG"
             fUsage usage
+            # shellcheck disable=SC2317
             exit 1
-        ;;
+            ;;
+        \?)
+            echo "Error: Unknown option: $OPTARG"
+            fUsage usage
+            # shellcheck disable=SC2317
+            exit 1
+            ;;
     esac
 done
 ((--OPTIND))
@@ -256,12 +272,14 @@ done
 if [[ -z "$gpFileIn" ]]; then
     echo "Error: Missing input file."
     fUsage usage
+    # shellcheck disable=SC2317
     exit 1
 fi
 
 if [[ ! -r $gpFileIn ]]; then
     echo "Error: cannot read file: $gpFileIn"
     fUsage usage
+    # shellcheck disable=SC2317
     exit 1
 fi
 
@@ -321,12 +339,17 @@ s;</h5></p>;</h5>;g
 s;<p><h6>;<h6>;g
 s;</h6></p>;</h6>;g
 
+EOF
+
+if [[ $gpNA -eq 0 ]]; then
+    cat <<\EOF >>$cPostFix
 s;{\(.\);<cite>{\1;g
 s;\(.\)};\1}</cite>;g
 
 s;<cite><cite>;<cite>;g
 s;</cite></cite>;</cite>;g
 EOF
+fi
 
 if [[ $gpSep -ge 3 ]]; then
     echo 's;<h3;<hr><h3;g' >>$cPostFix
@@ -341,7 +364,7 @@ fi
 # --------------------
 # Functional section
 
-sed -f $cPreFix  <$gpFileIn | perl  $cPreFixPl >$cTmp1
+sed -f $cPreFix <$gpFileIn | perl $cPreFixPl >$cTmp1
 pandoc -f org -t html <$cTmp1 >$cTmp2
 
 sed -f /$cPostFix <$cTmp2 >$cTmp3

@@ -1,8 +1,10 @@
 #!/bin/bash
 
+export SHFMT_OPTS="-i 4 -ci -bn"
+
 # --------------------
 function fUsage() {
-    cat <<\EOF | more 1>&2
+    cat <<EOF | more 1>&2
 Usage:
     bash-fmt - <pInFile >pOutFile
         or
@@ -54,7 +56,7 @@ function fProcess() {
         echo "Warning: Not a bash file [$LINENO]" 1>&2
     fi
 
-    bash -n <$cInFile &>/dev/null
+    bash -n <$cInFile >/dev/null 2>&1
     if [ $? -ne 0 ]; then
         echo "Error: bash script has syntax errors [$LINENO]" 1>&2
         gErr=1
@@ -64,7 +66,7 @@ function fProcess() {
     # expand tabs, remove trailing whitespace, and try formatting
     expand <$cInFile |
         sed -E 's/[[:space:]]*$//' |
-        'shfmt' -i 4 -ci >$cOutFile 2>/dev/null
+        'shfmt' $SHFMT_OPTS >$cOutFile 2>/dev/null
     if [ $? -ne 0 ]; then
         echo "Error: shfmt errors [$LINENO]" 1>&2
         gErr=1
@@ -100,9 +102,12 @@ if ! which shfmt &>/dev/null; then
 fi
 
 if [ $# -eq 0 ]; then
-        fUsage
+    fUsage
 fi
 
+if [ "x$1" = "x-h" ]; then
+    fUsage
+fi
 
 # --------------------
 if [ -f $1 ]; then
