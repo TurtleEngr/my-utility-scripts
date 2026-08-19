@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-export cVer=2.3.3
+export cVer=2.3.5
 export cBin
 export cExampleFile
 export cOutputDir
@@ -65,7 +65,7 @@ fUsage() {
 
     case $pStyle in
         short | usage | man | long | text | md)
-            fComUsage -f $cBin/$cName.inc -s $pStyle
+            fComUsage -f $cBin/$cName.inc -s $pStyle | more
             ;;
         html)
             fComUsage -f $cBin/$cName.inc -s $pStyle -t "$cName Usage"
@@ -98,6 +98,17 @@ fUsage() {
 
 Rename video files and set Title, Caption, and Keywords metadata.
 And generate thumbnails.
+
+=begin html
+
+<p>
+<a href="https://github.com/TurtleEngr/vid-tag/actions/workflows/test.yml"><img src="https://github.com/TurtleEngr/vid-tag/actions/workflows/test.yml/badge.svg" alt="test" title="" /></a>
+<a href="https://github.com/TurtleEngr/vid-tag/tags"><img src="https://img.shields.io/github/v/tag/TurtleEngr/vid-tag?label=release-tag" alt="Tag" title=""/></a>
+<a href="https://github.com/TurtleEngr/vid-tag/issues"><img src="https://img.shields.io/github/issues-search?query=repo%3ATurtleEngr%2Fvid-tag%20is%3Aopen&amp;style=flat&amp;label=issues"/></a>
+<a href="https://github.com/TurtleEngr/vid-tag/blob/develop/LICENSE"><img src="https://img.shields.io/github/license/TurtleEngr/vid-tag"/></a>
+</p>
+
+=end html
 
 =head1 SYNOPSIS
 
@@ -488,24 +499,20 @@ HOME, USER, PATH
 
 =head2 vid-tag-N.N.zip
 
-    vid-tag      - this script
-    vid-tag.inc  - vid-tag functions
-    vid-tag.conf - sample config file describing tags for an event
-    bash-com.inc - utility functions
-    LICENSE      - GPLv2
+    vid-tag       - this script
+    vid-tag.inc   - vid-tag functions
+    vid-tag.conf  - sample config file describing tags for an event
+    bash-com.inc  - utility functions
+    vid-tag.test  - unit and CLI integration tests
+    bash-com.test - test utility functions
+    shunit2.1     - unit test framework for vid-tag.test
+    LICENSE       - GPLv2
 
 =head2 Generated files
 
     vid-tag.conf - if missing, it will be created with defaults and CLI args
     vid-tag-example.txt - lists the changes to files based on vid-tag.conf
     output/      - generated directory, with renamed copies of files
-
-=head2 vid-tag-test-N.N.zip
-
-This package is for testing the vid-tag script. See the NOTES section
-
-    vid-tag.test - optional unit and CLI integration tests
-    shunit2.1    - unit test framework for vid-tag.test
 
 =head2 vid-tag-test-input.zip (4.5G)
 
@@ -633,7 +640,7 @@ Turtle Engineer
 
 GPLv2 (c) Copyright (See LICENSE file for terms.)
 
-cVer=2.3.3
+cVer=2.3.5
 
 =cut
 
@@ -1396,9 +1403,9 @@ fExampleCollectSplit() {
     local pFile="$2"
     local pCreateDate="$3"
 
-    local -i tH
-    local -i tM
-    local -i tS
+    local tH
+    local tM
+    local tS
     local -i tMin
     local -i tNumParts
     local -i tIdx
@@ -1414,13 +1421,14 @@ fExampleCollectSplit() {
     if [[ -z "$tLength" ]]; then
         return 0
     fi
-    IFS=':' read -r tH tM tS <<<"$tLength"
+    IFS=':'
+    read -r tH tM tS <<<"$tLength"
     IFS=' '
 
-    # Strip any leading zeros so bash arithmetic doesn't treat them as octal.
-    tH=$((10#$tH))
-    tM=$((10#$tM))
-    tS=$((10#$tS))
+    # Strip any leading zeros
+    tH=${tH#0}
+    tM=${tM#0}
+    tS=${tS#0}
 
     # Same threshold as fProcessFile: <= 10 min → no split.
     ((tMin = tH * 60 + tM))
@@ -1610,9 +1618,9 @@ fAddMin() {
 
     local tDate
     local tTime
-    local -i tH
-    local -i tM
-    local -i tS
+    local tH
+    local tM
+    local tS
 
     # Strip the label, keeping only "YYYY:MM:DD HH:MM:SS"
     tDate="${pRaw##*: }"
@@ -1621,12 +1629,14 @@ fAddMin() {
     tTime="${tDate##* }"
     tDate="${tDate%% *}"
 
-    IFS=':' read -r tH tM tS <<<"$tTime"
+    IFS=':'
+    read -r tH tM tS <<<"$tTime"
     IFS=' '
 
-    # Remove any leading zeros for arithmetic
-    tM=$((10#$tM))
-    tH=$((10#$tH))
+    # Strip any leading zeros
+    tH=${tH#0}
+    tM=${tM#0}
+    tS=${tS#0}
 
     ((tM += pMin))
     if [[ $tM -ge 60 ]]; then
@@ -1845,9 +1855,9 @@ fProcessFile() {
     # Rename + tag a single file.  Must be called with CWD == ./output/
     local pFile="$1"
 
-    local -i tH
-    local -i tM
-    local -i tS
+    local tH
+    local tM
+    local tS
     local -i tIncMin
     local -i tNumParts
     local tBase
@@ -1946,8 +1956,14 @@ fProcessFile() {
     # ----------
     # See if the file needs to be split. I.e. greater than 10 min
     tLength=$(ffmpeg -i $tNewName 2>&1 | grep -oP 'Duration: \K[\d:]+(?=\.)')
-    IFS=':' read -r tH tM tS <<<"$tLength"
+    IFS=':'
+    read -r tH tM tS <<<"$tLength"
     IFS=' '
+
+    # Strip any leading zeros
+    tH=${tH#0}
+    tM=${tM#0}
+    tS=${tS#0}
     ((tMin = $tH * 60 + $tM))
 
     # Compute the split-part count (1 = not split).  Used both for the

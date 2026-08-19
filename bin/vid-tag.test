@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/vid-tag.test,v $
-# $Revision: 1.4 $ $Date: 2026/06/01 17:06:05 $ GMT
+# $Revision: 1.5 $ $Date: 2026/08/04 03:23:47 $ GMT
 set -u
 
-export cVer=2.3.3
+export cVer=2.3.5
 
 # --------------------------------
 fUsageTest() {
@@ -117,7 +117,7 @@ Turtle Engineer
 
 GPLv2 (c) Copyright
 
-cVer=2.3.3
+cVer=2.3.5
 
 =cut
 EOF

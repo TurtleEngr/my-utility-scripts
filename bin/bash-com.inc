@@ -1,6 +1,6 @@
 #!/bin/bash
 # $Source: /repo/per-bruce.cvs/bin/bash-com.inc,v $
-# $Revision: 1.30 $ $Date: 2026/06/01 17:06:05 $ GMT
+# $Revision: 1.31 $ $Date: 2026/08/04 03:23:47 $ GMT
 
 export PWD Tmp cBin cCurDir cName cPID cTmp1 cTmp2 cTmpF cVer
 export gErr gpDebug gpFacility gpLog gpVerbose gpTest SHUNIT_COLOR
@@ -107,7 +107,7 @@ For more help, see the Globals section in fUsage.
  cBin - directory where the script is executing from
  cVer - current version. For example, if using CVS:
         # shellcheck disable=SC2016
-        cVer='$Revision: 1.30 $'
+        cVer='$Revision: 1.31 $'
 
  gpTopDir     - top dir for config and project files
                default: ~/.config/$cName
@@ -195,7 +195,7 @@ fComSetGlobals() {
     # -------------------
     # If your script defines a version with the Revision keyword, clean it
     # shellcheck disable=SC2016
-    #cVer='$Revision: 1.30 $'
+    #cVer='$Revision: 1.31 $'
 
     if [[ "$cVer" != "${cVer#*' '}" ]]; then
         cVer=${cVer#*' '}
