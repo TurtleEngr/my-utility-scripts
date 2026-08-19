@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header: /repo/per-bruce.cvs/bin/versionsys,v 1.12 2024/11/12 16:53:34 bruce Exp $
+# $Header: /repo/per-bruce.cvs/bin/versionsys,v 1.13 2026/08/17 20:12:02 bruce Exp $
 # Commit all of the versioned config files for this system.
 # Must be run as root. See bin/init-sys-ver for setup information.
 
@@ -41,5 +41,7 @@ fi
 
 # /etc
 chmod a+r /etc/CHANGES*
-chmod a+r /etc/ntp.conf
 chmod ug=r,o= /etc/sudoers
+if [ -f /etc/ntp.conf ]; then
+    chmod a+r /etc/ntp.conf
+fi
