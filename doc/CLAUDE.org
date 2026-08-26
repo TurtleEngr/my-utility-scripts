@@ -1,4 +1,5 @@
 * CLAUDE.md
+- $Revision: 1.2 $ $Date: 2026/08/26 03:02:12 $
 
 - *Tradeoff:* These guidelines bias toward caution over speed. For
   trivial tasks, use judgment.
