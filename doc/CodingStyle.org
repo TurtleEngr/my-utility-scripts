@@ -1,7 +1,7 @@
 * Coding Style
-- $Revision: 1.3 $ $Date: 2026/08/26 20:31:14 $
+$Revision: 1.4 $ $Date: 2026/08/26 20:34:34 $
 
-- These coding style conventions are mostly language independent.
+These coding style conventions are mostly language independent.
  
 ** Naming Convention
 
@@ -64,9 +64,9 @@ For bash code use shunit tests. See:
 https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/shunit2.1
 
 For example use of shunit, see:
-  - https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/bash-com.test
-  - and the test code in:
-  - https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/template.sh
+  + https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/bash-com.test
+  + and the test code in:
+    https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/template.sh
 
 For bash code check syntax with:
   + bash -n SCRIPT.sh
