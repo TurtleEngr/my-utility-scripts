@@ -1,0 +1,83 @@
+* Coding Style
+
+- These coding style conventions are mostly language independent.
+ 
+** Naming Convention
+
+- This naming convent is used to help others know where variables are
+  defined and their scope, because that is more important than a
+  variable's type.
+
++ gpVar - command line parameters. These can override gcVars with same
+  base name.
++ gcVar - config vars that are read from a config file
++ cVar - These are global config vars, fixed values for the program.
++ gVar - global variables. Should be few. Use functions to reduce these.
++ pVar - a variable passed into a function (local).
++ tVar - a local variable used in a function.
++ fFunction - a function (or method) that is unique to the program.
+
++ fPrefixFunction - for functions in different files, us a "Prefix"
+  that is an abbreviation of the file it is defined in.
+  + For example: fComFunction - Most functions in bash-com.inc begin
+    with fCom
+
++ Use CamelCase where ever possible, not snake_case.
++ For abbreviations that have multiple capital letters, just
+  capitalize the first letter. For example: "URL" would be "Url"
+
+** Exceptions
++ Constants or variable names that are expected by external programs
+  are libraries will follow the convention of the external program.
+
+** Indent Style
+
++ Keep opening blocks "{", or the "then" part of if statements, on the
+  same line. I.e. make the code vertically compact.
+
++ Try to format the code to fit in 79 characters for each line. Of
+  course, literals can be longer if needed.
+
++ Indent with 4 spaces, no TABs
+
++ For bash code use:
+  https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/bash-fmt
+  which requires:
+  https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/shfmt
+
++ For PHP coded use:
+  https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/phptidy.php
+  https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/.phptidy-config.php
+  
++ For C code use:
+  indent -kr -l79 -lc79 -nbbo -i4 -nut
+
+** Common Bash Functions
+
+- Where ever possible use the functions in:
+  - https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/bash-com.inc
+
+** Test Code
+
+- For bash code use shunit tests. See:
+  - https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/shunit2.1
+
+- For example use of shunit, see:
+  - https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/bash-com.test
+  - and the test code in:
+  - https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/template.sh
+
+- For bash code check syntax with:
+  + bash -n SCRIPT.sh
+  + shellcheck SCRIPT.sh
+  
+** Documentation
+
+- Use POD formatted text for usage documentation.
+
+- POD Syntax can be found at:
+  https://web.archive.org/web/20260502155348/https://perldoc.perl.org/perlpod
+
+- Example use in bash scripts can be found in:
+  https://github.com/TurtleEngr/my-utility-scripts/blob/develop/bin/template.sh
+

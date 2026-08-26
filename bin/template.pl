@@ -12,7 +12,7 @@ SCRIPTNAME - DESCRIPTION
 
 =head1 SYNOPSIS
 
-	SCRIPTNAME [-o Optiong] [-h[elp]] [-v[erbose]] [-d[ebug] level] 
+    SCRIPTNAME [-o Optiong] [-h[elp]] [-v[erbose]] [-d[ebug] level] 
 
 =head1 DESCRIPTION
 
@@ -75,71 +75,71 @@ Bruce Rafnel
 
 (c) Copyright 2004 by COMPANY
 
-$Revision: 1.36 $ GMT 
+$Revision: 1.37 $ GMT 
 
 =cut
 
 # ---------------------------------------------------
 # Function
 sub fMsg {
-	# Input:
-	#	Args:
-	#	 	$pLevel
-	#			0 - fatal error, die
-	#			1 - error
-	#			2 - warning
-	#			3 - normal
-	#			4 - normal, output if $pVerbose
-	#			5 or more - output if $pDebug >= $pLevel
-	#		$pMsg - message text
-	#		[$pProg] - __FILE__ 
-	#		[$pLine] - __LINE__
-	#		[$pFile] - output $pFile and $. if specified
-	#	$gpDebug
-	#	$gpVerbose
-	# Output:
-	#	warn ...
-	my $pFile;
-	my $pLevel;
-	my $pLine;
-	my $pMsg;
-	my $pProg;
-	my $tFile;
-	my $tLoc;
-	my $tMsg;
+    # Input:
+    #   Args:
+    #       $pLevel
+    #           0 - fatal error, die
+    #           1 - error
+    #           2 - warning
+    #           3 - normal
+    #           4 - normal, output if $pVerbose
+    #           5 or more - output if $pDebug >= $pLevel
+    #       $pMsg - message text
+    #       [$pProg] - __FILE__ 
+    #       [$pLine] - __LINE__
+    #       [$pFile] - output $pFile and $. if specified
+    #   $gpDebug
+    #   $gpVerbose
+    # Output:
+    #   warn ...
+    my $pFile;
+    my $pLevel;
+    my $pLine;
+    my $pMsg;
+    my $pProg;
+    my $tFile;
+    my $tLoc;
+    my $tMsg;
 
-	($pLevel, $pMsg, $pProg, $pLine, $pFile) = @_;
-	if ($pLevel == 0) {
-		$tLevel = "Fatal Error: ";
-	} elsif ($pLevel == 1) {
-		$tLevel = "Error: ";
-	} elsif ($pLevel == 2) {
-		$tLevel = "Warning: ";
-	} elsif ($pLevel == 3) {
-		$tLevel = "";
-	} elsif ($pLevel == 4 && $gpVerbose) {
-		$tLevel = "";
-	} elsif ($gpDebug >= $pLevel) {
-		$tLevel = "Debug" . $pLevel . ": ";
-	} else {
-		return;
-	}
-	$tLoc = "";
-	if ($pProg ne "") {
-		$pProg =~ s/.+\///;
-		$tLoc = " [" . $pProg . ":" . $pLine . "]";
-	}
-	$tFile = "";
-	if ($pFile ne "") {
-		$tFile =  " (" . $pFile . ":" . $. . ")";
-	}
-	$tMsg = $tLevel . $pMsg . $tFile . $tLoc . "\n";
-	if ($pLevel != 0) {
-		warn $tMsg;
-	} else {
-		die $tMsg;
-	}
-	return;
+    ($pLevel, $pMsg, $pProg, $pLine, $pFile) = @_;
+    if ($pLevel == 0) {
+        $tLevel = "Fatal Error: ";
+    } elsif ($pLevel == 1) {
+        $tLevel = "Error: ";
+    } elsif ($pLevel == 2) {
+        $tLevel = "Warning: ";
+    } elsif ($pLevel == 3) {
+        $tLevel = "";
+    } elsif ($pLevel == 4 && $gpVerbose) {
+        $tLevel = "";
+    } elsif ($gpDebug >= $pLevel) {
+        $tLevel = "Debug" . $pLevel . ": ";
+    } else {
+        return;
+    }
+    $tLoc = "";
+    if ($pProg ne "") {
+        $pProg =~ s/.+\///;
+        $tLoc = " [" . $pProg . ":" . $pLine . "]";
+    }
+    $tFile = "";
+    if ($pFile ne "") {
+        $tFile =  " (" . $pFile . ":" . $. . ")";
+    }
+    $tMsg = $tLevel . $pMsg . $tFile . $tLoc . "\n";
+    if ($pLevel != 0) {
+        warn $tMsg;
+    } else {
+        die $tMsg;
+    }
+    return;
 } # fMsg
 
 # ---------------------------------------------------
@@ -164,14 +164,14 @@ $gpDebug = 0;
 $gpHelp = 0;
 $gpVerbose = 0;
 &GetOptions(
-	"debug:s" => \$gpDebug,
-	"help" => \$gpHelp,
-	"verbose" => \$gpVerbose,
+    "debug:s" => \$gpDebug,
+    "help" => \$gpHelp,
+    "verbose" => \$gpVerbose,
 );
 
 if ($gpHelp) {
-	system("pod2text $0 | more");
-	exit 1;
+    system("pod2text $0 | more");
+    exit 1;
 }
 
 # Validate options
