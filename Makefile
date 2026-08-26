@@ -9,6 +9,7 @@ update copy :
 		cp -a ../doc/$$i.int.md doc 2>/dev/null; \
 		cp -a ../doc/$$i.txt doc 2>/dev/null; \
 	done
+	cp -a ../doc/CLAUDE.org ../doc/CodingStyle.org doc/
 	git st
 	echo if OK, make ci
 
