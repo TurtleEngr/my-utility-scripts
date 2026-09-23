@@ -9,6 +9,7 @@ update copy :
 		cp -a ../doc/$$i.int.md doc 2>/dev/null; \
 		cp -a ../doc/$$i.txt doc 2>/dev/null; \
 	done
+	cp -a ../doc/CLAUDE.org ../doc/CodingStyle.org doc/
 	git st
 	echo if OK, make ci
 
@@ -18,13 +19,13 @@ ci checkin commit save :
 
 push upload :
 	git pull origin develop
-	incver.sh -p VERSION
+	incver.sh -p -f VERSION
 	git ci -am "inc patch level"
 	git push origin develop
 	echo if OK, make release
 
 release :
-	incver.sh -m VERSION
+	incver.sh -m -f VERSION
 	git ci -am "inc minor level"
 	git push origin develop
 	git co main
@@ -32,7 +33,7 @@ release :
 	git tag -m "Release $$(cat VERSION)" $$(echo tag-$$(cat VERSION | tr '.' '-'))
 	git push --tags origin main
 	git co develop
-	incver.sh -p VERSION
+	incver.sh -p -f VERSION
 	git ci -am "inc patch level"
 	git push origin develop
 

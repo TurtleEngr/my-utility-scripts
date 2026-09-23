@@ -72,7 +72,7 @@ Host $cName $cName.lan $cIP
         CheckHostIP yes
         Compression yes
         IdentitiesOnly=yes
-        IdentityFile ~/.ssh/id.bruceraf
+        IdentityFile ~/.ssh/id.bruceraf2
         User bruce
 EOF
 chmod go= $cConfig

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # $Source: /repo/per-bruce.cvs/bin/template.sh,v $
-# $Revision: 1.94 $ $Date: 2026/05/24 18:32:17 $ GMT
+# $Revision: 1.95 $ $Date: 2026/08/17 04:06:48 $ GMT
 
 # Naming Convention
 # gpVar - command line parameters. These can override gcVars with same
@@ -381,7 +381,7 @@ To verify the script is internally OK, run: SCRIPTNAME -T all
 
 GPLv2 (c) Copyright
 
-$Revision: 1.94 $ $Date: 2026/05/24 18:32:17 $ GMT
+$Revision: 1.95 $ $Date: 2026/08/17 04:06:48 $ GMT
 
 =cut
 EOF
@@ -463,7 +463,7 @@ EOF
 # -------------------
 fValidateHostName() {
     if [[ -z "$gpHostName" ]]; then
-        fError2 -m "The -n or -c option is required." -l $LINENO
+        fError -m "The -n or -c option is required." -l $LINENO
     fi
     return
 
@@ -674,17 +674,17 @@ source $cBin/bash-com.inc
 # Configuration Section
 
 # shellcheck disable=SC2016
-cVer='$Revision: 1.94 $'
+cVer='$Revision: 1.95 $'
 fSetGlobals
 
 # -------------------
 # Get Args Section
 if [[ $# -eq 0 ]]; then
-    fError2 -m "Missing options." -l $LINENO
+    fError -m "Missing options." -l $LINENO
 fi
 # Or use this if the script expects stdin
 #if [[ -t 0 ]]; then
-#    fError2 -m "Missing input file redirect." -l $LINENO
+#    fError -m "Missing input file redirect." -l $LINENO
 #fi
 
 while getopts :cn:t:hH:lT:vx tArg; do

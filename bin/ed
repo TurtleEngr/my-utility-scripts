@@ -12,7 +12,7 @@ export cMyToDo=~/profile/plan.org
 
 # --------------------------------
 fUsage() {
-    cat <<EOF
+    cat <<EOF | more
 ed - run emacs with personal options
 Usage
     ed [-l] [-j] [-t] [-d] File...

@@ -15,7 +15,7 @@ set -u
 # ========================================
 # Main
 
-export cVer=2.3.3
+export cVer=2.3.5
 export cName=${BASH_SOURCE##*/}
 
 # Save original command line for fExample.  Done before any parsing so
